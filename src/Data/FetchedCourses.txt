@@ -1,0 +1,145 @@
+Semester 0
+ESP0
+ESP 0
+CALC0
+Mathematics 0
+
+Semester 1
+IC
+Introduction to computers
+IS
+Introduction to Information Systems
+ESP1
+ESP I
+CALC1
+Calculus I
+PHY
+Physics
+BUS
+Fundmentals of business
+
+Semester 2
+
+
+CALC2
+Calculus II
+ESP2
+ESP II
+PS
+Introduction to problem solving &amp; programming
+ELC
+Fundamentals of electronics
+CSK
+Communication skills
+MM
+Introduction to multimedia
+
+Semester 3
+       
+CALC3
+Calculus III
+OOP
+Object- oriented programming
+DSS
+Discrete Structures
+PR
+Probability &amp; statistics
+DLD
+Digital logic design
+APHY
+Advanced physics
+
+Semester 4
+          
+DAS
+Data structures and algorithms
+NETs
+Introduction to Networks
+SE
+Introduction to software engineering
+APA
+Advanced Programming Applications
+CAR
+Introduction to computer architecture
+DBS
+Database systems
+
+
+Semester 5
+
+SP
+Systems programming
+TC
+Theory of computation
+LG
+Linear algebra
+WEB
+Web programming
+CG
+Computer graphics
+AS
+Advanced statistics
+
+Semester 6
+
+CA
+Computing algorithms
+SMS
+System Modelling and Simulation
+NM
+Numerical Methods
+OS
+Operating Systems
+AI
+Introduction to Artificial Intelligence
+
+Semester 7
+TEST
+TEST
+TEST
+TEST
+TEST
+TEST
+Semester 8
+TEST
+TEST
+TEST
+TEST
+TEST
+TEST
+
+
+
+
+
+
+
+
+          
+
+
+Systems programming
+Theory of computation
+             
+
+Linear algebra
+Web programming
+Computer graphics
+Advanced statistics
+Computing algorithms
+System Modelling and Simulation
+Numerical Methods
+Operating Systems
+          
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject
+Long name of the subject

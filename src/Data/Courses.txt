@@ -1,0 +1,203 @@
+
+        <p class="semesters__list__item__p not__collapsible">Semester 5</p>
+        <br />
+        <span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="SP"
+          ><p class="subject__before">SP</p>
+          <p class="subject__after__phone">Systems programming</p>
+          <p class="subject__after">Systems programming</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TC"
+          ><p class="subject__before">TC</p>
+          <p class="subject__after__phone">Theory of computation</p>
+          <p class="subject__after">Theory of computation</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="LG"
+          ><p class="subject__before">LG</p>
+          <p class="subject__after__phone">Linear algebra</p>
+          <p class="subject__after">Linear algebra</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="WEB"
+          ><p class="subject__before">WEB</p>
+          <p class="subject__after__phone">Web programming</p>
+          <p class="subject__after">Web programming</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="CG"
+          ><p class="subject__before">CG</p>
+          <p class="subject__after__phone">Computer graphics</p>
+          <p class="subject__after">Computer graphics</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="AST"
+          ><p class="subject__before">AST</p>
+          <p class="subject__after__phone">Advanced statistics</p>
+          <p class="subject__after">Advanced statistics</p></span
+        >
+      </li>
+      <li
+        id="collapsible_6"
+        onclick="collapsible(this)"
+        data-state="false"
+        class="semesters__list__item"
+      >
+        <p class="semesters__list__item__p not__collapsible">Semester 6</p>
+        <br />
+        <span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="CA"
+          ><p class="subject__before">CA</p>
+          <p class="subject__after__phone">Computing algorithms</p>
+          <p class="subject__after">Computing algorithms</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="SMS"
+          ><p class="subject__before">SMS</p>
+          <p class="subject__after__phone">System Modelling and Simulation</p>
+          <p class="subject__after">System Modelling and Simulation</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="NM"
+          ><p class="subject__before">NM</p>
+          <p class="subject__after__phone">Numerical Methods</p>
+          <p class="subject__after">Numerical Methods</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="OS"
+          ><p class="subject__before">OS</p>
+          <p class="subject__after__phone">Operating Systems</p>
+          <p class="subject__after">Operating Systems</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="AI"
+          ><p class="subject__before">AI</p>
+          <p class="subject__after__phone">
+            Introduction to Artificial Intelligence
+          </p>
+          <p class="subject__after">
+            Introduction to Artificial Intelligence
+          </p></span
+        >
+      </li>
+      <li
+        id="collapsible_7"
+        onclick="collapsible(this)"
+        data-state="false"
+        class="semesters__list__item"
+      >
+        <p class="semesters__list__item__p not__collapsible">Semester 7</p>
+        <br />
+        <span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        >
+      </li>
+      <li
+        id="collapsible_8"
+        onclick="collapsible(this)"
+        data-state="false"
+        class="semesters__list__item"
+      >
+        <p class="semesters__list__item__p not__collapsible">Semester 8</p>
+        <br />
+        <span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        ><span
+          class="semesters__list__item__subject"
+          onclick="subject(this)"
+          id="TEST"
+          ><p class="subject__before">TEST</p>
+          <p class="subject__after__phone">Long name of the subject</p>
+          <p class="subject__after">Long name of the subject</p></span
+        >
+      </li>
+    </ul>
+  </section>
+</main>

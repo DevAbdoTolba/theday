@@ -1,0 +1,98 @@
+body {
+  background-color: #121212 !important;
+  color: #d4d4d4 !important;
+}
+
+::-webkit-scrollbar {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  /* make it fit the theme  */
+  background-color: #007acc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  /* make it fit the theme  */
+  background-color: #0685da;
+  border: #5f5f5f 0.5px solid;
+}
+
+::-webkit-scrollbar-thumb:active {
+  /* make it fit the theme  */
+  background-color: #00548d;
+}
+
+::-webkit-scrollbar-track {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-button {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-corner {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+::-webkit-resizer {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+.Material_container::-webkit-scrollbar {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  width: 10px;
+}
+
+.Material_container::-webkit-scrollbar-thumb {
+  /* make it fit the theme  */
+  background-color: #007acc;
+  border-radius: 10px;
+}
+
+.Material_container::-webkit-scrollbar-thumb:hover {
+  /* make it fit the theme  */
+  background-color: #0685da;
+  border: #5f5f5f 0.5px solid;
+}
+
+.Material_container::-webkit-scrollbar-thumb:active {
+  /* make it fit the theme  */
+  background-color: #00548d;
+}
+
+.Material_container::-webkit-scrollbar-track {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+.Material_container::-webkit-scrollbar-button {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+.Material_container::-webkit-scrollbar-corner {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+.Material_container::-webkit-resizer {
+  /* make it fit the theme  */
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
