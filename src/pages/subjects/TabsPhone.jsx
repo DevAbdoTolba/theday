@@ -9,7 +9,7 @@ import Schedule from "./Schedule";
 import Material from "./Material";
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, data, ...other } = props;
 
   return (
     <div

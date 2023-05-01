@@ -9,8 +9,18 @@ import Material from "./Material";
 import Schedule from "./Schedule";
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
+  const { children, value, index, data, ...other } = props;
+  /*
+   {
+    {
+      [{},{},{}]
+    } ,{
+      [{},{},{}]
+    },{
+      [{},{},{}]
+    }
+  }
+  */
   return (
     <div
       role="tabpanel"

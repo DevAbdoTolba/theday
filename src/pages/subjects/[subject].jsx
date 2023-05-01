@@ -1,4 +1,10 @@
-import React, { Suspense, lazy } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  startTransition,
+} from "react";
 
 import Header from "../../components/Header";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,7 +19,33 @@ const TabsPC = lazy(() => import("./TabsPc"));
 const TabsPhone = lazy(() => import("./TabsPhone"));
 
 function SubjectPage() {
+  const [data, setData] = useState(null);
+
+  const router = useRouter();
   // get parameters from url
+  const [subject, setSubject] = useState(null);
+
+  useEffect(() => {
+    if (router.isReady) {
+      const subject = router.query;
+      setSubject(subject);
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
+    if (subject) {
+      fetch(`/api/test/${subject.subject}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setData(data);
+          console.log(data);
+        });
+    }
+  }, [subject]);
+
+  // fetch data from api
+
+  // if data is not fetched yet
 
   // const router = useRouter();
   // const [subjectAbbreviation, setSubjectAbbreviation] = React.useState("s");
@@ -53,8 +85,12 @@ function SubjectPage() {
       <CssBaseline />
       <Header title={"subjectAbbreviation"} isSearch={false} />
       <Suspense fallback={<div>Loading...</div>}>
-        <TabsPC />
-        <TabsPhone />
+        {data && (
+          <>
+            <TabsPC data={data} />
+            <TabsPhone data={data} />
+          </>
+        )}
       </Suspense>
     </>
   );

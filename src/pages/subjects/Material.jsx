@@ -4,7 +4,7 @@ function Material({
   name,
   abbreviation,
   material, // subject => 1-lecture 2-whitenning 3-section
-
+  data,
   PreviousExams,
   schedule,
   description,
@@ -21,7 +21,7 @@ function Material({
 
   return (
     <>
-      {["Lectures", "Sections", "Whitenning"].map((item, index) => (
+      {Object.keys(data).map((key, index) => (
         <Paper
           key={index}
           sx={{
@@ -30,17 +30,14 @@ function Material({
           }}
         >
           <Typography variant="h4" sx={{ margin: "1rem" }}>
-            {item}
+            {key}
           </Typography>
           <Box
             className="Material_container"
             key={index}
             style={containerStyle}
           >
-            {[
-              1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-              1, 1, 1, 1, 1, 1,
-            ].map((x, index) => (
+            {data[key].map((item, index) => (
               <Box
                 key={index}
                 sx={{
@@ -73,21 +70,12 @@ function Material({
                     padding: "4rem",
                   }}
                 >
-                  {x === 1 ? (
-                    <Typography
-                      variant="h5"
-                      sx={{ fontSize: { sm: "2vw", xs: "6vw" } }}
-                    >
-                      PDF
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant="h5"
-                      sx={{ fontSize: { sm: "2vw", xs: "6vw" } }}
-                    >
-                      IMG
-                    </Typography>
-                  )}
+                  <Typography
+                    variant="h5"
+                    sx={{ fontSize: { sm: "2vw", xs: "6vw" } }}
+                  >
+                    {item["name"]}
+                  </Typography>
                 </Paper>
               </Box>
             ))}
