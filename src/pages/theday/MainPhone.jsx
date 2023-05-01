@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import data from "../../Data/data.json";
+import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
 import Dialog from "./Dialog";
 import { Typography } from "@mui/material";
@@ -25,10 +25,7 @@ function MainPhone({ search, curretnSemester }) {
             x.subjects.filter(
               (y) =>
                 y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                y?.abbreviation
-                  ?.toLowerCase()
-                  .includes(search?.toLowerCase()) ||
-                y?.doctor?.toLowerCase().includes(search?.toLowerCase())
+                y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
             ).length > 0
         )
         .map((item, index) => (
@@ -53,11 +50,10 @@ function MainPhone({ search, curretnSemester }) {
                 {item.subjects
                   .filter(
                     (y) =>
-                      y.name.toLowerCase().includes(search.toLowerCase()) ||
-                      y.abbreviation
-                        .toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                      y.doctor.toLowerCase().includes(search.toLowerCase())
+                      y?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                      y?.abbreviation
+                        ?.toLowerCase()
+                        .includes(search.toLowerCase())
                   )
 
                   .map((subjects, index) => (

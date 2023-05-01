@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import {
   Box,
   Grid,
@@ -12,7 +12,7 @@ import { styled } from "@mui/material/styles";
 
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-import data from "../../Data/data.json";
+import data from "src/Data/data.json";
 
 export default function CurretnSemester({
   curretnSemester,
@@ -34,7 +34,9 @@ export default function CurretnSemester({
   }));
 
   useEffect(() => {
-    setSubjects(data.semesters[curretnSemester].subjects);
+    startTransition(() => {
+      setSubjects(data.semesters[curretnSemester].subjects);
+    });
   }, []);
 
   return (

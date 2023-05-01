@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from "react";
+import React, { Suspense, lazy } from "react";
 
 import Header from "../../components/Header";
 import CssBaseline from "@mui/material/CssBaseline";

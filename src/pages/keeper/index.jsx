@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from "react";
+import React, { Suspense, lazy } from "react";
 import Header from "../../components/Header";
 
 import { useState } from "react";

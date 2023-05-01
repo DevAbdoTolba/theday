@@ -1,12 +1,10 @@
 import { Box, Paper, Typography, Grid } from "@mui/material";
-import { useEffect } from "react";
 
 function Material({
   name,
   abbreviation,
   material, // subject => 1-lecture 2-whitenning 3-section
 
-  doctor,
   PreviousExams,
   schedule,
   description,

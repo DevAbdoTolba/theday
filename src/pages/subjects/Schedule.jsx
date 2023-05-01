@@ -8,7 +8,6 @@ import ScheduleDialog from "./ScheduleDialog";
 function Schedule({
   name,
   abbreviation,
-  doctor,
   material,
   PreviousExams,
   schedule,

@@ -5,17 +5,11 @@
             "subjects": [
                 {
                     "name": "Mathematics 0",
-                    "abbreviation": "CALC0",
-                    "doctor": "Dr. John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CALC0"
                 },
                 {
                     "name": "ESP 0",
-                    "abbreviation": "ESP0",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "ESP0"
                 }
             ]
         },
@@ -24,45 +18,27 @@
             "subjects": [
                 {
                     "name": "Calculas 1",
-                    "abbreviation": "CALC1",
-                    "doctor": "Dr. Zenab",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CALC1"
                 },
                 {
                     "name": "Introduction to Information Systems",
-                    "abbreviation": "IS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "IS"
                 },
                 {
                     "name": "Introduction to computers",
-                    "abbreviation": "IC",
-                    "doctor": "Dr. Zenab",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "IC"
                 },
                 {
                     "name": "ESP 1",
-                    "abbreviation": "ESP1",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "ESP1"
                 },
                 {
                     "name": "Fundmentals of business",
-                    "abbreviation": "BUS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "BUS"
                 },
                 {
                     "name": "Physics",
-                    "abbreviation": "PHY",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "PHY"
                 }
             ]
         },
@@ -71,45 +47,27 @@
             "subjects": [
                 {
                     "name": "Calculus II",
-                    "abbreviation": "CALC2",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CALC2"
                 },
                 {
                     "name": "ESP 2",
-                    "abbreviation": "ESP2",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "ESP2"
                 },
                 {
                     "name": "Introduction to problem solving & programming",
-                    "abbreviation": "PS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "PS"
                 },
                 {
                     "name": "Fundamentals of electronics",
-                    "abbreviation": "ELC",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "ELC"
                 },
                 {
                     "name": "Communication skills",
-                    "abbreviation": "CSK",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CSK"
                 },
                 {
                     "name": "Introduction to multimedia",
-                    "abbreviation": "MM",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "MM"
                 }
             ]
         },
@@ -118,45 +76,27 @@
             "subjects": [
                 {
                     "name": "Calculus III",
-                    "abbreviation": "CALC3",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CALC3"
                 },
                 {
                     "name": "Object- oriented programming",
-                    "abbreviation": "OOP",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "OOP"
                 },
                 {
                     "name": "Discrete Structures",
-                    "abbreviation": "DSS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "DSS"
                 },
                 {
                     "name": "Probability & statistics",
-                    "abbreviation": "PR",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "PR"
                 },
                 {
                     "name": "Digital logic design",
-                    "abbreviation": "DLD",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "DLD"
                 },
                 {
                     "name": "Advanced physics",
-                    "abbreviation": "APHY",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "APHY"
                 }
             ]
         },
@@ -165,45 +105,27 @@
             "subjects": [
                 {
                     "name": "Data structures and algorithms",
-                    "abbreviation": "DAS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "DAS"
                 },
                 {
                     "name": "Introduction to Networks",
-                    "abbreviation": "NETs",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "NETs"
                 },
                 {
                     "name": "Introduction to software engineering",
-                    "abbreviation": "SE",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "SE"
                 },
                 {
                     "name": "Advanced Programming Applications",
-                    "abbreviation": "APA",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "APA"
                 },
                 {
                     "name": "Introduction to computer architecture",
-                    "abbreviation": "CAR",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CAR"
                 },
                 {
                     "name": "Database systems",
-                    "abbreviation": "DBS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "DBS"
                 }
             ]
         },
@@ -212,45 +134,27 @@
             "subjects": [
                 {
                     "name": "Systems programming",
-                    "abbreviation": "SP",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "SP"
                 },
                 {
                     "name": "Theory of computation",
-                    "abbreviation": "TC",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "TC"
                 },
                 {
                     "name": "Linear algebra",
-                    "abbreviation": "LG",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "LG"
                 },
                 {
                     "name": "Web programming",
-                    "abbreviation": "WEB",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "WEB"
                 },
                 {
                     "name": "Computer graphics",
-                    "abbreviation": "CG",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CG"
                 },
                 {
                     "name": "Advanced statistics",
-                    "abbreviation": "AS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "AS"
                 }
             ]
         },
@@ -259,38 +163,23 @@
             "subjects": [
                 {
                     "name": "Computing algorithms",
-                    "abbreviation": "CA",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "CA"
                 },
                 {
                     "name": "System Modelling and Simulation",
-                    "abbreviation": "SMS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "SMS"
                 },
                 {
                     "name": "Numerical Methods",
-                    "abbreviation": "NM",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "NM"
                 },
                 {
                     "name": "Operating Systems",
-                    "abbreviation": "OS",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "OS"
                 },
                 {
                     "name": "Introduction to Artificial Intelligence",
-                    "abbreviation": "AI",
-                    "doctor": "Dr. Not John Doe",
-                    "schedule": "https://picsum.photos/800/400",
-                    "description": "This is a description of the subject"
+                    "abbreviation": "AI"
                 }
             ]
         }

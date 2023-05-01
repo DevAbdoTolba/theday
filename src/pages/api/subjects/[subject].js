@@ -1,4 +1,4 @@
-import data from "../../../Data/data.json";
+import data from "src/Data/data.json";
 
 export default function handler(req, res) {
   // get params

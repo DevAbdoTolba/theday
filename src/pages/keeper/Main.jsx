@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import Note from "./Note.jsx";
 import Grid from "@mui/material/Grid";
 import FormDialog from "./FormDialog.jsx";
@@ -34,7 +34,9 @@ function useLocalNotes() {
     try {
       const notes = window.localStorage.getItem("notes");
       if (notes) {
-        setNotes(JSON.parse(notes));
+        startTransition(() => {
+          setNotes(JSON.parse(notes));
+        });
       }
     } catch (error) {}
   }, []);

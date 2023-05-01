@@ -1,4 +1,11 @@
-import React, { Suspense, lazy, useState, useEffect, forwardRef } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  forwardRef,
+  startTransition,
+} from "react";
 import Header from "../../components/Header";
 import CurretnSemester from "./CurretnSemester";
 import Skeleton from "@mui/material/Skeleton";
@@ -42,8 +49,10 @@ function App() {
     const semester = JSON.parse(localStorage.getItem("semester"));
 
     if (semester) {
-      setCurretnSemester(semester);
-      setUpTo(semester);
+      startTransition(() => {
+        setCurretnSemester(semester);
+        setUpTo(semester);
+      });
     }
   }, [curretnSemester]);
 
