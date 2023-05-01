@@ -72,11 +72,15 @@ export default function MainPc({ search, currentSemester }) {
                     {item.subjects
                       .filter(
                         (y) =>
-                          y.name.toLowerCase().includes(search.toLowerCase()) ||
-                          y.abbreviation
-                            .toLowerCase()
+                          y?.name
+                            ?.toLowerCase()
                             .includes(search.toLowerCase()) ||
-                          y.doctor.toLowerCase().includes(search.toLowerCase())
+                          y?.abbreviation
+                            ?.toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                          y?.doctor
+                            ?.toLowerCase()
+                            .includes(search.toLowerCase())
                       )
                       .map((subjects, index) => (
                         <Grid key={index} item>
