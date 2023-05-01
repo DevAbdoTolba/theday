@@ -21,7 +21,7 @@ function Material({
 
   return (
     <>
-      {Object.keys(data).map((key, index) => (
+      {Object?.keys(data)?.map((key, index) => (
         <Paper
           key={index}
           sx={{
@@ -37,7 +37,7 @@ function Material({
             key={index}
             style={containerStyle}
           >
-            {data[key].map((item, index) => (
+            {data[key]?.map((item, index) => (
               <Box
                 key={index}
                 sx={{
@@ -45,7 +45,7 @@ function Material({
                   mb: "1rem",
                 }}
               >
-                <Typography variant="h6">{item["name"]}</Typography>
+                <Typography variant="h6">{item?.name}</Typography>
                 <Paper
                   className="Material_item"
                   style={itemStyle}

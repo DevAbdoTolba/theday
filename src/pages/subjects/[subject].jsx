@@ -35,7 +35,7 @@ function SubjectPage() {
   useEffect(() => {
     if (subject) {
       fetch(`/api/test/${subject.subject}`)
-        .then((res) => res.json())
+        .then((res) => res?.json())
         .then((data) => {
           setData(data);
           console.log(data);
