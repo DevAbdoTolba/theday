@@ -50,10 +50,10 @@ function MainPhone({ search, curretnSemester }) {
                 {item.subjects
                   .filter(
                     (y) =>
-                      y?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                      y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
                       y?.abbreviation
                         ?.toLowerCase()
-                        .includes(search.toLowerCase())
+                        .includes(search?.toLowerCase())
                   )
 
                   .map((subjects, index) => (

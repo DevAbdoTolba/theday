@@ -43,10 +43,10 @@ export default function MainPc({ search, currentSemester }) {
               (x) =>
                 x.subjects.filter(
                   (y) =>
-                    y?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                    y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
                     y?.abbreviation
                       ?.toLowerCase()
-                      .includes(search.toLowerCase())
+                      .includes(search?.toLowerCase())
                 ).length > 0
             )
             .map((item, index) => (
@@ -72,10 +72,10 @@ export default function MainPc({ search, currentSemester }) {
                         (y) =>
                           y?.name
                             ?.toLowerCase()
-                            .includes(search.toLowerCase()) ||
+                            .includes(search?.toLowerCase()) ||
                           y?.abbreviation
                             ?.toLowerCase()
-                            .includes(search.toLowerCase())
+                            .includes(search?.toLowerCase())
                       )
                       .map((subjects, index) => (
                         <Grid key={index} item>
