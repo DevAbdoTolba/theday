@@ -65,7 +65,7 @@ function MainPhone({ search, curretnSemester }) {
                       // }}
                     >
                       <Dialog
-                        label={subjects.name}
+                        label={subjects?.name}
                         subject={subjects}
                         curretnSemester={curretnSemester}
                         index={item.index}

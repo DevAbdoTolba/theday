@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     let dic = {};
     for (let i = 0; i < SubjectSubFolders.data.files.length; i++) {
       dic[SubjectSubFolders.data.files[i].id] =
-        SubjectSubFolders.data.files[i].name;
+        SubjectSubFolders.data.files[i]?.name;
       Parents += `'${SubjectSubFolders.data.files[i].id}' in parents`;
       if (i != SubjectSubFolders.data.files.length - 1) {
         Parents += " or ";
