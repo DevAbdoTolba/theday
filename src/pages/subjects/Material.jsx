@@ -45,7 +45,7 @@ function Material({
                   mb: "1rem",
                 }}
               >
-                <Typography variant="h6">Title</Typography>
+                <Typography variant="h6">{item["name"]}</Typography>
                 <Paper
                   className="Material_item"
                   style={itemStyle}
@@ -74,7 +74,7 @@ function Material({
                     variant="h5"
                     sx={{ fontSize: { sm: "2vw", xs: "6vw" } }}
                   >
-                    {item["name"]}
+                    Data 🥰
                   </Typography>
                 </Paper>
               </Box>
