@@ -34,7 +34,7 @@ export default function AlertDialog({
             boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
             "&::after": {
               // content is the value of subject.name
-              content: `"${subject.name}"`,
+              content: `"${subject?.name}"`,
 
               position: "absolute",
               top: "120%",
@@ -78,7 +78,7 @@ export default function AlertDialog({
             boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
             "&::after": {
               // content is the value of subject.name
-              content: `"${subject.name}"`,
+              content: `"${subject?.name}"`,
 
               position: "absolute",
               top: "120%",
