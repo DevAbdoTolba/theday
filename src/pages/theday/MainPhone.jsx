@@ -62,10 +62,9 @@ function MainPhone({ search, curretnSemester }) {
                     <Grid
                       key={index}
                       item
-                      {
-                        //sx={{ width: "100%" }}  this one for the other look
-                        ..." "
-                      }
+                      // sx={{
+                      //   width: "100%",
+                      // }}
                     >
                       <Dialog
                         label={subjects.name}
