@@ -117,7 +117,7 @@ export default function CurretnSemester({
                   boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
                   "&::after": {
                     // content is the value of subject.name
-                    content: `"${item.name}"`,
+                    content: `"${item?.name}"`,
 
                     position: "absolute",
                     top: "120%",
