@@ -116,7 +116,10 @@ function Material({
                   key={index}
                   sx={{
                     position: "relative",
-                    mr: "1rem",
+                    mr: {
+                      sm: "1rem",
+                      xs: "3rem",
+                    },
                     mb: "1rem",
                     maxWidth: {
                       sm: "15%",
@@ -203,7 +206,7 @@ function Material({
                   >
                     <Typography
                       variant="h5"
-                      sx={{ fontSize: { sm: "1vw", xs: "2vw" } }}
+                      sx={{ fontSize: { sm: "1vw", xs: "4vw" } }}
                     >
                       {mimeTypeToAppName(item?.mimeType) +
                         "\n" +
