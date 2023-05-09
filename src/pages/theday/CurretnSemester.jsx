@@ -142,16 +142,16 @@ export default function CurretnSemester({
                     visibility: "hidden",
                   },
                   "&:hover::after": {
-                    opacity: "1",
-                    visibility: "visible",
+                    opacity: { sm: "1", xs: "0" },
+                    visibility: { sm: "visible", xs: "hidden" },
                     transform: "translateX(50%) translateY(0%)",
                   },
                 }}
                 className="subject__chip"
-                label={item.abbreviation}
+                label={item?.abbreviation}
                 clickable
                 component={"a"}
-                href={/subject/ + item.abbreviation}
+                href={/subject/ + item?.abbreviation}
                 // onClick={handleClickOpen}
               />
             </Grid>
