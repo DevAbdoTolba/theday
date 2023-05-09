@@ -26,6 +26,7 @@ const Alert = forwardRef(function Alert(props, ref) {
 });
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const [curretnSemester, setCurretnSemester] = useState(-1);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -54,6 +55,7 @@ function App() {
         setUpTo(semester);
       });
     }
+    setLoading(false);
   }, [curretnSemester]);
 
   return (
@@ -74,51 +76,57 @@ function App() {
         setSearch={setSearch}
         isSearch={true}
       />
-      <Box
-        sx={{
-          pt: { sm: "2%", xs: "10%" },
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-        }}
-      >
-        {curretnSemester !== -1 && (
-          <>
-            <CurretnSemester
-              curretnSemester={curretnSemester}
-              setCurretnSemester={setCurretnSemester}
-              handleClick={handleClick}
-              setOpen={setOpen}
-            />
-          </>
-        )}
-        <Paper
+      {!loading && (
+        <Box
           sx={{
-            width: "100%",
-
-            maxWidth: { sm: "80%", xs: "100%" },
+            pt: { sm: "2%", xs: "10%" },
             position: "relative",
-            pb: 50,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            overflow: "hidden",
           }}
         >
-          <Suspense
-            fallback={
-              <Stack spacing={1}>
-                {/* For variant="text", adjust the height via font-size */}
-                <Skeleton variant="text" sx={{ fontSize: "1rem" }} />
-                {/* For other variants, adjust the size with `width` and `height` */}
-                <Skeleton variant="rectangular" width={210} height={60} />
-                <Skeleton variant="rounded" width={210} height={60} />
-              </Stack>
-            }
+          {curretnSemester !== -1 && (
+            <>
+              <CurretnSemester
+                curretnSemester={curretnSemester}
+                setCurretnSemester={setCurretnSemester}
+                handleClick={handleClick}
+                setOpen={setOpen}
+              />
+            </>
+          )}
+          <Paper
+            sx={{
+              width: "100%",
+
+              maxWidth: { sm: "80%", xs: "100%" },
+              position: "relative",
+              pb: 50,
+            }}
           >
-            <Main search={search} curretnSemester={curretnSemester} />
-          </Suspense>
-        </Paper>
-      </Box>
+            <Suspense
+              fallback={
+                <Stack spacing={1}>
+                  {/* For variant="text", adjust the height via font-size */}
+                  <Skeleton variant="text" sx={{ fontSize: "1rem" }} />
+                  {/* For other variants, adjust the size with `width` and `height` */}
+                  <Skeleton variant="rectangular" width={210} height={60} />
+                  <Skeleton variant="rounded" width={210} height={60} />
+                </Stack>
+              }
+            >
+              <Main
+                setLoading={setLoading}
+                search={search}
+                curretnSemester={curretnSemester}
+              />
+            </Suspense>
+          </Paper>
+        </Box>
+      )}
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
           Up to semester {<span style={{ fontWeight: "800" }}>{upTo + 1}</span>}{" "}

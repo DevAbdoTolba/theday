@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import MainPc from "./MainPc";
 import MainPhone from "./MainPhone";
 
-function Main({ search, curretnSemester }) {
+function Main({ search, curretnSemester, setLoading }) {
   return (
     <>
       <MainPc search={search} curretnSemester={curretnSemester} />

@@ -16,7 +16,7 @@ import data from "src/Data/data.json";
 
 export default function CurretnSemester({
   curretnSemester,
-  setCurretnSemester,
+
   handleClick,
   setOpen,
 }) {
@@ -151,7 +151,7 @@ export default function CurretnSemester({
                 label={item?.abbreviation}
                 clickable
                 component={"a"}
-                href={/subject/ + item?.abbreviation}
+                href={"/subjects/" + item?.abbreviation}
                 // onClick={handleClickOpen}
               />
             </Grid>
