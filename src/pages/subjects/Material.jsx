@@ -44,6 +44,10 @@ function Material({
                   sx={{
                     mr: "1rem",
                     mb: "1rem",
+                    maxWidth: {
+                      sm: "15%",
+                      xs: "33%",
+                    },
                   }}
                 >
                   <Typography variant="h6">{item?.name}</Typography>

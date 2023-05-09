@@ -24,17 +24,26 @@ function SubjectPage() {
   const router = useRouter();
   // get parameters from url
   const [subject, setSubject] = useState(null);
+  const [subjectLoading, setSubjectLoading] = useState(true);
 
   useEffect(() => {
     if (router.isReady) {
       const subject = router.query;
+
       setSubject(subject);
+
+      console.log(
+        "%cAbdoTolba was here!! :D",
+        "color: red; font-family: sans-serif; font-size: 4.5rem; font-weight: bolder; text-shadow: #000 1px 1px;"
+      );
+
+      setSubjectLoading(false);
     }
   }, [router.isReady]);
 
   useEffect(() => {
     if (subject) {
-      fetch(`/api/test/${subject.subject}`)
+      fetch(`/api/subjects/${subject.subject}`)
         .then((res) => res?.json())
         .then((data) => {
           setData(data);
@@ -74,7 +83,9 @@ function SubjectPage() {
   return (
     <>
       <Head>
-        <title>{"subjectAbbreviation"}</title>
+        <title>
+          {subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
+        </title>
         <link
           rel="icon"
           href={
@@ -83,7 +94,10 @@ function SubjectPage() {
         />
       </Head>
       <CssBaseline />
-      <Header title={"subjectAbbreviation"} isSearch={false} />
+      <Header
+        title={subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
+        isSearch={false}
+      />
       <Suspense fallback={<div>Loading...</div>}>
         {data && (
           <>
