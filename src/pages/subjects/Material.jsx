@@ -1,5 +1,78 @@
 import { Box, Paper, Typography, Grid } from "@mui/material";
 
+function mimeTypeToAppName(mimeType) {
+  switch (mimeType) {
+    case "application/vnd.google-apps.audio":
+      return "GoogleAudio";
+    case "application/vnd.google-apps.blogger":
+      return "GoogleBlogger";
+    case "application/vnd.google-apps.calendar":
+      return "GoogleCalendar";
+    case "application/vnd.google-apps.dcm":
+      return "GoogleCampaign Manager 360";
+    case "application/vnd.google-apps.document":
+      return "GoogleDocs";
+    case "application/vnd.google-apps.drive-sdk":
+      return "Thirdparty shortcut";
+    case "application/vnd.google-apps.drawing":
+      return "GoogleDrawings";
+    case "application/vnd.google-apps.file":
+      return "GoogleDrive file";
+    case "application/vnd.google-apps.folder":
+      return "GoogleDrive folder";
+    case "application/vnd.google-apps.form":
+      return "GoogleForms";
+    case "application/vnd.google-apps.fusiontable":
+      return "GoogleFusion Tables";
+    case "application/vnd.google-apps.hangout":
+      return "GoogleHangouts";
+    case "application/vnd.google-apps.image":
+      return "GoogleDrive image";
+    case "application/vnd.google-apps.jam":
+      return "GoogleJamboard";
+    case "application/vnd.google-apps.kix":
+      return "GoogleDocs (old)";
+    case "application/vnd.google-apps.map":
+      return "GoogleMy Maps";
+    case "application/vnd.google-apps.photo":
+      return "GooglePhotos";
+    case "application/vnd.google-apps.presentation":
+      return "GoogleSlides";
+    case "application/vnd.google-apps.script":
+      return "GoogleApps Script";
+    case "application/vnd.google-apps.shortcut":
+      return "Shortcut";
+    case "application/vnd.google-apps.site":
+      return "GoogleSites";
+    case "application/vnd.google-apps.spreadsheet":
+      return "GoogleSheets";
+    case "application/vnd.google-apps.unknown":
+      return "Unknownfile type";
+    case "application/vnd.google-apps.video":
+      return "GoogleVideo";
+    case "application/vnd.google-apps.script+json":
+      return "GoogleApps Script (JSON)";
+    case "image/jpeg":
+      return "JPEGimage";
+    case "image/png":
+      return "PNGimage";
+    case "image/gif":
+      return "GIFimage";
+    case "image/webp":
+      return "WebPimage";
+    case "image/svg+xml":
+      return "SVGimage";
+    case "image/bmp":
+      return "BMPimage";
+    case "image/tiff":
+      return "TIFFimage";
+    case "image/x-icon":
+      return "Iconimage";
+    default:
+      return "";
+  }
+}
+
 function Material({
   name,
   abbreviation,
@@ -42,6 +115,7 @@ function Material({
                 <Box
                   key={index}
                   sx={{
+                    position: "relative",
                     mr: "1rem",
                     mb: "1rem",
                     maxWidth: {
@@ -50,7 +124,52 @@ function Material({
                     },
                   }}
                 >
-                  <Typography variant="h6">{item?.name}</Typography>
+                  <Typography
+                    sx={{
+                      "white-space": "nowrap",
+                      "text-overflow": "ellipsis",
+                      overflow: "hidden",
+                      fontSize: { sm: "1.5vw", xs: "4vw" },
+
+                      // zindex on top of all
+
+                      zIndex: 10000,
+
+                      "&::after": {
+                        content: `"${item?.name}"`,
+
+                        opacity: 0,
+                        visibility: "hidden",
+                        position: "absolute",
+
+                        width: "100%",
+                        height: "fit-content",
+                        // break lines
+
+                        whiteSpace: "pre-wrap",
+
+                        top: "11%",
+                        left: "0",
+                        fontSize: "0.8rem",
+                        // cool floating effect with box shadow
+                        background: "#222",
+                        borderRadius: "5px",
+                        boxShadow: "0 0 5px 3px rgba(0, 0, 0, 0.8)",
+                        color: "#fff",
+                        padding: "2px",
+
+                        overflow: "hidden",
+                        transition: "opacity 0.3s",
+                      },
+                      "&:hover::after": {
+                        opacity: 0.8,
+                        visibility: "visible",
+                      },
+                    }}
+                    variant="h6"
+                  >
+                    {item?.name}
+                  </Typography>
                   <Paper
                     className="Material_item"
                     style={itemStyle}
@@ -74,12 +193,21 @@ function Material({
                       minWidth: "100%",
                       padding: "4rem",
                     }}
+                    // on click get file id with https://drive.google.com/uc?id=FILE%20ID
+                    onClick={() => {
+                      window.open(
+                        `https://drive.google.com/uc?id=${item?.id}`,
+                        "_blank"
+                      );
+                    }}
                   >
                     <Typography
                       variant="h5"
-                      sx={{ fontSize: { sm: "2vw", xs: "6vw" } }}
+                      sx={{ fontSize: { sm: "1vw", xs: "2vw" } }}
                     >
-                      Data 🥰
+                      {mimeTypeToAppName(item?.mimeType) +
+                        "\n" +
+                        (item?.size ? Math.ceil(item?.size / 1024) + "KB" : "")}
                     </Typography>
                   </Paper>
                 </Box>
