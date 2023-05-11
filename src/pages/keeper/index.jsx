@@ -82,11 +82,15 @@ const App = () => {
                 },
               }}
             >
-              <img
-                src={"waiting-cat-" + waiting + ".gif"}
-                alt={"Adorable bunny patiently waiting for something."}
-                width={200}
-              />
+              {!waiting ? (
+                ""
+              ) : (
+                <img
+                  src={"waiting-cat-" + waiting + ".gif"}
+                  alt={"Adorable bunny patiently waiting for something."}
+                  width={200}
+                />
+              )}
             </Grid>
 
             <Grid item sm={5}></Grid>
