@@ -1,7 +1,7 @@
 import Note from "./Note.jsx";
 import Grid from "@mui/material/Grid";
 
-function Main({ search, notes, setNotes }) {
+function Main({ search, notes = [], setNotes }) {
   const handelDelete = (item) => {
     setNotes(notes?.filter((n) => n !== item));
   };
