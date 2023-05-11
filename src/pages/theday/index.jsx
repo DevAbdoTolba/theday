@@ -7,7 +7,7 @@ import React, {
   startTransition,
 } from "react";
 import Header from "../../components/Header";
-import CurretnSemester from "./CurretnSemester";
+import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -27,7 +27,7 @@ const Alert = forwardRef(function Alert(props, ref) {
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const [curretnSemester, setCurretnSemester] = useState(-1);
+  const [currentSemester, setCurrentSemester] = useState(-1);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [upTo, setUpTo] = useState(0);
@@ -35,7 +35,7 @@ function App() {
   const handleClick = () => {
     setOpen(true);
 
-    setCurretnSemester(-1);
+    setCurrentSemester(-1);
   };
 
   const handleClose = (event, reason) => {
@@ -51,12 +51,12 @@ function App() {
 
     if (semester) {
       startTransition(() => {
-        setCurretnSemester(semester);
+        setCurrentSemester(semester);
         setUpTo(semester);
       });
     }
     setLoading(false);
-  }, [curretnSemester]);
+  }, [currentSemester]);
 
   return (
     <>
@@ -88,11 +88,11 @@ function App() {
             overflow: "hidden",
           }}
         >
-          {curretnSemester !== -1 && (
+          {currentSemester !== -1 && (
             <>
-              <CurretnSemester
-                curretnSemester={curretnSemester}
-                setCurretnSemester={setCurretnSemester}
+              <CurrentSemester
+                currentSemester={currentSemester}
+                setCurrentSemester={setCurrentSemester}
                 handleClick={handleClick}
                 setOpen={setOpen}
               />
@@ -121,7 +121,7 @@ function App() {
               <Main
                 setLoading={setLoading}
                 search={search}
-                curretnSemester={curretnSemester}
+                currentSemester={currentSemester}
               />
             </Suspense>
           </Paper>

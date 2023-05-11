@@ -14,8 +14,8 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 import data from "src/Data/data.json";
 
-export default function CurretnSemester({
-  curretnSemester,
+export default function CurrentSemester({
+  currentSemester,
   handleClick,
   setOpen,
 }) {
@@ -34,7 +34,7 @@ export default function CurretnSemester({
 
   useEffect(() => {
     startTransition(() => {
-      setSubjects(data.semesters[curretnSemester].subjects);
+      setSubjects(data.semesters[currentSemester].subjects);
     });
   }, []);
 
@@ -100,7 +100,7 @@ export default function CurretnSemester({
           </IconButton>
         </Tooltip>
         <Typography sx={{ mb: 3, color: "#fff", fontSize: "1.5rem" }}>
-          Semester {curretnSemester}
+          Semester {currentSemester}
         </Typography>
 
         <Grid container spacing={2} sx={{ marginBottom: 3 }}>

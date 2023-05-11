@@ -8,7 +8,7 @@ import React, {
 
 import Header from "../../components/Header";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography } from "@mui/material";
+import { Typography, Grid } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -25,6 +25,8 @@ function SubjectPage() {
   // get parameters from url
   const [subject, setSubject] = useState(null);
   const [subjectLoading, setSubjectLoading] = useState(true);
+  const [materialLoading, setMaterialLoading] = useState(true);
+  const [dots, setDots] = useState(".");
 
   useEffect(() => {
     if (router.isReady) {
@@ -44,13 +46,38 @@ function SubjectPage() {
   useEffect(() => {
     if (subject) {
       fetch(`/api/subjects/${subject.subject}`)
-        .then((res) => res?.json())
+        .then((res) => {
+          if (res.ok) {
+            return res.json(); // If response is ok, parse JSON data
+          } else {
+            throw new Error("Network response was not ok"); // Throw an error if response is not ok
+          }
+        })
         .then((data) => {
           setData(data);
           console.log(data);
+          setMaterialLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setMaterialLoading(false);
         });
     }
   }, [subject]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (materialLoading) {
+        // add dots until it reaches dots, then deacrese them until they reach 1 and reapet
+        if (dots.length < 3) {
+          setDots(dots + ".");
+        }
+        if (dots.length === 3) {
+          setDots("");
+        }
+      }
+    }, 333);
+  }, [dots]);
 
   // fetch data from api
 
@@ -98,14 +125,73 @@ function SubjectPage() {
         title={subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
         isSearch={false}
       />
-      <Suspense fallback={<div>Loading...</div>}>
-        {data && (
-          <>
-            <TabsPC data={data} />
-            <TabsPhone data={data} />
-          </>
-        )}
-      </Suspense>
+      {materialLoading ? (
+        <Typography
+          variant="h5"
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+          }}
+        >
+          Loading{dots}
+        </Typography>
+      ) : (
+        <Suspense fallback={<div>Loading...</div>}>
+          {!data ? (
+            <Grid
+              container
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              <Grid item sm={5}></Grid>
+              <Grid
+                item
+                sm={2}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%,-50%)",
+                  // after class saying waiting
+
+                  "&::after": {
+                    content: "'No data were uploaded... YET '",
+
+                    position: "absolute",
+                    mt: "1rem",
+                    fontSize: "1.5rem",
+                    fontWeight: "bold",
+                    top: "100%",
+                    left: "50%",
+                    width: "200%",
+                    transform: "translateX(-50%)",
+                  },
+                }}
+              >
+                <img
+                  src={"/noData.gif"}
+                  alt={"Nervously waiting"}
+                  width={200}
+                />
+              </Grid>
+
+              <Grid item sm={5}></Grid>
+            </Grid>
+          ) : (
+            <>
+              <TabsPC data={data} />
+              <TabsPhone data={data} />
+            </>
+          )}
+        </Suspense>
+      )}
     </>
   );
 }
