@@ -1,11 +1,7 @@
-import { useState, useEffect, startTransition } from "react";
 import Note from "./Note.jsx";
 import Grid from "@mui/material/Grid";
-import FormDialog from "./FormDialog.jsx";
 
-function Main({ search }) {
-  const [notes, setNotes] = useLocalNotes();
-
+function Main({ search, notes, setNotes }) {
   const handelDelete = (item) => {
     setNotes(notes.filter((n) => n !== item));
   };
@@ -23,30 +19,8 @@ function Main({ search }) {
             />
           </Grid>
         ))}
-      <FormDialog setNotes={setNotes} />
     </Grid>
   );
-}
-
-function useLocalNotes() {
-  const [notes, setNotes] = useState([]);
-  useEffect(() => {
-    try {
-      const notes = window.localStorage.getItem("notes");
-      if (notes) {
-        startTransition(() => {
-          setNotes(JSON.parse(notes));
-        });
-      }
-    } catch (error) {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem("notes", JSON.stringify(notes));
-    } catch (error) {}
-  }, [notes]);
-  return [notes, setNotes];
 }
 
 export default Main;

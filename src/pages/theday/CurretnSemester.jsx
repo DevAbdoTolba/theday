@@ -16,7 +16,6 @@ import data from "src/Data/data.json";
 
 export default function CurretnSemester({
   curretnSemester,
-
   handleClick,
   setOpen,
 }) {
