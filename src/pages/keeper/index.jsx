@@ -8,7 +8,27 @@ import FormDialog from "./FormDialog";
 import Head from "next/head";
 
 const Main = lazy(() => import("./Main.jsx"));
+function useLocalNotes() {
+  const [notes, setNotes] = useState([]);
+  useEffect(() => {
+    try {
+      const notes = window.localStorage.getItem("notes");
+      if (notes) {
+        startTransition(() => {
+          setNotes(JSON.parse(notes));
+        });
+      }
+    } catch (error) {}
+  }, []);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("notes", JSON.stringify(notes));
+      console.log(notes.length);
+    } catch (error) {}
+  }, [notes]);
+  return [notes, setNotes];
+}
 const App = () => {
   const [search, setSearch] = useState("");
   const [notes, setNotes] = useLocalNotes();
@@ -101,27 +121,5 @@ const App = () => {
     </>
   );
 };
-
-function useLocalNotes() {
-  const [notes, setNotes] = useState([]);
-  useEffect(() => {
-    try {
-      const notes = window.localStorage.getItem("notes");
-      if (notes) {
-        startTransition(() => {
-          setNotes(JSON.parse(notes));
-        });
-      }
-    } catch (error) {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem("notes", JSON.stringify(notes));
-    } catch (error) {}
-  }, [notes]);
-  // console.log(notes.length);
-  return [notes, setNotes];
-}
 
 export default App;

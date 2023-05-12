@@ -7,6 +7,8 @@ import React, {
 } from "react";
 
 import Header from "../../components/Header";
+import NoData from "../../components/NoData";
+
 import CssBaseline from "@mui/material/CssBaseline";
 import { Typography, Grid } from "@mui/material";
 import Head from "next/head";
@@ -54,7 +56,9 @@ function SubjectPage() {
           }
         })
         .then((data) => {
+          // if data is null set data to {}
           setData(data);
+
           console.log(data);
           setMaterialLoading(false);
         })
@@ -140,50 +144,9 @@ function SubjectPage() {
       ) : (
         <Suspense fallback={<div>Loading...</div>}>
           {!data ? (
-            <Grid
-              container
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              <Grid item sm={5}></Grid>
-              <Grid
-                item
-                sm={2}
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%,-50%)",
-                  // after class saying waiting
-
-                  "&::after": {
-                    content: "'No data were uploaded... YET '",
-
-                    position: "absolute",
-                    mt: "1rem",
-                    fontSize: "1.5rem",
-                    fontWeight: "bold",
-                    top: "100%",
-                    left: "50%",
-                    width: "200%",
-                    transform: "translateX(-50%)",
-                  },
-                }}
-              >
-                <img
-                  src={"/noData.gif"}
-                  alt={"Nervously waiting"}
-                  width={200}
-                />
-              </Grid>
-
-              <Grid item sm={5}></Grid>
-            </Grid>
+            <NoData />
+          ) : !Object?.keys(data)?.length ? (
+            <NoData />
           ) : (
             <>
               <TabsPC data={data} />

@@ -114,6 +114,8 @@ export default function Header({ search, setSearch, title, isSearch }) {
               Go To Keeper
           </LinkMUI> */}
           {/* 2 icons first for theday route and the other for Keeper route */}
+
+          {/*
           <Tooltip title="The Day">
             <IconButton
               edge="start"
@@ -165,7 +167,7 @@ export default function Header({ search, setSearch, title, isSearch }) {
                 }}
               />
             </IconButton>
-          </Tooltip>
+          </Tooltip>*/}
           {isSearch && (
             <Tooltip title="Search">
               <Search>
