@@ -103,7 +103,11 @@ export default function CurrentSemester({
           Semester {currentSemester}
         </Typography>
 
-        <Grid container spacing={2} sx={{ marginBottom: 3 }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ marginBottom: 3, display: "flex", justifyContent: "center" }}
+        >
           {subjects.map((item, index) => (
             <Grid key={index} item>
               <Chip
