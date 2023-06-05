@@ -224,10 +224,18 @@ export default function Search({ data }) {
           <Box
             sx={{
               height: "100%",
-              maxHeight: "70vh",
+              maxHeight: {
+                sm: "70vh",
+                xs: "90vh",
+              },
 
               padding: " 1ch 2.5ch",
               overflowY: "scroll",
+
+              minHeight: {
+                sm: "50vh",
+                xs: "100vh",
+              },
             }}
           >
             {/* Search Result */}
