@@ -16,8 +16,10 @@ export default function AlertDialog({
 }) {
   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleClickOpen = (subject) => {
+    console.log("currentSemester : " + currentSemester + "\nIndex : " + index);
+    if (currentSemester === -1) setOpen(true);
+    else window.location.href = "/subjects/" + subject;
   };
 
   const handleClose = () => {
@@ -68,7 +70,9 @@ export default function AlertDialog({
           label={label}
           clickable
           // component={"a"}
-          onClick={handleClickOpen}
+          onClick={() => {
+            handleClickOpen(subject.abbreviation);
+          }}
         />
       ) : (
         <Chip
@@ -128,32 +132,31 @@ export default function AlertDialog({
           Are you in semester {index} ?{" "}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            <Box display="flex" sx={{ m: 1 }}>
-              {/* two buttons one says yes other says no */}
-              <Button
-                sx={{ m: 2 }}
-                variant="contained"
-                onClick={() => {
-                  // store in local storage index as and key and index as value
-                  localStorage.setItem("semester", index);
-                  // redirect to subject page
-                  window.location.href = "/subjects/" + subject.abbreviation;
-                }}
-              >
-                Yes
-              </Button>
-              <Button
-                sx={{ m: 2 }}
-                variant="contained"
-                onClick={() => {
-                  window.location.href = "/subjects/" + subject.abbreviation;
-                }}
-              >
-                No
-              </Button>
+          <Box display="flex" sx={{ m: 1 }}>
+            {/* two buttons one says yes other says no */}
+            <Button
+              sx={{ m: 2 }}
+              variant="contained"
+              onClick={() => {
+                // store in local storage index as and key and index as value
+                localStorage.setItem("semester", index);
+                // redirect to subject page
+                window.location.href = "/subjects/" + subject.abbreviation;
+              }}
+            >
+              Yes
+            </Button>
+            <Button
+              sx={{ m: 2 }}
+              variant="contained"
+              onClick={() => {
+                window.location.href = "/subjects/" + subject.abbreviation;
+              }}
+            >
+              No
+            </Button>
 
-              {/* <Chip
+            {/* <Chip
                 component={"a"}
                 href={/subject/ + subject.abbreviation}
                 target="_blank"
@@ -180,8 +183,7 @@ export default function AlertDialog({
                 }}
                 clickable
               /> */}
-            </Box>
-          </DialogContentText>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Close</Button>

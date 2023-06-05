@@ -84,17 +84,17 @@ export default function CurrentSemester({
                 color: "#900",
               },
             }}
+            onClick={() => {
+              handleClick();
+              localStorage.removeItem("semester");
+
+              // window.location.reload();
+            }}
           >
             <RemoveCircleOutlineIcon
               sx={{
                 color: "#ddd",
                 cursor: "pointer",
-              }}
-              onClick={() => {
-                handleClick();
-                localStorage.removeItem("semester");
-
-                // window.location.reload();
               }}
             />
           </IconButton>

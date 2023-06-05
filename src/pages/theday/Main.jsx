@@ -4,11 +4,11 @@ import { Typography } from "@mui/material";
 import MainPc from "./MainPc";
 import MainPhone from "./MainPhone";
 
-function Main({ search, curretnSemester, setLoading }) {
+function Main({ search, currentSemester, setLoading }) {
   return (
     <>
-      <MainPc search={search} curretnSemester={curretnSemester} />
-      <MainPhone search={search} curretnSemester={curretnSemester} />
+      <MainPc search={search} currentSemester={currentSemester} />
+      <MainPhone search={search} currentSemester={currentSemester} />
       <br />
       <Box
         sx={{

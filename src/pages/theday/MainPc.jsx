@@ -41,6 +41,7 @@ export default function MainPc({ search, currentSemester }) {
           {data.semesters
             .filter(
               (x) =>
+                x.index !== currentSemester &&
                 x.subjects.filter(
                   (y) =>
                     y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
