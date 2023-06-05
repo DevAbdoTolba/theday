@@ -65,7 +65,15 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function Header({ search, setSearch, title, isSearch }) {
+export default function Header({
+  search,
+  setSearch,
+  title,
+  isSearch,
+  isSubjectSearch,
+  SearchBox,
+  data,
+}) {
   return (
     <Box
       sx={{
@@ -183,6 +191,7 @@ export default function Header({ search, setSearch, title, isSearch }) {
               </Search>
             </Tooltip>
           )}
+          {isSubjectSearch && <SearchBox data={data} />}
         </Toolbar>
       </AppBar>
     </Box>

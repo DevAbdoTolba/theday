@@ -8,9 +8,10 @@ import React, {
 
 import Header from "../../components/Header";
 import NoData from "../../components/NoData";
+import Search from "./Search";
 
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography, Grid } from "@mui/material";
+import { Typography, Grid, Box } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -112,7 +113,11 @@ function SubjectPage() {
   //     .map((subject) => subject[0]);
 
   return (
-    <>
+    <Box
+      sx={{
+        overflowX: "hidden",
+      }}
+    >
       <Head>
         <title>
           {subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
@@ -125,10 +130,18 @@ function SubjectPage() {
         />
       </Head>
       <CssBaseline />
-      <Header
-        title={subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
-        isSearch={false}
-      />
+      {subjectLoading ? (
+        <Header title={"Loading..."} isSearch={false} isSubjectSearch={false} />
+      ) : (
+        <Header
+          title={subject.subject.toUpperCase()}
+          isSearch={false}
+          SearchBox={Search}
+          data={data}
+          isSubjectSearch={materialLoading ? false : true}
+        />
+      )}
+
       {materialLoading ? (
         <Typography
           variant="h5"
@@ -155,7 +168,7 @@ function SubjectPage() {
           )}
         </Suspense>
       )}
-    </>
+    </Box>
   );
 }
 

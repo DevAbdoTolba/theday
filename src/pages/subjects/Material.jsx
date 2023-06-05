@@ -129,8 +129,8 @@ function Material({
                 >
                   <Typography
                     sx={{
-                      "white-space": "nowrap",
-                      "text-overflow": "ellipsis",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
                       overflow: "hidden",
                       fontSize: { sm: "1.5vw", xs: "4vw" },
 
