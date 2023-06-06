@@ -115,6 +115,14 @@ function Material({
                 <Box
                   key={index}
                   sx={{
+                    "&:active > *, &:hover > *": {
+                      sm: {
+                        "&::after": {
+                          opacity: 0.8,
+                          visibility: "visible",
+                        },
+                      },
+                    },
                     position: "relative",
                     mr: {
                       sm: "1rem",
@@ -131,8 +139,9 @@ function Material({
                     sx={{
                       whiteSpace: "nowrap",
                       textOverflow: "ellipsis",
+
                       overflow: "hidden",
-                      fontSize: { sm: "1.5vw", xs: "4vw" },
+                      fontSize: { sm: "1.5ch", xs: "1.8ch" },
 
                       // zindex on top of all
 
@@ -155,8 +164,8 @@ function Material({
                         left: "0",
                         fontSize: "0.8rem",
                         // cool floating effect with box shadow
-                        background: "#222",
-                        borderRadius: "5px",
+                        background: "#555",
+                        borderRadius: "3px",
                         boxShadow: "0 0 5px 3px rgba(0, 0, 0, 0.8)",
                         color: "#fff",
                         padding: "2px",
@@ -178,7 +187,12 @@ function Material({
                     style={itemStyle}
                     elevation={20}
                     sx={{
-                      aspectRatio: "2 / 3",
+                      backgroundImage: `url(https://drive.google.com/thumbnail?id=${item?.id}) `,
+                      backgroundSize: "contain",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "center",
+
+                      aspectRatio: "3 / 2",
                       flexBasis: "50%",
                       cursor: "pointer",
                       p: 4,
@@ -206,7 +220,12 @@ function Material({
                   >
                     <Typography
                       variant="h5"
-                      sx={{ fontSize: { sm: "1vw", xs: "4vw" } }}
+                      sx={{
+                        fontSize: { sm: "1.3ch", xs: "1.4ch" },
+                        // out line
+                        textShadow: "0px 2px 1px  #0000ff",
+                        color: "#fff",
+                      }}
                     >
                       {mimeTypeToAppName(item?.mimeType) +
                         "\n" +

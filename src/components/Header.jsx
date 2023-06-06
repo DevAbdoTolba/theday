@@ -73,6 +73,7 @@ export default function Header({
   isSubjectSearch,
   SearchBox,
   data,
+  children,
 }) {
   return (
     <Box
