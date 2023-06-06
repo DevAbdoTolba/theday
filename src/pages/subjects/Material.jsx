@@ -1,4 +1,13 @@
-import { Box, Paper, Typography, Grid } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 function mimeTypeToAppName(mimeType) {
   switch (mimeType) {
@@ -92,6 +101,10 @@ function Material({
 
   const itemStyle = {};
 
+  const openFolder = (id) => {
+    window.open(`https://drive.google.com/drive/folders/${id}`, "_blank");
+  };
+
   return (
     <>
       {data &&
@@ -103,9 +116,39 @@ function Material({
               m: "1rem",
             }}
           >
-            <Typography variant="h4" sx={{ margin: "1rem" }}>
-              {key}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  margin: "1rem",
+                  "&:hover": { cursor: "pointer" },
+                  width: "fit-content",
+                }}
+                onClick={() => {
+                  openFolder(data[key][0]?.parents[0]);
+                }}
+              >
+                {key}
+              </Typography>
+              <Tooltip title="open in drive">
+                <IconButton
+                  sx={{
+                    height: "fit-content",
+                    width: "fit-content",
+                  }}
+                  onClick={() => {
+                    openFolder(data[key][0]?.parents[0]);
+                  }}
+                >
+                  <OpenInNewIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
             <Box
               className="Material_container"
               key={index}
