@@ -188,7 +188,7 @@ function Material({
                     elevation={20}
                     sx={{
                       backgroundImage: `url(https://drive.google.com/thumbnail?id=${item?.id}) `,
-                      backgroundSize: "contain",
+                      backgroundSize: "cover",
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: "center",
 
@@ -218,7 +218,7 @@ function Material({
                       );
                     }}
                   >
-                    <Typography
+                    {/* <Typography
                       variant="h5"
                       sx={{
                         fontSize: { sm: "1.3ch", xs: "1.4ch" },
@@ -230,7 +230,7 @@ function Material({
                       {mimeTypeToAppName(item?.mimeType) +
                         "\n" +
                         (item?.size ? Math.ceil(item?.size / 1024) + "KB" : "")}
-                    </Typography>
+                    </Typography> */}
                   </Paper>
                 </Box>
               ))}
