@@ -324,82 +324,85 @@ export default function Search({ data }) {
             }}
           >
             {/* Search Result */}
-            {Object?.keys(data)
-              ?.filter((key) =>
-                data[key]?.some((subject) =>
-                  subject?.name?.toLowerCase()?.includes(search?.toLowerCase())
+            {data &&
+              Object?.keys(data)
+                ?.filter((key) =>
+                  data[key]?.some((subject) =>
+                    subject?.name
+                      ?.toLowerCase()
+                      ?.includes(search?.toLowerCase())
+                  )
                 )
-              )
-              ?.map((key, index) => {
-                return (
-                  <Box
-                    key={index}
-                    sx={{
-                      padding: "1ch 0",
-                      "&:not(:last-child)": {
-                        borderBottom: "1px solid #727272",
-                      },
-                    }}
-                  >
+                ?.map((key, index) => {
+                  return (
                     <Box
+                      key={index}
                       sx={{
-                        fontSize: "1.5rem",
-                        fontWeight: "bold",
-                        color: "#fff",
-                        padding: "0.5ch 0",
+                        padding: "1ch 0",
+                        "&:not(:last-child)": {
+                          borderBottom: "1px solid #727272",
+                        },
                       }}
                     >
-                      {key}
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        flexWrap: "wrap",
-                        gap: "1ch",
-                      }}
-                    >
-                      {data[key]
-                        ?.filter((subject) =>
-                          subject?.name
-                            ?.toLowerCase()
-                            ?.includes(search?.toLowerCase())
-                        )
-                        ?.map((subject, index) => {
-                          return (
-                            <Box
-                              tabIndex={index + 3}
-                              key={index}
-                              sx={{
-                                backgroundColor: "#292929",
-                                padding: "0.5ch 1ch 0.5ch 3ch",
-                                // word break
-                                wordBreak: "break-all",
-                                lineHeight: "1.5rem",
-                                borderRadius: "10px",
-                                color: "#fff",
-                                fontSize: "1.2rem",
-                                cursor: "pointer",
+                      <Box
+                        sx={{
+                          fontSize: "1.5rem",
+                          fontWeight: "bold",
+                          color: "#fff",
+                          padding: "0.5ch 0",
+                        }}
+                      >
+                        {key}
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          flexWrap: "wrap",
+                          gap: "1ch",
+                        }}
+                      >
+                        {data[key]
+                          ?.filter((subject) =>
+                            subject?.name
+                              ?.toLowerCase()
+                              ?.includes(search?.toLowerCase())
+                          )
+                          ?.map((subject, index) => {
+                            return (
+                              <Box
+                                tabIndex={index + 3}
+                                key={index}
+                                sx={{
+                                  backgroundColor: "#292929",
+                                  padding: "0.5ch 1ch 0.5ch 3ch",
+                                  // word break
+                                  wordBreak: "break-all",
+                                  lineHeight: "1.5rem",
+                                  borderRadius: "10px",
+                                  color: "#fff",
+                                  fontSize: "1.2rem",
+                                  cursor: "pointer",
 
-                                "&:hover": {
-                                  backgroundColor: "#1e1e1e",
-                                },
-                              }}
-                              onClick={() => {
-                                window.open(
-                                  `https://drive.google.com/uc?id=${subject?.id}`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              {subject?.name}
-                            </Box>
-                          );
-                        })}
+                                  "&:hover": {
+                                    backgroundColor: "#1e1e1e",
+                                  },
+                                }}
+                                onClick={() => {
+                                  window.open(
+                                    `https://drive.google.com/uc?id=${subject?.id}`,
+                                    "_blank"
+                                  );
+                                }}
+                              >
+                                {subject?.name}
+                              </Box>
+                            );
+                          })}
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              })}
+                  );
+                })}
           </Box>
         </Paper>
       }
