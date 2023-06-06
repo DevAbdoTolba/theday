@@ -91,13 +91,13 @@ export default function Search({ data }) {
   const searchRef = React.useRef(null);
 
   const handleChange = (e) => {
-    setSearch(e.target.value);
+    setSearch(e?.target?.value);
   };
 
   const handleOpen = () => {
     setOpen(true);
     setTimeout(() => {
-      searchRef.current.focus();
+      searchRef?.current?.focus();
     }, 100); // wait for the modal to open
   };
 
@@ -126,8 +126,8 @@ export default function Search({ data }) {
 
   React.useEffect(() => {
     const handleCtrlK = (e) => {
-      if (e.ctrlKey && (e.keyCode === 75 || e.code === "KeyK")) {
-        e.preventDefault();
+      if (e?.ctrlKey && (e?.keyCode === 75 || e?.code === "KeyK")) {
+        e?.preventDefault();
         handleOpen();
       }
     };
@@ -140,8 +140,8 @@ export default function Search({ data }) {
   }, [open]);
 
   useEffect(() => {
-    if (searchRef.current) {
-      searchRef.current.focus();
+    if (searchRef?.current) {
+      searchRef?.current?.focus();
     }
   }, []);
 
