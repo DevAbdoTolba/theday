@@ -2,6 +2,7 @@ import "@/styles/Material.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
+import { Analytics } from "@vercel/analytics/react";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {
@@ -35,6 +36,7 @@ export default function App({ Component, pageProps }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Component {...pageProps} />
+      <Analytics />
     </ThemeProvider>
   );
 }
