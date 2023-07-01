@@ -120,6 +120,7 @@ function Material({
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
               <Typography
