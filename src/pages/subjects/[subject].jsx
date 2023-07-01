@@ -138,7 +138,9 @@ function SubjectPage() {
           isSearch={false}
           SearchBox={Search}
           data={data}
-          isSubjectSearch={materialLoading ? false : true}
+          isSubjectSearch={
+            materialLoading ? false : data ? Object?.keys(data)?.length : false
+          }
         />
       )}
 
