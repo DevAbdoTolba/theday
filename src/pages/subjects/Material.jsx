@@ -6,6 +6,8 @@ import {
   IconButton,
   Tooltip,
   Button,
+  Tab,
+  Tabs,
 } from "@mui/material";
 
 import { useState } from "react";
@@ -229,11 +231,13 @@ function Material({
                   >
                     {item?.name}
                   </Typography>
-                  <Paper
+                  <Button
                     className="Material_item"
                     style={itemStyle}
                     elevation={20}
+                    disableRipple
                     sx={{
+                      all: "unset",
                       backgroundImage: `url(https://drive.google.com/thumbnail?id=${item?.id}) `,
                       backgroundSize: "cover",
                       backgroundRepeat: "no-repeat",
@@ -256,6 +260,13 @@ function Material({
                       boxSizing: "border-box",
                       minWidth: "100%",
                       padding: "4rem",
+
+                      "&:focus": {
+                        margin: "3px",
+                        outline: "1px solid #fff",
+                        // huge shadow
+                        boxShadow: "10px 10px 70px 30px rgba(0, 0, 0, 0.8)",
+                      },
                     }}
                     // on click get file id with https://drive.google.com/uc?id=FILE%20ID
                     onClick={() => {
@@ -278,7 +289,7 @@ function Material({
                         "\n" +
                         (item?.size ? Math.ceil(item?.size / 1024) + "KB" : "")}
                     </Typography> */}
-                  </Paper>
+                  </Button>
                 </Box>
               ))}
             </Box>
