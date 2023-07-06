@@ -1,18 +1,13 @@
-body {
-  background-color: #121212 !important;
-  color: #d4d4d4 !important;
-}
-
 ::-webkit-scrollbar {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  width: 10px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
   /* make it fit the theme  */
   background-color: #007acc;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -29,37 +24,31 @@ body {
 ::-webkit-scrollbar-track {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-button {
-  /* make it fit the theme  */
-  background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-corner {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 ::-webkit-resizer {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 .Material_container::-webkit-scrollbar {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  width: 10px;
+  height: 7px;
 }
 
 .Material_container::-webkit-scrollbar-thumb {
   /* make it fit the theme  */
   background-color: #007acc;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 .Material_container::-webkit-scrollbar-thumb:hover {
@@ -76,23 +65,17 @@ body {
 .Material_container::-webkit-scrollbar-track {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
-}
-
-.Material_container::-webkit-scrollbar-button {
-  /* make it fit the theme  */
-  background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 .Material_container::-webkit-scrollbar-corner {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 .Material_container::-webkit-resizer {
   /* make it fit the theme  */
   background-color: #1e1e1e;
-  border-radius: 10px;
+  border-radius: 3px;
 }

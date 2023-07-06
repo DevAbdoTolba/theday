@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -12,6 +13,7 @@ import { Link } from "@mui/material";
 import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes";
 import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
 import Tooltip from "@mui/material/Tooltip";
+import SearchDialog from "./SearchDialog";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -75,6 +77,8 @@ export default function Header({
   data,
   children,
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Box
       sx={{
@@ -192,7 +196,11 @@ export default function Header({
               </Search>
             </Tooltip>
           )}
-          {isSubjectSearch && <SearchBox data={data} />}
+          {isSubjectSearch && (
+            <>
+              <SearchDialog open={open} setOpen={setOpen} data={data} />
+            </>
+          )}
         </Toolbar>
       </AppBar>
     </Box>

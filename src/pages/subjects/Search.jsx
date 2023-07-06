@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
-import { Box, Paper, TextField, Typography } from "@mui/material";
+
+import { Box, Paper, Slide, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 export default function Search({ data }) {
   const [search, setSearch] = React.useState("");
+
   const buttonStyle = {
     backgroundColor: "#1e1e1e",
     color: "#fff",
@@ -14,6 +16,10 @@ export default function Search({ data }) {
     padding: ".5ch 1ch",
     border: "2px solid #3f3f3f",
   };
+
+  const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
 
   // data = {
   //   Assignment: [
@@ -85,7 +91,6 @@ export default function Search({ data }) {
   //   ],
   // };
 
-  const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(3);
 
   const searchRef = React.useRef(null);
@@ -95,14 +100,16 @@ export default function Search({ data }) {
   };
 
   const handleOpen = () => {
-    setOpen(true);
+    // goto url #search to open the modal
+    window.location.hash = "#search";
     setTimeout(() => {
       searchRef?.current?.focus();
     }, 100); // wait for the modal to open
   };
 
   const handleClose = () => {
-    setOpen(false);
+    // goto url # to close the modal
+    history.back();
     // empty the search input
     setTimeout(() => {
       setSearch("");
@@ -110,19 +117,21 @@ export default function Search({ data }) {
     }, 320); // wait for the modal to close so don't show blunt search results
   };
 
-  React.useEffect(() => {
-    const handleEsc = (e) => {
-      if (e?.key === "Escape" && open) {
-        handleClose();
-      }
-    };
+  // Handle closing the modal when pressing escape
 
-    window.addEventListener("keydown", handleEsc);
+  // React.useEffect(() => {
+  //   const handleEsc = (e) => {
+  //     if (e?.key === "Escape") {
+  //       handleClose();
+  //     }
+  //   };
 
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [open]);
+  //   window.addEventListener("keydown", handleEsc);
+
+  //   return () => {
+  //     window.removeEventListener("keydown", handleEsc);
+  //   };
+  // }, []);
 
   React.useEffect(() => {
     const handleCtrlK = (e) => {
@@ -137,7 +146,7 @@ export default function Search({ data }) {
     return () => {
       window.removeEventListener("keydown", handleCtrlK);
     };
-  }, [open]);
+  }, []);
 
   useEffect(() => {
     if (searchRef?.current) {
@@ -203,11 +212,12 @@ export default function Search({ data }) {
 
       {
         <Paper
+          id="search"
           sx={{
             backgroundColor: "#1e1e1e",
             position: "fixed",
             top: {
-              sm: open ? "10%" : "15%",
+              sm: "15%",
               xs: "0",
             },
 
@@ -240,8 +250,19 @@ export default function Search({ data }) {
             overflowY: "hidden",
             overflowX: "hidden",
 
-            opacity: open ? 1 : 0,
-            visibility: open ? "visible" : "hidden",
+            opacity: 0,
+            visibility: "hidden",
+
+            "&:target": {
+              opacity: 1,
+              visibility: "visible",
+              top: "10%",
+            },
+
+            "&:target + #shadow": {
+              opacity: "0.8 !important",
+              visibility: "visible !important",
+            },
 
             transition: "all .3s ",
           }}
@@ -408,23 +429,27 @@ export default function Search({ data }) {
       }
 
       {/* Shadow Box */}
-      {open && (
+      {
         <Box
+          id="shadow"
           sx={{
+            // if #search is :target then show the shadow box
+
             position: "fixed",
             top: 0,
             left: 0,
             width: "100vw",
             height: "100vh",
             backgroundColor: "#000",
-            opacity: open ? 0.8 : 0,
+            opacity: 0,
+            visibility: "hidden",
             zIndex: 3,
 
             transition: "all .3s ",
           }}
           onClick={handleClose}
         />
-      )}
+      }
     </>
   );
 }
