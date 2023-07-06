@@ -14,6 +14,7 @@ import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes";
 import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
+import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -113,8 +114,24 @@ export default function Header({
               fontSize: { sm: "1.5rem", xs: "1.5rem" },
             }}
           >
-            <Tooltip title="Home" placement="bottom-start">
-              <Link href="/" style={{ textDecoration: "none", color: "white" }}>
+            <Tooltip
+              title={title === "TheDay" ? "" : "Home"}
+              placement="bottom"
+            >
+              <Link
+                href={title === "TheDay" ? null : "/theday"}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "fit-content",
+                  textDecoration: "none",
+                  color: "white",
+                  "&:hover .MuiSvgIcon-root": {
+                    color: "#0066ff",
+                  },
+                }}
+              >
+                {title === "TheDay" ? <></> : <KeyboardDoubleArrowLeftIcon />}
                 {title}
               </Link>
             </Tooltip>
