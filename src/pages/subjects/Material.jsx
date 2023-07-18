@@ -271,7 +271,7 @@ function Material({
                     // on click get file id with https://drive.google.com/uc?id=FILE%20ID
                     onClick={() => {
                       window.open(
-                        `https://drive.google.com/uc?id=${item?.id}`,
+                        `https://drive.google.com/file/d/${item?.id}/preview`,
                         "_blank"
                       );
                     }}
