@@ -34,7 +34,6 @@ function App() {
   const [upTo, setUpTo] = useState(0);
   const [isMaxSemester, setIsMaxSemester] = useState(0);
 
-
   const handleClick = () => {
     setOpen(true);
 
@@ -51,11 +50,11 @@ function App() {
 
   useEffect(() => {
     const semester = JSON.parse(localStorage.getItem("semester"));
-    if (semester == data.semesters[data.semesters.length-1].index) {
+    if (semester == data.semesters[data.semesters.length - 1].index) {
       startTransition(() => {
         setIsMaxSemester(1);
       });
-    }else{
+    } else {
       startTransition(() => {
         setIsMaxSemester(0);
       });
@@ -72,7 +71,7 @@ function App() {
       });
     }
     setLoading(false);
-  }, [currentSemester]);
+  }, []);
 
   return (
     <>
@@ -145,20 +144,25 @@ function App() {
       )}
 
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-      { !isMaxSemester && (
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Up to semester {<span style={{ fontWeight: "800" }}>{upTo +1}</span>}{" "}
-          🌟🤠
-        </Alert>
-        ) || (
-          <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Congratulations on graduating 🥳🎉
-         </Alert>
-        ) 
-      }
+        {!isMaxSemester ? (
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Up to semester{" "}
+            {<span style={{ fontWeight: "800" }}>{upTo + 1}</span>} 🌟🤠
+          </Alert>
+        ) : (
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Congratulations on graduating 🥳🎉
+          </Alert>
+        )}
       </Snackbar>
-
-
     </>
   );
 }
