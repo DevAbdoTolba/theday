@@ -11,6 +11,7 @@ import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import data from "src/Data/data.json";
 
 import { Paper, Box } from "@mui/material";
 
@@ -31,6 +32,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [upTo, setUpTo] = useState(0);
+  const [isMaxSemester, setIsMaxSemester] = useState(0);
 
   const handleClick = () => {
     setOpen(true);
@@ -48,6 +50,19 @@ function App() {
 
   useEffect(() => {
     const semester = JSON.parse(localStorage.getItem("semester"));
+    if (semester == data.semesters[data.semesters.length - 1].index) {
+      startTransition(() => {
+        setIsMaxSemester(1);
+      });
+    } else {
+      startTransition(() => {
+        setIsMaxSemester(0);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const semester = JSON.parse(localStorage.getItem("semester"));
 
     if (semester) {
       startTransition(() => {
@@ -56,7 +71,7 @@ function App() {
       });
     }
     setLoading(false);
-  }, [currentSemester]);
+  }, []);
 
   return (
     <>
@@ -127,11 +142,26 @@ function App() {
           </Paper>
         </Box>
       )}
+
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          Up to semester {<span style={{ fontWeight: "800" }}>{upTo + 1}</span>}{" "}
-          🌟🤠
-        </Alert>
+        {!isMaxSemester ? (
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Up to semester{" "}
+            {<span style={{ fontWeight: "800" }}>{upTo + 1}</span>} 🌟🤠
+          </Alert>
+        ) : (
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Congratulations on graduating 🥳🎉
+          </Alert>
+        )}
       </Snackbar>
     </>
   );
