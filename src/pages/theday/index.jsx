@@ -59,7 +59,7 @@ function App() {
         setIsMaxSemester(0);
       });
     }
-  }, [isMaxSemester]);
+  }, []);
 
   useEffect(() => {
     const semester = JSON.parse(localStorage.getItem("semester"));
