@@ -159,7 +159,20 @@ function Material({
               className="Material_container"
               key={index}
               style={containerStyle}
-            >
+              onWheel={(event)=>{
+                if (event.shiftKey) {
+                  const container = event.currentTarget;
+                  const scrollAmount = event.deltaY;
+                  const step = 10;
+                  const smoothScroll = () => {
+                    const remainingScroll = Math.abs(scrollAmount) - step;
+                    const scrollStep = scrollAmount > 0 ? Math.min(remainingScroll, step) : -Math.min(remainingScroll, step);
+                    container.scrollLeft += scrollStep;
+                  };
+                 requestAnimationFrame(smoothScroll);
+                }
+            }}
+            > 
               {data[key]?.map((item, index) => (
                 <Box
                   key={index}
