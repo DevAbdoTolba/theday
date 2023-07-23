@@ -319,7 +319,7 @@ export default function AlertDialogSlide({ open, setOpen, data }) {
                               disableRipple
                               onClick={() => {
                                 window.open(
-                                  `https://drive.google.com/uc?id=${subject?.id}`,
+                                  `https://drive.google.com/file/d/${subject?.id}/preview`,
                                   "_blank"
                                 );
                               }}

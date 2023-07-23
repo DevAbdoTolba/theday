@@ -411,7 +411,7 @@ export default function Search({ data }) {
                                 }}
                                 onClick={() => {
                                   window.open(
-                                    `https://drive.google.com/uc?id=${subject?.id}`,
+                                    `https://drive.google.com/file/d/${subject?.id}/preview`,
                                     "_blank"
                                   );
                                 }}
