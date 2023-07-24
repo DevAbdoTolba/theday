@@ -14,7 +14,7 @@ import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Link } from "@mui/material";
+import { Button, Link } from "@mui/material";
 import NextLink from "next/link";
 
 interface Data {
@@ -163,9 +163,10 @@ export default function Header({
               title={title === "TheDay" ? "" : "Home"}
               placement="bottom"
             >
-              <Link
-                component={NextLink}
-                href={title === "TheDay" ? undefined : "/theday"}
+              <Button
+                LinkComponent={NextLink}
+                href={"/theday"}
+                disableRipple
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -179,7 +180,7 @@ export default function Header({
               >
                 {title === "TheDay" ? <></> : <KeyboardDoubleArrowLeftIcon />}
                 {title}
-              </Link>
+              </Button>
             </Tooltip>
           </Typography>
           {/* <LinkMUI 
