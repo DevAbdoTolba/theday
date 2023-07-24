@@ -9,6 +9,24 @@ import Slide from "@mui/material/Slide";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, TextField, Typography } from "@mui/material";
 
+interface Data {
+  id: string;
+  mimeType: string;
+  name: string;
+  parents: string[];
+  size: number;
+}
+
+interface DataMap {
+  [key: string]: Data[];
+}
+
+interface Props {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  data: DataMap;
+}
+
 const buttonStyle = {
   backgroundColor: "#1e1e1e",
   color: "#fff",
@@ -24,11 +42,11 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AlertDialogSlide({ open, setOpen, data }) {
-  const searchRef = React.useRef(null);
+export default function AlertDialogSlide({ open, setOpen, data }: Props) {
+  const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e?.target?.value);
   };
 
@@ -51,7 +69,7 @@ export default function AlertDialogSlide({ open, setOpen, data }) {
   }, [open]);
 
   React.useEffect(() => {
-    const handleCtrlK = (e) => {
+    const handleCtrlK = (e: KeyboardEvent) => {
       if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
         e?.preventDefault();
         setOpen(true);
@@ -77,7 +95,6 @@ export default function AlertDialogSlide({ open, setOpen, data }) {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "0",
           width: "auto",
           fontSize: "1.6ch",
           padding: ".7ch 2ch",
@@ -137,7 +154,6 @@ export default function AlertDialogSlide({ open, setOpen, data }) {
           "& .MuiDialog-paper": {
             backgroundColor: "#292929",
             backgroundImage: "none",
-            padding: "1.5ch",
             borderRadius: {
               sm: "20px ",
               xs: "0",
