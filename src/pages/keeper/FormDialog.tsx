@@ -11,7 +11,18 @@ import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import Tooltip from "@mui/material/Tooltip";
 
-export default function FormDialog(props) {
+interface Props {
+  setNotes: React.Dispatch<
+    React.SetStateAction<
+      {
+        title: string;
+        body: string;
+      }[]
+    >
+  >;
+}
+
+export default function FormDialog({ setNotes }: Props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -27,16 +38,16 @@ export default function FormDialog(props) {
   const [name, setName] = useState("qrs");
   const [note, setNote] = useState("");
 
-  const handleChangeName = (event) => {
+  const handleChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
 
-  const handleChangeNote = (event) => {
+  const handleChangeNote = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNote(event.target.value);
   };
 
   const handelOnClick = () => {
-    props.setNotes((prevNotes) => [...prevNotes, { title: name, body: note }]);
+    setNotes((prevNotes) => [...prevNotes, { title: name, body: note }]);
     handleClose();
   };
 
