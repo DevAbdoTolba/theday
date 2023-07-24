@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Grid } from "@mui/material";
+import Image from "next/image";
 
 export default function NoData() {
   return (
@@ -39,7 +40,7 @@ export default function NoData() {
           },
         }}
       >
-        <img src={"/noData.gif"} alt={"Nervously waiting"} width={200} />
+        <Image src={"/noData.gif"} alt={"Nervously waiting"} width={200} />
       </Grid>
 
       <Grid item sm={5}></Grid>
