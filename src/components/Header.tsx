@@ -9,12 +9,57 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "@mui/material";
 import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes";
 import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import { Link } from "@mui/material";
+import NextLink from "next/link";
+
+interface Data {
+  id: string;
+  mimeType: string;
+  name: string;
+  parents: string[];
+  size: number;
+}
+
+interface DataMap {
+  [key: string]: Data[];
+}
+
+interface Props {
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  title: string;
+  isSearch: boolean;
+  isSubjectSearch: boolean;
+  SearchBox: React.FC;
+  data: DataMap;
+  children: React.ReactNode;
+}
+
+// let data: DataMap = {
+//   "1": [
+//     {
+//       id: "1",
+//       mimeType: "application/vnd.google-apps.folder",
+//       name: "Folder1",
+//       parents: ["root"],
+//       size: 0,
+//     },
+//   ],
+//   "2": [
+//     {
+//       id: "2",
+//       mimeType: "application/vnd.google-apps.folder",
+//       name: "Folder2",
+//       parents: ["root"],
+//       size: 0,
+//     },
+//   ],
+// };
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -77,7 +122,7 @@ export default function Header({
   SearchBox,
   data,
   children,
-}) {
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -119,7 +164,8 @@ export default function Header({
               placement="bottom"
             >
               <Link
-                href={title === "TheDay" ? null : "/theday"}
+                component={NextLink}
+                href={title === "TheDay" ? undefined : "/theday"}
                 sx={{
                   display: "flex",
                   alignItems: "center",
