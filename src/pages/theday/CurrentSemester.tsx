@@ -1,4 +1,4 @@
-import { useEffect, useState, startTransition } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -14,12 +14,23 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 import data from "src/Data/data.json";
 
+interface Props {
+  currentSemester: number;
+  handleClick: () => void;
+  setOpen: (value: boolean) => void;
+}
+
 export default function CurrentSemester({
   currentSemester,
   handleClick,
   setOpen,
-}) {
-  const [subjects, setSubjects] = useState([]);
+}: Props) {
+  const [subjects, setSubjects] = useState<
+    {
+      name: string;
+      abbreviation: string;
+    }[]
+  >();
 
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
@@ -33,9 +44,7 @@ export default function CurrentSemester({
   }));
 
   useEffect(() => {
-    startTransition(() => {
-      setSubjects(data.semesters[currentSemester].subjects);
-    });
+    setSubjects(data.semesters[currentSemester].subjects);
   }, []);
 
   return (
@@ -108,7 +117,7 @@ export default function CurrentSemester({
           spacing={2}
           sx={{ marginBottom: 3, display: "flex", justifyContent: "center" }}
         >
-          {subjects.map((item, index) => (
+          {subjects?.map((item, index) => (
             <Grid key={index} item>
               <Chip
                 sx={{
