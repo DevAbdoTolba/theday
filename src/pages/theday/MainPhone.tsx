@@ -9,7 +9,12 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect } from "react";
 
-function MainPhone({ search, curretnSemester, setLoading }) {
+interface Props {
+  search: string;
+  currentSemester: number;
+}
+
+function MainPhone({ search, currentSemester }: Props) {
   return (
     <Box
       sx={{
@@ -68,7 +73,7 @@ function MainPhone({ search, curretnSemester, setLoading }) {
                       <Dialog
                         label={subjects?.name}
                         subject={subjects}
-                        curretnSemester={curretnSemester}
+                        currentSemester={currentSemester}
                         index={item.index}
                       />
                     </Grid>

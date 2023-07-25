@@ -6,7 +6,12 @@ import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 
-export default function MainPc({ search, currentSemester }) {
+interface Props {
+  search: string;
+  currentSemester: number;
+}
+
+export default function MainPc({ search, currentSemester }: Props) {
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
     ...theme.typography.body2,

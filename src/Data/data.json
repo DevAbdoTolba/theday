@@ -43,7 +43,7 @@
             ]
         },
         {
-            "index": "2",
+            "index": 2,
             "subjects": [
                 {
                     "name": "Calculus II",
@@ -72,7 +72,7 @@
             ]
         },
         {
-            "index": "3",
+            "index": 3,
             "subjects": [
                 {
                     "name": "Calculus III",
@@ -101,7 +101,7 @@
             ]
         },
         {
-            "index": "4",
+            "index": 4,
             "subjects": [
                 {
                     "name": "Data structures and algorithms",
@@ -130,7 +130,7 @@
             ]
         },
         {
-            "index": "5",
+            "index": 5,
             "subjects": [
                 {
                     "name": "Systems programming",
@@ -159,7 +159,7 @@
             ]
         },
         {
-            "index": "6",
+            "index": 6,
             "subjects": [
                 {
                     "name": "Computing algorithms",
@@ -184,13 +184,11 @@
             ]
         },
         {
-            "index": "7",
-            "subjects": [
-
-            ]
+            "index": 7,
+            "subjects": []
         },
         {
-            "index": "8",
+            "index": 8,
             "subjects": [
                 {
                     "name": "Human Computer Interaction",

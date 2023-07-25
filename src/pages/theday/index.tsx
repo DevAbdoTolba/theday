@@ -118,11 +118,7 @@ function App() {
                 </Stack>
               }
             >
-              <Main
-                setLoading={setLoading}
-                search={search}
-                currentSemester={currentSemester}
-              />
+              <Main search={search} currentSemester={currentSemester} />
             </Suspense>
           </Paper>
         </Box>
