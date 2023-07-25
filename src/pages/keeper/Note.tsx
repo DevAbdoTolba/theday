@@ -7,7 +7,14 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tooltip from "@mui/material/Tooltip";
 
-export default function BasicCard({ title, body, handelDelete, item }) {
+interface Props {
+  title: string;
+  body: string;
+  handelDelete: (item: any) => void;
+  item: any;
+}
+
+export default function BasicCard({ title, body, handelDelete, item }: Props) {
   return (
     <Card>
       <CardContent>
@@ -17,16 +24,15 @@ export default function BasicCard({ title, body, handelDelete, item }) {
 
         <Typography variant="body2">{body}</Typography>
 
-        <Button
+        <IconButton
+          aria-label="delete"
           sx={{ position: "relative", right: "-85%" }}
           onClick={() => handelDelete(item)}
         >
-          <IconButton aria-label="delete">
-            <Tooltip title="Delete">
-              <DeleteIcon />
-            </Tooltip>
-          </IconButton>
-        </Button>
+          <Tooltip title="Delete">
+            <DeleteIcon />
+          </Tooltip>
+        </IconButton>
       </CardContent>
     </Card>
   );

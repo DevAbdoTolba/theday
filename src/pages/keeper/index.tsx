@@ -1,22 +1,27 @@
-import React, { Suspense, lazy } from "react";
+import React, { Dispatch, SetStateAction, Suspense, lazy } from "react";
 import Header from "../../components/Header";
 
 import { useState, useEffect } from "react";
-import { Paper, Box, Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import FormDialog from "./FormDialog";
 
 import Head from "next/head";
+import Image from "next/image";
 
-const Main = lazy(() => import("./Main.jsx"));
-function useLocalNotes() {
-  const [notes, setNotes] = useState([]);
+interface note {
+  title: string;
+  body: string;
+}
+
+const Main = lazy(() => import("./Main"));
+function useLocalNotes(): [note[], Dispatch<SetStateAction<note[]>>] {
+  const [notes, setNotes] = useState<note[]>([]);
   useEffect(() => {
     try {
       const notes = window.localStorage.getItem("notes");
       if (notes) {
-        startTransition(() => {
-          setNotes(JSON.parse(notes));
-        });
+        const parsedNotes = JSON.parse(notes);
+        setNotes(parsedNotes);
       }
     } catch (error) {}
   }, []);
@@ -52,9 +57,9 @@ const App = () => {
         />
       </Head>
       <Header
-        title="Keeper"
-        setSearch={setSearch}
         search={search}
+        setSearch={setSearch}
+        title="Keeper"
         isSearch={true}
       />
       <Box
@@ -105,11 +110,17 @@ const App = () => {
               {!waiting ? (
                 ""
               ) : (
-                <img
-                  src={"waiting-cat-" + waiting + ".gif"}
-                  alt={"Adorable bunny patiently waiting for something."}
-                  width={200}
-                />
+                <>
+                  {
+                    <Image
+                      loading="lazy"
+                      src={"/waiting-cat-" + waiting + ".gif"}
+                      alt={"Adorable bunny patiently waiting for something."}
+                      width={200}
+                      height={200}
+                    />
+                  }
+                </>
               )}
             </Grid>
 

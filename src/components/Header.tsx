@@ -30,10 +30,8 @@ interface Props {
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   title: string;
   isSearch: boolean;
-  isSubjectSearch: boolean;
-  SearchBox: React.FC;
-  data: DataMap;
-  children: React.ReactNode;
+  isSubjectSearch?: boolean;
+  data?: DataMap;
 }
 
 // let data: DataMap = {
@@ -115,9 +113,7 @@ export default function Header({
   title,
   isSearch,
   isSubjectSearch,
-  SearchBox,
   data,
-  children,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -256,7 +252,7 @@ export default function Header({
               </Search>
             </Tooltip>
           )}
-          {isSubjectSearch && (
+          {isSubjectSearch && data && (
             <>
               <SearchDialog open={open} setOpen={setOpen} data={data} />
             </>
