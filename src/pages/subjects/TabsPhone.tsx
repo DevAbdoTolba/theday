@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 import Schedule from "./Schedule";
 import Material from "./Material";
 
-function TabPanel(props) {
+function TabPanel(props: any) {
   const { children, value, index, data, ...other } = props;
 
   return (
@@ -34,17 +34,17 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,
   };
 }
 
-export default function BasicTabs(props) {
+export default function BasicTabs(props: any) {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
 
