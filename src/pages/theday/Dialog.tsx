@@ -8,15 +8,27 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Chip from "@mui/material/Chip";
 import { Box } from "@mui/material";
 
+interface Subject {
+  name: string;
+  abbreviation: string;
+}
+
+interface Props {
+  label: string;
+  subject: Subject;
+  index: number;
+  currentSemester: number;
+}
+
 export default function AlertDialog({
   label,
   subject,
   index,
   currentSemester,
-}) {
+}: Props) {
   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = (subject) => {
+  const handleClickOpen = (subject: string) => {
     console.log("currentSemester : " + currentSemester + "\nIndex : " + index);
     if (currentSemester === -1) setOpen(true);
     else window.location.href = "/subjects/" + subject;
@@ -139,7 +151,7 @@ export default function AlertDialog({
               variant="contained"
               onClick={() => {
                 // store in local storage index as and key and index as value
-                localStorage.setItem("semester", index);
+                localStorage.setItem("semester", index.toString());
                 // redirect to subject page
                 window.location.href = "/subjects/" + subject.abbreviation;
               }}
