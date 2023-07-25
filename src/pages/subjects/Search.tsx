@@ -3,7 +3,23 @@ import React, { useEffect } from "react";
 import { Box, Paper, Slide, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-export default function Search({ data }) {
+interface Data {
+  id: string;
+  mimeType: string;
+  name: string;
+  parents: string[];
+  size: number;
+}
+
+interface DataMap {
+  [key: string]: Data[];
+}
+
+interface Props {
+  data: DataMap;
+}
+
+export default function Search({ data }: Props) {
   const [search, setSearch] = React.useState("");
 
   const buttonStyle = {
@@ -16,10 +32,6 @@ export default function Search({ data }) {
     padding: ".5ch 1ch",
     border: "2px solid #3f3f3f",
   };
-
-  const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
 
   // data = {
   //   Assignment: [
@@ -93,9 +105,9 @@ export default function Search({ data }) {
 
   const [index, setIndex] = React.useState(3);
 
-  const searchRef = React.useRef(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e?.target?.value);
   };
 
@@ -108,12 +120,10 @@ export default function Search({ data }) {
   };
 
   const handleClose = () => {
-    // goto url # to close the modal
     history.back();
     // empty the search input
     setTimeout(() => {
       setSearch("");
-      searchRef.current.value = "";
     }, 320); // wait for the modal to close so don't show blunt search results
   };
 
@@ -134,7 +144,7 @@ export default function Search({ data }) {
   // }, []);
 
   React.useEffect(() => {
-    const handleCtrlK = (e) => {
+    const handleCtrlK = (e: KeyboardEvent) => {
       if (e?.ctrlKey && (e?.keyCode === 75 || e?.code === "KeyK")) {
         e?.preventDefault();
         handleOpen();
