@@ -8,6 +8,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, TextField, Typography } from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
 
 interface Data {
   id: string;
@@ -38,7 +39,12 @@ const buttonStyle = {
   border: "2px solid #3f3f3f",
 };
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>
+) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
