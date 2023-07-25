@@ -1,16 +1,19 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Paper from "@mui/material/Paper";
 import Draggable from "react-draggable";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
+import Image from "next/image";
 
-function PaperComponent(props) {
+interface Props {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  schedule: string;
+}
+
+function PaperComponent(props: any) {
   return (
     <Draggable
       handle="#draggable-dialog-title"
@@ -21,7 +24,7 @@ function PaperComponent(props) {
   );
 }
 
-export default function ScheduleDialog({ open, setOpen, schedule }) {
+export default function ScheduleDialog({ open, setOpen, schedule }: Props) {
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -48,7 +51,7 @@ export default function ScheduleDialog({ open, setOpen, schedule }) {
                 pointerEvents: "none",
               }}
             >
-              <img src={schedule} alt="schedule" loading="lazy" />
+              <Image src={schedule} alt="schedule" loading="lazy" />
             </ImageListItem>
           </ImageList>
         </DialogTitle>
