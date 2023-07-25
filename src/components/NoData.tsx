@@ -40,7 +40,12 @@ export default function NoData() {
           },
         }}
       >
-        <Image src={"/noData.gif"} alt={"Nervously waiting"} width={200} />
+        <Image
+          src={"/noData.gif"}
+          alt={"Nervously waiting"}
+          height={215}
+          width={200}
+        />
       </Grid>
 
       <Grid item sm={5}></Grid>
