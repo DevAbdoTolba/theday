@@ -1,16 +1,8 @@
-import React, {
-  Suspense,
-  lazy,
-  useState,
-  useEffect,
-  forwardRef,
-  startTransition,
-} from "react";
+import React, { Suspense, lazy, useState, useEffect, forwardRef } from "react";
 import Header from "../../components/Header";
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import data from "src/Data/data.json";
 
 import { Paper, Box } from "@mui/material";
@@ -22,7 +14,7 @@ import Head from "next/head";
 
 const Main = lazy(() => import("./Main"));
 
-const Alert = forwardRef(function Alert(props, ref) {
+const Alert = forwardRef(function Alert(props: any, ref: any) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
@@ -40,7 +32,10 @@ function App() {
     setCurrentSemester(-1);
   };
 
-  const handleClose = (event, reason) => {
+  const handleClose = (
+    event: React.SyntheticEvent<any, Event>,
+    reason: string
+  ) => {
     if (reason === "clickaway") {
       return;
     }
@@ -49,26 +44,22 @@ function App() {
   };
 
   useEffect(() => {
+    // @ts-ignore
     const semester = JSON.parse(localStorage.getItem("semester"));
     if (semester == data.semesters[data.semesters.length - 1].index) {
-      startTransition(() => {
-        setIsMaxSemester(1);
-      });
+      setIsMaxSemester(1);
     } else {
-      startTransition(() => {
-        setIsMaxSemester(0);
-      });
+      setIsMaxSemester(0);
     }
   }, []);
 
   useEffect(() => {
+    // @ts-ignore
     const semester = JSON.parse(localStorage.getItem("semester"));
 
     if (semester) {
-      startTransition(() => {
-        setCurrentSemester(semester);
-        setUpTo(semester);
-      });
+      setCurrentSemester(semester);
+      setUpTo(semester);
     }
     setLoading(false);
   }, []);
@@ -85,12 +76,7 @@ function App() {
           }
         />
       </Head>
-      <Header
-        title="TheDay"
-        value={search}
-        setSearch={setSearch}
-        isSearch={true}
-      />
+      <Header title="TheDay" setSearch={setSearch} isSearch={true} />
       {!loading && (
         <Box
           sx={{
@@ -107,7 +93,6 @@ function App() {
             <>
               <CurrentSemester
                 currentSemester={currentSemester}
-                setCurrentSemester={setCurrentSemester}
                 handleClick={handleClick}
                 setOpen={setOpen}
               />
@@ -143,7 +128,7 @@ function App() {
         </Box>
       )}
 
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar open={open} autoHideDuration={6000}>
         {!isMaxSemester ? (
           <Alert
             onClose={handleClose}
