@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 import Material from "./Material";
 import Schedule from "./Schedule";
 
-function TabPanel(props) {
+function TabPanel(props: any) {
   const { children, value, index, data, ...other } = props;
   /*
    {
@@ -44,17 +44,17 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `vertical-tab-${index}`,
     "aria-controls": `vertical-tabpanel-${index}`,
   };
 }
 
-export default function VerticalTabs(props) {
+export default function VerticalTabs(props: any) {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
 
