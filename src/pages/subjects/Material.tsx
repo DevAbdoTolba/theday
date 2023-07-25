@@ -2,19 +2,37 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   IconButton,
   Tooltip,
   Button,
-  Tab,
-  Tabs,
 } from "@mui/material";
 
 import { useState } from "react";
 
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-function mimeTypeToAppName(mimeType) {
+interface Data {
+  id: string;
+  mimeType: string;
+  name: string;
+  parents: string[];
+  size: number;
+}
+
+interface DataMap {
+  [key: string]: Data[];
+}
+
+interface Props {
+  name: string;
+  abbreviation: string;
+  material: number;
+  data: DataMap;
+  PreviousExams: DataMap;
+  schedule: DataMap;
+  description: string;
+}
+function mimeTypeToAppName(mimeType: string) {
   switch (mimeType) {
     case "application/vnd.google-apps.audio":
       return "GoogleAudio";
@@ -95,7 +113,7 @@ function Material({
   PreviousExams,
   schedule,
   description,
-}) {
+}: Props) {
   const containerStyle = {
     display: "flex",
     flexWrap: "noWrap",
@@ -106,7 +124,7 @@ function Material({
 
   const itemStyle = {};
 
-  const openFolder = (id) => {
+  const openFolder = (id: string) => {
     window.open(`https://drive.google.com/drive/folders/${id}`, "_blank");
   };
 
@@ -158,7 +176,7 @@ function Material({
             <Box
               className="Material_container"
               key={index}
-              style={containerStyle}
+              sx={{ ...containerStyle }}
             >
               {data[key]?.map((item, index) => (
                 <Box
@@ -234,7 +252,6 @@ function Material({
                   <Button
                     className="Material_item"
                     style={itemStyle}
-                    elevation={20}
                     disableRipple
                     sx={{
                       all: "unset",
