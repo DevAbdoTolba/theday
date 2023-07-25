@@ -11,15 +11,13 @@ import AddIcon from "@mui/icons-material/Add";
 import { useState } from "react";
 import Tooltip from "@mui/material/Tooltip";
 
+interface note {
+  title: string;
+  body: string;
+}
+
 interface Props {
-  setNotes: React.Dispatch<
-    React.SetStateAction<
-      {
-        title: string;
-        body: string;
-      }[]
-    >
-  >;
+  setNotes: React.Dispatch<React.SetStateAction<note[]>>;
 }
 
 export default function FormDialog({ setNotes }: Props) {
