@@ -1,10 +1,4 @@
-import React, {
-  Suspense,
-  lazy,
-  useState,
-  useEffect,
-  startTransition,
-} from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 
 import Header from "../../components/Header";
 import NoData from "../../components/NoData";
@@ -21,21 +15,34 @@ import { useRouter } from "next/router";
 const TabsPC = lazy(() => import("./TabsPc"));
 const TabsPhone = lazy(() => import("./TabsPhone"));
 
+interface Data {
+  id: string;
+  mimeType: string;
+  name: string;
+  parents: string[];
+  size: number;
+}
+
+interface DataMap {
+  [key: string]: Data[];
+}
+
 function SubjectPage() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<DataMap>();
 
   const router = useRouter();
   // get parameters from url
-  const [subject, setSubject] = useState(null);
+  const [subject, setSubject] = useState("");
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(true);
   const [dots, setDots] = useState(".");
 
   useEffect(() => {
     if (router.isReady) {
-      const subject = router.query;
+      const { subject } = router.query;
+      console.log("it is", subject);
 
-      setSubject(subject);
+      setSubject(subject as string);
 
       console.log(
         "%cAbdoTolba was here!! :D",
@@ -48,7 +55,7 @@ function SubjectPage() {
 
   useEffect(() => {
     if (subject) {
-      fetch(`/api/subjects/${subject.subject}`)
+      fetch(`/api/subjects/${subject}`)
         .then((res) => {
           if (res.ok) {
             return res.json(); // If response is ok, parse JSON data
@@ -119,9 +126,7 @@ function SubjectPage() {
       }}
     >
       <Head>
-        <title>
-          {subjectLoading ? "Loading..." : subject.subject.toUpperCase()}
-        </title>
+        <title>{subjectLoading ? "Loading..." : subject.toUpperCase()}</title>
         <link
           rel="icon"
           href={
@@ -134,12 +139,15 @@ function SubjectPage() {
         <Header title={"Loading..."} isSearch={false} isSubjectSearch={false} />
       ) : (
         <Header
-          title={subject.subject.toUpperCase()}
+          title={subject.toUpperCase()}
           isSearch={false}
-          SearchBox={Search}
           data={data}
           isSubjectSearch={
-            materialLoading ? false : data ? Object?.keys(data)?.length : false
+            (materialLoading as boolean)
+              ? false
+              : data
+              ? ((Object?.keys(data)?.length > 0) as boolean)
+              : false
           }
         />
       )}

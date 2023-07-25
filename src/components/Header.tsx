@@ -26,8 +26,8 @@ interface DataMap {
 }
 
 interface Props {
-  search: string;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  search?: string;
+  setSearch?: React.Dispatch<React.SetStateAction<string>>;
   title: string;
   isSearch: boolean;
   isSubjectSearch?: boolean;
@@ -237,7 +237,7 @@ export default function Header({
               />
             </IconButton>
           </Tooltip>*/}
-          {isSearch && (
+          {isSearch && setSearch && (
             <Tooltip title="Search">
               <Search>
                 <SearchIconWrapper>
