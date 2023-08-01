@@ -9,6 +9,9 @@ import { Typography, Grid, Box } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
+import Offline from "../../components/Offline";
+import { offlineContext } from "../_app";
+
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
 
@@ -36,6 +39,8 @@ function SubjectPage() {
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(true);
   const [dots, setDots] = useState(".");
+
+  const [offline, setOffline] = React.useContext(offlineContext);
 
   useEffect(() => {
     if (router.isReady) {
@@ -152,31 +157,37 @@ function SubjectPage() {
         />
       )}
 
-      {materialLoading ? (
-        <Typography
-          variant="h5"
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-          }}
-        >
-          Loading{dots}
-        </Typography>
+      {offline && materialLoading ? (
+        <Offline />
       ) : (
-        <Suspense fallback={<div>Loading...</div>}>
-          {!data ? (
-            <NoData />
-          ) : !Object?.keys(data)?.length ? (
-            <NoData />
+        <>
+          {materialLoading ? (
+            <Typography
+              variant="h5"
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%,-50%)",
+              }}
+            >
+              Loading{dots}
+            </Typography>
           ) : (
-            <>
-              <TabsPC data={data} />
-              <TabsPhone data={data} />
-            </>
+            <Suspense fallback={<div>Loading...</div>}>
+              {!data ? (
+                <NoData />
+              ) : !Object?.keys(data)?.length ? (
+                <NoData />
+              ) : (
+                <>
+                  <TabsPC data={data} />
+                  <TabsPhone data={data} />
+                </>
+              )}
+            </Suspense>
           )}
-        </Suspense>
+        </>
       )}
     </Box>
   );
