@@ -1,3 +1,4 @@
+"use client";
 import { Box, Button, Typography } from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
@@ -198,12 +199,7 @@ export default function Offline() {
           else setFilterPercent(0);
         }}
         style={{
-          // soft colors mask
-          filter: ` sepia(${
-            1 - filterPercent
-          }) saturate(${filterPercent}) hue-rotate(${
-            (180 * (100 - filterPercent * 100)) / 100
-          }deg)`,
+          // @ts-ignore
           userDrag: "none",
           WebkitUserDrag: "none",
           userSelect: "none",
@@ -211,6 +207,12 @@ export default function Offline() {
           WebkitUserSelect: "none",
           MsUserSelect: "none",
           zIndex: 9999,
+          // soft colors mask
+          filter: ` sepia(${
+            1 - filterPercent
+          }) saturate(${filterPercent}) hue-rotate(${
+            (180 * (100 - filterPercent * 100)) / 100
+          }deg)`,
         }}
         src={"/icon-512x512.png"}
         alt="icon"
