@@ -1,4 +1,11 @@
-import React, { Suspense, lazy, useState, useEffect, forwardRef } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  forwardRef,
+  useContext,
+} from "react";
 import Header from "../../components/Header";
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
@@ -11,6 +18,9 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
 import Head from "next/head";
+
+import Offline from "../../components/Offline";
+import { offlineContext } from "../_app";
 
 const Main = lazy(() => import("./Main"));
 
@@ -25,6 +35,8 @@ function App() {
   const [open, setOpen] = useState(false);
   const [upTo, setUpTo] = useState(0);
   const [isMaxSemester, setIsMaxSemester] = useState(0);
+
+  const [offline, setOffline] = useContext(offlineContext);
 
   const handleClick = () => {
     setOpen(true);
@@ -64,6 +76,11 @@ function App() {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    console.log("offline", offline);
+    console.log("loading", loading);
+  }, [offline, loading]);
+
   return (
     <>
       <Head>
@@ -77,6 +94,7 @@ function App() {
         />
       </Head>
       <Header title="TheDay" setSearch={setSearch} isSearch={true} />
+      {loading && offline && <Offline />}
       {!loading && (
         <Box
           sx={{
