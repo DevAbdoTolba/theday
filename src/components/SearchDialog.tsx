@@ -68,7 +68,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
   };
 
   React.useEffect(() => {
-    console.log(searchRef);
     if (open) {
       searchRef?.current?.focus();
     }

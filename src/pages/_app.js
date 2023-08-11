@@ -6,6 +6,7 @@ import { Button, CssBaseline } from "@mui/material";
 import { Analytics } from "@vercel/analytics/react";
 import Offline from "../components/Offline";
 import Image from "next/image";
+import Head from "next/head";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {

@@ -7,7 +7,8 @@ import {
   Button,
 } from "@mui/material";
 
-import { useState } from "react";
+import LinkIcon from "@mui/icons-material/Link";
+import { useState, useEffect, useRef } from "react";
 
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
@@ -128,6 +129,23 @@ function Material({
     window.open(`https://drive.google.com/drive/folders/${id}`, "_blank");
   };
 
+  const scrollToItem = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "start",
+      });
+    }
+  };
+
+  useEffect(() => {
+    // get from url the folder id after the #
+    const id = window.location.hash.split("#")[1];
+    scrollToItem(id);
+  }, [data]);
+
   return (
     <>
       {data &&
@@ -144,21 +162,40 @@ function Material({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                "&:hover a": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                "& a": {
+                  display: "none",
+                },
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{
-                  margin: "1rem",
-                  "&:hover": { cursor: "pointer" },
-                  width: "fit-content",
-                }}
-                onClick={() => {
-                  openFolder(data[key][0]?.parents[0]);
-                }}
-              >
-                {key}
-              </Typography>
+              <Box display={"flex"} flexDirection={"row"} alignItems={"center"}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    margin: "1rem",
+                    width: "fit-content",
+                  }}
+                  id={key}
+                >
+                  {key}
+                </Typography>
+                <a
+                  href={`#${key}`}
+                  style={{
+                    width: "4ch",
+                    textDecoration: "none",
+                    color: "inherit",
+                    backgroundColor: "#3e3e3e",
+                    borderRadius: "30%",
+                  }}
+                >
+                  <LinkIcon />
+                </a>
+              </Box>
               <Tooltip title="open in drive">
                 <IconButton
                   sx={{
