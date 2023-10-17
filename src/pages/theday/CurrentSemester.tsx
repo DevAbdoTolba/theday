@@ -7,6 +7,7 @@ import {
   Chip,
   Tooltip,
   IconButton,
+  Zoom,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -119,6 +120,15 @@ export default function CurrentSemester({
         >
           {subjects?.map((item, index) => (
             <Grid key={index} item>
+              <Tooltip title={item?.name}
+              disableInteractive
+              
+              arrow
+              TransitionComponent={Zoom}
+              // disableHoverListener={phone}
+              // disableFocusListener={phone}
+              // disableTouchListener={phone}
+              >
               <Chip
                 sx={{
                   padding: "0.5rem",
@@ -127,37 +137,37 @@ export default function CurrentSemester({
                   width: { xs: "auto", sm: "100%" },
                   MozBoxShadow: "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
                   boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
-                  "&::after": {
-                    // content is the value of subject.name
-                    content: `"${item?.name}"`,
+                  // "&::after": {
+                  //   // content is the value of subject.name
+                  //   content: `"${item?.name}"`,
 
-                    position: "absolute",
-                    top: "120%",
-                    right: "50%",
-                    transform: "translateX(50%) translateY(-100%)",
-                    borderRadius: "5px",
-                    height: "auto",
-                    width: "auto",
-                    backgroundColor: "#bbb",
-                    color: "black",
-                    marginLeft: "0.5rem",
-                    padding: "0.5rem",
-                    pointerEvents: "none",
-                    whiteSpace: "wrap",
-                    transition: "all 0.2s",
-                    WebkitBoxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-                    MozBoxShadow: "0px 0.5px 2px 0.5px rgba(0, 0, 0, 0.5)",
-                    boxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-                    zIndex: "4",
+                  //   position: "absolute",
+                  //   top: "120%",
+                  //   right: "50%",
+                  //   transform: "translateX(50%) translateY(-100%)",
+                  //   borderRadius: "5px",
+                  //   height: "auto",
+                  //   width: "auto",
+                  //   backgroundColor: "#bbb",
+                  //   color: "black",
+                  //   marginLeft: "0.5rem",
+                  //   padding: "0.5rem",
+                  //   pointerEvents: "none",
+                  //   whiteSpace: "wrap",
+                  //   transition: "all 0.2s",
+                  //   WebkitBoxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
+                  //   MozBoxShadow: "0px 0.5px 2px 0.5px rgba(0, 0, 0, 0.5)",
+                  //   boxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
+                  //   zIndex: "4",
 
-                    opacity: "0",
-                    visibility: "hidden",
-                  },
-                  "&:hover::after": {
-                    opacity: { sm: "1", xs: "0" },
-                    visibility: { sm: "visible", xs: "hidden" },
-                    transform: "translateX(50%) translateY(0%)",
-                  },
+                  //   opacity: "0",
+                  //   visibility: "hidden",
+                  // },
+                  // "&:hover::after": {
+                  //   opacity: { sm: "1", xs: "0" },
+                  //   visibility: { sm: "visible", xs: "hidden" },
+                  //   transform: "translateX(50%) translateY(0%)",
+                  // },
                 }}
                 className="subject__chip"
                 label={item?.abbreviation}
@@ -166,6 +176,7 @@ export default function CurrentSemester({
                 href={"/subjects/" + item?.abbreviation}
                 // onClick={handleClickOpen}
               />
+              </Tooltip>
             </Grid>
           ))}
         </Grid>
