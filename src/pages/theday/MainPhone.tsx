@@ -7,7 +7,6 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useEffect } from "react";
 
 interface Props {
   search: string;
@@ -71,6 +70,7 @@ function MainPhone({ search, currentSemester }: Props) {
                       // }}
                     >
                       <Dialog
+                        phone={true}
                         label={subjects?.name}
                         subject={subjects}
                         currentSemester={currentSemester}
