@@ -49,8 +49,6 @@ function SubjectPage() {
 
       setSubject(subject as string);
 
-
-
       setSubjectLoading(false);
     }
   }, [router.isReady]);
