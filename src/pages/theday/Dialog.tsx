@@ -6,7 +6,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Chip from "@mui/material/Chip";
-import { Box } from "@mui/material";
+import Zoom from '@mui/material/Zoom';
+import { Box, Tooltip } from "@mui/material";
 
 interface Subject {
   name: string;
@@ -40,100 +41,59 @@ export default function AlertDialog({
 
   return (
     <Box>
-      {index !== 0 ? (
+ 
+        <Tooltip title={subject?.name} arrow disableInteractive TransitionComponent={Zoom}>
+
         <Chip
           sx={{
             width: "100%",
             MozBoxShadow: "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
             boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
-            "&::after": {
-              // content is the value of subject.name
-              content: `"${subject?.name}"`,
+            // "&::after": {
+            //   // content is the value of subject.name
+            //   content: `"${subject?.name}"`,
 
-              position: "absolute",
-              top: "120%",
-              right: "50%",
-              transform: "translateX(50%) translateY(-100%)",
-              borderRadius: "5px",
-              height: "auto",
-              width: "auto",
-              backgroundColor: "#bbb",
-              color: "black",
-              marginLeft: "0.5rem",
-              padding: "0.5rem",
-              pointerEvents: "none",
-              whiteSpace: "wrap",
-              transition: "all 0.2s",
-              WebkitBoxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-              MozBoxShadow: "0px 0.5px 2px 0.5px rgba(0, 0, 0, 0.5)",
-              boxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-              zIndex: "4",
+            //   position: "absolute",
+            //   top: "120%",
+            //   right: "50%",
+            //   transform: "translateX(50%) translateY(-100%)",
+            //   borderRadius: "5px",
+            //   height: "auto",
+            //   width: "auto",
+            //   backgroundColor: "#bbb",
+            //   color: "black",
+            //   marginLeft: "0.5rem",
+            //   padding: "0.5rem",
+            //   pointerEvents: "none",
+            //   whiteSpace: "wrap",
+            //   transition: "all 0.2s",
+            //   WebkitBoxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
+            //   MozBoxShadow: "0px 0.5px 2px 0.5px rgba(0, 0, 0, 0.5)",
+            //   boxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
+            //   zIndex: "4",
 
-              opacity: "0",
-              visibility: "hidden",
-            },
-            "&:hover::after": {
-              opacity: { sm: "1", xs: "0" },
-              visibility: { sm: "visible", xs: "hidden" },
-              transform: "translateX(50%) translateY(0%)",
-            },
+            //   opacity: "0",
+            //   visibility: "hidden",
+            // },
+            // "&:hover::after": {
+            //   opacity: { sm: "1", xs: "0" },
+            //   visibility: { sm: "visible", xs: "hidden" },
+            //   transform: "translateX(50%) translateY(0%)",
+            // },
           }}
           className="subject__chip"
           label={label}
           clickable
           // component={"a"}
           onClick={() => {
-            handleClickOpen(subject.abbreviation);
-          }}
-        />
-      ) : (
-        <Chip
-          sx={{
-            width: "100%",
-            MozBoxShadow: "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
-            boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
-            "&::after": {
-              // content is the value of subject.name
-              content: `"${subject?.name}"`,
 
-              position: "absolute",
-              top: "120%",
-              right: "50%",
-              transform: "translateX(50%) translateY(-100%)",
-              borderRadius: "5px",
-              height: "auto",
-              width: "auto",
-              backgroundColor: "#bbb",
-              color: "black",
-              marginLeft: "0.5rem",
-              padding: "0.5rem",
-              pointerEvents: "none",
-              whiteSpace: "wrap",
-              transition: "all 0.2s",
-              WebkitBoxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-              MozBoxShadow: "0px 0.5px 2px 0.5px rgba(0, 0, 0, 0.5)",
-              boxShadow: "0px 0.5px 2px 0.5px rgb(0 0 0 / 50%)",
-              zIndex: "4",
-
-              opacity: "0",
-              visibility: "hidden",
-            },
-            "&:hover::after": {
-              opacity: { sm: "1", xs: "0" },
-              visibility: { sm: "visible", xs: "hidden" },
-              transform: "translateX(50%) translateY(0%)",
-            },
-          }}
-          className="subject__chip"
-          label={label}
-          clickable
-          // component={"a"}
-          onClick={() => {
             // redirect
+            index !== 0? handleClickOpen(subject.abbreviation) :
             window.location.href = "/subjects/" + subject.abbreviation;
           }}
         />
-      )}
+        </Tooltip>
+       
       <Dialog
         open={open}
         onClose={handleClose}
