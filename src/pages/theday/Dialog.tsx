@@ -6,7 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Chip from "@mui/material/Chip";
-import Zoom from '@mui/material/Zoom';
+import Zoom from "@mui/material/Zoom";
 import { Box, Tooltip } from "@mui/material";
 
 interface Subject {
@@ -15,6 +15,7 @@ interface Subject {
 }
 
 interface Props {
+  phone?: boolean | false;
   label: string;
   subject: Subject;
   index: number;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function AlertDialog({
+  phone,
   label,
   subject,
   index,
@@ -41,9 +43,15 @@ export default function AlertDialog({
 
   return (
     <Box>
- 
-        <Tooltip title={subject?.name} arrow disableInteractive TransitionComponent={Zoom}>
-
+      <Tooltip
+        title={subject?.name}
+        arrow
+        disableInteractive
+        TransitionComponent={Zoom}
+        disableHoverListener={phone}
+        disableFocusListener={phone}
+        disableTouchListener={phone}
+      >
         <Chip
           sx={{
             width: "100%",
@@ -86,14 +94,14 @@ export default function AlertDialog({
           clickable
           // component={"a"}
           onClick={() => {
-
             // redirect
-            index !== 0? handleClickOpen(subject.abbreviation) :
-            window.location.href = "/subjects/" + subject.abbreviation;
+            index !== 0
+              ? handleClickOpen(subject.abbreviation)
+              : (window.location.href = "/subjects/" + subject.abbreviation);
           }}
         />
-        </Tooltip>
-       
+      </Tooltip>
+
       <Dialog
         open={open}
         onClose={handleClose}

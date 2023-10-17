@@ -86,6 +86,7 @@ export default function MainPc({ search, currentSemester }: Props) {
                       .map((subjects, index) => (
                         <Grid key={index} item>
                           <Dialog
+                            phone={false}
                             currentSemester={currentSemester}
                             index={item.index}
                             label={subjects.abbreviation}
