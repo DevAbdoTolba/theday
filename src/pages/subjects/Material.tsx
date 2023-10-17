@@ -11,6 +11,9 @@ import LinkIcon from "@mui/icons-material/Link";
 import { useState, useEffect, useRef } from "react";
 
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import Link from "next/link";
+
+import Zoom from "@mui/material/Zoom";
 
 interface Data {
   id: string;
@@ -183,7 +186,7 @@ function Material({
                 >
                   {key}
                 </Typography>
-                <a
+                <Link
                   href={`#${key}`}
                   style={{
                     width: "4ch",
@@ -194,7 +197,7 @@ function Material({
                   }}
                 >
                   <LinkIcon />
-                </a>
+                </Link>
               </Box>
               <Tooltip title="open in drive">
                 <IconButton
@@ -239,53 +242,55 @@ function Material({
                     },
                   }}
                 >
-                  <Typography
-                    sx={{
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-
-                      overflow: "hidden",
-                      fontSize: { sm: "1.5ch", xs: "1.8ch" },
-
-                      // zindex on top of all
-
-                      zIndex: 10000,
-
-                      "&::after": {
-                        content: `"${item?.name}"`,
-
-                        opacity: 0,
-                        visibility: "hidden",
-                        position: "absolute",
-
-                        width: "100%",
-                        height: "fit-content",
-                        // break lines
-
-                        whiteSpace: "pre-wrap",
-
-                        top: "11%",
-                        left: "0",
-                        fontSize: "0.8rem",
-                        // cool floating effect with box shadow
-                        background: "#555",
-                        borderRadius: "3px",
-                        boxShadow: "0 0 5px 3px rgba(0, 0, 0, 0.8)",
-                        color: "#fff",
-                        padding: "2px",
+                  <Tooltip title={item?.name} arrow TransitionComponent={Zoom}>
+                    <Typography
+                      sx={{
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
 
                         overflow: "hidden",
-                        transition: "opacity 0.3s",
-                      },
-                      "&:hover::after": {
-                        opacity: 0.8,
-                        visibility: "visible",
-                      },
-                    }}
-                    variant="h6"
-                  >
-                    {item?.name}
-                  </Typography>
+                        fontSize: { sm: "1.5ch", xs: "1.8ch" },
+
+                        // zindex on top of all
+
+                        zIndex: 10000,
+
+                        // "&::after": {
+                        //   content: `"${item?.name}"`,
+
+                        //   opacity: 0,
+                        //   visibility: "hidden",
+                        //   position: "absolute",
+
+                        //   width: "100%",
+                        //   height: "fit-content",
+                        //   // break lines
+
+                        //   whiteSpace: "pre-wrap",
+
+                        //   top: "11%",
+                        //   left: "0",
+                        //   fontSize: "0.8rem",
+                        //   // cool floating effect with box shadow
+                        //   background: "#555",
+                        //   borderRadius: "3px",
+                        //   boxShadow: "0 0 5px 3px rgba(0, 0, 0, 0.8)",
+                        //   color: "#fff",
+                        //   padding: "2px",
+
+                        //   overflow: "hidden",
+                        //   transition: "opacity 0.3s",
+                        // },
+                        // "&:hover::after": {
+                        //   opacity: 0.8,
+                        //   visibility: "visible",
+                        // },
+                      }}
+                      variant="h6"
+                    >
+                      {item?.name}
+                    </Typography>
+                  </Tooltip>
                   <Button
                     className="Material_item"
                     style={itemStyle}
