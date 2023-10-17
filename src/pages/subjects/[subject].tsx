@@ -49,10 +49,7 @@ function SubjectPage() {
 
       setSubject(subject as string);
 
-      console.log(
-        "%cAbdoTolba was here!! :D",
-        "color: red; font-family: sans-serif; font-size: 4.5rem; font-weight: bolder; text-shadow: #000 1px 1px;"
-      );
+
 
       setSubjectLoading(false);
     }
