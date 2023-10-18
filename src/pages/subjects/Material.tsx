@@ -13,6 +13,8 @@ import { useState, useEffect, useRef } from "react";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Link from "next/link";
 
+import SemesterBar from "../../components/SemesterBar";
+
 import Zoom from "@mui/material/Zoom";
 
 interface Data {
@@ -354,6 +356,7 @@ function Material({
             </Box>
           </Paper>
         ))}
+        <SemesterBar />
     </>
   );
 }

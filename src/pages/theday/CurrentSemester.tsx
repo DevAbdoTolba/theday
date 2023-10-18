@@ -96,7 +96,7 @@ export default function CurrentSemester({
             }}
             onClick={() => {
               handleClick();
-              localStorage.removeItem("semester");
+              localStorage.setItem("semester", "-1");
 
               // window.location.reload();
             }}
