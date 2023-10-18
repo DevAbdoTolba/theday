@@ -33,7 +33,7 @@ export default function SimpleSnackbar() {
     setOpen(true);
   };
 
-  const handleClose = (
+  const handelYes = (
     event: React.SyntheticEvent | Event,
     reason?: string
   ) => {
@@ -46,12 +46,24 @@ export default function SimpleSnackbar() {
     setOpen(false);
   };
 
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    // set current semester to -1
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
+
   const action = (
     <React.Fragment>
       <Button
         color="success"
         size="small"
-        onClick={handleClose}
+        onClick={handelYes}
         sx={{
           fontWeight: "bolder",
         }}
