@@ -32,8 +32,8 @@ export default function AlertDialog({
 
   const handleClickOpen = (subject: string) => {
     console.log("currentSemester : " + currentSemester + "\nIndex : " + index);
-    if (currentSemester === -1) setOpen(true);
-    else window.location.href = "/subjects/" + subject;
+    localStorage.setItem("currentSemester", index.toString());
+    window.location.href = "/subjects/" + subject;
   };
 
   const handleClose = () => {
@@ -94,9 +94,7 @@ export default function AlertDialog({
           // component={"a"}
           onClick={() => {
             // redirect
-            index !== 0
-              ? handleClickOpen(subject.abbreviation)
-              : (window.location.href = "/subjects/" + subject.abbreviation);
+            handleClickOpen(subject.abbreviation);
           }}
         />
       </Tooltip>
