@@ -13,13 +13,17 @@ export default function SimpleSnackbar() {
     setCurrentSemester(currentSemester);
     // only setTimeout if currentSemester is not -1 or null
 
-// check if there is a semester in local storage
-    const semester = ((parseInt(localStorage.getItem("semester")!) == -1) || (!localStorage.hasOwnProperty("semester")));
-    
-    console.log("semester : " + semester + "\ncurrentSemester : " + currentSemester);
-    
+    // check if there is a semester in local storage
+    const semester =
+      parseInt(localStorage.getItem("semester")!) == -1 ||
+      !localStorage.hasOwnProperty("semester");
+
+    console.log(
+      "semester : " + semester + "\ncurrentSemester : " + currentSemester
+    );
+
     // if the semester that is in the main page is not set (-1) or there is no error so the currentSemester was set correctly
-    if (semester && currentSemester )
+    if (semester && currentSemester)
       setTimeout(() => {
         handleClick();
       }, 4000);
@@ -44,7 +48,14 @@ export default function SimpleSnackbar() {
 
   const action = (
     <React.Fragment>
-      <Button color="secondary" size="small" onClick={handleClose}>
+      <Button
+        color="success"
+        size="small"
+        onClick={handleClose}
+        sx={{
+          fontWeight: "bolder",
+        }}
+      >
         Yes
       </Button>
       <IconButton
@@ -62,10 +73,17 @@ export default function SimpleSnackbar() {
   return (
     <>
       <Snackbar
+        sx={{
+          "& .MuiPaper-root": {
+            bgcolor: "#1f1f1f",
+            color: "#fff",
+          },
+        }}
         open={open}
         onClose={handleClose}
         message={"Are you in semester " + currentSemester + "?"}
         action={action}
+        transitionDuration={600}
       />
     </>
   );
