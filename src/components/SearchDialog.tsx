@@ -115,7 +115,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
           "&:focus": {
             outline: "1px solid #fff",
           },
-          "& > *:not(:first-child, :last-child)": {
+          "& > *:not(:first-of-type, :last-child)": {
             margin: "0 2ch",
           },
         }}
