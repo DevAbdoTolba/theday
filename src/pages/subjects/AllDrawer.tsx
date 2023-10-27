@@ -84,7 +84,7 @@ export default function AllDrawer({
           />
         ) : (
           <Header
-            title={subject.toUpperCase()}
+            title={subject?.toUpperCase()}
             isSearch={false}
             data={data}
             isSubjectSearch={
@@ -106,7 +106,7 @@ export default function AllDrawer({
           />
         ) : (
           <Header
-            title={subject.toUpperCase()}
+            title={subject?.toUpperCase()}
             isSearch={false}
             data={data}
             isSubjectSearch={
