@@ -2,18 +2,9 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Snackbar from "@mui/material/Snackbar";
-import CssBaseline from "@mui/material/CssBaseline";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
+
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import Header from "@/src/components/Header";
@@ -21,6 +12,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Chip,
   Tooltip,
   Zoom,
 } from "@mui/material";
@@ -188,16 +180,41 @@ export default function AllDrawer({
           ))}
         </Drawer>
       </Box>
+
       <Snackbar
+        sx={{
+          // phone no
+          display: { sm: "block", xs: "none" },
+           width : "5ch",
+           "& .MuiSnackbarContent-message":{
+            width: "100%",
+           }
+        }}
         open={open}
-        onClose={(e,reason) => {
+        onClose={(e, reason) => {
           if (reason === "clickaway") {
             return;
           }
           setOpen(false);
         }}
         autoHideDuration={12000}
-        message="Click Shift + &#8592;"
+        message={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography>Click</Typography>
+            <Tooltip title={"Shift + Left arrow"} placement="top" TransitionComponent={Zoom} arrow>
+            <Chip
+              label={"Shift + ←"}
+              sx={{ mx: "0.5rem", color: "black", backgroundColor: "#e2e2e2" }}
+            />
+            </Tooltip>
+          </Box>
+        }
         // animation
         TransitionComponent={Zoom}
         TransitionProps={{ timeout: 300 }}
