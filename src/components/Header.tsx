@@ -33,7 +33,7 @@ interface Props {
   isSubjectSearch?: boolean;
   data?: DataMap;
   position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
-  props?: any;
+  sx?: any;
 }
 
 // let data: DataMap = {
@@ -117,6 +117,7 @@ export default function Header({
   isSubjectSearch,
   data,
   position,
+  sx,
   // take any other props
   ...props
 }: Props) {
@@ -135,7 +136,7 @@ export default function Header({
 
           display: "flex",
           justifyContent: "center",
-          ...props?.sx,
+          ...sx,
         }}
       >
         <Toolbar>
