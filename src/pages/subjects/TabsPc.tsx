@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 
 import Material from "./Material";
 import Schedule from "./Schedule";
-import Drawer from "./allDrawer";
+import Drawer from "./AllDrawer";
 
 function TabPanel(props: any) {
   const { children, value, index, data, ...other } = props;
