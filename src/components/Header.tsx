@@ -32,6 +32,7 @@ interface Props {
   isSearch: boolean;
   isSubjectSearch?: boolean;
   data?: DataMap;
+  props?: any;
 }
 
 // let data: DataMap = {
@@ -114,6 +115,8 @@ export default function Header({
   isSearch,
   isSubjectSearch,
   data,
+  // take any other props
+  ...props
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -124,12 +127,13 @@ export default function Header({
       }}
     >
       <AppBar
-        position="static"
+        position={props.position || "static"}
         sx={{
           height: { sm: "5rem", xs: "4rem" },
 
           display: "flex",
           justifyContent: "center",
+          ...props?.sx,
         }}
       >
         <Toolbar>

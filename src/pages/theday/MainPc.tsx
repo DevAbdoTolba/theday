@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
-import Dialog from "./Dialog";
-import { Typography } from "@mui/material";
+import Zoom from "@mui/material/Zoom";
+import { Chip, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 
@@ -35,6 +35,7 @@ export default function MainPc({ search, currentSemester }: Props) {
         }}
       >
         <Grid container spacing={2}>
+          
           {/*Filter for search
 1-Semesters
 2-Subjects
@@ -85,13 +86,42 @@ export default function MainPc({ search, currentSemester }: Props) {
                       )
                       .map((subjects, index) => (
                         <Grid key={index} item>
-                          <Dialog
-                            phone={false}
-                            currentSemester={currentSemester}
-                            index={item.index}
-                            label={subjects.abbreviation}
-                            subject={subjects}
-                          />
+                          <Tooltip
+                            title={subjects?.name}
+                            arrow
+                            TransitionComponent={Zoom}
+                            disableInteractive
+                          >
+                            <Chip
+                              sx={{
+                                width: "100%",
+                                MozBoxShadow:
+                                  "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
+                                boxShadow:
+                                  "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
+                              }}
+                              className="subject__chip"
+                              label={subjects.abbreviation}
+                              clickable
+                              // component={"a"}
+                              onClick={() => {
+                                // redirect
+
+                                console.log(
+                                  "currentSemester : " +
+                                    currentSemester +
+                                    "\nIndex : " +
+                                    index
+                                );
+                                localStorage.setItem(
+                                  "currentSemester",
+                                  index.toString()
+                                );
+                                window.location.href =
+                                  "/subjects/" + subjects.abbreviation;
+                              }}
+                            />
+                          </Tooltip>
                         </Grid>
                       ))}
                   </Grid>
