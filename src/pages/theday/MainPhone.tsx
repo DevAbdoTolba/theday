@@ -2,7 +2,8 @@ import Box from "@mui/material/Box";
 import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
 import Dialog from "./Dialog";
-import { Typography } from "@mui/material";
+import Zoom from "@mui/material/Zoom";
+import { Chip, Tooltip, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -69,13 +70,44 @@ function MainPhone({ search, currentSemester }: Props) {
                       //   width: "100%",
                       // }}
                     >
-                      <Dialog
-                        phone={true}
-                        label={subjects?.name}
-                        subject={subjects}
-                        currentSemester={currentSemester}
-                        index={item.index}
-                      />
+                      <Tooltip
+                        title={subjects?.name}
+                        arrow
+                        TransitionComponent={Zoom}
+                        disableInteractive
+                        disableHoverListener
+                        disableFocusListener
+                        disableTouchListener
+                      >
+                        <Chip
+                          sx={{
+                            width: "100%",
+                            MozBoxShadow:
+                              "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
+                            boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
+                          }}
+                          className="subject__chip"
+                          label={subjects.abbreviation}
+                          clickable
+                          // component={"a"}
+                          onClick={() => {
+                            // redirect
+
+                            console.log(
+                              "currentSemester : " +
+                                currentSemester +
+                                "\nIndex : " +
+                                index
+                            );
+                            localStorage.setItem(
+                              "currentSemester",
+                              index.toString()
+                            );
+                            window.location.href =
+                              "/subjects/" + subjects.abbreviation;
+                          }}
+                        />
+                      </Tooltip>
                     </Grid>
                   ))}
               </Grid>

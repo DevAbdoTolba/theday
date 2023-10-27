@@ -11,6 +11,8 @@ import { useRouter } from "next/router";
 
 import Offline from "../../components/Offline";
 import { offlineContext } from "../_app";
+import NavTabs from "./Tabs";
+import Drawer from "./allDrawer";
 
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
@@ -141,22 +143,6 @@ function SubjectPage() {
             `}
         </style>
       </Head>
-      {subjectLoading ? (
-        <Header title={"Loading..."} isSearch={false} isSubjectSearch={false} />
-      ) : (
-        <Header
-          title={subject.toUpperCase()}
-          isSearch={false}
-          data={data}
-          isSubjectSearch={
-            (materialLoading as boolean)
-              ? false
-              : data
-              ? ((Object?.keys(data)?.length > 0) as boolean)
-              : false
-          }
-        />
-      )}
 
       {offline && materialLoading ? (
         <Offline />
@@ -182,7 +168,15 @@ function SubjectPage() {
                 <NoData />
               ) : (
                 <>
-                  <TabsPC data={data} />
+                 
+                    <Drawer
+                      subjectLoading={subjectLoading}
+                      subject={subject}
+                      data={data}
+                      materialLoading={materialLoading}
+                    />
+                  
+                  <TabsPC  subjectLoading={subjectLoading} data={data} />
                   <TabsPhone data={data} />
                 </>
               )}
