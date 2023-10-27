@@ -32,6 +32,7 @@ interface Props {
   isSearch: boolean;
   isSubjectSearch?: boolean;
   data?: DataMap;
+  position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
   props?: any;
 }
 
@@ -115,6 +116,7 @@ export default function Header({
   isSearch,
   isSubjectSearch,
   data,
+  position,
   // take any other props
   ...props
 }: Props) {
@@ -127,7 +129,7 @@ export default function Header({
       }}
     >
       <AppBar
-        position={props.position || "static"}
+        position={ position || "static"}
         sx={{
           height: { sm: "5rem", xs: "4rem" },
 
