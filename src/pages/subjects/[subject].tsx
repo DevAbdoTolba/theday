@@ -41,6 +41,7 @@ function SubjectPage() {
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(true);
   const [dots, setDots] = useState(".");
+  const [showDrawer, setShowDrawer] = useState(true);
 
   const [offline, setOffline] = React.useContext(offlineContext);
 
@@ -92,6 +93,23 @@ function SubjectPage() {
       }
     }, 333);
   }, [dots]);
+
+  // event listen if shift + arrow left is pressed log hi
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === "ArrowLeft") {
+        setShowDrawer((prev) => {
+          return !prev;
+        })
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // fetch data from api
 
@@ -174,9 +192,10 @@ function SubjectPage() {
                       subject={subject}
                       data={data}
                       materialLoading={materialLoading}
+                      showDrawer={showDrawer}
                     />
                   
-                  <TabsPC  subjectLoading={subjectLoading} data={data} />
+                  <TabsPC  showDrawer={showDrawer} subjectLoading={subjectLoading} data={data} />
                   <TabsPhone data={data} />
                 </>
               )}

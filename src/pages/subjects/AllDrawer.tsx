@@ -1,6 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
+import Snackbar from "@mui/material/Snackbar";
 import CssBaseline from "@mui/material/CssBaseline";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -35,6 +36,7 @@ interface Props {
   materialLoading: boolean;
   data: any;
   subject: string;
+  showDrawer: boolean;
 }
 
 export default function AllDrawer({
@@ -42,13 +44,30 @@ export default function AllDrawer({
   materialLoading,
   data,
   subject,
+  showDrawer,
 }: Props) {
   const [expanded, setExpanded] = React.useState<string | false>(false);
+  const [clicked, setClicked] = React.useState<number>(0);
+  const [open, setOpen] = React.useState(false);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
     };
+
+  // when clicking on the side drawer, send a messge snakbar syaing click shift + left arrow
+  const handleDrawerClick = (e: any) => {
+    setClicked((prev) => {
+      return prev + 1;
+    });
+    if (clicked === 2) {
+      setOpen(true);
+    }
+  };
+
+  React.useEffect(() => {
+    setOpen(false);
+  }, [showDrawer]);
 
   return (
     <>
@@ -100,7 +119,7 @@ export default function AllDrawer({
             position="relative"
             sx={{
               // width: `calc(100% - ${drawerWidth}px)`,
-              ml: `${drawerWidth}px`,
+              ml: showDrawer ? `${drawerWidth}px` : "0",
             }}
           />
         )}
@@ -113,11 +132,16 @@ export default function AllDrawer({
               boxSizing: "border-box",
             },
           }}
-          variant="permanent"
+          onClick={handleDrawerClick}
+          variant={showDrawer ? "permanent" : "temporary"}
           anchor="left"
         >
           {subjectsData.semesters.map((item, index) => (
-            <Accordion key={index} expanded={expanded === ('panel'+index)} onChange={handleChange(('panel'+index))}>
+            <Accordion
+              key={index}
+              expanded={expanded === "panel" + index}
+              onChange={handleChange("panel" + index)}
+            >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"
@@ -164,6 +188,20 @@ export default function AllDrawer({
           ))}
         </Drawer>
       </Box>
+      <Snackbar
+        open={open}
+        onClose={(e,reason) => {
+          if (reason === "clickaway") {
+            return;
+          }
+          setOpen(false);
+        }}
+        autoHideDuration={12000}
+        message="Click Shift + &#8592;"
+        // animation
+        TransitionComponent={Zoom}
+        TransitionProps={{ timeout: 300 }}
+      />
     </>
   );
 }
