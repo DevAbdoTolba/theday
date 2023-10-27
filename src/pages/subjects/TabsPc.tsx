@@ -7,7 +7,6 @@ import Box from "@mui/material/Box";
 
 import Material from "./Material";
 import Schedule from "./Schedule";
-import Drawer from "./AllDrawer";
 
 function TabPanel(props: any) {
   const { children, value, index, data, ...other } = props;
@@ -69,30 +68,14 @@ export default function VerticalTabs(props: any) {
           xs: "none",
           md: "flex",
         },
+        flexDirection: "column",
+        ml: {
+          sm: props?.showDrawer ? "22ch" : "0",
+          xs: "0",
+        },
       }}
     >
-      
-      <Tabs
-        orientation="vertical"
-        variant="scrollable"
-        value={value}
-        onChange={handleChange}
-        aria-label="Vertical tabs example"
-        sx={{ borderRight: 1, borderColor: "divider" }}
-      >
-        <Tab label="Material" {...a11yProps(0)} />
-        <Tab label="Schedule" {...a11yProps(1)} />
-        <Tab label="Previous Exams" {...a11yProps(2)} />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <Material {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Schedule {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        {"Not Yet :)"}
-      </TabPanel>
+      <Material {...props} />
     </Box>
   );
 }
