@@ -84,8 +84,8 @@ export default function MainPc({ search, currentSemester }: Props) {
                             ?.toLowerCase()
                             .includes(search?.toLowerCase())
                       )
-                      .map((subjects, index) => (
-                        <Grid key={index} item>
+                      .map((subjects, subIndex) => (
+                        <Grid key={subIndex} item>
                           <Tooltip
                             title={subjects?.name}
                             arrow
@@ -116,6 +116,12 @@ export default function MainPc({ search, currentSemester }: Props) {
                                 localStorage.setItem(
                                   "currentSemester",
                                   index.toString()
+                                );
+                                console.log(
+                                  "currentSemester : " +
+                                    currentSemester +
+                                    "\nIndex : " +
+                                    index
                                 );
                                 window.location.href =
                                   "/subjects/" + subjects.abbreviation;

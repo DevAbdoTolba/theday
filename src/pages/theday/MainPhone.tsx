@@ -62,9 +62,9 @@ function MainPhone({ search, currentSemester }: Props) {
                         .includes(search?.toLowerCase())
                   )
 
-                  .map((subjects, index) => (
+                  .map((subjects, subIndex) => (
                     <Grid
-                      key={index}
+                      key={subIndex}
                       item
                       // sx={{
                       //   width: "100%",
