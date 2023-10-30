@@ -87,7 +87,7 @@ function MainPhone({ search, currentSemester }: Props) {
                             boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
                           }}
                           className="subject__chip"
-                          label={subjects.abbreviation}
+                          label={subjects.name}
                           clickable
                           // component={"a"}
                           onClick={() => {
