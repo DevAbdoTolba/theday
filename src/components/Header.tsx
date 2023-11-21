@@ -130,10 +130,9 @@ export default function Header({
       }}
     >
       <AppBar
-        position={ position || "static"}
+        position={position || "static"}
         sx={{
           height: { sm: "5rem", xs: "4rem" },
-
           display: "flex",
           justifyContent: "center",
           ...sx,
