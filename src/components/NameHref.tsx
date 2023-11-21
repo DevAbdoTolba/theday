@@ -5,12 +5,12 @@ import React, { useEffect } from "react";
 
 interface Props {
   name: string;
-
+  variant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "subtitle1" | "subtitle2";
   dataName: string[];
   dataHref: string[];
 }
 
-export default function NameHref({ name, dataName, dataHref }: Props) {
+export default function NameHref({ name, dataName, dataHref, variant }: Props) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,7 +63,7 @@ export default function NameHref({ name, dataName, dataHref }: Props) {
               cursor: "pointer",
             },
           }}
-          variant="subtitle2"
+          variant={variant ? variant : "subtitle2"}
           fontWeight={"100"}
           textAlign={"left"}
         >
