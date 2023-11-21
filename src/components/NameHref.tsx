@@ -20,19 +20,24 @@ export default function NameHref({ name, dataName, dataHref, variant }: Props) {
     setAnchorEl(null);
   };
 
-  const [title, setTitle] = React.useState(dataHref);
+  const [title, setTitle] = React.useState(
+    dataHref.map((item) => {
+      let temp = new URL(item);
+      return "" + temp.pathname;
+    })
+  );
 
   React.useEffect(() => {
     setTitle((prev) => {
       let temp = prev;
       temp.map((item) => {
         try {
-          const parsedUrl = new URL(item);
+          let parsedUrl = new URL(item);
           //   console.log(parsedUrl.hostname + parsedUrl.pathname);
-          return parsedUrl.hostname + parsedUrl.pathname;
+          return "" + parsedUrl.hostname + parsedUrl.pathname + "hello";
         } catch (e) {
           console.error(e);
-          return item;
+          return item + "hello";
         }
       });
 
