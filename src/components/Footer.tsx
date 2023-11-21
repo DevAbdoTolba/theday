@@ -11,10 +11,6 @@ import React from "react";
 
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import InstagramIcon from "@mui/icons-material/Instagram";
 import Tooltip from "@mui/material/Tooltip";
 
 import Link from "next/link";
@@ -44,7 +40,7 @@ export default function footer() {
       dataHref: ["https://linktr.ee/omarfarouk27"],
     },
     {
-      name: "Yaser Shaban",
+      name: "Yasser Shaban",
       dataName: ["LinkTree"],
       dataHref: ["https://linktr.ee/yasershaban03"],
     },
@@ -221,30 +217,6 @@ export default function footer() {
               student.
             </Typography>
           </Box>
-
-          <ButtonGroup
-            variant="text"
-            aria-label="text button group"
-            sx={{
-              "& *": {
-                color: "Main.primary",
-              },
-              transform: "translateX(-.5rem)",
-            }}
-          >
-            <IconButton>
-              <FacebookIcon />
-            </IconButton>
-            <IconButton>
-              <TwitterIcon />
-            </IconButton>
-            <IconButton>
-              <LinkedInIcon />
-            </IconButton>
-            <IconButton>
-              <InstagramIcon />
-            </IconButton>
-          </ButtonGroup>
         </Grid>
         <Grid
           item
@@ -340,7 +312,7 @@ export default function footer() {
           </Box>
         </Grid>
       </Grid>
-      <Divider 
+      <Divider
         sx={{
           my: "3ch",
         }}
@@ -409,7 +381,7 @@ export default function footer() {
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          &nbsp; , &nbsp;
+          &nbsp; | &nbsp;
         </Typography>
 
         <Box
@@ -449,7 +421,7 @@ export default function footer() {
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          &nbsp;, and &nbsp;
+          &nbsp; | &nbsp;
         </Typography>
 
         <Box
@@ -482,7 +454,7 @@ export default function footer() {
           <NameHref
             name="Omar Farouq"
             dataName={["LinkTree"]}
-            dataHref={["https://linktr.ee/yasershaban03/"]}
+            dataHref={["https://linktr.ee/omarfarouk27"]}
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
