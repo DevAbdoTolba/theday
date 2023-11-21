@@ -15,6 +15,8 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
+import Tooltip from "@mui/material/Tooltip";
+
 import Link from "next/link";
 import Image from "next/image";
 import NameHref from "./NameHref";
@@ -95,8 +97,12 @@ export default function footer() {
     },
     {
       name: "Yousef Atef",
-      dataName: ["phone", "email"],
-      dataHref: ["tel:01158259889", "mailto:youssefatef865@gmail.com"],
+      dataName: ["phone", "email", "LinkedIn"],
+      dataHref: [
+        "tel:01158259889",
+        "mailto:youssefatef865@gmail.com",
+        "https://www.linkedin.com/in/youssef-atef-3284b5251",
+      ],
     },
   ];
   const TNT = 2;
@@ -121,11 +127,15 @@ export default function footer() {
       <Grid
         container
         justifyContent={"center"}
-        alignItems="stretch"
         flexWrap={"wrap"}
         // items inside takes the whole width
         width={"100%"}
         sx={{
+          alignItems: {
+            xs: "center",
+            sm: "stretch",
+          },
+
           flexDirection: {
             xs: "column",
             sm: "row",
@@ -144,6 +154,12 @@ export default function footer() {
           justifyContent={"flex-start"}
           alignItems={"center"}
           gap={"1rem"}
+          sx={{
+            width: {
+              sm: "auto",
+              xs: "100vw ",
+            },
+          }}
         >
           <Box
             display={"flex"}
@@ -155,6 +171,7 @@ export default function footer() {
             sx={{
               width: {
                 sm: "auto",
+                xs: "80vw ",
               },
             }}
           >
@@ -164,18 +181,44 @@ export default function footer() {
               height={100}
               alt="The-Day website Logo"
             />
-            <Typography
-              variant="h5"
-              // maximum of 10 words per line
-              width={"auto"}
+
+            <Tooltip
+              title={"The-Day repo"}
+              placement="top"
+              arrow
+              TransitionProps={{ timeout: 200 }}
             >
-              The-Day
-            </Typography>{" "}
+              <Typography
+                variant="h5"
+                sx={{
+                  "& *": {
+                    all: "unset",
+                    cursor: "pointer",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  },
+                }}
+                // maximum of 10 words per line
+                width={"auto"}
+              >
+                <Link
+                  href="https://github.com/DevAbdoTolba/theday"
+                  target="_blank"
+                >
+                  The-Day
+                </Link>
+              </Typography>
+            </Tooltip>
             <Typography
               variant="subtitle2"
               // maximum of 10 words per line
             >
               Made with 💖🫰, by AASTMT aswan CS&quot;2110 students
+            </Typography>
+            <Typography variant="subtitle2">
+              All content and materials in the journey of a computer science
+              student.
             </Typography>
           </Box>
 
@@ -229,8 +272,11 @@ export default function footer() {
               alignItems: "center",
               flexWrap: "wrap",
               textAlign: "center",
-              width: "100%",
               height: "100%",
+              width: {
+                xs: "85vw",
+                sm: "100%",
+              },
             }}
           >
             {BackTeamData.map((item, index) => (
@@ -271,6 +317,10 @@ export default function footer() {
               flexWrap: "wrap",
               textAlign: "center",
               height: "100%",
+              width: {
+                xs: "85vw",
+                sm: "100%",
+              },
             }}
           >
             {TntData.map((item, index) => (
@@ -290,7 +340,11 @@ export default function footer() {
           </Box>
         </Grid>
       </Grid>
-      <Divider />
+      <Divider 
+        sx={{
+          my: "3ch",
+        }}
+      />
       <Grid
         container
         justifyContent={"center"}
@@ -318,37 +372,34 @@ export default function footer() {
         </Typography>
 
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          Developed by &quot;
+          Developed by &nbsp;
         </Typography>
 
         <Box
           sx={{
-            position : "relative",
+            position: "relative",
             color: "#0685da",
             bgcolor: "#121212",
             transition: "all .2s ease-in-out",
             "&:hover": {
               transform: "scale(1.2) rotate(5deg)",
             },
-            "&::after":{
-              content : '""',
-              position : "absolute",
+            "&::after": {
+              content: '""',
+              position: "absolute",
               bottom: 0,
               left: 0,
               height: "1%",
-              width : "0",
-              transition : "all .2s ease-in-out",
-              bgcolor: "red"
-            }
-            ,
-            "&:hover::after":{
-              width: "100%"
-            }
-            ,
-            "& *":{
-              textDecoration  : "none !important"
-            }
-
+              width: "0",
+              transition: "all .2s ease-in-out",
+              bgcolor: "red",
+            },
+            "&:hover::after": {
+              width: "100%",
+            },
+            "& *": {
+              textDecoration: "none !important",
+            },
           }}
         >
           <NameHref
@@ -358,37 +409,34 @@ export default function footer() {
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          &quot; , &quot;
+          &nbsp; , &nbsp;
         </Typography>
 
         <Box
           sx={{
-            position : "relative",
+            position: "relative",
             color: "#0685da",
             bgcolor: "#121212",
             transition: "all .2s ease-in-out",
             "&:hover": {
               transform: "scale(1.2) rotate(5deg)",
             },
-            "&::after":{
-              content : '""',
-              position : "absolute",
+            "&::after": {
+              content: '""',
+              position: "absolute",
               bottom: 0,
               left: 0,
               height: "1%",
-              width : "0",
-              transition : "all .2s ease-in-out",
-              bgcolor: "red"
-            }
-            ,
-            "&:hover::after":{
-              width: "100%"
-            }
-            ,
-            "& *":{
-              textDecoration  : "none !important"
-            }
-
+              width: "0",
+              transition: "all .2s ease-in-out",
+              bgcolor: "red",
+            },
+            "&:hover::after": {
+              width: "100%",
+            },
+            "& *": {
+              textDecoration: "none !important",
+            },
           }}
         >
           <NameHref
@@ -401,37 +449,34 @@ export default function footer() {
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          &quot; and &quot;
+          &nbsp;, and &nbsp;
         </Typography>
 
         <Box
           sx={{
-            position : "relative",
+            position: "relative",
             color: "#0685da",
             bgcolor: "#121212",
             transition: "all .2s ease-in-out",
             "&:hover": {
               transform: "scale(1.2) rotate(5deg)",
             },
-            "&::after":{
-              content : '""',
-              position : "absolute",
+            "&::after": {
+              content: '""',
+              position: "absolute",
               bottom: 0,
               left: 0,
               height: "1%",
-              width : "0",
-              transition : "all .2s ease-in-out",
-              bgcolor: "red"
-            }
-            ,
-            "&:hover::after":{
-              width: "100%"
-            }
-            ,
-            "& *":{
-              textDecoration  : "none !important"
-            }
-
+              width: "0",
+              transition: "all .2s ease-in-out",
+              bgcolor: "red",
+            },
+            "&:hover::after": {
+              width: "100%",
+            },
+            "& *": {
+              textDecoration: "none !important",
+            },
           }}
         >
           <NameHref
@@ -441,7 +486,7 @@ export default function footer() {
           />
         </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
-          &quot;
+          &nbsp;
         </Typography>
       </Grid>
     </Box>
