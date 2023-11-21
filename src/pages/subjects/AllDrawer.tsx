@@ -160,6 +160,7 @@ export default function AllDrawer({
                       <Link
                         component={nextLink}
                         href={`/subjects/${item?.abbreviation}`}
+                        target="_top"
                         // remove default styling and give it a modern look
 
                         sx={{
