@@ -69,6 +69,16 @@ export default function footer() {
       dataName: ["phone", "email"],
       dataHref: ["tel:01147477955", "mailto:mahmoudrafatt995@gmail.com"],
     },
+    {
+      name: "Maivy Ayman",
+      dataName: ["phone", "email"],
+      dataHref: ["tel:01205164464", "mailto:mavyaymen90@gmail.com"],
+    },
+    {
+      name: "Sara Hisham",
+      dataName: ["phone", "email"],
+      dataHref: ["tel:01020788954", "mailto:sara.hisham24.sh@gmail.com"],
+    },
   ];
   const TntData = [
     {

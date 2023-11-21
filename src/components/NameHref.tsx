@@ -22,8 +22,12 @@ export default function NameHref({ name, dataName, dataHref, variant }: Props) {
 
   const [title, setTitle] = React.useState(
     dataHref.map((item) => {
-      let temp = new URL(item);
-      return "" + temp.pathname;
+      try {
+        let temp = new URL(item);
+        return "" + temp.pathname;
+      } catch {
+        return item;
+      }
     })
   );
 
