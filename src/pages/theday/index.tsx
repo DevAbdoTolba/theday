@@ -6,7 +6,10 @@ import React, {
   forwardRef,
   useContext,
 } from "react";
+
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
@@ -119,10 +122,9 @@ function App() {
           <Paper
             sx={{
               width: "100%",
-
+              height: "100dvh",
               maxWidth: { sm: "80%", xs: "100%" },
               position: "relative",
-              pb: 50,
             }}
           >
             <Suspense
@@ -162,6 +164,7 @@ function App() {
           </Alert>
         )}
       </Snackbar>
+      <Footer />
     </>
   );
 }

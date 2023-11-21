@@ -15,20 +15,6 @@ function Main({ search, currentSemester }: Props) {
     <>
       <MainPc search={search} currentSemester={currentSemester} />
       <MainPhone search={search} currentSemester={currentSemester} />
-      <br />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-        }}
-      >
-        <Typography variant="h1" sx={{ mt: 30, textAlign: "center" }}>
-          {"Coming Soon "}
-        </Typography>
-        <Image src="/cat.gif" alt="Coming Soon" width={250} height={250} />
-      </Box>
     </>
   );
 }
