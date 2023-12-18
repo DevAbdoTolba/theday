@@ -41,7 +41,17 @@ function SubjectPage() {
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(true);
   const [dots, setDots] = useState(".");
-  const [showDrawer, setShowDrawer] = useState(true);
+
+  let showDrawerFromLocalStorage;
+
+  
+  if (typeof window !== "undefined") {
+    showDrawerFromLocalStorage = localStorage.getItem("showDrawer");
+  }
+
+  const [showDrawer, setShowDrawer] = useState(
+    showDrawerFromLocalStorage === "true" ? true : false
+  );
 
   const [offline, setOffline] = React.useContext(offlineContext);
 
@@ -99,15 +109,16 @@ function SubjectPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "ArrowLeft") {
         setShowDrawer((prev) => {
+          localStorage.setItem("showDrawer", (!prev).toString());
           return !prev;
-        })
+        });
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -186,16 +197,19 @@ function SubjectPage() {
                 <NoData />
               ) : (
                 <>
-                 
-                    <Drawer
-                      subjectLoading={subjectLoading}
-                      subject={subject}
-                      data={data}
-                      materialLoading={materialLoading}
-                      showDrawer={showDrawer}
-                    />
-                  
-                  <TabsPC  showDrawer={showDrawer} subjectLoading={subjectLoading} data={data} />
+                  <Drawer
+                    subjectLoading={subjectLoading}
+                    subject={subject}
+                    data={data}
+                    materialLoading={materialLoading}
+                    showDrawer={showDrawer}
+                  />
+
+                  <TabsPC
+                    showDrawer={showDrawer}
+                    subjectLoading={subjectLoading}
+                    data={data}
+                  />
                   <TabsPhone data={data} />
                 </>
               )}
