@@ -38,9 +38,22 @@ export default function AllDrawer({
   subject,
   showDrawer,
 }: Props) {
-  const [expanded, setExpanded] = React.useState<string | false>(false);
+  let currentSemester = -1 ;
+  let showDrawerFromLocalStorage: undefined | boolean = undefined;
+  if (typeof window !== "undefined") {
+    currentSemester = localStorage.getItem("currentSemester")
+      ? parseInt(localStorage.getItem("currentSemester") as string)
+      : -1;
+
+    showDrawerFromLocalStorage =
+      localStorage.getItem("showDrawer") == "true" ? true : false;
+  }
+
+  const [expanded, setExpanded] = React.useState<string | false>(
+    currentSemester !== -1 ? "panel" + currentSemester : ""
+  );
   const [clicked, setClicked] = React.useState<number>(0);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -52,7 +65,7 @@ export default function AllDrawer({
     setClicked((prev) => {
       return prev + 1;
     });
-    if (clicked === 2) {
+    if (clicked === 2 && !showDrawerFromLocalStorage) {
       setOpen(true);
     }
   };
@@ -65,7 +78,7 @@ export default function AllDrawer({
     <>
       <Box
         sx={{
-          display: { sm: "none", xs: "block" },
+          display: { md: "none", xs: "block" },
         }}
       >
         {subjectLoading ? (
@@ -89,7 +102,7 @@ export default function AllDrawer({
           />
         )}
       </Box>
-      <Box sx={{ display: { sm: "flex", xs: "none" } }}>
+      <Box sx={{ display: { md: "flex", xs: "none" } }}>
         {subjectLoading ? (
           <Header
             title={"Loading..."}
@@ -133,6 +146,14 @@ export default function AllDrawer({
               key={index}
               expanded={expanded === "panel" + index}
               onChange={handleChange("panel" + index)}
+              sx={{
+                bgcolor: index === currentSemester ? "#0685da" : "inherit",
+                boxShadow:
+                  index === currentSemester
+                    ? "rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px"
+                    : "none",
+       
+              }}
             >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -141,7 +162,26 @@ export default function AllDrawer({
               >
                 <Typography>{"Sem." + item?.index}</Typography>
               </AccordionSummary>
-              <AccordionDetails>
+              <AccordionDetails
+                sx={{
+                  px: "0",
+                  
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "stretch",
+
+                  "& a": {
+                    width: "100%",
+                    py: "0.5ch",
+                    pl: "4ch",
+                    borderRadius: "0 2rem 2rem 0",
+                    "&:hover": {
+                      bgcolor: "#0b5a8e",
+                    },
+                  },
+                }}
+              >
                 {item?.subjects.map((item, index) => (
                   <Box
                     key={index}
@@ -186,10 +226,10 @@ export default function AllDrawer({
         sx={{
           // phone no
           display: { sm: "block", xs: "none" },
-           width : "5ch",
-           "& .MuiSnackbarContent-message":{
+          width: "5ch",
+          "& .MuiSnackbarContent-message": {
             width: "100%",
-           }
+          },
         }}
         open={open}
         onClose={(e, reason) => {
@@ -208,11 +248,20 @@ export default function AllDrawer({
             }}
           >
             <Typography>Click</Typography>
-            <Tooltip title={"Shift + Left arrow"} placement="top" TransitionComponent={Zoom} arrow>
-            <Chip
-              label={"Shift + ←"}
-              sx={{ mx: "0.5rem", color: "black", backgroundColor: "#e2e2e2" }}
-            />
+            <Tooltip
+              title={"Shift + Left arrow"}
+              placement="top"
+              TransitionComponent={Zoom}
+              arrow
+            >
+              <Chip
+                label={"Shift + ←"}
+                sx={{
+                  mx: "0.5rem",
+                  color: "black",
+                  backgroundColor: "#e2e2e2",
+                }}
+              />
             </Tooltip>
           </Box>
         }
