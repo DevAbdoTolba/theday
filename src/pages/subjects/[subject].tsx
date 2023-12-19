@@ -49,7 +49,11 @@ function SubjectPage() {
   }
 
   const [showDrawer, setShowDrawer] = useState(
-    showDrawerFromLocalStorage === "true" ? true : false
+    showDrawerFromLocalStorage === "true"
+      ? true
+      : showDrawerFromLocalStorage === "false"
+      ? false
+      : true
   );
 
   const [offline, setOffline] = React.useContext(offlineContext);
