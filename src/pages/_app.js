@@ -59,6 +59,14 @@ export default function App({ Component, pageProps }) {
   );
   console.log("https://github.com/DevAbdoTolba");
 
+    // check if there is a localstorage named "first-open-date" if not set it to the current date
+    if (typeof window !== "undefined") {
+      if (!localStorage.getItem("first-open-date")) {
+        localStorage.setItem("first-open-date", (new Date()).toISOString().split('T')[0]);
+      }
+    }
+
+
   return (
     <offlineContext.Provider value={[offline, setOffline]}>
       <ThemeProvider theme={theme}>

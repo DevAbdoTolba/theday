@@ -44,7 +44,6 @@ function SubjectPage() {
 
   let showDrawerFromLocalStorage;
 
-  
   if (typeof window !== "undefined") {
     showDrawerFromLocalStorage = localStorage.getItem("showDrawer");
   }
@@ -157,7 +156,26 @@ function SubjectPage() {
       }}
     >
       <Head>
-        <title>{subjectLoading ? "Loading..." : subject.toUpperCase()}</title>
+        <title>
+          {subjectLoading
+            ? "Loading..."
+            : (() => {
+                // check if there is a localstorage named "first-visited-subject" if not set it to the current date
+
+                if (!localStorage.getItem("first-visited-subject")) {
+                  localStorage.setItem(
+                    "first-visited-subject",
+                    subject.toUpperCase()
+                  );
+                }
+                // update localstorage "last-visited-subject" to the current subjcet name
+                localStorage.setItem(
+                  "last-visited-subject",
+                  subject.toUpperCase()
+                );
+                return subject.toUpperCase();
+              })()}
+        </title>
         <link
           rel="icon"
           href={
