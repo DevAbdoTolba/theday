@@ -73,20 +73,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     }
   }, [open]);
 
-  React.useEffect(() => {
-    const handleCtrlK = (e: KeyboardEvent) => {
-      if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
-        e?.preventDefault();
-        setOpen(true);
-      }
-    };
 
-    window.addEventListener("keydown", handleCtrlK);
-
-    return () => {
-      window.removeEventListener("keydown", handleCtrlK);
-    };
-  }, []);
 
   return (
     <div>
@@ -132,7 +119,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             },
           }}
         >
-          Search...
+          Search &nbsp; &nbsp;
         </Typography>
         <Box
           sx={{

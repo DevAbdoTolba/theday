@@ -143,20 +143,20 @@ export default function Search({ data }: Props) {
   //   };
   // }, []);
 
-  React.useEffect(() => {
-    const handleCtrlK = (e: KeyboardEvent) => {
-      if (e?.ctrlKey && (e?.keyCode === 75 || e?.code === "KeyK")) {
-        e?.preventDefault();
-        handleOpen();
-      }
-    };
+  // React.useEffect(() => {
+  //   const handleCtrlK = (e: KeyboardEvent) => {
+  //     if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
+  //       e?.preventDefault();
+  //       handleOpen();
+  //     }
+  //   };
 
-    window.addEventListener("keydown", handleCtrlK);
+  //   window.addEventListener("keydown", handleCtrlK);
 
-    return () => {
-      window.removeEventListener("keydown", handleCtrlK);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("keydown", handleCtrlK);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (searchRef?.current) {

@@ -34,6 +34,7 @@ interface Props {
   data?: DataMap;
   position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
   sx?: any;
+  shortCutActivate?: boolean;
 }
 
 // let data: DataMap = {
@@ -118,10 +119,29 @@ export default function Header({
   data,
   position,
   sx,
+  shortCutActivate,
   // take any other props
+
   ...props
 }: Props) {
   const [open, setOpen] = useState(false);
+  shortCutActivate = shortCutActivate || false;
+  React.useEffect(() => {
+    const handleCtrlK = (e: KeyboardEvent) => {
+      if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
+        e?.preventDefault();
+        console.log("ctrl+k");
+        setOpen(true);
+      }
+    };
+
+    if (shortCutActivate === true)
+      window.addEventListener("keydown", handleCtrlK);
+
+    return () => {
+      window.removeEventListener("keydown", handleCtrlK);
+    };
+  }, []);
 
   return (
     <Box

@@ -38,7 +38,7 @@ export default function AllDrawer({
   subject,
   showDrawer,
 }: Props) {
-  let currentSemester = -1 ;
+  let currentSemester = -1;
   let showDrawerFromLocalStorage: undefined | boolean = undefined;
   if (typeof window !== "undefined") {
     currentSemester = localStorage.getItem("currentSemester")
@@ -121,6 +121,7 @@ export default function AllDrawer({
                 ? ((Object?.keys(data)?.length > 0) as boolean)
                 : false
             }
+            shortCutActivate={true}
             position="relative"
             sx={{
               // width: `calc(100% - ${drawerWidth}px)`,
@@ -152,7 +153,6 @@ export default function AllDrawer({
                   index === currentSemester
                     ? "rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px"
                     : "none",
-       
               }}
             >
               <AccordionSummary
@@ -165,7 +165,7 @@ export default function AllDrawer({
               <AccordionDetails
                 sx={{
                   px: "0",
-                  
+
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
