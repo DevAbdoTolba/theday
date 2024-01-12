@@ -275,15 +275,24 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                       },
                     }}
                   >
-                    <Box
-                      sx={{
-                        fontSize: "1.5rem",
-                        fontWeight: "bold",
-                        color: "#fff",
-                        padding: "0.5ch 0",
-                      }}
-                    >
-                      {key}
+                    <Box display={"flex"} justifyContent={"flex-start"}>
+                      {/* {key} */}
+                      <Typography
+                        fontSize={"1.5rem"}
+                        fontWeight={"bold"}
+                        color={"#fff"}
+                        padding={"0.5ch 0"}
+                      >
+                        {key}
+                      </Typography>
+                      <Typography
+                        fontSize={"1rem"}
+                        fontWeight={"bolder"}
+                        color={"grey"}
+                        padding={"0.5ch .2ch"}
+                      >
+                        {data[key].length}
+                      </Typography>
                     </Box>
                     <Box
                       sx={{
