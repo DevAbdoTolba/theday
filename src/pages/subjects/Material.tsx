@@ -188,6 +188,16 @@ function Material({
                 >
                   {key}
                 </Typography>
+                <Typography
+                  fontSize={"1rem"}
+                  fontWeight={"bolder"}
+                  color={"grey"}
+                  display={"inline-block"}
+                  margin={"2ch 0"}
+                  alignSelf={"flex-start"}
+                >
+                  {data[key].length}
+                </Typography>
                 <Link
                   href={`#${key}`}
                   style={{
