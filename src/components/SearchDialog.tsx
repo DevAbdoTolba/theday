@@ -73,8 +73,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     }
   }, [open]);
 
-
-
   return (
     <div>
       <Button
@@ -304,6 +302,8 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                         ?.map((subject, index) => {
                           return (
                             <Button
+                              href={`https://drive.google.com/file/d/${subject?.id}/preview`}
+                              target="_blank"
                               key={index}
                               sx={{
                                 all: "unset",
@@ -325,12 +325,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                                 },
                               }}
                               disableRipple
-                              onClick={() => {
-                                window.open(
-                                  `https://drive.google.com/file/d/${subject?.id}/preview`,
-                                  "_blank"
-                                );
-                              }}
                             >
                               {subject?.name}
                             </Button>
