@@ -6,10 +6,9 @@ import { useEffect } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  
   // redirect to theday
   useEffect(() => {
     window.location.href = "/theday";
   }, []);
-  return <></>;
+  return null;
 }

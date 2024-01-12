@@ -33,9 +33,15 @@ const theme = createTheme({
 
 // custom CssBaseline with dark mode
 
-export const offlineContext = React.createContext();
+export const offlineContext = React.createContext({});
 
-export default function App({ Component, pageProps }) {
+export default function App({
+  Component,
+  pageProps,
+}: {
+  Component: React.ComponentType;
+  pageProps: Record<string, unknown>;
+}) {
   // const classes = useStyles();
 
   React.useEffect(() => {
@@ -43,7 +49,7 @@ export default function App({ Component, pageProps }) {
     window.addEventListener("offline", () => updateOnlineStatus(navigator));
   }, []);
 
-  const updateOnlineStatus = (navigator) => {
+  const updateOnlineStatus = (navigator: Navigator) => {
     if (navigator.onLine) {
       setOffline(false);
     }
@@ -59,13 +65,15 @@ export default function App({ Component, pageProps }) {
   );
   console.log("https://github.com/DevAbdoTolba");
 
-    // check if there is a localstorage named "first-open-date" if not set it to the current date
-    if (typeof window !== "undefined") {
-      if (!localStorage.getItem("first-open-date")) {
-        localStorage.setItem("first-open-date", (new Date()).toISOString().split('T')[0]);
-      }
+  // check if there is a localStorage named "first-open-date" if not set it to the current date
+  if (typeof window !== "undefined") {
+    if (!localStorage.getItem("first-open-date")) {
+      localStorage.setItem(
+        "first-open-date",
+        new Date().toISOString().split("T")[0]
+      );
     }
-
+  }
 
   return (
     <offlineContext.Provider value={[offline, setOffline]}>
