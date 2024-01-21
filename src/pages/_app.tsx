@@ -33,7 +33,7 @@ const theme = createTheme({
 
 // custom CssBaseline with dark mode
 
-export const offlineContext = React.createContext({});
+export const offlineContext = React.createContext<any>({});
 
 export default function App({ Component, pageProps }: { Component: React.ComponentType<any>, pageProps: any }) {
   // const classes = useStyles();
@@ -59,12 +59,12 @@ export default function App({ Component, pageProps }: { Component: React.Compone
   );
   console.log("https://github.com/DevAbdoTolba");
 
-    // check if there is a localstorage named "first-open-date" if not set it to the current date
-    if (typeof window !== "undefined") {
-      if (!localStorage.getItem("first-open-date")) {
-        localStorage.setItem("first-open-date", (new Date()).toISOString().split('T')[0]);
-      }
+  // check if there is a localstorage named "first-open-date" if not set it to the current date
+  if (typeof window !== "undefined") {
+    if (!localStorage.getItem("first-open-date")) {
+      localStorage.setItem("first-open-date", (new Date()).toISOString().split('T')[0]);
     }
+  }
 
 
   return (
