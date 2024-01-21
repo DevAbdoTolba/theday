@@ -84,7 +84,7 @@
                 },
                 {
                     "name": "Discrete Structures",
-                    "abbreviation": "DSS"
+                    "abbreviation": "DIS"
                 },
                 {
                     "name": "Probability & statistics",
@@ -180,12 +180,37 @@
                 {
                     "name": "Introduction to Artificial Intelligence",
                     "abbreviation": "AI"
+                },
+                {
+                    "name": "Advanced Database Systems",
+                    "abbreviation": "ADB"
                 }
             ]
         },
         {
             "index": 7,
-            "subjects": []
+            "subjects": [
+                {
+                    "name": "Deep Learning",
+                    "abbreviation": "DL"
+                },
+                {
+                    "name": "System Analysis & Design",
+                    "abbreviation": "SAD"
+                },
+                {
+                    "name": "Computers & Society",
+                    "abbreviation": "C&S"
+                },
+                {
+                    "name": "Embedded Systems Programming",
+                    "abbreviation": "EMB"
+                },
+                {
+                    "name": "Struture of Programming Languages",
+                    "abbreviation": "STPL"
+                }
+            ]
         },
         {
             "index": 8,
@@ -193,6 +218,22 @@
                 {
                     "name": "Human Computer Interaction",
                     "abbreviation": "HCI"
+                },
+                {
+                    "name": "Computer Systems Security",
+                    "abbreviation": "CSS"
+                },
+                {
+                    "name": "Decision Support Systems",
+                    "abbreviation": "DSS"
+                },
+                {
+                    "name": "Soft computing",
+                    "abbreviation": "SCO"
+                },
+                {
+                    "name": "Robotics Applications",
+                    "abbreviation": "ROB"
                 }
             ]
         }
