@@ -33,9 +33,9 @@ const theme = createTheme({
 
 // custom CssBaseline with dark mode
 
-export const offlineContext = React.createContext();
+export const offlineContext = React.createContext({});
 
-export default function App({ Component, pageProps }) {
+export default function App({ Component, pageProps }: { Component: React.ComponentType<any>, pageProps: any }) {
   // const classes = useStyles();
 
   React.useEffect(() => {
@@ -43,7 +43,7 @@ export default function App({ Component, pageProps }) {
     window.addEventListener("offline", () => updateOnlineStatus(navigator));
   }, []);
 
-  const updateOnlineStatus = (navigator) => {
+  const updateOnlineStatus = (navigator: Navigator) => {
     if (navigator.onLine) {
       setOffline(false);
     }
