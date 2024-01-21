@@ -56,7 +56,9 @@ function SubjectPage() {
       : true
   );
 
-  const [offline, setOffline] = React.useContext(offlineContext);
+
+
+  const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
 
   useEffect(() => {
     if (router.isReady) {
