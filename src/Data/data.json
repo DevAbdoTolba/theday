@@ -115,7 +115,6 @@
                     "name": "Introduction to software engineering",
                     "abbreviation": "SE"
                 },
-                
                 {
                     "name": "Advanced Programming Applications",
                     "abbreviation": "APA"
@@ -127,6 +126,10 @@
                 {
                     "name": "Database systems",
                     "abbreviation": "DBS"
+                },
+                {
+                    "name": "Introduction to Cybersecurity",
+                    "abbreviation": "CYS"
                 }
             ]
         },
