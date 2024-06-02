@@ -420,6 +420,8 @@ function Material({
                           );
                           // get the url
                           try {
+                            console.log("urlIndex", urlIndex, name_split);
+
                             url = new URL(name_split[urlIndex]);
                             // if url is youtube change the word youtube into : yout-ube
                             if (url.hostname.includes("youtube")) {
@@ -429,6 +431,8 @@ function Material({
                           } catch {
                             return `https://drive.google.com/uc?id=${item?.id}`;
                           }
+                        } else {
+                          return `https://drive.google.com/uc?id=${item?.id}`;
                         }
                         //  `https://drive.google.com/file/d/${item?.id}/preview`;
                       })() as string
