@@ -423,7 +423,7 @@ function Material({
                         }
                       }
                       //  `https://drive.google.com/file/d/${item?.id}/preview`;
-                    })()}
+                    })() as string}
                     target="_blank"
                   >
                     {/* <Typography
