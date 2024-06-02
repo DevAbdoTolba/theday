@@ -429,10 +429,10 @@ function Material({
                             }
                             return url.href;
                           } catch {
-                            return `https://drive.google.com/uc?id=${item?.id}`;
+                            return  `https://drive.google.com/file/d/${item?.id}/preview`;
                           }
                         } else {
-                          return `https://drive.google.com/uc?id=${item?.id}`;
+                          return  `https://drive.google.com/file/d/${item?.id}/preview`;
                         }
                         //  `https://drive.google.com/file/d/${item?.id}/preview`;
                       })() as string
