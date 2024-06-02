@@ -369,7 +369,14 @@ function Material({
                     disableRipple
                     sx={{
                       all: "unset",
-                      backgroundImage: `url(https://drive.google.com/thumbnail?id=${item?.id}) `,
+                      backgroundImage: () => {
+                        if (item?.name.includes("http")) {
+                          if (item?.name.includes("youtube"))
+                            return "url(  /youtube.jpg)";
+                          else return "url(/link.jpg)";
+                        }
+                        return `url(https://drive.google.com/thumbnail?id=${item?.id}) `;
+                      },
                       backgroundSize: "cover",
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: "center",
@@ -401,29 +408,31 @@ function Material({
                     }}
                     // on click get file id with https://drive.google.com/uc?id=FILE%20ID
 
-                    href={(() => {
-                      if (item?.name.includes("http")) {
-                        let url: URL | string = "";
-                        let name_split = item?.name.split(" ");
-                        // check which index is the url
+                    href={
+                      (() => {
+                        if (item?.name.includes("http")) {
+                          let url: URL | string = "";
+                          let name_split = item?.name.split(" ");
+                          // check which index is the url
 
-                        let urlIndex = name_split.findIndex((name) =>
-                          name.includes("http")
-                        );
-                        // get the url
-                        try {
-                          url = new URL(name_split[urlIndex]);
-                          // if url is youtube change the word youtube into : yout-ube
-                          if (url.hostname.includes("youtube")) {
-                            url.hostname = "yout-ube.com";
+                          let urlIndex = name_split.findIndex((name) =>
+                            name.includes("http")
+                          );
+                          // get the url
+                          try {
+                            url = new URL(name_split[urlIndex]);
+                            // if url is youtube change the word youtube into : yout-ube
+                            if (url.hostname.includes("youtube")) {
+                              url.hostname = "yout-ube.com";
+                            }
+                            return url.href;
+                          } catch {
+                            return `https://drive.google.com/uc?id=${item?.id}`;
                           }
-                          return url.href;
-                        } catch {
-                          return `https://drive.google.com/uc?id=${item?.id}`;
                         }
-                      }
-                      //  `https://drive.google.com/file/d/${item?.id}/preview`;
-                    })() as string}
+                        //  `https://drive.google.com/file/d/${item?.id}/preview`;
+                      })() as string
+                    }
                     target="_blank"
                   >
                     {/* <Typography
