@@ -254,7 +254,39 @@ function Material({
                     },
                   }}
                 >
-                  <Tooltip title={item?.name} arrow TransitionComponent={Zoom}>
+                  <Tooltip
+                    title={(() => {
+                      if (item?.name.includes("http")) {
+                        let url: URL | string = "";
+                        let name_split = item?.name.split(" ");
+                        // check which index is the url
+
+                        let urlIndex = name_split.findIndex((name) =>
+                          name.includes("http")
+                        );
+                        const name_split_no_url = name_split.filter(
+                          (name) => !name.includes("http")
+                        );
+                        // get the url
+                        if (name_split_no_url.length > 0) {
+                          return name_split_no_url.join(" ");
+                        }
+                        try {
+                          url = new URL(name_split[urlIndex]);
+                          // if url is youtube change the word youtube into : yout-ube
+                          if (url.hostname.includes("youtube")) {
+                            url.hostname = "yout-ube.com";
+                          }
+                          return url.hostname;
+                        } catch {
+                          return item?.name;
+                        }
+                      }
+                      return item?.name;
+                    })()}
+                    arrow
+                    TransitionComponent={Zoom}
+                  >
                     <Typography
                       sx={{
                         whiteSpace: "nowrap",
@@ -300,7 +332,35 @@ function Material({
                       }}
                       variant="h6"
                     >
-                      {item?.name}
+                      {(() => {
+                        if (item?.name.includes("http")) {
+                          let url: URL | string = "";
+                          let name_split = item?.name.split(" ");
+                          // check which index is the url
+
+                          let urlIndex = name_split.findIndex((name) =>
+                            name.includes("http")
+                          );
+                          const name_split_no_url = name_split.filter(
+                            (name) => !name.includes("http")
+                          );
+                          // get the url
+                          if (name_split_no_url.length > 0) {
+                            return name_split_no_url.join(" ");
+                          }
+                          try {
+                            url = new URL(name_split[urlIndex]);
+                            // if url is youtube change the word youtube into : yout-ube
+                            if (url.hostname.includes("youtube")) {
+                              url.hostname = "yout-ube.com";
+                            }
+                            return url.hostname;
+                          } catch {
+                            return item?.name;
+                          }
+                        }
+                        return item?.name;
+                      })()}
                     </Typography>
                   </Tooltip>
                   <Button
@@ -341,7 +401,29 @@ function Material({
                     }}
                     // on click get file id with https://drive.google.com/uc?id=FILE%20ID
 
-                    href={`https://drive.google.com/file/d/${item?.id}/preview`}
+                    href={(() => {
+                      if (item?.name.includes("http")) {
+                        let url: URL | string = "";
+                        let name_split = item?.name.split(" ");
+                        // check which index is the url
+
+                        let urlIndex = name_split.findIndex((name) =>
+                          name.includes("http")
+                        );
+                        // get the url
+                        try {
+                          url = new URL(name_split[urlIndex]);
+                          // if url is youtube change the word youtube into : yout-ube
+                          if (url.hostname.includes("youtube")) {
+                            url.hostname = "yout-ube.com";
+                          }
+                          return url.href;
+                        } catch {
+                          return `https://drive.google.com/uc?id=${item?.id}`;
+                        }
+                      }
+                      //  `https://drive.google.com/file/d/${item?.id}/preview`;
+                    })() as string}
                     target="_blank"
                   >
                     {/* <Typography
