@@ -89,12 +89,7 @@ function App() {
       <Head>
         <title>{"TheDay"}</title>
         {/* <meta name="description" content={description} /> */}
-        <link
-          rel="icon"
-          href={
-            "https://media.discordapp.net/attachments/1008571067398369291/1072747224586522714/Hotpot_1_2.png?width=270&height=270"
-          }
-        />
+        <link rel="icon" href={"./main.png"} />
       </Head>
       <Header title="TheDay" setSearch={setSearch} isSearch={true} />
       {loading && offline && <Offline />}
