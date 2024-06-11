@@ -1,7 +1,7 @@
 
 
 
-# <p align="center" ><img align="center" src="https://github.com/DevAbdoTolba/theday/assets/100101090/73b4464f-13cc-45e4-a922-5b6dafc33088"><br> <br> TheDay </p>
+# <p align="center" ><img align="center" src="https://raw.githubusercontent.com/DevAbdoTolba/theday/main/public/icon-192x192.png"><br> <br> TheDay </p>
 
 Made with <img height=20 width=20 src="https://cdn-0.emojis.wiki/emoji-pics-lf/telegram/heart-with-ribbon-telegram.gif" />, by AASTMT aswan <strong> CS"2110 </strong> students
 
