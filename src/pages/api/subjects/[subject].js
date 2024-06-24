@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
     const Files = await google?.drive({ version: "v3", auth })?.files?.list({
       q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
-      fields: "files(mimeType,name,size,id,parents)",
+      fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
       pageSize: 1000,
     });
     for (let i = 0; i < Files?.data?.files?.length; i++) {
