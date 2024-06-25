@@ -226,7 +226,8 @@ export default function Header({
               label="className"
               onChange={(e) => {
                 setClassName(e.target.value);
-                localStorage.setItem("className", e.target.value.class);
+                // @ts-ignore
+                localStorage.setItem("className", e?.target?.value?.class);
               }}
             >
               {classes.map((c: any) => (
