@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import default2110 from "./data.json";
 
 interface Transcript {
@@ -58,7 +59,9 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
 
   const q = useSearchParams().get("q") ?? "";
+  const router = useRouter();
   useEffect(() => {
+    if (!router.isReady) return;
     const fetchTranscript = async () => {
       // get q from url name
 
@@ -80,11 +83,12 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setTranscript(default2110);
       } finally {
         setLoadingTranscript(false);
+        console.log("Transcript fetched " + q);
       }
     };
 
     fetchTranscript();
-  }, [q]);
+  }, [q, router.isReady]);
 
   // check which type is transcriptData
   let transcript: Transcript[] | defaultData = transcriptData;
