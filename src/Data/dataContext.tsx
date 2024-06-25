@@ -104,9 +104,10 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
       { semesters: transcript?.transcript?.data }
     : transcript;
   useEffect(() => {
-    if (q == null) return;
-    localStorage.setItem("transcript", JSON.stringify(transcript));
-    localStorage.setItem("className", className);
+    if (q !== null && window.location.href.indexOf("theday") !== -1) {
+      localStorage.setItem("transcript", JSON.stringify(transcript));
+      localStorage.setItem("className", className);
+    }
 
     if (q !== "" && className !== "default") {
       const classes =

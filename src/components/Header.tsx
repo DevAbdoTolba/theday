@@ -126,15 +126,19 @@ export default function Header({
 }: Props) {
   const [className, setClassName] = useState<string>("");
   React.useEffect(() => {
-    console.log(localStorage.getItem("className"));
-    console.log(
-      localStorage.getItem(localStorage.getItem("className") as string)
-    );
+    const classToStore = JSON.parse(localStorage.getItem("classes") as string);
+    const className = localStorage.getItem("className") as string;
 
-    setClassName(
-      localStorage.getItem(localStorage.getItem("className") as string) || ""
-    );
+    if (classToStore?.length > 0 && className !== "default") {
+      // search for which class is stored and get the id
+
+      const classId = classToStore.find((c: any) => c.class === className)?.id;
+      setClassName(classId);
+    } else {
+      setClassName("1");
+    }
   }, []);
+
   const [open, setOpen] = useState(false);
   shortCutActivate = shortCutActivate || false;
   React.useEffect(() => {
