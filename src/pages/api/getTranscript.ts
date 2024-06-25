@@ -15,7 +15,7 @@ export default async function handler(
       res.status(400).json({ message: "Missing parameters 'className' " });
       return;
     }
-    
+
     const transcript = await getTranscript(className);
     res.status(200).json({ transcript });
   } else {
@@ -42,11 +42,14 @@ async function getTranscript(className: string) {
     TranscriptModel = connection.model("classes", new mongoose.Schema({}));
   }
   console.log("Connected to the database", mongoose.connection.readyState);
-  
+
   // get the data
   const transcript = await TranscriptModel.findOne(
-    // search for id object classes
-    { class: className }
+    // search of id
+    { _id: className }
+
+    // search for className object classes
+    // { class: className }
   );
 
   return transcript;
