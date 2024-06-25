@@ -88,17 +88,25 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // check which type is transcriptData
   let transcript: Transcript[] | defaultData = transcriptData;
-  let className;
+  let className: string;
 
   transcript = transcriptData;
-  className = "default";
+
+  // @ts-ignore
+  className = transcriptData?.transcript
+    ? transcriptData.transcript.class
+    : "default";
 
   // @ts-ignore
   transcript = transcript?.transcript
     ? // @ts-ignore
       { semesters: transcript?.transcript?.data }
     : transcript;
-
+  useEffect(() => {
+    if (q == null) return;
+    localStorage.setItem("transcript", JSON.stringify(transcript));
+    localStorage.setItem("className", className);
+  }, [transcript, className]);
   return (
     <DataContext.Provider
       // @ts-ignore

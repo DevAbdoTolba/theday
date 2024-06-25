@@ -124,6 +124,10 @@ export default function Header({
 
   ...props
 }: Props) {
+  const [className, setClassName] = useState<string>("");
+  React.useEffect(() => {
+    setClassName(localStorage.getItem("className") || "");
+  }, []);
   const [open, setOpen] = useState(false);
   shortCutActivate = shortCutActivate || false;
   React.useEffect(() => {
@@ -183,7 +187,7 @@ export default function Header({
             >
               <Button
                 LinkComponent={NextLink}
-                href={"/theday"}
+                href={"/theday" + (className ? `?q=${className}` : "")}
                 disableRipple
                 sx={{
                   display: "flex",
