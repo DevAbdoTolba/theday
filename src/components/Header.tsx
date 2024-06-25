@@ -126,7 +126,14 @@ export default function Header({
 }: Props) {
   const [className, setClassName] = useState<string>("");
   React.useEffect(() => {
-    setClassName(localStorage.getItem("className") || "");
+    console.log(localStorage.getItem("className"));
+    console.log(
+      localStorage.getItem(localStorage.getItem("className") as string)
+    );
+
+    setClassName(
+      localStorage.getItem(localStorage.getItem("className") as string) || ""
+    );
   }, []);
   const [open, setOpen] = useState(false);
   shortCutActivate = shortCutActivate || false;
