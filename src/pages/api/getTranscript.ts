@@ -1,5 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
+const dotenv = require('dotenv');
+
+dotenv.config(); // Load environment variables from .env file
+
+
 
 export default async function handler(
   req: NextApiRequest,
