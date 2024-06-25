@@ -1,3 +1,6 @@
+import { useContext } from "react";
+import { DataContext } from "../../Data/dataContext";
+
 import Box from "@mui/material/Box";
 import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
@@ -15,6 +18,7 @@ interface Props {
 }
 
 function MainPhone({ search, currentSemester }: Props) {
+  const { transcript, loadingTranscript, error } = useContext(DataContext);
   return (
     <Box
       sx={{
@@ -25,16 +29,17 @@ function MainPhone({ search, currentSemester }: Props) {
         },
       }}
     >
-      {data.semesters
+      {/* @ts-ignore */}
+      {transcript.semesters
         .filter(
-          (x) =>
+          (x: any) =>
             x.subjects.filter(
-              (y) =>
+              (y: any) =>
                 y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
                 y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
             ).length > 0
         )
-        .map((item, index) => (
+        .map((item: any, index: any) => (
           <Accordion
             key={index}
             sx={{
@@ -55,14 +60,14 @@ function MainPhone({ search, currentSemester }: Props) {
               <Grid container spacing={2} sx={{ marginBottom: 3 }}>
                 {item.subjects
                   .filter(
-                    (y) =>
+                    (y: any) =>
                       y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
                       y?.abbreviation
                         ?.toLowerCase()
                         .includes(search?.toLowerCase())
                   )
 
-                  .map((subjects, subIndex) => (
+                  .map((subjects: any, subIndex: any) => (
                     <Grid
                       key={subIndex}
                       item
