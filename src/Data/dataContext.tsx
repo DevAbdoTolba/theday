@@ -57,7 +57,7 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loadingTranscript, setLoadingTranscript] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const q = useSearchParams().get("q");
+  const q = useSearchParams().get("q") ?? "";
   useEffect(() => {
     const fetchTranscript = async () => {
       // get q from url name
@@ -94,8 +94,8 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // @ts-ignore
   className = transcriptData?.transcript
-  // @ts-ignore
-    ? transcriptData.transcript.class
+    ? // @ts-ignore
+      transcriptData.transcript.class
     : "default";
 
   // @ts-ignore
@@ -107,7 +107,24 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (q == null) return;
     localStorage.setItem("transcript", JSON.stringify(transcript));
     localStorage.setItem("className", className);
-  }, [transcript, className]);
+
+    if (q !== "" && className !== "default") {
+      const classes =
+        JSON.parse(localStorage.getItem("classes") as string) || [];
+      const storedClasses =
+        JSON.parse(localStorage.getItem("classes") as string) || [];
+      const isDuplicate = storedClasses.some(
+        (storedClass: any) =>
+          storedClass.class === className && storedClass.id === q
+      );
+      if (!isDuplicate) {
+        localStorage.setItem(
+          "classes",
+          JSON.stringify([...storedClasses, { class: className, id: q }])
+        );
+      }
+    }
+  }, [transcript, className, q]);
   return (
     <DataContext.Provider
       // @ts-ignore
