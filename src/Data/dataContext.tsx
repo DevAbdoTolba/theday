@@ -94,6 +94,7 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // @ts-ignore
   className = transcriptData?.transcript
+  // @ts-ignore
     ? transcriptData.transcript.class
     : "default";
 
