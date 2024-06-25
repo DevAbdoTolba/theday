@@ -13,7 +13,6 @@ import Footer from "../../components/Footer";
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
-import data from "src/Data/data.json";
 
 import { Paper, Box } from "@mui/material";
 
@@ -24,6 +23,7 @@ import Head from "next/head";
 
 import Offline from "../../components/Offline";
 import { offlineContext } from "../_app";
+import { DataContext } from "../../Data/dataContext";
 
 const Main = lazy(() => import("./Main"));
 
@@ -32,6 +32,7 @@ const Alert = forwardRef(function Alert(props: any, ref: any) {
 });
 
 function App() {
+  const { transcript, loadingTranscript, error } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
   const [currentSemester, setCurrentSemester] = useState(-1);
   const [search, setSearch] = useState("");
@@ -59,18 +60,21 @@ function App() {
   };
 
   useEffect(() => {
-    // @ts-ignore
-    const semester = JSON.parse(localStorage.getItem("semester"));
-    if (semester == data.semesters[data.semesters.length - 1].index) {
+    const semester = JSON.parse(localStorage.getItem("semester") as string);
+    console.log(transcript);
+    
+    if (
+      // @ts-ignore
+      semester == transcript.semesters[transcript.semesters.length - 1].index
+    ) {
       setIsMaxSemester(1);
     } else {
       setIsMaxSemester(0);
     }
-  }, []);
+  }, [transcript]);
 
   useEffect(() => {
-    // @ts-ignore
-    const semester = JSON.parse(localStorage.getItem("semester"));
+    const semester = JSON.parse(localStorage.getItem("semester") as string);
 
     if (semester) {
       setCurrentSemester(semester);
@@ -92,8 +96,8 @@ function App() {
         <link rel="icon" href={"./main.png"} />
       </Head>
       <Header title="TheDay" setSearch={setSearch} isSearch={true} />
-      {loading && offline && <Offline />}
-      {!loading && (
+      {loadingTranscript && offline && <Offline />}
+      {!loadingTranscript && (
         <Box
           sx={{
             pt: { sm: "2%", xs: "10%" },
