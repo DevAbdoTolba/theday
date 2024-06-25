@@ -1,12 +1,13 @@
 import "../styles/Material.css";
 
-import React from "react";
+import React, { useContext } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Button, CssBaseline } from "@mui/material";
 import { Analytics } from "@vercel/analytics/react";
 import Offline from "../components/Offline";
 import Image from "next/image";
 import Head from "next/head";
+import { DataContextProvider } from "../Data/dataContext";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {
@@ -35,7 +36,13 @@ const theme = createTheme({
 
 export const offlineContext = React.createContext<any>({});
 
-export default function App({ Component, pageProps }: { Component: React.ComponentType<any>, pageProps: any }) {
+export default function App({
+  Component,
+  pageProps,
+}: {
+  Component: React.ComponentType<any>;
+  pageProps: any;
+}) {
   // const classes = useStyles();
 
   React.useEffect(() => {
@@ -62,32 +69,36 @@ export default function App({ Component, pageProps }: { Component: React.Compone
   // check if there is a localstorage named "first-open-date" if not set it to the current date
   if (typeof window !== "undefined") {
     if (!localStorage.getItem("first-open-date")) {
-      localStorage.setItem("first-open-date", (new Date()).toISOString().split('T')[0]);
+      localStorage.setItem(
+        "first-open-date",
+        new Date().toISOString().split("T")[0]
+      );
     }
   }
 
-
   return (
-    <offlineContext.Provider value={[offline, setOffline]}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Image
-          src={"/icon-512x512.png"}
-          alt="icon"
-          width={"200"}
-          height={"200"}
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: -100,
-            opacity: 0,
-          }}
-        />
-        <Component {...pageProps} />
-        <Analytics />
-      </ThemeProvider>
-    </offlineContext.Provider>
+    <DataContextProvider>
+      <offlineContext.Provider value={[offline, setOffline]}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Image
+            src={"/icon-512x512.png"}
+            alt="icon"
+            width={"200"}
+            height={"200"}
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: -100,
+              opacity: 0,
+            }}
+          />
+          <Component {...pageProps} />
+          <Analytics />
+        </ThemeProvider>
+      </offlineContext.Provider>
+    </DataContextProvider>
   );
 }
