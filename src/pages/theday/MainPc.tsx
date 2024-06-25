@@ -1,3 +1,6 @@
+import { useContext } from "react";
+import { DataContext } from "../../Data/dataContext";
+
 import Box from "@mui/material/Box";
 import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
@@ -23,6 +26,8 @@ export default function MainPc({ search, currentSemester }: Props) {
     color: theme.palette.text.secondary,
   }));
 
+  const { transcript, loadingTranscript, error } = useContext(DataContext);
+
   return (
     <>
       <Box
@@ -35,7 +40,6 @@ export default function MainPc({ search, currentSemester }: Props) {
         }}
       >
         <Grid container spacing={2}>
-          
           {/*Filter for search
 1-Semesters
 2-Subjects
@@ -43,20 +47,20 @@ export default function MainPc({ search, currentSemester }: Props) {
 5-abbreviation
 .filter?
 */}
-
-          {data.semesters
+          {/* @ts-ignore */}
+          {transcript.semesters
             .filter(
-              (x) =>
+              (x: any) =>
                 x.index !== currentSemester &&
                 x.subjects.filter(
-                  (y) =>
+                  (y: any) =>
                     y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
                     y?.abbreviation
                       ?.toLowerCase()
                       .includes(search?.toLowerCase())
                 ).length > 0
             )
-            .map((item, index) => (
+            .map((item: any, index: any) => (
               <Grid key={index} item xs={4}>
                 <Item
                   sx={{
@@ -76,7 +80,7 @@ export default function MainPc({ search, currentSemester }: Props) {
                   <Grid container spacing={2} sx={{ marginBottom: 3 }}>
                     {item.subjects
                       .filter(
-                        (y) =>
+                        (y: any) =>
                           y?.name
                             ?.toLowerCase()
                             .includes(search?.toLowerCase()) ||
@@ -84,7 +88,7 @@ export default function MainPc({ search, currentSemester }: Props) {
                             ?.toLowerCase()
                             .includes(search?.toLowerCase())
                       )
-                      .map((subjects, subIndex) => (
+                      .map((subjects: any, subIndex: any) => (
                         <Grid key={subIndex} item>
                           <Tooltip
                             title={subjects?.name}
