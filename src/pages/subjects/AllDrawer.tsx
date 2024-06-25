@@ -1,7 +1,4 @@
 import * as React from "react";
-import { useContext } from "react";
-import { DataContext } from "../../Data/dataContext";
-
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Snackbar from "@mui/material/Snackbar";
@@ -20,6 +17,7 @@ import {
   Zoom,
 } from "@mui/material";
 
+import subjectsData from "../../Data/data.json";
 import Link from "@mui/material/Link";
 import nextLink from "next/link";
 
@@ -40,8 +38,6 @@ export default function AllDrawer({
   subject,
   showDrawer,
 }: Props) {
-  const { transcript, loadingTranscript, error } = useContext(DataContext);
-
   let currentSemester = -1;
   let showDrawerFromLocalStorage: undefined | boolean = undefined;
   if (typeof window !== "undefined") {
@@ -146,8 +142,7 @@ export default function AllDrawer({
           variant={showDrawer ? "permanent" : "temporary"}
           anchor="left"
         >
-          {/* @ts-ignore */}
-          {transcript.semesters.map((item, index) => (
+          {subjectsData.semesters.map((item, index) => (
             <Accordion
               key={index}
               expanded={expanded === "panel" + index}
@@ -187,7 +182,7 @@ export default function AllDrawer({
                   },
                 }}
               >
-                {item?.subjects.map((item: any, index: any) => (
+                {item?.subjects.map((item, index) => (
                   <Box
                     key={index}
                     display={"flex"}
