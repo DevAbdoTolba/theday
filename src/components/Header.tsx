@@ -10,8 +10,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Button, Link } from "@mui/material";
+import { Button, Link, MenuItem, Select } from "@mui/material";
 import NextLink from "next/link";
+import NativeSelect from "@mui/material/NativeSelect";
 
 interface Data {
   id: string;
@@ -125,8 +126,10 @@ export default function Header({
   ...props
 }: Props) {
   const [className, setClassName] = useState<string>("");
+  const [classes, setClasses] = useState<any>([]);
   React.useEffect(() => {
     const classToStore = JSON.parse(localStorage.getItem("classes") as string);
+    setClasses(classToStore);
     const className = localStorage.getItem("className") as string;
 
     if (classToStore?.length > 0 && className !== "default") {
@@ -216,6 +219,36 @@ export default function Header({
               </Button>
             </Tooltip>
           </Typography>
+
+          {classes?.length > 1 && (
+            <Select
+              defaultValue={className.toString()}
+              label="className"
+              onChange={(e) => {
+                setClassName(e.target.value);
+                localStorage.setItem("className", e.target.value.class);
+              }}
+            >
+              {classes.map((c: any) => (
+                <MenuItem
+                  key={c.id}
+                  value={c}
+                  sx={{
+                    // set all a tag in menu items to have white color
+                    a: {
+                      color: "#ccc",
+                    },
+                    // on hover change the color of the a tag to blue
+                    "&:hover a": {
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  <a href={"/theday?q=" + c.id}>{c.class}</a>
+                </MenuItem>
+              ))}
+            </Select>
+          )}
           {/* <LinkMUI 
               component={
                 RouterLink  
@@ -287,7 +320,7 @@ export default function Header({
                 <StyledInputBase
                   placeholder="Search…"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e: any) => setSearch(e.target.value)}
                   inputProps={{ "aria-label": "search" }}
                 />
               </Search>
