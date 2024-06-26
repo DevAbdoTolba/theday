@@ -3,6 +3,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import default2110 from "./data.json";
+import Loading from "../components/Loading";
 
 interface Transcript {
   transcript: {
@@ -46,96 +47,125 @@ export const DataContext = createContext<DataContextValue>(
 export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // print colored and change size in console log says context here
-  // console.log(
-  //   "%ccontext",
-  //   "color: #fff; background-color: #f44336; font-size: 16px; padding: 4px 8px; border-radius: 4px"
-  // );
-
-  const [transcriptData, setTranscript] = useState<defaultData | Transcript[]>(
-    default2110
-  );
-  const [loadingTranscript, setLoadingTranscript] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
   const q = useSearchParams().get("q") ?? "";
   const router = useRouter();
+  const [transcript, setTranscript] = useState<Transcript | defaultData | null>(
+    null
+  );
+  const [loadingTranscript, setLoadingTranscript] = useState(true);
+  const [className, setClassName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!router.isReady) return;
-    const fetchTranscript = async () => {
-      // get q from url name
+    console.log("here " + q + " <== Q");
 
-      try {
-        setLoadingTranscript(true);
-        const response = await fetch("/api/getTranscript?className=" + q);
-        const data = await response.json();
-        // check if transcript is null
-        if (data.transcript == null) {
-          // throw an error
-          throw new Error("Transcript not found");
+    function thereQ() {}
+    function noQ() {}
+
+    function stored() {}
+    function notStored() {}
+
+    function valid() {}
+    function notValid() {}
+
+    if (q) {
+      // check if stored
+      if (
+        JSON.parse(localStorage.getItem("classes") as string) &&
+        JSON.parse(localStorage.getItem("classes") as string).some(
+          (storedClass: any) => storedClass.class === q
+        )
+      ) {
+        // ========= STORED =========
+        const storedClasses =
+          JSON.parse(localStorage.getItem("classes") as string) || [];
+
+        const storedClass = storedClasses.find(
+          (storedClass: any) => storedClass.id === q
+        );
+
+        if (storedClass) {
+          setTranscript(
+            JSON.parse(localStorage.getItem(storedClass.class) as string)
+          );
+          setClassName(storedClass.class);
         }
-        setError(null);
-        setTranscript(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
-        setTranscript(default2110);
-      } finally {
-        setLoadingTranscript(false);
-        console.log("Transcript fetched " + q);
+      } else {
+        // ========= !STORED =========
+
+        fetch(`/api/getTranscript?className=${q}`)
+          .then((res) => res.json())
+          .then((res) => {
+            // ========= VALID =========
+
+            // capturing lets
+            let transcript = res.transcript.data;
+            let className = res.transcript.class;
+
+            // setting data
+            setTranscript({ semesters: transcript });
+            setClassName(className);
+            setLoadingTranscript(false);
+
+            // caching data to localStorage store for 1 week
+            // transcript
+            localStorage.setItem(
+              "transcript",
+              JSON.stringify({ semesters: res.transcript.data })
+            );
+
+            // className
+
+            localStorage.setItem("className", className);
+
+            // class cache
+            if (className)
+              localStorage.setItem(
+                className,
+                JSON.stringify({ semesters: res.transcript.data })
+              );
+
+            // classes
+            const classes =
+              JSON.parse(localStorage.getItem("classes") as string) || [];
+
+            const isDuplicate = classes.some(
+              (storedClass: any) =>
+                storedClass.class === className && storedClass.id === q
+            );
+            if (!isDuplicate) {
+              localStorage.setItem(
+                "classes",
+                JSON.stringify([...classes, { class: className, id: q }])
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+            setError("Error fetching data");
+            // ========= !VALID =========
+
+            setTranscript(default2110);
+            setClassName("default");
+
+            setLoadingTranscript(false);
+          });
       }
-    };
-
-    fetchTranscript();
+    } else {
+      setTranscript(default2110);
+      setClassName("default");
+      setLoadingTranscript(false);
+    }
   }, [q, router.isReady]);
 
-  // check which type is transcriptData
-  let transcript: Transcript[] | defaultData = transcriptData;
-  let className: string;
-
-  transcript = transcriptData;
-
-  // @ts-ignore
-  className = transcriptData?.transcript
-    ? // @ts-ignore
-      transcriptData.transcript.class
-    : "default";
-
-  // @ts-ignore
-  transcript = transcript?.transcript
-    ? // @ts-ignore
-      { semesters: transcript?.transcript?.data }
-    : transcript;
-  useEffect(() => {
-    if (q !== null && window.location.href.indexOf("theday") !== -1) {
-      localStorage.setItem("transcript", JSON.stringify(transcript));
-      localStorage.setItem("className", className);
-    }
-
-    if (q !== "" && className !== "default") {
-      const classes =
-        JSON.parse(localStorage.getItem("classes") as string) || [];
-      const storedClasses =
-        JSON.parse(localStorage.getItem("classes") as string) || [];
-      const isDuplicate = storedClasses.some(
-        (storedClass: any) =>
-          storedClass.class === className && storedClass.id === q
-      );
-      if (!isDuplicate) {
-        localStorage.setItem(
-          "classes",
-          JSON.stringify([...storedClasses, { class: className, id: q }])
-        );
-      }
-    }
-  }, [transcript, className, q]);
   return (
     <DataContext.Provider
       // @ts-ignore
       value={{ transcript, className, loadingTranscript, error }}
     >
-      {children}
+      {/* {loadingTranscript ? <Loading /> : <Loading />} */}
+      {loadingTranscript ? <Loading /> : children}
     </DataContext.Provider>
   );
 };

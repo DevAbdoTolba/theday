@@ -126,20 +126,28 @@ export default function Header({
   ...props
 }: Props) {
   const [className, setClassName] = useState<string>("");
+  const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
+
   React.useEffect(() => {
-    const classToStore = JSON.parse(localStorage.getItem("classes") as string);
-    setClasses(classToStore);
-    const className = localStorage.getItem("className") as string;
+    const className = (localStorage.getItem("className") as string) || "";
+    setClassName(className);
+    setClasses(JSON.parse(localStorage.getItem("classes") as string) || []);
+    setQ(classes.find((c: any) => c.class === className)?.id || "");
 
-    if (classToStore?.length > 0 && className !== "default") {
-      // search for which class is stored and get the id
-
-      const classId = classToStore.find((c: any) => c.class === className)?.id;
-      setClassName(classId);
-    } else {
-      setClassName("1");
-    }
+    // const classToStore = JSON.parse(localStorage.getItem("classes") as string);
+    // setClasses(classToStore);
+    // const className = localStorage.getItem("className") as string;
+    // if (classToStore?.length > 0) {
+    //   // search for which class is stored and get the id
+    //   console.log("INSIDE IF");
+    //   const classId = classToStore.find((e: any) => e === className)?.id;
+    //   console.log("classId", classId);
+    //   console.log("🚀 ~ React.useEffect ~ className:", className);
+    //   setClassName(classId);
+    // } else {
+    //   setClassName("1");
+    // }
   }, []);
 
   const [open, setOpen] = useState(false);
@@ -201,7 +209,7 @@ export default function Header({
             >
               <Button
                 LinkComponent={NextLink}
-                href={"/theday" + (className ? `?q=${className}` : "")}
+                href={"/theday" + (q ? `?q=${q}` : "")}
                 disableRipple
                 sx={{
                   display: "flex",
@@ -222,8 +230,9 @@ export default function Header({
 
           {classes?.length > 1 && (
             <Select
-              defaultValue={className.toString()}
-              label="className"
+              defaultValue={className?.toString()}
+              label={className}
+              // add a default selected option
               onChange={(e) => {
                 setClassName(e.target.value);
                 // @ts-ignore
@@ -232,12 +241,20 @@ export default function Header({
             >
               {classes.map((c: any) => (
                 <MenuItem
+                  disabled={c.class === className}
+                  LinkComponent={NextLink}
                   key={c.id}
                   value={c}
                   sx={{
+                    all: "unset",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "column",
                     // set all a tag in menu items to have white color
                     a: {
-                      color: "#ccc",
+                      color: c.class === className ? "#4caf50" : "#fff",
+                      padding: "0.5rem",
                     },
                     // on hover change the color of the a tag to blue
                     "&:hover a": {
@@ -245,7 +262,7 @@ export default function Header({
                     },
                   }}
                 >
-                  <a href={"/theday?q=" + c.id}>{c.class}</a>
+                  <NextLink href={`/theday?q=${c.id}`}>{c.class}</NextLink>
                 </MenuItem>
               ))}
             </Select>
