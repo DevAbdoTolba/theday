@@ -121,7 +121,7 @@ function App() {
           <Paper
             sx={{
               width: "100%",
-              height: "100dvh",
+              minHeight: "100dvh",
               maxWidth: { sm: "80%", xs: "100%" },
               position: "relative",
             }}
