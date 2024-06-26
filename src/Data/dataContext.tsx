@@ -80,7 +80,8 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log("Stored");
 
           // ========= STORED =========
-
+          const storedClasses =
+            JSON.parse(localStorage.getItem("classes") as string) || [];
           const storedClass = storedClasses.find(
             (storedClass: any) => storedClass.id === q
           );
@@ -131,8 +132,6 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
                       console.log(e);
                     }
                   });
-                  localStorage.removeItem("classes");
-                  localStorage.removeItem("className");
                   localStorage.removeItem("transcriptStoredAt");
                   handlingContext();
                 }
