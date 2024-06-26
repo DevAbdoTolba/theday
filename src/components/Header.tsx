@@ -134,7 +134,7 @@ export default function Header({
     const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
     console.log("classes", classes);
     console.log("className", className);
-    
+
     setClassName(className);
     setClasses(classes);
     setQ(classes.find((c: any) => c.class === className)?.id || "");
@@ -213,7 +213,7 @@ export default function Header({
             >
               <Button
                 LinkComponent={NextLink}
-                href={"/theday" + (q ? `?q=${q}` : "")}
+                href={"/theday" + (q ? `/q/${q}` : "")}
                 disableRipple
                 sx={{
                   display: "flex",
@@ -266,7 +266,7 @@ export default function Header({
                     },
                   }}
                 >
-                  <NextLink href={`/theday?q=${c.id}`}>
+                  <NextLink href={`/theday/q/${c.id}`}>
                     {c?.class as string}
                   </NextLink>
                 </MenuItem>
