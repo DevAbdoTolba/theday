@@ -7,6 +7,7 @@ import FormDialog from "./FormDialog";
 
 import Head from "next/head";
 import Image from "next/image";
+import Loading from "../../components/Loading";
 
 interface note {
   title: string;
@@ -68,7 +69,7 @@ const App = () => {
         }}
       >
         {notes.length ? (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Loading />}>
             <Main search={search} notes={notes} setNotes={setNotes} />
           </Suspense>
         ) : (

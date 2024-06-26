@@ -62,7 +62,7 @@ function App() {
   useEffect(() => {
     const semester = JSON.parse(localStorage.getItem("semester") as string);
     console.log(transcript);
-    
+
     if (
       // @ts-ignore
       semester == transcript.semesters[transcript.semesters.length - 1].index

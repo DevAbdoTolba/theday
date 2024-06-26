@@ -17,6 +17,7 @@ import Drawer from "./AllDrawer";
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
 
+import Loading from "../../components/Loading";
 const TabsPC = lazy(() => import("./TabsPc"));
 const TabsPhone = lazy(() => import("./TabsPhone"));
 
@@ -161,24 +162,26 @@ function SubjectPage() {
     >
       <Head>
         <title>
-          {subjectLoading
-            ? "Loading..."
-            : (() => {
-                // check if there is a localstorage named "first-visited-subject" if not set it to the current date
+          {subjectLoading ? (
+            <Loading />
+          ) : (
+            (() => {
+              // check if there is a localstorage named "first-visited-subject" if not set it to the current date
 
-                if (!localStorage.getItem("first-visited-subject")) {
-                  localStorage.setItem(
-                    "first-visited-subject",
-                    subject.toUpperCase()
-                  );
-                }
-                // update localstorage "last-visited-subject" to the current subjcet name
+              if (!localStorage.getItem("first-visited-subject")) {
                 localStorage.setItem(
-                  "last-visited-subject",
+                  "first-visited-subject",
                   subject.toUpperCase()
                 );
-                return subject.toUpperCase();
-              })()}
+              }
+              // update localstorage "last-visited-subject" to the current subjcet name
+              localStorage.setItem(
+                "last-visited-subject",
+                subject.toUpperCase()
+              );
+              return subject.toUpperCase();
+            })()
+          )}
         </title>
         <link rel="icon" href={"../book.png"} />
         <style>
@@ -195,19 +198,20 @@ function SubjectPage() {
       ) : (
         <>
           {materialLoading ? (
-            <Typography
-              variant="h5"
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%,-50%)",
-              }}
-            >
-              Loading{dots}
-            </Typography>
+            // <Typography
+            //   variant="h5"
+            //   sx={{
+            //     position: "absolute",
+            //     top: "50%",
+            //     left: "50%",
+            //     transform: "translate(-50%,-50%)",
+            //   }}
+            // >
+            //   Loading{dots}
+            // </Typography>
+            <Loading />
           ) : (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<Loading />}>
               {!data ? (
                 <NoData />
               ) : !Object?.keys(data)?.length ? (
