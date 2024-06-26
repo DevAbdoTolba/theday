@@ -68,94 +68,132 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     function valid() {}
     function notValid() {}
+    handlingContext();
+    function handlingContext() {
+      if (q) {
+        // check if stored
+        if (
+          JSON.parse(localStorage.getItem("classes") as string) &&
+          JSON.parse(localStorage.getItem("classes") as string).some(
+            (storedClass: any) => storedClass.class === q
+          )
+        ) {
+          // ========= STORED =========
+          const storedClasses =
+            JSON.parse(localStorage.getItem("classes") as string) || [];
 
-    if (q) {
-      // check if stored
-      if (
-        JSON.parse(localStorage.getItem("classes") as string) &&
-        JSON.parse(localStorage.getItem("classes") as string).some(
-          (storedClass: any) => storedClass.class === q
-        )
-      ) {
-        // ========= STORED =========
-        const storedClasses =
-          JSON.parse(localStorage.getItem("classes") as string) || [];
-
-        const storedClass = storedClasses.find(
-          (storedClass: any) => storedClass.id === q
-        );
-
-        if (storedClass) {
-          setTranscript(
-            JSON.parse(localStorage.getItem(storedClass.class) as string)
+          const storedClass = storedClasses.find(
+            (storedClass: any) => storedClass.id === q
           );
-          setClassName(storedClass.class);
-        }
-      } else {
-        // ========= !STORED =========
 
-        fetch(`/api/getTranscript?className=${q}`)
-          .then((res) => res.json())
-          .then((res) => {
-            // ========= VALID =========
-
-            // capturing lets
-            let transcript = res.transcript.data;
-            let className = res.transcript.class;
-
-            // setting data
-            setTranscript({ semesters: transcript });
-            setClassName(className);
-            setLoadingTranscript(false);
-
-            // caching data to localStorage store for 1 week
-            // transcript
-            localStorage.setItem(
-              "transcript",
-              JSON.stringify({ semesters: res.transcript.data })
+          if (storedClass) {
+            setTranscript(
+              JSON.parse(localStorage.getItem(storedClass.class) as string)
             );
+            setClassName(storedClass.class);
+          }
+        } else {
+          // ========= !STORED =========
 
-            // className
+          fetch(`/api/getTranscript?className=${q}`)
+            .then((res) => res.json())
+            .then((res) => {
+              // ========= VALID =========
 
-            localStorage.setItem("className", className);
+              // ================== Handling Caching time ==================
+              /*
+              classes
+              class in classes
+              transcript
+              className
+            */
+              if (!localStorage.getItem("transcriptStoredAt")) {
+                localStorage.setItem(
+                  "transcriptStoredAt",
+                  new Date().getTime().toString()
+                );
+              } else {
+                const storedAt = parseInt(
+                  localStorage.getItem("transcriptStoredAt") as string
+                );
 
-            // class cache
-            if (className)
+                if (new Date().getTime() - storedAt > 604800000) {
+                  localStorage.removeItem("transcriptStoredAt");
+                  localStorage.removeItem("transcript");
+                  // remove each class which name is in classes
+                  const classes =
+                    JSON.parse(localStorage.getItem("classes") as string) || [];
+                  classes.forEach((storedClass: any) => {
+                    try {
+                      localStorage.removeItem(storedClass.class);
+                    } catch (e) {
+                      console.log(e);
+                    }
+                  });
+                  localStorage.removeItem("classes");
+                  localStorage.removeItem("className");
+                  localStorage.removeItem("transcriptStoredAt");
+                  handlingContext();
+                }
+              }
+              // capturing lets
+              let transcript = res.transcript.data;
+              let className = res.transcript.class;
+
+              // setting data
+              setTranscript({ semesters: transcript });
+              setClassName(className);
+              setLoadingTranscript(false);
+
+              // caching data to localStorage store for 1 week
+              // transcript
               localStorage.setItem(
-                className,
+                "transcript",
                 JSON.stringify({ semesters: res.transcript.data })
               );
 
-            // classes
-            const classes =
-              JSON.parse(localStorage.getItem("classes") as string) || [];
+              // className
 
-            const isDuplicate = classes.some(
-              (storedClass: any) =>
-                storedClass.class === className && storedClass.id === q
-            );
-            if (!isDuplicate) {
-              localStorage.setItem(
-                "classes",
-                JSON.stringify([...classes, { class: className, id: q }])
+              localStorage.setItem("className", className);
+
+              // class cache
+              if (className)
+                localStorage.setItem(
+                  className,
+                  JSON.stringify({ semesters: res.transcript.data })
+                );
+
+              // classes
+              const classes =
+                JSON.parse(localStorage.getItem("classes") as string) || [];
+
+              const isDuplicate = classes.some(
+                (storedClass: any) =>
+                  storedClass.class === className && storedClass.id === q
               );
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data: ", error);
-            setError("Error fetching data");
-            // ========= !VALID =========
+              if (!isDuplicate) {
+                localStorage.setItem(
+                  "classes",
+                  JSON.stringify([...classes, { class: className, id: q }])
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching data: ", error);
+              setError("Error fetching data");
+              // ========= !VALID =========
 
-            setTranscript(default2110);
-            setClassName("default");
+              setTranscript(default2110);
+              setClassName("default");
 
-            setLoadingTranscript(false);
-          });
+              setLoadingTranscript(false);
+            });
+        }
+      } else {
+        setTranscript(default2110);
+        setClassName("default");
+        setLoadingTranscript(false);
       }
-    } else {
-      setTranscript(default2110);
-      setClassName("default");
-      setLoadingTranscript(false);
     }
   }, [q, router.isReady]);
 
