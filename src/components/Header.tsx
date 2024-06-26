@@ -131,8 +131,12 @@ export default function Header({
 
   React.useEffect(() => {
     const className = (localStorage.getItem("className") as string) || "";
+    const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
+    console.log("classes", classes);
+    console.log("className", className);
+    
     setClassName(className);
-    setClasses(JSON.parse(localStorage.getItem("classes") as string) || []);
+    setClasses(classes);
     setQ(classes.find((c: any) => c.class === className)?.id || "");
 
     // const classToStore = JSON.parse(localStorage.getItem("classes") as string);
