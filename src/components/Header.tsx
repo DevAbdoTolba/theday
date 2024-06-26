@@ -244,7 +244,7 @@ export default function Header({
                   disabled={c.class === className}
                   LinkComponent={NextLink}
                   key={c.id}
-                  value={c}
+                  value={c.name}
                   sx={{
                     all: "unset",
                     display: "flex",
@@ -262,7 +262,9 @@ export default function Header({
                     },
                   }}
                 >
-                  <NextLink href={`/theday?q=${c.id}`}>{c.class}</NextLink>
+                  <NextLink href={`/theday?q=${c.id}`}>
+                    {c?.class as string}
+                  </NextLink>
                 </MenuItem>
               ))}
             </Select>
