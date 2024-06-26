@@ -68,19 +68,18 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
     function valid() {}
     function notValid() {}
+
     handlingContext();
     function handlingContext() {
       if (q) {
         // check if stored
-        if (
-          JSON.parse(localStorage.getItem("classes") as string) &&
-          JSON.parse(localStorage.getItem("classes") as string).some(
-            (storedClass: any) => storedClass.class === q
-          )
-        ) {
+        const storedClasses =
+          JSON.parse(localStorage.getItem("classes") as string) || [];
+
+        if (storedClasses.some((storedClass: any) => storedClass.id === q)) {
+          console.log("Stored");
+
           // ========= STORED =========
-          const storedClasses =
-            JSON.parse(localStorage.getItem("classes") as string) || [];
 
           const storedClass = storedClasses.find(
             (storedClass: any) => storedClass.id === q
@@ -92,13 +91,15 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
             );
             setClassName(storedClass.class);
           }
+          setLoadingTranscript(false);
         } else {
+          console.log("Not Stored");
           // ========= !STORED =========
-
           fetch(`/api/getTranscript?className=${q}`)
             .then((res) => res.json())
             .then((res) => {
               // ========= VALID =========
+              console.log(" Valid");
 
               // ================== Handling Caching time ==================
               /*
@@ -182,6 +183,7 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
               console.error("Error fetching data: ", error);
               setError("Error fetching data");
               // ========= !VALID =========
+              console.log("Not Valid");
 
               setTranscript(default2110);
               setClassName("default");
