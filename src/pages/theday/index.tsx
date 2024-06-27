@@ -9,9 +9,9 @@ export default function Index() {
   React.useEffect(() => {
     const className = localStorage.getItem("className");
     const classes = JSON.parse(localStorage.getItem("classes") as string);
-    const q = classes?.find((c: any) => c?.class === className);
-    if (q && className && classes) {
-      window.location.href = `/theday/q/${q.id}`;
+    const Class = classes?.find((c: any) => c?.class === className);
+    if (Class && className && classes) {
+      window.location.href = `/theday/q/${Class.id}`;
     } else {
       window.location.href = "/theday/q/default";
     }
