@@ -132,8 +132,6 @@ export default function Header({
   React.useEffect(() => {
     const className = (localStorage.getItem("className") as string) || "";
     const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
-    console.log("classes", classes);
-    console.log("className", className);
 
     setClassName(className);
     setClasses(classes);
@@ -237,10 +235,10 @@ export default function Header({
               defaultValue={className?.toString()}
               label={className}
               // add a default selected option
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setClassName(e.target.value);
                 // @ts-ignore
-                localStorage.setItem("className", e?.target?.value?.class);
+                localStorage.setItem("className", e?.target?.value);
               }}
             >
               {classes.map((c: any) => (
@@ -248,7 +246,7 @@ export default function Header({
                   disabled={c.class === className}
                   LinkComponent={NextLink}
                   key={c.id}
-                  value={c.name}
+                  value={c.class}
                   sx={{
                     all: "unset",
                     display: "flex",
