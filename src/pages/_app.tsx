@@ -77,28 +77,35 @@ export default function App({
   }
 
   return (
-    <DataContextProvider>
-      <offlineContext.Provider value={[offline, setOffline]}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Image
-            src={"/icon-512x512.png"}
-            alt="icon"
-            width={"200"}
-            height={"200"}
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: -100,
-              opacity: 0,
-            }}
-          />
-          <Component {...pageProps} />
-          <Analytics />
-        </ThemeProvider>
-      </offlineContext.Provider>
-    </DataContextProvider>
+    <>
+      <Head>
+        <title>{"TheDay"}</title>
+        {/* <meta name="description" content={description} /> */}
+        <link rel="icon" href={"./main.png"} />
+      </Head>
+      <DataContextProvider>
+        <offlineContext.Provider value={[offline, setOffline]}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Image
+              src={"/icon-512x512.png"}
+              alt="icon"
+              width={"200"}
+              height={"200"}
+              style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: -100,
+                opacity: 0,
+              }}
+            />
+            <Component {...pageProps} />
+            <Analytics />
+          </ThemeProvider>
+        </offlineContext.Provider>
+      </DataContextProvider>
+    </>
   );
 }

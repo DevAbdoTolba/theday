@@ -19,8 +19,6 @@ import { Paper, Box } from "@mui/material";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
-import Head from "next/head";
-
 import Offline from "../../../../components/Offline";
 import { offlineContext } from "../../../_app";
 import { DataContext } from "../../../../Data/dataContext";
@@ -65,7 +63,7 @@ function App() {
 
     if (
       // @ts-ignore
-      semester == transcript.semesters[transcript.semesters.length - 1].index
+      semester == transcript?.semesters[transcript?.semesters.length - 1].index
     ) {
       setIsMaxSemester(1);
     } else {
@@ -90,11 +88,6 @@ function App() {
 
   return (
     <>
-      <Head>
-        <title>{"TheDay"}</title>
-        {/* <meta name="description" content={description} /> */}
-        <link rel="icon" href={"./main.png"} />
-      </Head>
       <Header title="TheDay" setSearch={setSearch} isSearch={true} />
       {loadingTranscript && offline && <Offline />}
       {!loadingTranscript && (
