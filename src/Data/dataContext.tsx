@@ -97,7 +97,6 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
               console.log(e);
             }
           });
-          localStorage.removeItem("transcriptStoredAt");
         }
       }
     }
@@ -193,11 +192,11 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
                 JSON.parse(localStorage.getItem(storedClass.class) as string)
               );
               setClassName(storedClass.class);
+              setLoadingTranscript(false);
             } else {
               fetchData();
             }
           }
-          setLoadingTranscript(false);
         } else {
           console.log("Not Stored");
           // ========= !STORED =========
