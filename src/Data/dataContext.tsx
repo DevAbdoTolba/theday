@@ -95,7 +95,6 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           });
           localStorage.removeItem("transcriptStoredAt");
-          handlingContext();
         }
       }
     }
