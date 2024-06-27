@@ -82,7 +82,10 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
         );
 
         if (new Date().getTime() - storedAt > 604800000) {
-          localStorage.removeItem("transcriptStoredAt");
+          localStorage.setItem(
+            "transcriptStoredAt",
+            new Date().getTime().toString()
+          );
           localStorage.removeItem("transcript");
           // remove each class which name is in classes
           const classes =
@@ -113,15 +116,14 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
         className
       */
 
-          handlingWeekCacheClearAndAdd();
           // capturing lets
+
           let transcript = res.transcript.data;
           let className = res.transcript.class;
 
           // setting data
           setTranscript({ semesters: transcript });
           setClassName(className);
-          setLoadingTranscript(false);
 
           // caching data to localStorage store for 1 week
           // transcript
@@ -164,15 +166,11 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
           setTranscript(default2110);
           setClassName("default");
-
+        })
+        .finally(() => {
           setLoadingTranscript(false);
         });
     }
-
-    handlingWeekCacheClearAndAdd();
-
-    handlingContext();
-
     function handlingContext() {
       if (q) {
         // check if stored
@@ -211,6 +209,10 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoadingTranscript(false);
       }
     }
+
+    handlingWeekCacheClearAndAdd();
+
+    handlingContext();
   }, [q, router.isReady]);
 
   return (

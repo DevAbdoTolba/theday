@@ -63,7 +63,7 @@ function App() {
 
     if (
       // @ts-ignore
-      semester == transcript?.semesters[transcript?.semesters.length - 1].index
+      semester == transcript.semesters[transcript.semesters.length - 1].index
     ) {
       setIsMaxSemester(1);
     } else {
