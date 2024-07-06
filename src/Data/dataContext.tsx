@@ -30,6 +30,7 @@ interface DataContextValue {
   transcript: Transcript | defaultData | null;
   loadingTranscript: boolean;
   className: string;
+  setLoadingTranscript: (loading: boolean) => void;
   error: string | null;
 }
 
@@ -37,6 +38,7 @@ const initialDataContextValue: DataContextValue = {
   transcript: null,
   loadingTranscript: false,
   className: "",
+  setLoadingTranscript: () => {},
   error: null,
 };
 
@@ -218,7 +220,13 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <DataContext.Provider
       // @ts-ignore
-      value={{ transcript, className, loadingTranscript, error }}
+      value={{
+        transcript,
+        className,
+        loadingTranscript,
+        setLoadingTranscript,
+        error,
+      }}
     >
       {/* {loadingTranscript ? <Loading /> : <Loading />} */}
       {loadingTranscript ? <Loading /> : children}

@@ -13,6 +13,7 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import { Button, Link, MenuItem, Select } from "@mui/material";
 import NextLink from "next/link";
 import NativeSelect from "@mui/material/NativeSelect";
+import { DataContext } from "../Data/dataContext";
 
 interface Data {
   id: string;
@@ -128,7 +129,7 @@ export default function Header({
   const [className, setClassName] = useState<string>("");
   const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
-
+  const { setLoadingTranscript } = React.useContext(DataContext);
   React.useEffect(() => {
     const className = (localStorage.getItem("className") as string) || "";
     const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
@@ -236,6 +237,10 @@ export default function Header({
               label={className}
               // add a default selected option
               onChange={(e: any) => {
+                // setLoadingTranscript(true);
+                if (localStorage.getItem(e.target.value) === null) {
+                  setLoadingTranscript(true);
+                }
                 setClassName(e.target.value);
                 // @ts-ignore
                 localStorage.setItem("className", e?.target?.value);
