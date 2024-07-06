@@ -245,6 +245,11 @@ export default function Header({
                 // @ts-ignore
                 localStorage.setItem("className", e?.target?.value);
               }}
+              sx={{
+                "& *": {
+                  color: "#fff",
+                },
+              }}
             >
               {classes.map((c: any) => (
                 <MenuItem
