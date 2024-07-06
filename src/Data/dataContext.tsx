@@ -97,7 +97,7 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
               console.log(e);
             }
           });
-          localStorage.removeItem("classes");
+          // localStorage.removeItem("classes");
         }
       }
     }
