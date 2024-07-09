@@ -346,9 +346,7 @@ function Material({
                       {(() => {
                         // remove if found any %20 and replace it with space
                         let name = item?.name;
-                        if (name.includes("%20")) {
-                          name = name.replace(/%20/g, " ");
-                        }
+                  
                         if (name.includes("http")) {
                           let url: URL | string = "";
                           let name_split = name.split(" ");
@@ -433,9 +431,7 @@ function Material({
                     href={
                       (() => {
                         let name = item?.name;
-                        if (name.includes("%20")) {
-                          name = name.replace(/%20/g, " ");
-                        }
+                  
                         if (name.includes("http")) {
                           let url: URL | string = "";
                           let name_split = name.split(" ");
