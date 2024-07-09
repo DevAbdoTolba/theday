@@ -256,9 +256,14 @@ function Material({
                 >
                   <Tooltip
                     title={(() => {
-                      if (item?.name.includes("http")) {
+                      // remove if found any %20 and replace it with space
+                      let name = item?.name;
+                      if (name.includes("%20")) {
+                        name = name.replace(/%20/g, " ");
+                      }
+                      if (name.includes("http")) {
                         let url: URL | string = "";
-                        let name_split = item?.name.split(" ");
+                        let name_split = name.split(" ");
                         // check which index is the url
 
                         let urlIndex = name_split.findIndex((name) =>
@@ -279,7 +284,13 @@ function Material({
                           }
                           return url.hostname;
                         } catch {
-                          return item?.name;
+                          try {
+                            url = new URL(
+                              decodeURIComponent(name_split[urlIndex])
+                            );
+                          } catch {
+                            return item?.name;
+                          }
                         }
                       }
                       return item?.name;
@@ -333,9 +344,14 @@ function Material({
                       variant="h6"
                     >
                       {(() => {
-                        if (item?.name.includes("http")) {
+                        // remove if found any %20 and replace it with space
+                        let name = item?.name;
+                        if (name.includes("%20")) {
+                          name = name.replace(/%20/g, " ");
+                        }
+                        if (name.includes("http")) {
                           let url: URL | string = "";
-                          let name_split = item?.name.split(" ");
+                          let name_split = name.split(" ");
                           // check which index is the url
 
                           let urlIndex = name_split.findIndex((name) =>
@@ -356,7 +372,13 @@ function Material({
                             }
                             return url.hostname;
                           } catch {
-                            return item?.name;
+                            try {
+                              url = new URL(
+                                decodeURIComponent(name_split[urlIndex])
+                              );
+                            } catch {
+                              return item?.name;
+                            }
                           }
                         }
                         return item?.name;
@@ -410,9 +432,13 @@ function Material({
 
                     href={
                       (() => {
-                        if (item?.name.includes("http")) {
+                        let name = item?.name;
+                        if (name.includes("%20")) {
+                          name = name.replace(/%20/g, " ");
+                        }
+                        if (name.includes("http")) {
                           let url: URL | string = "";
-                          let name_split = item?.name.split(" ");
+                          let name_split = name.split(" ");
                           // check which index is the url
 
                           let urlIndex = name_split.findIndex((name) =>
@@ -429,10 +455,20 @@ function Material({
                             }
                             return url.href;
                           } catch {
-                            return  `https://drive.google.com/file/d/${item?.id}/preview`;
+                            try {
+                              url = new URL(
+                                decodeURIComponent(name_split[urlIndex])
+                              );
+                              if (url.hostname.includes("youtube")) {
+                                url.hostname = "yout-ube.com";
+                              }
+                              return url.href;
+                            } catch {
+                              return `https://drive.google.com/file/d/${item?.id}/preview`;
+                            }
                           }
                         } else {
-                          return  `https://drive.google.com/file/d/${item?.id}/preview`;
+                          return `https://drive.google.com/file/d/${item?.id}/preview`;
                         }
                         //  `https://drive.google.com/file/d/${item?.id}/preview`;
                       })() as string
