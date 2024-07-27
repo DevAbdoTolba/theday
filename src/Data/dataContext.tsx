@@ -105,7 +105,10 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     function fetchData() {
       fetch(`/api/getTranscript?className=${q}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (res?.ok) return res.json();
+          else throw new Error("Error");
+        })
         .then((res) => {
           // ========= VALID =========
           console.log(" Valid");
@@ -161,13 +164,20 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         })
         .catch((error) => {
+          localStorage.setItem("className", "default");
+
           console.error("Error fetching data: ", error);
+
           setError("Error fetching data");
           // ========= !VALID =========
           console.log("Not Valid");
 
           setTranscript(default2110);
           setClassName("default");
+          // navigate to http://localhost:3000/theday/q/default
+          router.push("/theday/q/default")
+
+
         })
         .finally(() => {
           setLoadingTranscript(false);
