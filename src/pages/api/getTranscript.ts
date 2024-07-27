@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 
- 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -16,8 +15,12 @@ export default async function handler(
       res.status(400).json({ message: "Missing parameters 'className' " });
       return;
     }
-
-    const transcript = await getTranscript(className);
+    let transcript;
+    try {
+      transcript = await getTranscript(className);
+    } catch (error) {
+      res.status(400).json({ message: "wrong ID" });
+    }
     res.status(200).json({ transcript });
   } else {
     res.status(405).json({ message: "Method not allowed" });
@@ -48,7 +51,6 @@ async function getTranscript(className: string) {
   const transcript = await TranscriptModel.findOne(
     // search of id
     { _id: className }
-
     // search for className object classes
     // { class: className }
   );
