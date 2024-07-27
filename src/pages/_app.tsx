@@ -81,7 +81,7 @@ export default function App({
       <Head>
         <title>{"TheDay"}</title>
         {/* <meta name="description" content={description} /> */}
-        <link rel="icon" href={"./main.png"} />
+        <link rel="icon" href={"/main.png"} />
       </Head>
       <DataContextProvider>
         <offlineContext.Provider value={[offline, setOffline]}>
