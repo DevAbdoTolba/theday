@@ -10,10 +10,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Button, Link, MenuItem, Select } from "@mui/material";
+import { Button, IconButton, Link, MenuItem, Select } from "@mui/material";
 import NextLink from "next/link";
 import NativeSelect from "@mui/material/NativeSelect";
 import { DataContext } from "../Data/dataContext";
+import KeyIcon from "@mui/icons-material/Key";
+
+import KeyDialog from "./KeyDialog";
 
 interface Data {
   id: string;
@@ -129,7 +132,9 @@ export default function Header({
   const [className, setClassName] = useState<string>("");
   const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
+  const [openKeyDialog, setOpenKeyDialog] = React.useState(false);
   const { setLoadingTranscript } = React.useContext(DataContext);
+
   React.useEffect(() => {
     const className = (localStorage.getItem("className") as string) || "";
     const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
@@ -195,41 +200,67 @@ export default function Header({
             sx={{ mr: 2 }}
           >
             <MenuIcon />
-          </IconButton> */}
-          <Typography
-            variant="h5"
-            noWrap
-            component="div"
+          </IconButton> /*/}
+          <Box
             sx={{
               flexGrow: 1,
-              display: "block",
-              fontSize: { sm: "1.5rem", xs: "1.5rem" },
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: {
+                xs: 0,
+                sm: "5ch",
+              },
             }}
           >
-            <Tooltip
-              title={title === "TheDay" ? "" : "Home"}
-              placement="bottom"
+            <Typography
+              variant="h5"
+              noWrap
+              component="div"
+              sx={{
+                display: "block",
+                fontSize: { sm: "1.5rem", xs: "1.5rem" },
+              }}
             >
-              <Button
-                LinkComponent={NextLink}
-                href={"/theday" + (q ? `/q/${q}` : "")}
-                disableRipple
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "fit-content",
-                  textDecoration: "none",
-                  color: "white",
-                  "&:hover .MuiSvgIcon-root": {
-                    color: "#0066ff",
-                  },
+              <Tooltip
+                title={title === "TheDay" ? "" : "Home"}
+                placement="bottom"
+              >
+                <Button
+                  LinkComponent={NextLink}
+                  href={"/theday" + (q ? `/q/${q}` : "")}
+                  disableRipple
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: "fit-content",
+                    textDecoration: "none",
+                    color: "white",
+                    "&:hover .MuiSvgIcon-root": {
+                      color: "#0066ff",
+                    },
+                  }}
+                >
+                  {title === "TheDay" ? <></> : <KeyboardDoubleArrowLeftIcon />}
+                  {title}
+                </Button>
+              </Tooltip>
+            </Typography>
+
+            <Tooltip title={"Insert a key"}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+                onClick={() => {
+                  setOpenKeyDialog(true);
                 }}
               >
-                {title === "TheDay" ? <></> : <KeyboardDoubleArrowLeftIcon />}
-                {title}
-              </Button>
+                <KeyIcon color="warning" fontSize="large" />
+              </IconButton>
             </Tooltip>
-          </Typography>
+          </Box>
 
           {classes?.length > 1 && (
             <Select
@@ -364,6 +395,7 @@ export default function Header({
             </>
           )}
         </Toolbar>
+        <KeyDialog open={openKeyDialog} setOpen={setOpenKeyDialog} />
       </AppBar>
     </Box>
   );

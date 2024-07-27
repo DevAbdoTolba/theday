@@ -175,9 +175,7 @@ export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
           setTranscript(default2110);
           setClassName("default");
           // navigate to http://localhost:3000/theday/q/default
-          router.push("/theday/q/default")
-
-
+          router.push("/theday/q/default");
         })
         .finally(() => {
           setLoadingTranscript(false);
