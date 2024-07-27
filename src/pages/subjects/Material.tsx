@@ -346,7 +346,7 @@ function Material({
                       {(() => {
                         // remove if found any %20 and replace it with space
                         let name = item?.name;
-                  
+
                         if (name.includes("http")) {
                           let url: URL | string = "";
                           let name_split = name.split(" ");
@@ -391,9 +391,31 @@ function Material({
                       all: "unset",
                       backgroundImage: () => {
                         if (item?.name.includes("http")) {
-                          if (item?.name.includes("youtube"))
-                            return "url(  /youtube.jpg)";
-                          else return "url(/link.jpg)";
+                          if (item?.name.includes("youtube")) {
+                            let vId = "";
+                            let url: URL | string = "";
+                            let name_split = item?.name.split(" ");
+                            // console.log(name_split);
+                            // which has the url
+                            let urlIndex = name_split.findIndex((name) =>
+                              name.includes("http")
+                            );
+                            // store the url
+                            url = name_split[urlIndex];
+                            // decode the url from URL encoding
+                            url = decodeURIComponent(url);
+                            try {
+                              url = new URL(url);
+                              vId = url.searchParams.get("v") || "";
+                              return vId
+                                ? `url(https://img.youtube.com/vi/${vId}/0.jpg)`
+                                : (() => {
+                                    throw new Error("");
+                                  })();
+                            } catch (e) {
+                              return "url(/link.jpg)";
+                            }
+                          } else return "url(/link.jpg)";
                         }
                         return `url(https://drive.google.com/thumbnail?id=${item?.id}) `;
                       },
@@ -431,7 +453,7 @@ function Material({
                     href={
                       (() => {
                         let name = item?.name;
-                  
+
                         if (name.includes("http")) {
                           let url: URL | string = "";
                           let name_split = name.split(" ");
@@ -442,7 +464,7 @@ function Material({
                           );
                           // get the url
                           try {
-                            console.log("urlIndex", urlIndex, name_split);
+                            // console.log("urlIndex", urlIndex, name_split);
 
                             url = new URL(name_split[urlIndex]);
                             // if url is youtube change the word youtube into : yout-ube
