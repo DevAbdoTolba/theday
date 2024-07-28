@@ -64,7 +64,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     setOpen(false);
     setTimeout(() => {
       setSearch("");
-    }, 15); // Must be 15 or it will be lagging if the user opened and closed it very fast it will not reset the search value in time
+    }, 15);
   };
 
   React.useEffect(() => {
@@ -79,7 +79,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
         sx={{
           position: "relative",
           backgroundColor: "rgba(0,0,0,0.5)",
-
           marginLeft: "0",
           display: "flex",
           flexDirection: "row",
@@ -89,10 +88,8 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
           fontSize: "1.6ch",
           padding: ".7ch 2ch",
           color: "#fff",
-
           borderRadius: "1ch",
           border: "2px solid #3f3f3f",
-
           "&:hover": {
             cursor: "pointer",
             backgroundColor: "rgba(50,50,50,0.7)",
@@ -138,8 +135,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
         keepMounted
         onClose={handleClose}
         aria-describedby="alert-dialog-slide-description"
-        // change width to 100vw
-
         sx={{
           "& .MuiDialog-paper": {
             backgroundColor: "#292929",
@@ -148,13 +143,11 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               sm: "20px ",
               xs: "0",
             },
-
             position: "absolute",
             top: {
               sm: "10%",
               xs: "0",
             },
-
             margin: "0 !important",
             padding: "0 !important",
             border: ".5px solid #727272",
@@ -165,7 +158,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               sm: "50vh",
               xs: "100vh",
             },
-
             height: {
               sm: "fit-content",
               xs: "100vh",
@@ -174,7 +166,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               sm: "50vw",
               xs: "100vw",
             },
-
             maxHeight: {
               sm: "80vh",
               xs: "100vh",
@@ -187,7 +178,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
         }}
       >
         <Box
-          // align in row
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -197,7 +187,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             backgroundColor: "#292929",
             p: "2ch",
             margin: 0,
-
             "&::after": {
               content: "''",
               position: "absolute",
@@ -205,7 +194,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               left: "0",
               width: "100%",
               height: "1px",
-
               backgroundColor: "#727272",
             },
           }}
@@ -216,7 +204,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               fontSize: "2rem",
             }}
           />
-          {/* Search Input */}
           <TextField
             inputRef={searchRef}
             type="text"
@@ -239,7 +226,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               },
             }}
           />
-          {/* esc button */}
           <Button
             style={buttonStyle}
             disableRipple
@@ -249,14 +235,12 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                 outline: "1px solid #fff",
               },
             }}
-            // close the search box
             onClick={handleClose}
           >
             esc
           </Button>
         </Box>
         <DialogContent>
-          {/* Search Result */}
           {data &&
             Object?.keys(data)
               ?.filter((key) =>
@@ -276,7 +260,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                     }}
                   >
                     <Box display={"flex"} justifyContent={"flex-start"}>
-                      {/* {key} */}
                       <Typography
                         fontSize={"1.5rem"}
                         fontWeight={"bold"}
@@ -309,33 +292,101 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                             ?.includes(search?.toLowerCase())
                         )
                         ?.map((subject, index) => {
+                          const displayName = (() => {
+                            let name = subject?.name;
+                            if (name.includes("%20")) {
+                              name = name.replace(/%20/g, " ");
+                            }
+                            if (name.includes("http")) {
+                              let url: URL | string = "";
+                              let name_split = name.split(" ");
+                              let urlIndex = name_split.findIndex((name) =>
+                                name.includes("http")
+                              );
+                              const name_split_no_url = name_split.filter(
+                                (name) => !name.includes("http")
+                              );
+                              if (name_split_no_url.length > 0) {
+                                return name_split_no_url.join(" ");
+                              }
+                              try {
+                                url = new URL(name_split[urlIndex]);
+                                if (url.hostname.includes("youtube")) {
+                                  url.hostname = "yout-ube.com";
+                                }
+                                return url.hostname;
+                              } catch {
+                                try {
+                                  url = new URL(
+                                    decodeURIComponent(name_split[urlIndex])
+                                  );
+                                } catch {
+                                  return subject?.name;
+                                }
+                              }
+                            }
+                            return subject?.name;
+                          })();
+
+                          const validURL = (() => {
+                            if (subject?.name.includes("http")) {
+                              let url: URL | string = "";
+                              let name_split = subject.name.split(" ");
+                              let urlIndex = name_split.findIndex((name) =>
+                                name.includes("http")
+                              );
+                              try {
+                                url = new URL(name_split[urlIndex]);
+                                if (url.hostname.includes("youtube")) {
+                                  url.hostname = "yout-ube.com";
+                                }
+                                return url.href;
+                              } catch {
+                                try {
+                                  url = new URL(
+                                    decodeURIComponent(name_split[urlIndex])
+                                  );
+                                  if (url.hostname.includes("youtube")) {
+                                    url.hostname = "yout-ube.com";
+                                  }
+                                  return url.href;
+                                } catch {
+                                  return null;
+                                }
+                              }
+                            }
+                            return null;
+                          })();
+
                           return (
                             <Button
-                              href={`https://drive.google.com/file/d/${subject?.id}/preview`}
+                              href={
+                                validURL ||
+                                `https://drive.google.com/file/d/${subject?.id}/preview`
+                              }
                               target="_blank"
                               key={index}
                               sx={{
                                 all: "unset",
                                 backgroundColor: "#292929",
-                                padding: "0.5ch 1ch 0.5ch 3ch",
-                                // word break
-                                wordBreak: "break-all",
-                                lineHeight: "1.5rem",
-                                borderRadius: "10px",
-                                color: "#fff",
-                                fontSize: "1.2rem",
+                                padding: "0.5ch",
                                 cursor: "pointer",
-
-                                "&:hover, &:focus": {
-                                  backgroundColor: "#1e1e1e",
+                                "&:hover": {
+                                  backgroundColor: "#333333",
                                 },
-                                "&:focus": {
-                                  outline: "1px solid #fff",
-                                },
+                                borderRadius: "0.5ch",
                               }}
-                              disableRipple
                             >
-                              {subject?.name}
+                              <Typography
+                                sx={{
+                                  fontSize: "1.2rem",
+                                  fontWeight: "bold",
+                                  color: "#fff",
+                                  textAlign: "left",
+                                }}
+                              >
+                                {displayName}
+                              </Typography>
                             </Button>
                           );
                         })}
