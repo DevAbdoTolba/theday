@@ -7,7 +7,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Offline from "../components/Offline";
 import Image from "next/image";
 import Head from "next/head";
-import { DataContextProvider } from "../Data/dataContext";
+import { TranscriptContextProvider } from "../Data/TranscriptContext";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {
@@ -83,7 +83,7 @@ export default function App({
         {/* <meta name="description" content={description} /> */}
         <link rel="icon" href={"/main.png"} />
       </Head>
-      <DataContextProvider>
+      <TranscriptContextProvider>
         <offlineContext.Provider value={[offline, setOffline]}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
@@ -105,7 +105,7 @@ export default function App({
             <Analytics />
           </ThemeProvider>
         </offlineContext.Provider>
-      </DataContextProvider>
+      </TranscriptContextProvider>
     </>
   );
 }

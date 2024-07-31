@@ -46,7 +46,7 @@ export const DataContext = createContext<DataContextValue>(
   initialDataContextValue
 );
 
-export const DataContextProvider: React.FC<{ children: React.ReactNode }> = ({
+export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const q = useSearchParams().get("q") ?? "";

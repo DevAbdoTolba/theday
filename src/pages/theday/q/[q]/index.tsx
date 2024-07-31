@@ -21,7 +21,7 @@ import MuiAlert from "@mui/material/Alert";
 
 import Offline from "../../../../components/Offline";
 import { offlineContext } from "../../../_app";
-import { DataContext } from "../../../../Data/dataContext";
+import { DataContext } from "../../../../Data/TranscriptContext";
 
 const Main = lazy(() => import("./Main"));
 
