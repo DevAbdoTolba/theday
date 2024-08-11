@@ -14,8 +14,12 @@ import { offlineContext } from "../_app";
 import NavTabs from "./Tabs";
 import Drawer from "./AllDrawer";
 
+import LinearProgress from "@mui/material/LinearProgress";
+
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
+
+import { useIndexedContext } from "../../Data/IndexedContext";
 
 import Loading from "../../components/Loading";
 const TabsPC = lazy(() => import("./TabsPc"));
@@ -40,8 +44,11 @@ function SubjectPage() {
   // get parameters from url
   const [subject, setSubject] = useState("");
   const [subjectLoading, setSubjectLoading] = useState(true);
-  const [materialLoading, setMaterialLoading] = useState(true);
+  const [materialLoading, setMaterialLoading] = useState(false);
+  const [newFetchLoading, setNewFetchLoading] = useState(false);
   const [dots, setDots] = useState(".");
+  const { getSubjectByName, addOrUpdateSubject, setLoading } =
+    useIndexedContext();
 
   let showDrawerFromLocalStorage;
 
@@ -62,29 +69,47 @@ function SubjectPage() {
   useEffect(() => {
     if (router.isReady) {
       const { subject } = router.query;
-      console.log("it is", subject);
-
-      setSubject(subject as string);
-
-      setSubjectLoading(false);
+      loadData(subject as string);
     }
   }, [router.isReady]);
 
-  useEffect(() => {
-    if (subject) {
-      fetch(`/api/subjects/${subject}`)
-        .then((res) => {
-          if (res.ok) {
-            return res.json(); // If response is ok, parse JSON data
-          } else {
-            throw new Error("Network response was not ok"); // Throw an error if response is not ok
-          }
-        })
-        .then((data) => {
-          // if data is null set data to {}
-          setData(data);
+  const loadData = async (subject: string) => {
+    setLoading(true);
 
-          console.log(data);
+    const cachedSubject = await getSubjectByName(subject);
+
+    if (cachedSubject) {
+      setMaterialLoading(false);
+      setData(cachedSubject.folders);
+      setLoading(false);
+      setNewFetchLoading(true);
+
+      // Fetch the data and update if necessary
+      fetch(`/api/subjects/${subject}`)
+        .then((res) => res.json())
+        .then(async (fetchedData) => {
+          const result = await addOrUpdateSubject(subject, fetchedData);
+          console.log("changes? ", result);
+
+          if (result.msg !== "No changes") {
+            setData(fetchedData);
+          }
+          setNewFetchLoading(false);
+          setMaterialLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setNewFetchLoading(false);
+          setMaterialLoading(false);
+        });
+    } else {
+      setMaterialLoading(true);
+      // Fetch data as the subject is not in the DB
+      fetch(`/api/subjects/${subject}`)
+        .then((res) => res.json())
+        .then(async (fetchedData) => {
+          setData(fetchedData);
+          await addOrUpdateSubject(subject, fetchedData);
           setMaterialLoading(false);
         })
         .catch((error) => {
@@ -92,7 +117,10 @@ function SubjectPage() {
           setMaterialLoading(false);
         });
     }
-  }, [subject]);
+
+    setSubjectLoading(false);
+    setLoading(false);
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -153,6 +181,9 @@ function SubjectPage() {
   //   const subject = subjects
   //     .filter((subject) => subject.length > 0)
   //     .map((subject) => subject[0]);
+  if (subjectLoading) {
+    return <Loading />;
+  }
 
   return (
     <Box
@@ -160,28 +191,33 @@ function SubjectPage() {
         overflowX: "hidden",
       }}
     >
+      {newFetchLoading && (
+        <LinearProgress
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            zIndex: 1000,
+          }}
+        />
+      )}
+
       <Head>
         <title>
-          {subjectLoading ? (
-            <Loading />
-          ) : (
-            (() => {
-              // check if there is a localstorage named "first-visited-subject" if not set it to the current date
+          {(() => {
+            // check if there is a localstorage named "first-visited-subject" if not set it to the current date
 
-              if (!localStorage.getItem("first-visited-subject")) {
-                localStorage.setItem(
-                  "first-visited-subject",
-                  subject.toUpperCase()
-                );
-              }
-              // update localstorage "last-visited-subject" to the current subjcet name
+            if (!localStorage.getItem("first-visited-subject")) {
               localStorage.setItem(
-                "last-visited-subject",
+                "first-visited-subject",
                 subject.toUpperCase()
               );
-              return subject.toUpperCase();
-            })()
-          )}
+            }
+            // update localstorage "last-visited-subject" to the current subjcet name
+            localStorage.setItem("last-visited-subject", subject.toUpperCase());
+            return subject.toUpperCase();
+          })()}
         </title>
         <link rel="icon" href={"../book.png"} />
         <style>

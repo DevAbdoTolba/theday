@@ -8,6 +8,7 @@ import Offline from "../components/Offline";
 import Image from "next/image";
 import Head from "next/head";
 import { TranscriptContextProvider } from "../Data/TranscriptContext";
+import IndexedProvider from "../Data/IndexedContext";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {
@@ -83,29 +84,31 @@ export default function App({
         {/* <meta name="description" content={description} /> */}
         <link rel="icon" href={"/main.png"} />
       </Head>
-      <TranscriptContextProvider>
-        <offlineContext.Provider value={[offline, setOffline]}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Image
-              src={"/icon-512x512.png"}
-              alt="icon"
-              width={"200"}
-              height={"200"}
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: -100,
-                opacity: 0,
-              }}
-            />
-            <Component {...pageProps} />
-            <Analytics />
-          </ThemeProvider>
-        </offlineContext.Provider>
-      </TranscriptContextProvider>
+      <IndexedProvider>
+        <TranscriptContextProvider>
+          <offlineContext.Provider value={[offline, setOffline]}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Image
+                src={"/icon-512x512.png"}
+                alt="icon"
+                width={"200"}
+                height={"200"}
+                style={{
+                  position: "fixed",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: -100,
+                  opacity: 0,
+                }}
+              />
+              <Component {...pageProps} />
+              <Analytics />
+            </ThemeProvider>
+          </offlineContext.Provider>
+        </TranscriptContextProvider>
+      </IndexedProvider>
     </>
   );
 }
