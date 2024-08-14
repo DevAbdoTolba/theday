@@ -5,7 +5,7 @@ import NoData from "../../components/NoData";
 import Search from "./Search";
 
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography, Grid, Box } from "@mui/material";
+import { Typography, Grid, Box, Tooltip } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -46,7 +46,6 @@ function SubjectPage() {
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(false);
   const [newFetchLoading, setNewFetchLoading] = useState(false);
-  const [dots, setDots] = useState(".");
   const { getSubjectByName, addOrUpdateSubject, setLoading } =
     useIndexedContext();
 
@@ -66,14 +65,8 @@ function SubjectPage() {
 
   const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
 
-  useEffect(() => {
-    if (router.isReady) {
-      const { subject } = router.query;
-      loadData(subject as string);
-    }
-  }, [router.isReady]);
-
   const loadData = async (subject: string) => {
+    
     setLoading(true);
 
     const cachedSubject = await getSubjectByName(subject);
@@ -82,26 +75,28 @@ function SubjectPage() {
       setMaterialLoading(false);
       setData(cachedSubject.folders);
       setLoading(false);
-      setNewFetchLoading(true);
 
-      // Fetch the data and update if necessary
-      fetch(`/api/subjects/${subject}`)
-        .then((res) => res.json())
-        .then(async (fetchedData) => {
-          const result = await addOrUpdateSubject(subject, fetchedData);
-          console.log("changes? ", result);
+      setTimeout(() => {
+        setNewFetchLoading(true);
+        // Fetch the data and update if necessary
+        fetch(`/api/subjects/${subject}`)
+          .then((res) => res.json())
+          .then(async (fetchedData) => {
+            const result = await addOrUpdateSubject(subject, fetchedData);
+            console.log("changes? ", result);
 
-          if (result.msg !== "No changes") {
-            setData(fetchedData);
-          }
-          setNewFetchLoading(false);
-          setMaterialLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setNewFetchLoading(false);
-          setMaterialLoading(false);
-        });
+            if (result.msg !== "No changes") {
+              setData(fetchedData);
+            }
+            setNewFetchLoading(false);
+            setMaterialLoading(false);
+          })
+          .catch((error) => {
+            console.error(error);
+            setNewFetchLoading(false);
+            setMaterialLoading(false);
+          });
+      }, 1000);
     } else {
       setMaterialLoading(true);
       // Fetch data as the subject is not in the DB
@@ -123,36 +118,29 @@ function SubjectPage() {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      if (materialLoading) {
-        // add dots until it reaches dots, then deacrese them until they reach 1 and reapet
-        if (dots.length < 3) {
-          setDots(dots + ".");
+    if (router.isReady) {
+      const { subject } = router.query;
+      loadData(subject as string);
+      setSubject(subject as string);
+
+      // event listen if shift + arrow left is pressed log hi
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.shiftKey && e.key === "ArrowLeft") {
+          setShowDrawer((prev) => {
+            localStorage.setItem("showDrawer", (!prev).toString());
+            return !prev;
+          });
         }
-        if (dots.length === 3) {
-          setDots("");
-        }
-      }
-    }, 333);
-  }, [dots]);
+      };
 
-  // event listen if shift + arrow left is pressed log hi
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === "ArrowLeft") {
-        setShowDrawer((prev) => {
-          localStorage.setItem("showDrawer", (!prev).toString());
-          return !prev;
-        });
-      }
-    };
+      addEventListener("keydown", handleKeyDown);
 
-    addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+      return () => {
+        removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [router.isReady]);
 
   // fetch data from api
 
@@ -181,7 +169,7 @@ function SubjectPage() {
   //   const subject = subjects
   //     .filter((subject) => subject.length > 0)
   //     .map((subject) => subject[0]);
-  if (subjectLoading) {
+  if (subjectLoading || materialLoading) {
     return <Loading />;
   }
 
@@ -191,18 +179,6 @@ function SubjectPage() {
         overflowX: "hidden",
       }}
     >
-      {newFetchLoading && (
-        <LinearProgress
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            zIndex: 1000,
-          }}
-        />
-      )}
-
       <Head>
         <title>
           {(() => {
@@ -233,46 +209,51 @@ function SubjectPage() {
         <Offline />
       ) : (
         <>
-          {materialLoading ? (
-            // <Typography
-            //   variant="h5"
-            //   sx={{
-            //     position: "absolute",
-            //     top: "50%",
-            //     left: "50%",
-            //     transform: "translate(-50%,-50%)",
-            //   }}
-            // >
-            //   Loading{dots}
-            // </Typography>
-            <Loading />
+          {!data ? (
+            <NoData />
+          ) : !Object?.keys(data)?.length ? (
+            <NoData />
           ) : (
-            <Suspense fallback={<Loading />}>
-              {!data ? (
-                <NoData />
-              ) : !Object?.keys(data)?.length ? (
-                <NoData />
-              ) : (
-                <>
-                  <Drawer
-                    subjectLoading={subjectLoading}
-                    subject={subject}
-                    data={data}
-                    materialLoading={materialLoading}
-                    showDrawer={showDrawer}
-                  />
+            <>
+              <Drawer
+                subjectLoading={subjectLoading}
+                subject={subject}
+                data={data}
+                materialLoading={materialLoading}
+                showDrawer={showDrawer}
+              />
 
-                  <TabsPC
-                    showDrawer={showDrawer}
-                    subjectLoading={subjectLoading}
-                    data={data}
-                  />
-                  <TabsPhone data={data} />
-                </>
-              )}
-            </Suspense>
+              <TabsPC
+                showDrawer={showDrawer}
+                subjectLoading={subjectLoading}
+                data={data}
+              />
+              <TabsPhone data={data} />
+            </>
           )}
         </>
+      )}
+      {newFetchLoading && (
+        <Tooltip title="Fetching new data..." placement="top">
+          <LinearProgress
+            sx={{
+              position: "fixed",
+              
+              top: 0,
+              left: 0,
+              width: "100%",
+              zIndex: 1000,
+              "&.MuiLinearProgress-root": {
+                backgroundColor: "#272727",
+              },
+
+              "& .MuiLinearProgress-bar ": {
+                height: "1px",
+                borderRadius: "50px",
+              },
+            }}
+          />
+        </Tooltip>
       )}
     </Box>
   );

@@ -262,7 +262,7 @@ export default function Header({
             </Tooltip>
           </Box>
 
-          {classes?.length > 1 && (
+          { !isSubjectSearch && (classes?.length > 1 && (
             <Select
               defaultValue={className?.toString()}
               label={className}
@@ -311,7 +311,7 @@ export default function Header({
                 </MenuItem>
               ))}
             </Select>
-          )}
+          ))}
           {/* <LinkMUI 
               component={
                 RouterLink  

@@ -82,7 +82,7 @@ export default function IndexedProvider({
     }
   };
 
-  const compareAndUpdate = (
+  const compareAndUpdate = (  
     existingFolders: DataMap,
     newFolders: DataMap,
     name: string
