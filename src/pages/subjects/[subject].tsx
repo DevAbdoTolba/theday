@@ -48,6 +48,7 @@ function SubjectPage() {
   const [newFetchLoading, setNewFetchLoading] = useState(false);
   const { getSubjectByName, addOrUpdateSubject, setLoading } =
     useIndexedContext();
+  const [newItems, setNewItems] = useState([]);
 
   let showDrawerFromLocalStorage;
 
@@ -66,7 +67,6 @@ function SubjectPage() {
   const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
 
   const loadData = async (subject: string) => {
-    
     setLoading(true);
 
     const cachedSubject = await getSubjectByName(subject);
@@ -83,7 +83,9 @@ function SubjectPage() {
           .then((res) => res.json())
           .then(async (fetchedData) => {
             const result = await addOrUpdateSubject(subject, fetchedData);
-            console.log("changes? ", result);
+            console.log("changes? ", result.newItems);
+
+            setNewItems(result.newItems);
 
             if (result.msg !== "No changes") {
               setData(fetchedData);
@@ -227,8 +229,9 @@ function SubjectPage() {
                 showDrawer={showDrawer}
                 subjectLoading={subjectLoading}
                 data={data}
+                newItems={newItems}
               />
-              <TabsPhone data={data} />
+              <TabsPhone data={data} newItems={newItems} />
             </>
           )}
         </>
@@ -238,7 +241,7 @@ function SubjectPage() {
           <LinearProgress
             sx={{
               position: "fixed",
-              
+
               top: 0,
               left: 0,
               width: "100%",
