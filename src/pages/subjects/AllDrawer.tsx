@@ -82,7 +82,7 @@ export default function AllDrawer({
 
   return (
     <>
-      {transcript && (
+      {
         <>
           <Box
             sx={{
@@ -150,83 +150,85 @@ export default function AllDrawer({
               variant={showDrawer ? "permanent" : "temporary"}
               anchor="left"
             >
-              {transcript.semesters.map((item: any, index: any) => (
-                <Accordion
-                  key={index}
-                  expanded={expanded === "panel" + index}
-                  onChange={handleChange("panel" + index)}
-                  sx={{
-                    bgcolor: index === currentSemester ? "#0685da" : "inherit",
-                    boxShadow:
-                      index === currentSemester
-                        ? "rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px"
-                        : "none",
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <Typography>{"Sem." + item?.index}</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails
+              {transcript &&
+                transcript.semesters.map((item: any, index: any) => (
+                  <Accordion
+                    key={index}
+                    expanded={expanded === "panel" + index}
+                    onChange={handleChange("panel" + index)}
                     sx={{
-                      px: "0",
-
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "stretch",
-
-                      "& a": {
-                        width: "100%",
-                        py: "0.5ch",
-                        pl: "4ch",
-                        borderRadius: "0 2rem 2rem 0",
-                        "&:hover": {
-                          bgcolor: "#0b5a8e",
-                        },
-                      },
+                      bgcolor:
+                        index === currentSemester ? "#0685da" : "inherit",
+                      boxShadow:
+                        index === currentSemester
+                          ? "rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px"
+                          : "none",
                     }}
                   >
-                    {item?.subjects.map((item: any, index: any) => (
-                      <Box
-                        key={index}
-                        display={"flex"}
-                        justifyContent={"flex-start"}
-                        alignItems={"center"}
-                        textAlign={"left"}
-                      >
-                        <Tooltip
-                          title={item?.name}
-                          placement="right-end"
-                          arrow
-                          TransitionComponent={Zoom}
-                          disableInteractive
-                        >
-                          <Link
-                            component={nextLink}
-                            href={`/subjects/${item?.abbreviation}`}
-                            target="_top"
-                            // remove default styling and give it a modern look
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel1a-content"
+                      id="panel1a-header"
+                    >
+                      <Typography>{"Sem." + item?.index}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails
+                      sx={{
+                        px: "0",
 
-                            sx={{
-                              color: "inherit",
-                              textDecoration: "none",
-                              "&:hover": {
-                                textDecoration: "underline",
-                              },
-                            }}
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "stretch",
+
+                        "& a": {
+                          width: "100%",
+                          py: "0.5ch",
+                          pl: "4ch",
+                          borderRadius: "0 2rem 2rem 0",
+                          "&:hover": {
+                            bgcolor: "#0b5a8e",
+                          },
+                        },
+                      }}
+                    >
+                      {item?.subjects.map((item: any, index: any) => (
+                        <Box
+                          key={index}
+                          display={"flex"}
+                          justifyContent={"flex-start"}
+                          alignItems={"center"}
+                          textAlign={"left"}
+                        >
+                          <Tooltip
+                            title={item?.name}
+                            placement="right-end"
+                            arrow
+                            TransitionComponent={Zoom}
+                            disableInteractive
                           >
-                            {item?.abbreviation}
-                          </Link>
-                        </Tooltip>
-                      </Box>
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+                            <Link
+                              component={nextLink}
+                              href={`/subjects/${item?.abbreviation}`}
+                              target="_top"
+                              // remove default styling and give it a modern look
+
+                              sx={{
+                                color: "inherit",
+                                textDecoration: "none",
+                                "&:hover": {
+                                  textDecoration: "underline",
+                                },
+                              }}
+                            >
+                              {item?.abbreviation}
+                            </Link>
+                          </Tooltip>
+                        </Box>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
             </Drawer>
           </Box>
 
@@ -278,7 +280,7 @@ export default function AllDrawer({
             TransitionProps={{ timeout: 300 }}
           />
         </>
-      )}
+      }
     </>
   );
 }
