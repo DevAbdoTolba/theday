@@ -4,7 +4,8 @@ export default async function handler(req, res) {
   // calculate time
   const start = Date.now();
 
-  const { subject } = req.query;
+  const { subject,cache } = req.query;
+
 
   const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
   };
 
   // Cache Control headers - cache for a year until manually invalidated
-  res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
+  !cache && res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
   try {
     const GetDataOfSubjectData = await GetDataOfSubject(subject);
 
