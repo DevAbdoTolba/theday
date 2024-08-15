@@ -5,7 +5,7 @@ import NoData from "../../components/NoData";
 import Search from "./Search";
 
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography, Grid, Box, Tooltip } from "@mui/material";
+import { Typography, Grid, Box, Tooltip, Snackbar, Paper } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -46,6 +46,7 @@ function SubjectPage() {
   const [subjectLoading, setSubjectLoading] = useState(true);
   const [materialLoading, setMaterialLoading] = useState(false);
   const [newFetchLoading, setNewFetchLoading] = useState(false);
+  const [newItemsMsg, setNewItemsMsg] = useState("");
   const { getSubjectByName, addOrUpdateSubject, setLoading } =
     useIndexedContext();
   const [newItems, setNewItems] = useState([]);
@@ -83,9 +84,9 @@ function SubjectPage() {
           .then((res) => res.json())
           .then(async (fetchedData) => {
             const result = await addOrUpdateSubject(subject, fetchedData);
-            console.log("changes? ", result.newItems);
 
             setNewItems(result.newItems);
+            setNewItemsMsg(result.msg);
 
             if (result.msg !== "No changes") {
               setData(fetchedData);
@@ -257,6 +258,44 @@ function SubjectPage() {
             }}
           />
         </Tooltip>
+      )}
+      {/* simple notification alert showing result.msg  */}
+      {newItemsMsg && (
+        <Paper elevation={6}>
+          <Snackbar
+            open={
+              newItemsMsg !== ""
+                ? newItemsMsg === "No changes"
+                  ? false
+                  : true
+                : false
+            }
+            autoHideDuration={6000}
+            onClose={() => setNewItemsMsg("")}
+            message={newItemsMsg}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            sx={{
+              "& .MuiSnackbarContent-root": {
+                backgroundColor: "#1f1f1f",
+                borderRadius: "15rem",
+                color: "#fff",
+                textAlign: "center",
+                "& .MuiSnackbarContent-message": {
+                  width: "100%",
+                  fontSize: "1rem",
+                  "&::after": {
+                    content: "'since last visit'",
+                    fontSize: "1ch",
+                    position: "absolute",
+                    right: "10%",
+                    bottom: "10%",
+                    color: "#f0f0f0",
+                  },
+                },
+              },
+            }}
+          />
+        </Paper>
       )}
     </Box>
   );

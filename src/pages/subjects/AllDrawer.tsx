@@ -59,7 +59,7 @@ export default function AllDrawer({
     currentSemester !== -1 ? "panel" + currentSemester : ""
   );
   const [clicked, setClicked] = React.useState<number>(0);
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {

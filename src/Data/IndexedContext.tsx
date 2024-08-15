@@ -123,7 +123,7 @@ export default function IndexedProvider({
         .modify({ folders: existingFolders });
 
       return {
-        msg: `${addedItems.length} new items, ${removedItems.length} removed`,
+        msg: `${addedItems.length > 0 ? `${addedItems.length} new items, ` : ""}${removedItems.length > 0 ? `${removedItems.length} removed` : ""}`,
         newItems: addedItems,
       };
     }
