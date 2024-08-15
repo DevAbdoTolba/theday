@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     }
 
     // Collect all SubjectFolderIds
-    const SubjectFolderIds = SubjectFolders.files.map(folder => folder.id);
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
     let Parents = "";
     let dic = {};
 
@@ -78,6 +78,8 @@ export default async function handler(req, res) {
     return FilesData;
   };
 
+  // Cache Control headers - cache for a year until manually invalidated
+  res.setHeader("Cache-Control", "s-maxage=31536000, stale-while-revalidate");
   try {
     const GetDataOfSubjectData = await GetDataOfSubject(subject);
 
