@@ -68,7 +68,7 @@ export default async function handler(req, res) {
 
     let now = new Date();
                           
-    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
+    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-uljpggy/endpoint/search";
   
     
   
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       const response = await axios.post(url, null, {
         params: { subject: subject },
         headers: {
-          "api-key" : process?.env?.MONGO_API_KEY,
+          "api-key" : process?.env?.MONGO_API_KEY_YASSER,
           'Content-Type': 'application/json'
         }
       });
