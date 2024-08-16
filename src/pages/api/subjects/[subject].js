@@ -1,7 +1,8 @@
 const { google } = require("googleapis");
 const fs = require('fs');
-import mongoose from "mongoose";
-const connectToDB = require("../../../Data/mongoConnection");
+// import mongoose from "mongoose";
+// const connectToDB = require("../../../Data/mongoConnection");
+import axios from 'axios';
 
 export default async function handler(req, res) {
   // calculate time
@@ -63,83 +64,31 @@ export default async function handler(req, res) {
 
   const GetDataOfSubject = async (subject) => {
 
-    const itemsModel = await connectToDB();
+    // const itemsModel = await connectToDB();
 
     let now = new Date();
                           
-    let ans = await itemsModel.aggregate([
-      {
-        $match: { name: subject, type: "folder", trashed: false }
-      },
-      {
-        $graphLookup: {
-          from: "items",
-          startWith: "$subfolders",
-          connectFromField: "subfolders",
-          connectToField: "id",
-          as: "subfolders",
-          restrictSearchWithMatch: { trashed: false } // Skip trashed subfolders
-        }
-      },
-      {
-        $unwind: "$subfolders"
-      },
-      {
-        $match: { "subfolders.trashed": false } // Ensure only non-trashed subfolders
-      },
-      {
-        $unwind: "$subfolders.files"
-      },
-      {
-        $lookup: {
-          from: "items",
-          localField: "subfolders.files",
-          foreignField: "id",
-          as: "fileDetails",
-          pipeline: [
-            { $match: { trashed: false } } // Skip trashed files in the lookup
-          ]
-        }
-      },
-      {
-        $addFields: {
-          "subfolders.files": { $arrayElemAt: ["$fileDetails", 0] }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            subfolderId: "$subfolders._id",
-            folderId: "$_id"
-          },
-          id: { $first: "$id" },
-          name: { $first: "$name" },
-          subfolderId: { $first: "$subfolders.id" },
-          subfolderName: { $first: "$subfolders.name" },
-          subfolderV: { $first: "$subfolders.__v" },
-          files: { $push: "$subfolders.files" },
-          subfolders: { $first: "$subfolders.subfolders" }
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.folderId",
-          id: { $first: "$id" },
-          name: { $first: "$name" },
-          subfolders: {
-            $push: {
-              _id: "$_id.subfolderId",
-              id: "$subfolderId",
-              name: "$subfolderName",
-              files: "$files",
-              subfolders: "$subfolders",
-              __v: "$subfolderV"
-            }
-          }
-        }
-      }
-    ]);
+    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
+  
     
+  
+    try {
+      const response = await axios.post(url, null, {
+        params: { subject: subject },
+        headers: {
+          "api-key" : process?.env?.MONGO_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      // const util = require('util');
+      // console.log(util.inspect(response.data, { depth: null, colors: true }));
+
+      // console.log(response.data);
+      
+
+    
+    let ans = response.data;
 
     let FilesData = {};
 
@@ -157,8 +106,7 @@ export default async function handler(req, res) {
 
 
 
-    // const util = require('util');
-    // console.log(util.inspect(ans, { depth: null, colors: true }));
+
     
     
 
@@ -190,6 +138,10 @@ export default async function handler(req, res) {
 
 
 return FilesData;
+} catch (error) {
+  console.error('Error:', error.response ? error.response.data : error.message);
+return {};
+}
 
   //   let FilesData = {};
 
