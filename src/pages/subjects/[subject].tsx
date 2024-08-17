@@ -276,7 +276,7 @@ function SubjectPage() {
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             sx={{
               "& .MuiSnackbarContent-root": {
-                backgroundColor: "#1f1f1f",
+                backgroundColor: "#e2e2e2",
                 borderRadius: "15rem",
                 color: "#fff",
                 textAlign: "center",
@@ -289,7 +289,7 @@ function SubjectPage() {
                     position: "absolute",
                     right: "10%",
                     bottom: "10%",
-                    color: "#f0f0f0",
+                    color: "#black",
                   },
                 },
               },
