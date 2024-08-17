@@ -5,7 +5,15 @@ import NoData from "../../components/NoData";
 import Search from "./Search";
 
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography, Grid, Box, Tooltip, Snackbar, Paper } from "@mui/material";
+import {
+  Typography,
+  Grid,
+  Box,
+  Tooltip,
+  Snackbar,
+  Paper,
+  Alert,
+} from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -278,7 +286,7 @@ function SubjectPage() {
               "& .MuiSnackbarContent-root": {
                 backgroundColor: "#e2e2e2",
                 borderRadius: "15rem",
-                color: "#fff",
+                color: "black",
                 textAlign: "center",
                 "& .MuiSnackbarContent-message": {
                   width: "100%",
@@ -289,12 +297,16 @@ function SubjectPage() {
                     position: "absolute",
                     right: "10%",
                     bottom: "10%",
-                    color: "#black",
+                    color: "black",
                   },
                 },
               },
             }}
-          />
+          >
+            <Alert severity="info">
+              Here is a gentle confirmation that your action was successful.
+            </Alert>
+          </Snackbar>
         </Paper>
       )}
     </Box>
