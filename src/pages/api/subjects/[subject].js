@@ -68,7 +68,7 @@ export default async function handler(req, res) {
 
     let now = new Date();
                           
-    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-uljpggy/endpoint/search";
+    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
   
     
   
