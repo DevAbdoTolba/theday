@@ -291,20 +291,25 @@ function SubjectPage() {
                 "& .MuiSnackbarContent-message": {
                   width: "100%",
                   fontSize: "1rem",
-                  "&::after": {
-                    content: "'since last visit'",
-                    fontSize: "1ch",
-                    position: "absolute",
-                    right: "10%",
-                    bottom: "10%",
-                    color: "black",
-                  },
                 },
               },
             }}
           >
-            <Alert severity="info">
-              Here is a gentle confirmation that your action was successful.
+            <Alert
+              severity="info"
+
+              // sx={{
+              //   "&::after": {
+              //     content: "'since last visit'",
+              //     fontSize: "1ch",
+              //     position: "absolute",
+              //     right: "10%",
+              //     bottom: "10%",
+              //     color: "black",
+              //   },
+              // }}
+            >
+              {newItemsMsg}
             </Alert>
           </Snackbar>
         </Paper>
