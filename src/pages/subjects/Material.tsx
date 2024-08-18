@@ -127,7 +127,6 @@ function Material({
     display: "flex",
     flexWrap: "noWrap",
     justifyContent: "flex-start",
-    width: "80vw",
     overflowX: "scroll",
   };
 
@@ -151,7 +150,9 @@ function Material({
   useEffect(() => {
     // get from url the folder id after the #
     const id = window.location.hash.split("#")[1];
-    scrollToItem(id);
+    // decode id from url encoding
+    const decodedId = decodeURIComponent(id);
+    scrollToItem(decodedId);
   }, [data]);
 
   return (
