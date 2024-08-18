@@ -13,10 +13,11 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import { Button, IconButton, Link, MenuItem, Select } from "@mui/material";
 import NextLink from "next/link";
 import NativeSelect from "@mui/material/NativeSelect";
-import { DataContext } from "../Data/TranscriptContext";
+import { DataContext } from "../context/TranscriptContext";
 import KeyIcon from "@mui/icons-material/Key";
 
-import KeyDialog from "./KeyDialog";
+import KeyDialog from "../context/KeyDialog";
+import { useRouter } from "next/router";
 
 interface Data {
   id: string;
@@ -129,17 +130,18 @@ export default function Header({
 
   ...props
 }: Props) {
-  const [className, setClassName] = useState<string>("");
   const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
   const [openKeyDialog, setOpenKeyDialog] = React.useState(false);
-  const { setLoadingTranscript } = React.useContext(DataContext);
+  const { setLoadingTranscript, className, setClassName } =
+    React.useContext(DataContext);
+  const router = useRouter();
 
   React.useEffect(() => {
-    const className = (localStorage.getItem("className") as string) || "";
+    // const classNameLocally = (localStorage.getItem("className") as string) || "";
     const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
 
-    setClassName(className);
+    // setClassName(classNameLocally);
     setClasses(classes);
     setQ(classes.find((c: any) => c.class === className)?.id || "");
 
@@ -155,12 +157,8 @@ export default function Header({
     //   setClassName(classId);
     // } else {
     //   setClassName("1");
-    // }
-  }, []);
 
-  const [open, setOpen] = useState(false);
-  shortCutActivate = shortCutActivate || false;
-  React.useEffect(() => {
+    // Ctrl K to open the search dialog
     const handleCtrlK = (e: KeyboardEvent) => {
       if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
         e?.preventDefault();
@@ -175,7 +173,15 @@ export default function Header({
     return () => {
       window.removeEventListener("keydown", handleCtrlK);
     };
+    // }
   }, []);
+
+  React.useEffect(() => {
+    console.log("🚀 ~ React.useEffect ~ className", className);
+  }, [className]);
+
+  const [open, setOpen] = useState(false);
+  shortCutActivate = shortCutActivate || false;
 
   return (
     <Box
@@ -262,10 +268,10 @@ export default function Header({
             </Tooltip>
           </Box>
 
-          { !isSubjectSearch && (classes?.length > 1 && (
+          {!isSubjectSearch && classes?.length > 1 && (
             <Select
-              defaultValue={className?.toString()}
-              label={className}
+              displayEmpty
+              value={className}
               // add a default selected option
               onChange={(e: any) => {
                 // setLoadingTranscript(true);
@@ -273,8 +279,6 @@ export default function Header({
                   setLoadingTranscript(true);
                 }
                 setClassName(e.target.value);
-                // @ts-ignore
-                localStorage.setItem("className", e?.target?.value);
               }}
               sx={{
                 "& *": {
@@ -311,7 +315,7 @@ export default function Header({
                 </MenuItem>
               ))}
             </Select>
-          ))}
+          )}
           {/* <LinkMUI 
               component={
                 RouterLink  

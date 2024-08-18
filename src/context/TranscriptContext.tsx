@@ -2,7 +2,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import default2110 from "./data.json";
+import default2110 from "../Data/data.json";
 import Loading from "../components/Loading";
 
 interface Transcript {
@@ -32,6 +32,7 @@ interface DataContextValue {
   className: string;
   setLoadingTranscript: (loading: boolean) => void;
   error: string | null;
+  setClassName: (className: string) => void;
 }
 
 const initialDataContextValue: DataContextValue = {
@@ -39,6 +40,7 @@ const initialDataContextValue: DataContextValue = {
   loadingTranscript: false,
   className: "",
   setLoadingTranscript: () => {},
+  setClassName: () => {},
   error: null,
 };
 
@@ -46,9 +48,9 @@ export const DataContext = createContext<DataContextValue>(
   initialDataContextValue
 );
 
-export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const TranscriptContextProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const q = useSearchParams().get("q") ?? "";
   const router = useRouter();
   const [transcript, setTranscript] = useState<Transcript | defaultData | null>(
@@ -138,8 +140,7 @@ export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> 
           );
 
           // className
-
-          localStorage.setItem("className", className);
+          setClassName(className);
 
           // class cache
           if (className)
@@ -164,8 +165,7 @@ export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> 
           }
         })
         .catch((error) => {
-          localStorage.setItem("className", "default");
-
+          setClassName("default");
           console.error("Error fetching data: ", error);
 
           setError("Error fetching data");
@@ -225,6 +225,10 @@ export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> 
     handlingContext();
   }, [q, router.isReady]);
 
+  useEffect(() => {
+    if (className) localStorage.setItem("className", className);
+  }, [className]);
+
   return (
     <DataContext.Provider
       // @ts-ignore
@@ -233,6 +237,7 @@ export const TranscriptContextProvider: React.FC<{ children: React.ReactNode }> 
         className,
         loadingTranscript,
         setLoadingTranscript,
+        setClassName,
         error,
       }}
     >

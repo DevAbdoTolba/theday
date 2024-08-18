@@ -9,8 +9,8 @@ import { Analytics } from "@vercel/analytics/react";
 import Offline from "../components/Offline";
 import Image from "next/image";
 import Head from "next/head";
-import { TranscriptContextProvider } from "../Data/TranscriptContext";
-import IndexedProvider from "../Data/IndexedContext";
+import { TranscriptContextProvider } from "../context/TranscriptContext";
+import IndexedProvider from "../context/IndexedContext";
 
 // const useStyles = makeStyles((theme) => ({
 //   "@global": {

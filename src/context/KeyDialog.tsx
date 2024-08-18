@@ -9,7 +9,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { CircularProgress, Snackbar, Alert, Typography } from "@mui/material";
 import TranslateRoundedIcon from "@mui/icons-material/TranslateRounded";
+import NextLink from "next/link";
+
 import { useRouter } from "next/router";
+import { DataContext } from "./TranscriptContext";
 
 type FormDialogProps = {
   open: boolean;
@@ -58,7 +61,8 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = React.useState(false);
   const [storedDialogOpen, setStoredDialogOpen] = React.useState(false);
-  const [className, setClassName] = React.useState({ _id: "", class: "" });
+  const [keyClass, setKeyClass] = React.useState({ _id: "", class: "" });
+  const { className, setClassName } = React.useContext(DataContext);
   const [key, setKey] = React.useState("");
   const router = useRouter();
 
@@ -119,13 +123,19 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
 
     if (isStored) {
       setStoredDialogOpen(true);
+      setKeyClass(
+        storedClasses.find((storedClass: any) => storedClass.id === key)
+      );
+      // setClassName(
+      //   storedClasses.find((storedClass: any) => storedClass.id === key).class
+      // );
       setLoading(false);
     } else {
       fetch(`/api/getTranscriptName?className=${key}`)
         .then((response) => response.json())
         .then((data) => {
           if (data.transcriptName) {
-            setClassName(data.transcriptName);
+            setKeyClass(data.transcriptName);
             setConfirmDialogOpen(true);
           } else {
             throw new Error("Transcript not found");
@@ -143,15 +153,6 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
 
   const handleConfirm = () => {
     setConfirmDialogOpen(false);
-    router.push(`/theday/q/${className._id}`).then(() => {
-      router.reload();
-    });
-  };
-
-  const handleStoredConfirm = () => {
-    setStoredDialogOpen(false);
-    setCloseKeyDialog();
-    router.push(`/theday/q/${key}`);
   };
 
   const toggleLanguage = () => {
@@ -242,7 +243,7 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
         <DialogTitle>{translations[language].confirmClassTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {translations[language].confirmClassContent(className.class)}
+            {translations[language].confirmClassContent(keyClass.class)}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -266,7 +267,14 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
           <Button onClick={handleStoredDialogClose}>
             {translations[language].rejectButton}
           </Button>
-          <Button onClick={handleStoredConfirm}>
+          <Button
+            onClick={() => {
+              setStoredDialogOpen(false);
+              setCloseKeyDialog();
+              localStorage.setItem("className", keyClass.class);
+              router.push(`/theday/q/${key}`);
+            }}
+          >
             {translations[language].confirmButton}
           </Button>
         </DialogActions>
@@ -279,15 +287,19 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
         <DialogContent>
           <DialogContentText>
             {language === "en"
-              ? `Is ${className.class} your class?`
-              : `هل ${className.class} دفعتك؟`}
+              ? `Is ${keyClass.class} your class?`
+              : `هل ${keyClass.class} دفعتك؟`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleConfirmDialogClose}>
             {language === "en" ? "Reject" : "رفض"}
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button
+            LinkComponent={NextLink}
+            href={`/theday/q/${key}`}
+            onClick={handleConfirm}
+          >
             {language === "en" ? "Confirm" : "تأكيد"}
           </Button>
         </DialogActions>
@@ -295,7 +307,9 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
 
       <Dialog open={storedDialogOpen} onClose={handleStoredDialogClose}>
         <DialogTitle>
-          {language === "en" ? "Class Already Stored" : "الدفعة مخزنة بالفعل"}
+          {language === "en"
+            ? `${keyClass.class} Class is Already Stored`
+            : `${keyClass.class} الدفعة مخزنة بالفعل`}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -308,7 +322,14 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
           <Button onClick={handleStoredDialogClose}>
             {language === "en" ? "Reject" : "رفض"}
           </Button>
-          <Button onClick={handleStoredConfirm}>
+          <Button
+            onClick={() => {
+              setStoredDialogOpen(false);
+              setCloseKeyDialog();
+              setClassName(keyClass.class);
+              router.push(`/theday/q/${key}`);
+            }}
+          >
             {language === "en" ? "Confirm" : "تأكيد"}
           </Button>
         </DialogActions>

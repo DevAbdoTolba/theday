@@ -27,7 +27,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
 
-import { useIndexedContext } from "../../Data/IndexedContext";
+import { useIndexedContext } from "../../context/IndexedContext";
 
 import Loading from "../../components/Loading";
 const TabsPC = lazy(() => import("./TabsPc"));

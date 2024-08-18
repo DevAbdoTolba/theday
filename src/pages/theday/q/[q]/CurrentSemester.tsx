@@ -13,7 +13,7 @@ import { styled } from "@mui/material/styles";
 
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-import { DataContext } from "../../../../Data/TranscriptContext";
+import { DataContext } from "../../../../context/TranscriptContext";
 
 interface Props {
   currentSemester: number;
