@@ -1,0 +1,56 @@
+:root {
+  --angle: 45deg;
+  --opacity: 0.5;
+}
+
+.rainbow {
+  border-radius: 10px;
+
+  --border-size: 0.3rem;
+  border: var(--border-size) solid transparent;
+
+  /* Paint an image in the border */
+  border-image: conic-gradient(
+      from var(--angle),
+      rgba(240, 17, 129, 0.75) 0deg 120deg,
+      rgba(6, 133, 218, 0.75) 120deg 240deg,
+      rgba(252, 253, 252, 0.75) 240deg 360deg
+    )
+    1 stretch;
+}
+
+/* Animate when Houdini is available */
+@supports (background: paint(houdini)) {
+  @property --opacity {
+    syntax: "<number>";
+    initial-value: 0.5;
+    inherits: false;
+  }
+
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes opacityChange {
+    to {
+      --opacity: 1;
+    }
+  }
+
+  @keyframes rotate {
+    to {
+      --angle: 360deg;
+    }
+  }
+
+  .rainbow {
+    animation: rotate 4s linear infinite, opacityChange 3s infinite alternate;
+  }
+
+  /* Hide the warning */
+  .warning {
+    display: none;
+  }
+}
