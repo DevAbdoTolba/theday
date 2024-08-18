@@ -25,11 +25,17 @@ export default function SimpleSnackbar() {
     // if the semester that is in the main page is not set (-1) or there is no error so the currentSemester was set correctly
     if (semester && currentSemester)
       // wait for any mouse click or keyboard press
-      document.addEventListener("mousedown", () => {
-        setTimeout(() => {
-          handleClick();
-        }, 4000);
-      });
+      document.addEventListener(
+        "mousedown",
+        () => {
+          console.log("called");
+
+          setTimeout(() => {
+            handleClick();
+          }, 4000);
+        },
+        { once: true }
+      );
   }, []);
 
   const handleClick = () => {
