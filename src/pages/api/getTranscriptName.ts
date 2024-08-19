@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
+import axios from 'axios';
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,29 +30,76 @@ export default async function handler(
 
 async function getTranscriptName(className: string) {
   // Connect to the database
-  const options: mongoose.ConnectOptions = {};
-  const URI = process.env.MONGODB_URI as string;
+  // const options: mongoose.ConnectOptions = {};
+  // const URI = process.env.MONGODB_URI as string;
 
-  // get all data
-  const connection = await mongoose.connect(URI, options);
+  // // get all data
+  // const connection = await mongoose.connect(URI, options);
 
-  // get the model
-  let TranscriptModel: mongoose.Model<any>;
+  // // get the model
+  // let TranscriptModel: mongoose.Model<any>;
 
-  try {
-    // Trying to get the existing model to prevent OverwriteModelError
-    TranscriptModel = connection.model("classes");
-  } catch (error) {
-    // If the model does not exist, then define it
-    TranscriptModel = connection.model("classes", new mongoose.Schema({}));
+  // try {
+  //   // Trying to get the existing model to prevent OverwriteModelError
+  //   TranscriptModel = connection.model("classes");
+  // } catch (error) {
+  //   // If the model does not exist, then define it
+  //   TranscriptModel = connection.model("classes", new mongoose.Schema({}));
+  // }
+  // console.log("Connected to the database", mongoose.connection.readyState);
+
+
+
+
+//   var axios = require('axios');
+// var data = JSON.stringify({
+//     "collection": "classes",
+//     "database": "theday",
+//     "dataSource": "Cluster0",
+//     "filter": { "_id": { "$oid": className } },
+//     "projection": {
+//       "class": 1
+//   }
+    
+// });
+// var config = {
+//     method: 'post',
+//     url: 'https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/data/v1/action/findOne',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Access-Control-Request-Headers': '*',
+//       'api-key': process.env.MONGO_API_KEY ,
+//     },
+//     data: data
+// };
+
+
+let url = 'https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/data/v1/action/findOne'
+
+
+const response = await axios.post(url, {
+  "collection": "classes",
+  "database": "theday",
+  "dataSource": "Cluster0",
+  "filter": { "_id": { "$oid": className } },
+  "projection": {
+    "class": 1
+}
+}, {
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Request-Headers': '*',
+    'api-key': process.env.MONGO_API_KEY ,
   }
-  console.log("Connected to the database", mongoose.connection.readyState);
+})
 
+
+  
   // get the data
-  const transcript = await TranscriptModel.findOne({ _id: className }).select(
-    "class"
-  );
+  // const transcript = await TranscriptModel.findOne({ _id: className }).select(
+  //   "class"
+  // );
 //   console.log(transcript._doc.class);
 
-  return transcript;
+  return response.data.document;
 }

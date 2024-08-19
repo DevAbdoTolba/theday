@@ -20,11 +20,13 @@ export default async function handler(req, res) {
             id: item.ID,
             name: item.title,
             type: item.mimeType === 'application/vnd.google-apps.folder' ? 'folder' : 'file',
-            mimeType: item.mimeType , 
+            mimeType: item.mimeType ,
+            createdAt: item.createdAt,
             ...(item.mimeType === 'application/vnd.google-apps.folder' ? {
               subfolders: [],
               files: [],
               mimeType: undefined, // mimeType is only included if type is 'file'
+              createdAt: undefined // createdAt is only included if type is 'file'
             } : {})
           }
         }

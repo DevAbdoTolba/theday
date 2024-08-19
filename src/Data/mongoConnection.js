@@ -14,6 +14,8 @@ const connectToDB = async () => {
     subfolders: [{ type: String }], // Only for folders
     owner: { type: String },
     trashed: { type: Boolean, default: false },
+    createdAt: {type: Date}
+
   });
 
   // Middleware to remove empty arrays

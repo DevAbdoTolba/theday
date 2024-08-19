@@ -9,23 +9,23 @@ export default async function handler(req, res) {
 
   const { subject } = req.query;
 
-  const SCOPES = ["https://www.googleapis.com/auth/drive"];
+  // const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      type: process?.env?.TYPE,
-      project_id: process?.env?.PROJECT_ID,
-      private_key_id: process?.env?.PRIVATE_KEY_ID,
-      private_key: process?.env?.PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      client_email: process?.env?.CLIENT_EMAIL,
-      client_id: process?.env?.CLIENT_ID,
-      auth_uri: process?.env?.AUTH_URI,
-      token_uri: process?.env?.TOKEN_URI,
-      auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
-      client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
-    },
-    scopes: SCOPES,
-  });
+  // const auth = new google.auth.GoogleAuth({
+  //   credentials: {
+  //     type: process?.env?.TYPE,
+  //     project_id: process?.env?.PROJECT_ID,
+  //     private_key_id: process?.env?.PRIVATE_KEY_ID,
+  //     private_key: process?.env?.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  //     client_email: process?.env?.CLIENT_EMAIL,
+  //     client_id: process?.env?.CLIENT_ID,
+  //     auth_uri: process?.env?.AUTH_URI,
+  //     token_uri: process?.env?.TOKEN_URI,
+  //     auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
+  //     client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
+  //   },
+  //   scopes: SCOPES,
+  // });
 
 
   // const drive = google.drive({ version: 'v3', auth });
@@ -98,7 +98,12 @@ export default async function handler(req, res) {
     for (let i = 0; i < ans[0].subfolders.length; i++) {
       const folder = ans[0].subfolders[i];
       // FilesData[folder.name] = folder.files;
-      FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
+
+      // sort files based on createdAt (newest first)
+      FilesData[folder.name] = folder.files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      // FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
+
       // console.log(folder);
     }
 
