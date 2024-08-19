@@ -1,30 +1,31 @@
 const { google } = require("googleapis");
 const fs = require('fs');
-import mongoose from "mongoose";
-const connectToDB = require("../../../Data/mongoConnection");
+// import mongoose from "mongoose";
+// const connectToDB = require("../../../Data/mongoConnection");
+import axios from 'axios';
 
 export default async function handler(req, res) {
   // calculate time
 
   const { subject } = req.query;
 
-  const SCOPES = ["https://www.googleapis.com/auth/drive"];
+  // const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      type: process?.env?.TYPE,
-      project_id: process?.env?.PROJECT_ID,
-      private_key_id: process?.env?.PRIVATE_KEY_ID,
-      private_key: process?.env?.PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      client_email: process?.env?.CLIENT_EMAIL,
-      client_id: process?.env?.CLIENT_ID,
-      auth_uri: process?.env?.AUTH_URI,
-      token_uri: process?.env?.TOKEN_URI,
-      auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
-      client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
-    },
-    scopes: SCOPES,
-  });
+  // const auth = new google.auth.GoogleAuth({
+  //   credentials: {
+  //     type: process?.env?.TYPE,
+  //     project_id: process?.env?.PROJECT_ID,
+  //     private_key_id: process?.env?.PRIVATE_KEY_ID,
+  //     private_key: process?.env?.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  //     client_email: process?.env?.CLIENT_EMAIL,
+  //     client_id: process?.env?.CLIENT_ID,
+  //     auth_uri: process?.env?.AUTH_URI,
+  //     token_uri: process?.env?.TOKEN_URI,
+  //     auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
+  //     client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
+  //   },
+  //   scopes: SCOPES,
+  // });
 
 
   // const drive = google.drive({ version: 'v3', auth });
@@ -63,102 +64,54 @@ export default async function handler(req, res) {
 
   const GetDataOfSubject = async (subject) => {
 
-    const itemsModel = await connectToDB();
+    // const itemsModel = await connectToDB();
 
-    let now = new Date();
+    // let now = new Date();
                           
-    let ans = await itemsModel.aggregate([
-      {
-        $match: { name: subject, type: "folder", trashed: false }
-      },
-      {
-        $graphLookup: {
-          from: "items",
-          startWith: "$subfolders",
-          connectFromField: "subfolders",
-          connectToField: "id",
-          as: "subfolders",
-          restrictSearchWithMatch: { trashed: false } // Skip trashed subfolders
-        }
-      },
-      {
-        $unwind: "$subfolders"
-      },
-      {
-        $match: { "subfolders.trashed": false } // Ensure only non-trashed subfolders
-      },
-      {
-        $unwind: "$subfolders.files"
-      },
-      {
-        $lookup: {
-          from: "items",
-          localField: "subfolders.files",
-          foreignField: "id",
-          as: "fileDetails",
-          pipeline: [
-            { $match: { trashed: false } } // Skip trashed files in the lookup
-          ]
-        }
-      },
-      {
-        $addFields: {
-          "subfolders.files": { $arrayElemAt: ["$fileDetails", 0] }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            subfolderId: "$subfolders._id",
-            folderId: "$_id"
-          },
-          id: { $first: "$id" },
-          name: { $first: "$name" },
-          subfolderId: { $first: "$subfolders.id" },
-          subfolderName: { $first: "$subfolders.name" },
-          subfolderV: { $first: "$subfolders.__v" },
-          files: { $push: "$subfolders.files" },
-          subfolders: { $first: "$subfolders.subfolders" }
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.folderId",
-          id: { $first: "$id" },
-          name: { $first: "$name" },
-          subfolders: {
-            $push: {
-              _id: "$_id.subfolderId",
-              id: "$subfolderId",
-              name: "$subfolderName",
-              files: "$files",
-              subfolders: "$subfolders",
-              __v: "$subfolderV"
-            }
-          }
-        }
-      }
-    ]);
+    // const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
+  
     
+  
+    // try {
+    //   const response = await axios.post(url, null, {
+    //     params: { subject: subject },
+    //     headers: {
+    //       "api-key" : process?.env?.MONGO_API_KEY_YASSER,
+    //       'Content-Type': 'application/json'
+    //     }
+    //   });
+  
+    //   // const util = require('util');
+    //   // console.log(util.inspect(response.data, { depth: null, colors: true }));
 
-    let FilesData = {};
+    //   // console.log(response.data);
+      
 
-    ans[0].subfolders = ans[0].subfolders.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // let ans = response.data;
 
+    let FilesData = {"uwu":[{"_id":"66c34ea3d9e7069c19b54000","id":"1z_Y6x30wTwBBx65zFJ5eW_c2fnSeslBW","name":"contacts.py","type":"file","mimeType":"text/x-python","trashed":false,"createdAt":"2024-08-19T13:54:01.417Z","__v":0}]};
 
-    for (let i = 0; i < ans[0].subfolders.length; i++) {
-      const folder = ans[0].subfolders[i];
-      // FilesData[folder.name] = folder.files;
-      FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
-      // console.log(folder);
-    }
+    // ans[0].subfolders = ans[0].subfolders.sort((a, b) => a.name.localeCompare(b.name));
 
 
+    // for (let i = 0; i < ans[0].subfolders.length; i++) {
+    //   const folder = ans[0].subfolders[i];
+    //   // FilesData[folder.name] = folder.files;
+
+    //   // sort files based on createdAt (newest first)
+    //   FilesData[folder.name] = folder.files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    //   // FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
+
+    //   // console.log(folder);
+    // }
 
 
 
-    // const util = require('util');
-    // console.log(util.inspect(ans, { depth: null, colors: true }));
+
+
+
     
     
 
@@ -190,6 +143,10 @@ export default async function handler(req, res) {
 
 
 return FilesData;
+// } catch (error) {
+//   console.error('Error:', error.response ? error.response.data : error.message);
+// return {};
+// }
 
   //   let FilesData = {};
 
@@ -258,6 +215,7 @@ return FilesData;
   try {
 
     // await getDriveChanges();
+    //
 
     let start = new Date();
 
