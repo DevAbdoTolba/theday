@@ -66,46 +66,46 @@ export default async function handler(req, res) {
 
     // const itemsModel = await connectToDB();
 
-    let now = new Date();
+    // let now = new Date();
                           
-    const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
+    // const url = "https://eu-central-1.aws.data.mongodb-api.com/app/data-nezlskl/endpoint/search";
   
     
   
-    try {
-      const response = await axios.post(url, null, {
-        params: { subject: subject },
-        headers: {
-          "api-key" : process?.env?.MONGO_API_KEY_YASSER,
-          'Content-Type': 'application/json'
-        }
-      });
+    // try {
+    //   const response = await axios.post(url, null, {
+    //     params: { subject: subject },
+    //     headers: {
+    //       "api-key" : process?.env?.MONGO_API_KEY_YASSER,
+    //       'Content-Type': 'application/json'
+    //     }
+    //   });
   
-      // const util = require('util');
-      // console.log(util.inspect(response.data, { depth: null, colors: true }));
+    //   // const util = require('util');
+    //   // console.log(util.inspect(response.data, { depth: null, colors: true }));
 
-      // console.log(response.data);
+    //   // console.log(response.data);
       
 
     
-    let ans = response.data;
+    // let ans = response.data;
 
-    let FilesData = {};
+    let FilesData = {"uwu":[{"_id":"66c34ea3d9e7069c19b54000","id":"1z_Y6x30wTwBBx65zFJ5eW_c2fnSeslBW","name":"contacts.py","type":"file","mimeType":"text/x-python","trashed":false,"createdAt":"2024-08-19T13:54:01.417Z","__v":0}]};
 
-    ans[0].subfolders = ans[0].subfolders.sort((a, b) => a.name.localeCompare(b.name));
+    // ans[0].subfolders = ans[0].subfolders.sort((a, b) => a.name.localeCompare(b.name));
 
 
-    for (let i = 0; i < ans[0].subfolders.length; i++) {
-      const folder = ans[0].subfolders[i];
-      // FilesData[folder.name] = folder.files;
+    // for (let i = 0; i < ans[0].subfolders.length; i++) {
+    //   const folder = ans[0].subfolders[i];
+    //   // FilesData[folder.name] = folder.files;
 
-      // sort files based on createdAt (newest first)
-      FilesData[folder.name] = folder.files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    //   // sort files based on createdAt (newest first)
+    //   FilesData[folder.name] = folder.files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      // FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
+    //   // FilesData[folder.name] = folder.files.sort((a, b) => a.name.localeCompare(b.name));
 
-      // console.log(folder);
-    }
+    //   // console.log(folder);
+    // }
 
 
 
@@ -143,10 +143,10 @@ export default async function handler(req, res) {
 
 
 return FilesData;
-} catch (error) {
-  console.error('Error:', error.response ? error.response.data : error.message);
-return {};
-}
+// } catch (error) {
+//   console.error('Error:', error.response ? error.response.data : error.message);
+// return {};
+// }
 
   //   let FilesData = {};
 
