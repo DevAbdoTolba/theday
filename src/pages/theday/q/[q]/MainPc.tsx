@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { DataContext } from "../../../../Data/dataContext";
+import { DataContext } from "../../../../Data/TranscriptContext";
 
 import Box from "@mui/material/Box";
 import data from "src/Data/data.json";

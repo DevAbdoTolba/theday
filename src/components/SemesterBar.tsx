@@ -24,19 +24,19 @@ export default function SimpleSnackbar() {
 
     // if the semester that is in the main page is not set (-1) or there is no error so the currentSemester was set correctly
     if (semester && currentSemester)
-      setTimeout(() => {
-        handleClick();
-      }, 4000);
+      // wait for any mouse click or keyboard press
+      document.addEventListener("mousedown", () => {
+        setTimeout(() => {
+          handleClick();
+        }, 4000);
+      });
   }, []);
 
   const handleClick = () => {
     setOpen(true);
   };
 
-  const handelYes = (
-    event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
+  const handelYes = (event: React.SyntheticEvent | Event, reason?: string) => {
     // set current semester to currentSemester
     localStorage.setItem("semester", currentSemester.toString());
     if (reason === "clickaway") {
@@ -93,9 +93,10 @@ export default function SimpleSnackbar() {
         }}
         open={open}
         onClose={handleClose}
-        message={"Are you in semester " + currentSemester + "?"}
+        message={"Are you in semester " + currentSemester + " ?"}
         action={action}
         transitionDuration={600}
+        autoHideDuration={10000}
       />
     </>
   );

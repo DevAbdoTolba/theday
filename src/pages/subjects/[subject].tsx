@@ -5,7 +5,15 @@ import NoData from "../../components/NoData";
 import Search from "./Search";
 
 import CssBaseline from "@mui/material/CssBaseline";
-import { Typography, Grid, Box } from "@mui/material";
+import {
+  Typography,
+  Grid,
+  Box,
+  Tooltip,
+  Snackbar,
+  Paper,
+  Alert,
+} from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -14,8 +22,12 @@ import { offlineContext } from "../_app";
 import NavTabs from "./Tabs";
 import Drawer from "./AllDrawer";
 
+import LinearProgress from "@mui/material/LinearProgress";
+
 // import TabsPC from "./TabsPc";
 // import TabsPhone from "./TabsPhone";
+
+import { useIndexedContext } from "../../Data/IndexedContext";
 
 import Loading from "../../components/Loading";
 const TabsPC = lazy(() => import("./TabsPc"));
@@ -40,8 +52,12 @@ function SubjectPage() {
   // get parameters from url
   const [subject, setSubject] = useState("");
   const [subjectLoading, setSubjectLoading] = useState(true);
-  const [materialLoading, setMaterialLoading] = useState(true);
-  const [dots, setDots] = useState(".");
+  const [materialLoading, setMaterialLoading] = useState(false);
+  const [newFetchLoading, setNewFetchLoading] = useState(false);
+  const [newItemsMsg, setNewItemsMsg] = useState("");
+  const { getSubjectByName, addOrUpdateSubject, setLoading } =
+    useIndexedContext();
+  const [newItems, setNewItems] = useState([]);
 
   let showDrawerFromLocalStorage;
 
@@ -59,32 +75,47 @@ function SubjectPage() {
 
   const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
 
-  useEffect(() => {
-    if (router.isReady) {
-      const { subject } = router.query;
-      console.log("it is", subject);
+  const loadData = async (subject: string) => {
+    setLoading(true);
 
-      setSubject(subject as string);
+    const cachedSubject = await getSubjectByName(subject);
 
-      setSubjectLoading(false);
-    }
-  }, [router.isReady]);
+    if (cachedSubject) {
+      setMaterialLoading(false);
+      setData(cachedSubject.folders);
+      setLoading(false);
 
-  useEffect(() => {
-    if (subject) {
+      setTimeout(() => {
+        setNewFetchLoading(true);
+        // Fetch the data and update if necessary
+        fetch(`/api/subjects/${subject}`)
+          .then((res) => res.json())
+          .then(async (fetchedData) => {
+            const result = await addOrUpdateSubject(subject, fetchedData);
+
+            setNewItems(result.newItems);
+            setNewItemsMsg(result.msg);
+
+            if (result.msg !== "No changes") {
+              setData(fetchedData);
+            }
+            setNewFetchLoading(false);
+            setMaterialLoading(false);
+          })
+          .catch((error) => {
+            console.error(error);
+            setNewFetchLoading(false);
+            setMaterialLoading(false);
+          });
+      }, 1000);
+    } else {
+      setMaterialLoading(true);
+      // Fetch data as the subject is not in the DB
       fetch(`/api/subjects/${subject}`)
-        .then((res) => {
-          if (res.ok) {
-            return res.json(); // If response is ok, parse JSON data
-          } else {
-            throw new Error("Network response was not ok"); // Throw an error if response is not ok
-          }
-        })
-        .then((data) => {
-          // if data is null set data to {}
-          setData(data);
-
-          console.log(data);
+        .then((res) => res.json())
+        .then(async (fetchedData) => {
+          setData(fetchedData);
+          await addOrUpdateSubject(subject, fetchedData);
           setMaterialLoading(false);
         })
         .catch((error) => {
@@ -92,39 +123,35 @@ function SubjectPage() {
           setMaterialLoading(false);
         });
     }
-  }, [subject]);
+
+    setSubjectLoading(false);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setTimeout(() => {
-      if (materialLoading) {
-        // add dots until it reaches dots, then deacrese them until they reach 1 and reapet
-        if (dots.length < 3) {
-          setDots(dots + ".");
+    if (router.isReady) {
+      const { subject } = router.query;
+      loadData(subject as string);
+      setSubject(subject as string);
+
+      // event listen if shift + arrow left is pressed log hi
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.shiftKey && e.key === "ArrowLeft") {
+          setShowDrawer((prev) => {
+            localStorage.setItem("showDrawer", (!prev).toString());
+            return !prev;
+          });
         }
-        if (dots.length === 3) {
-          setDots("");
-        }
-      }
-    }, 333);
-  }, [dots]);
+      };
 
-  // event listen if shift + arrow left is pressed log hi
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === "ArrowLeft") {
-        setShowDrawer((prev) => {
-          localStorage.setItem("showDrawer", (!prev).toString());
-          return !prev;
-        });
-      }
-    };
+      addEventListener("keydown", handleKeyDown);
 
-    addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+      return () => {
+        removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [router.isReady]);
 
   // fetch data from api
 
@@ -153,6 +180,9 @@ function SubjectPage() {
   //   const subject = subjects
   //     .filter((subject) => subject.length > 0)
   //     .map((subject) => subject[0]);
+  if (subjectLoading || materialLoading) {
+    return <Loading />;
+  }
 
   return (
     <Box
@@ -162,26 +192,19 @@ function SubjectPage() {
     >
       <Head>
         <title>
-          {subjectLoading ? (
-            <Loading />
-          ) : (
-            (() => {
-              // check if there is a localstorage named "first-visited-subject" if not set it to the current date
+          {(() => {
+            // check if there is a localstorage named "first-visited-subject" if not set it to the current date
 
-              if (!localStorage.getItem("first-visited-subject")) {
-                localStorage.setItem(
-                  "first-visited-subject",
-                  subject.toUpperCase()
-                );
-              }
-              // update localstorage "last-visited-subject" to the current subjcet name
+            if (!localStorage.getItem("first-visited-subject")) {
               localStorage.setItem(
-                "last-visited-subject",
+                "first-visited-subject",
                 subject.toUpperCase()
               );
-              return subject.toUpperCase();
-            })()
-          )}
+            }
+            // update localstorage "last-visited-subject" to the current subjcet name
+            localStorage.setItem("last-visited-subject", subject.toUpperCase());
+            return subject.toUpperCase();
+          })()}
         </title>
         <link rel="icon" href={"../book.png"} />
         <style>
@@ -197,46 +220,99 @@ function SubjectPage() {
         <Offline />
       ) : (
         <>
-          {materialLoading ? (
-            // <Typography
-            //   variant="h5"
-            //   sx={{
-            //     position: "absolute",
-            //     top: "50%",
-            //     left: "50%",
-            //     transform: "translate(-50%,-50%)",
-            //   }}
-            // >
-            //   Loading{dots}
-            // </Typography>
-            <Loading />
+          {!data ? (
+            <NoData />
+          ) : !Object?.keys(data)?.length ? (
+            <NoData />
           ) : (
-            <Suspense fallback={<Loading />}>
-              {!data ? (
-                <NoData />
-              ) : !Object?.keys(data)?.length ? (
-                <NoData />
-              ) : (
-                <>
-                  <Drawer
-                    subjectLoading={subjectLoading}
-                    subject={subject}
-                    data={data}
-                    materialLoading={materialLoading}
-                    showDrawer={showDrawer}
-                  />
+            <>
+              <Drawer
+                subjectLoading={subjectLoading}
+                subject={subject}
+                data={data}
+                materialLoading={materialLoading}
+                showDrawer={showDrawer}
+              />
 
-                  <TabsPC
-                    showDrawer={showDrawer}
-                    subjectLoading={subjectLoading}
-                    data={data}
-                  />
-                  <TabsPhone data={data} />
-                </>
-              )}
-            </Suspense>
+              <TabsPC
+                showDrawer={showDrawer}
+                subjectLoading={subjectLoading}
+                data={data}
+                newItems={newItems}
+              />
+              <TabsPhone data={data} newItems={newItems} />
+            </>
           )}
         </>
+      )}
+      {newFetchLoading && (
+        <Tooltip title="Fetching new data..." placement="top">
+          <LinearProgress
+            sx={{
+              position: "fixed",
+
+              top: 0,
+              left: 0,
+              width: "100%",
+              zIndex: 1000,
+              "&.MuiLinearProgress-root": {
+                backgroundColor: "#272727",
+              },
+
+              "& .MuiLinearProgress-bar ": {
+                height: "1px",
+                borderRadius: "50px",
+              },
+            }}
+          />
+        </Tooltip>
+      )}
+      {/* simple notification alert showing result.msg  */}
+      {newItemsMsg && (
+        <Paper elevation={6}>
+          <Snackbar
+            open={
+              newItemsMsg !== ""
+                ? newItemsMsg === "No changes"
+                  ? false
+                  : true
+                : false
+            }
+            autoHideDuration={6000}
+            onClose={() => setNewItemsMsg("")}
+            message={newItemsMsg}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            sx={{
+              "& .MuiSnackbarContent-root": {
+                backgroundColor: "#e2e2e2",
+                borderRadius: "15rem",
+                color: "black",
+                textAlign: "center",
+                "& .MuiSnackbarContent-message": {
+                  width: "100%",
+                  fontSize: "1rem",
+                },
+              },
+            }}
+          >
+            <Alert
+              severity="info"
+
+              // sx={{
+              //   "&::after": {
+              //     content: "'since last visit'",
+              //     fontSize: "1ch",
+              //     position: "absolute",
+              //     right: "10%",
+              //     bottom: "10%",
+              //     color: "black",
+              //   },
+              // }}
+            >
+              {newItemsMsg}
+            </Alert>
+          </Snackbar>
+        </Paper>
       )}
     </Box>
   );

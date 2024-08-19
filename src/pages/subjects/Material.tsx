@@ -7,6 +7,7 @@ import {
   Button,
 } from "@mui/material";
 
+import heartImg from "../../../public/heartAnimation.png";
 import LinkIcon from "@mui/icons-material/Link";
 import { useState, useEffect, useRef } from "react";
 
@@ -37,6 +38,7 @@ interface Props {
   PreviousExams: DataMap;
   schedule: DataMap;
   description: string;
+  newItems: string[];
 }
 function mimeTypeToAppName(mimeType: string) {
   switch (mimeType) {
@@ -119,6 +121,7 @@ function Material({
   PreviousExams,
   schedule,
   description,
+  newItems,
 }: Props) {
   const containerStyle = {
     display: "flex",
@@ -232,9 +235,12 @@ function Material({
             >
               {data[key]?.map((item, index) => (
                 <Box
+                  className="heart heart-active"
                   key={index}
                   sx={{
                     "&:active > *, &:hover > *": {
+                      position: "relative",
+
                       sm: {
                         "&::after": {
                           opacity: 0.8,
@@ -242,7 +248,6 @@ function Material({
                         },
                       },
                     },
-                    position: "relative",
                     mr: {
                       sm: "1rem",
                       xs: "3rem",
@@ -252,6 +257,26 @@ function Material({
                       sm: "15%",
                       xs: "33%",
                     },
+                    // if item id is in the array newItems do the animation
+                    animation: newItems.includes(item?.id)
+                      ? //  "shake-bottom 1s 3s 3, bounce-in-bottom 2s, heart 1s 5s 5 steps(28)  alternate-reverse"
+                        "shake-bottom 1s 3s 3, bounce-in-bottom 2s"
+                      : "",
+
+                    // backgroundImage: newItems.includes(item?.id)
+                    //   ? "url(" + heartImg.src + ")"
+                    //   : "",
+
+                    backgroundPosition: "left top",
+                    backgroundRepeat: "repeat-y space",
+
+                    "&::after": newItems.includes(item?.id)
+                      ? {
+                          content: "'New'",
+                          fontSize: "1ch",
+                          position: "absolute",
+                        }
+                      : {},
                   }}
                 >
                   <Tooltip

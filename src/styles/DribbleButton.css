@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:600&display=swap");
+
+
+@keyframes heart {
+  0% {
+    background-position: left;
+  }
+  50% {
+    background-position: right;
+  }
+  100% {
+    background-position: right;
+  }
+}
