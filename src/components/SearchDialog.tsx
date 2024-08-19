@@ -52,6 +52,11 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
 
+  const [filtersArray, setFiltersArray] = React.useState<string[]>(
+    Object.keys(data)
+  );
+  console.log(Object.keys(data));
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e?.target?.value);
   };
@@ -282,6 +287,11 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                         display: "flex",
                         flexDirection: "column",
                         flexWrap: "wrap",
+                        overflowX: "auto",
+                        // scroll bar x height 4px
+                        "&::-webkit-scrollbar": {
+                          height: "4px",
+                        },
                         gap: "1ch",
                       }}
                     >
@@ -379,9 +389,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                             >
                               <Typography
                                 sx={{
-                                  fontSize: "1.2rem",
-                                  fontWeight: "bold",
-                                  color: "#fff",
+                                  color: "#ddd",
                                   textAlign: "left",
                                 }}
                               >
