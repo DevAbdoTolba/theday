@@ -57,7 +57,7 @@ export const TranscriptContextProvider: React.FC<{
     null
   );
   const [loadingTranscript, setLoadingTranscript] = useState(true);
-  const [className, setClassName] = useState("");
+  const [className, setClassName] = useState("-1");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -214,9 +214,20 @@ export const TranscriptContextProvider: React.FC<{
           fetchData();
         }
       } else {
-        setTranscript(default2110);
-        setClassName("default");
-        setLoadingTranscript(false);
+        if (localStorage.getItem("className")) {
+          setClassName(localStorage.getItem("className") as string);
+          setTranscript(
+            JSON.parse(
+              // @ts-ignore
+              localStorage.getItem(localStorage.getItem("className")) as string
+            )
+          );
+          setLoadingTranscript(false);
+        } else {
+          setTranscript(default2110);
+          setClassName("default");
+          setLoadingTranscript(false);
+        }
       }
     }
 
@@ -226,7 +237,12 @@ export const TranscriptContextProvider: React.FC<{
   }, [q, router.isReady]);
 
   useEffect(() => {
-    if (className) localStorage.setItem("className", className);
+    if (className == "-1") return;
+    if (className) {
+      localStorage.setItem("className", className);
+      // @ts-ignore
+      localStorage.setItem("transcript", localStorage.getItem(className));
+    }
   }, [className]);
 
   return (

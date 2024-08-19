@@ -153,6 +153,8 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
 
   const handleConfirm = () => {
     setConfirmDialogOpen(false);
+    setCloseKeyDialog();
+    setClassName(keyClass.class);
   };
 
   const toggleLanguage = () => {
