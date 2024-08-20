@@ -7,8 +7,19 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Divider,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
+import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
+import Fade from "@mui/material/Fade";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Data {
   id: string;
@@ -48,14 +59,32 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+// Define motion variants for reusable animations
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      staggerChildren: 0.1,
+    },
+  },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.3 } },
+};
+
 export default function AlertDialogSlide({ open, setOpen, data }: Props) {
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
 
-  const [filtersArray, setFiltersArray] = React.useState<string[]>(
-    Object.keys(data)
-  );
-  console.log(Object.keys(data));
+  const filtersArray = Object.keys(data);
+  const [folder, setFolder] = React.useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e?.target?.value);
@@ -76,10 +105,15 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     if (open) {
       searchRef?.current?.focus();
     }
+    return () => {
+      setFolder("");
+    };
   }, [open]);
 
+  // filter logic
+
   return (
-    <div>
+    <>
       <Button
         sx={{
           position: "relative",
@@ -245,165 +279,216 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             esc
           </Button>
         </Box>
+        <Box
+          mt={1}
+          mx={2}
+          display={"flex"}
+          justifyContent={"flex-start"}
+          flexWrap={"wrap"}
+          gap={"1ch"}
+        >
+          {filtersArray.map((filteredFolder, index) => {
+            return (
+              <>
+                <Chip
+                  key={index}
+                  label={filteredFolder}
+                  variant={filteredFolder === folder ? "filled" : "outlined"}
+                  onClick={() => {
+                    if (filteredFolder === folder) {
+                      setFolder("");
+                      return;
+                    }
+                    setFolder(filteredFolder);
+                  }}
+                  deleteIcon={
+                    filteredFolder === folder ? <ClearIcon /> : <AddIcon />
+                  }
+                  onDelete={() => {
+                    if (filteredFolder === folder) {
+                      setFolder("");
+                      return;
+                    }
+                    setFolder(filteredFolder);
+                  }}
+                />
+              </>
+            );
+          })}
+        </Box>
         <DialogContent>
-          {data &&
-            Object?.keys(data)
-              ?.filter((key) =>
-                data[key]?.some((subject) =>
-                  subject?.name?.toLowerCase()?.includes(search?.toLowerCase())
+          <AnimatePresence>
+            {data &&
+              Object?.keys(data)
+                ?.filter(
+                  (key) =>
+                    data[key]?.some((subject) =>
+                      subject?.name
+                        ?.toLowerCase()
+                        ?.includes(search?.toLowerCase())
+                    ) && (folder !== "" ? key === folder : true)
                 )
-              )
-              ?.map((key, index) => {
-                return (
-                  <Box
-                    key={index}
-                    sx={{
-                      padding: "1ch 0",
-                      "&:not(:last-child)": {
-                        borderBottom: "1px solid #727272",
-                      },
-                    }}
-                  >
-                    <Box display={"flex"} justifyContent={"flex-start"}>
-                      <Typography
-                        fontSize={"1.5rem"}
-                        fontWeight={"bold"}
-                        color={"#fff"}
-                        padding={"0.5ch 0"}
-                      >
-                        {key}
-                      </Typography>
-                      <Typography
-                        fontSize={"1rem"}
-                        fontWeight={"bolder"}
-                        color={"grey"}
-                        padding={"0.5ch .2ch"}
-                      >
-                        {data[key].length}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        flexWrap: "wrap",
-                        overflowX: "auto",
-                        // scroll bar x height 4px
-                        "&::-webkit-scrollbar": {
-                          height: "4px",
-                        },
-                        gap: "1ch",
-                      }}
+                ?.map((key, index) => {
+                  return (
+                    <motion.div
+                      key={index}
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
                     >
-                      {data[key]
-                        ?.filter((subject) =>
-                          subject?.name
-                            ?.toLowerCase()
-                            ?.includes(search?.toLowerCase())
-                        )
-                        ?.map((subject, index) => {
-                          const displayName = (() => {
-                            let name = subject?.name;
-                            if (name.includes("%20")) {
-                              name = name.replace(/%20/g, " ");
-                            }
-                            if (name.includes("http")) {
-                              let url: URL | string = "";
-                              let name_split = name.split(" ");
-                              let urlIndex = name_split.findIndex((name) =>
-                                name.includes("http")
-                              );
-                              const name_split_no_url = name_split.filter(
-                                (name) => !name.includes("http")
-                              );
-                              if (name_split_no_url.length > 0) {
-                                return name_split_no_url.join(" ");
-                              }
-                              try {
-                                url = new URL(name_split[urlIndex]);
-                                if (url.hostname.includes("youtube")) {
-                                  url.hostname = "yout-ube.com";
+                      <Box
+                        key={index}
+                        sx={{
+                          padding: "1ch 0",
+                          "&:not(:last-child)": {
+                            borderBottom: "1px solid #727272",
+                          },
+                        }}
+                      >
+                        <Box display={"flex"} justifyContent={"flex-start"}>
+                          <Typography
+                            fontSize={"1.5rem"}
+                            fontWeight={"bold"}
+                            color={"#fff"}
+                            padding={"0.5ch 0"}
+                          >
+                            {key}
+                          </Typography>
+                          <Typography
+                            fontSize={"1rem"}
+                            fontWeight={"bolder"}
+                            color={"grey"}
+                            padding={"0.5ch .2ch"}
+                          >
+                            {data[key].length}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flexWrap: "wrap",
+                            overflowX: "auto",
+                            // scroll bar x height 4px
+                            "&::-webkit-scrollbar": {
+                              height: "4px",
+                            },
+                            gap: "1ch",
+                          }}
+                        >
+                          {data[key]
+                            ?.filter((subject) =>
+                              subject?.name
+                                ?.toLowerCase()
+                                ?.includes(search?.toLowerCase())
+                            )
+                            ?.map((subject, index) => {
+                              const displayName = (() => {
+                                let name = subject?.name;
+                                if (name.includes("%20")) {
+                                  name = name.replace(/%20/g, " ");
                                 }
-                                return url.hostname;
-                              } catch {
-                                try {
-                                  url = new URL(
-                                    decodeURIComponent(name_split[urlIndex])
+                                if (name.includes("http")) {
+                                  let url: URL | string = "";
+                                  let name_split = name.split(" ");
+                                  let urlIndex = name_split.findIndex((name) =>
+                                    name.includes("http")
                                   );
-                                } catch {
-                                  return subject?.name;
-                                }
-                              }
-                            }
-                            return subject?.name;
-                          })();
-
-                          const validURL = (() => {
-                            if (subject?.name.includes("http")) {
-                              let url: URL | string = "";
-                              let name_split = subject.name.split(" ");
-                              let urlIndex = name_split.findIndex((name) =>
-                                name.includes("http")
-                              );
-                              try {
-                                url = new URL(name_split[urlIndex]);
-                                if (url.hostname.includes("youtube")) {
-                                  url.hostname = "yout-ube.com";
-                                }
-                                return url.href;
-                              } catch {
-                                try {
-                                  url = new URL(
-                                    decodeURIComponent(name_split[urlIndex])
+                                  const name_split_no_url = name_split.filter(
+                                    (name) => !name.includes("http")
                                   );
-                                  if (url.hostname.includes("youtube")) {
-                                    url.hostname = "yout-ube.com";
+                                  if (name_split_no_url.length > 0) {
+                                    return name_split_no_url.join(" ");
                                   }
-                                  return url.href;
-                                } catch {
-                                  return null;
+                                  try {
+                                    url = new URL(name_split[urlIndex]);
+                                    if (url.hostname.includes("youtube")) {
+                                      url.hostname = "yout-ube.com";
+                                    }
+                                    return url.hostname;
+                                  } catch {
+                                    try {
+                                      url = new URL(
+                                        decodeURIComponent(name_split[urlIndex])
+                                      );
+                                    } catch {
+                                      return subject?.name;
+                                    }
+                                  }
                                 }
-                              }
-                            }
-                            return null;
-                          })();
+                                return subject?.name;
+                              })();
 
-                          return (
-                            <Button
-                              href={
-                                validURL ||
-                                `https://drive.google.com/file/d/${subject?.id}/preview`
-                              }
-                              target="_blank"
-                              key={index}
-                              sx={{
-                                all: "unset",
-                                backgroundColor: "#292929",
-                                padding: "0.5ch",
-                                cursor: "pointer",
-                                "&:hover": {
-                                  backgroundColor: "#333333",
-                                },
-                                borderRadius: "0.5ch",
-                              }}
-                            >
-                              <Typography
-                                sx={{
-                                  color: "#ddd",
-                                  textAlign: "left",
-                                }}
-                              >
-                                {displayName}
-                              </Typography>
-                            </Button>
-                          );
-                        })}
-                    </Box>
-                  </Box>
-                );
-              })}
+                              const validURL = (() => {
+                                if (subject?.name.includes("http")) {
+                                  let url: URL | string = "";
+                                  let name_split = subject.name.split(" ");
+                                  let urlIndex = name_split.findIndex((name) =>
+                                    name.includes("http")
+                                  );
+                                  try {
+                                    url = new URL(name_split[urlIndex]);
+                                    if (url.hostname.includes("youtube")) {
+                                      url.hostname = "yout-ube.com";
+                                    }
+                                    return url.href;
+                                  } catch {
+                                    try {
+                                      url = new URL(
+                                        decodeURIComponent(name_split[urlIndex])
+                                      );
+                                      if (url.hostname.includes("youtube")) {
+                                        url.hostname = "yout-ube.com";
+                                      }
+                                      return url.href;
+                                    } catch {
+                                      return null;
+                                    }
+                                  }
+                                }
+                                return null;
+                              })();
+
+                              return (
+                                <Button
+                                  href={
+                                    validURL ||
+                                    `https://drive.google.com/file/d/${subject?.id}/preview`
+                                  }
+                                  target="_blank"
+                                  key={index}
+                                  sx={{
+                                    all: "unset",
+                                    backgroundColor: "#292929",
+                                    padding: "0.5ch",
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                      backgroundColor: "#333333",
+                                    },
+                                    borderRadius: "0.5ch",
+                                  }}
+                                >
+                                  <Typography
+                                    sx={{
+                                      color: "#ddd",
+                                      textAlign: "left",
+                                    }}
+                                  >
+                                    {displayName}
+                                  </Typography>
+                                </Button>
+                              );
+                            })}
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </motion.div>
+                  );
+                })}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
