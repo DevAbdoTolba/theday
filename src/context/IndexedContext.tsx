@@ -54,6 +54,7 @@ export default function IndexedProvider({
   children,
 }: IndexedContextProps) {
   const [loading, setLoading] = useState(false);
+  const [updatedItems, setUpdatedItems] = useState<string[]>([]);
 
   const getSubjectByName = async (name: string) => {
     return await db.subjects.where("name").equals(name).first();
@@ -126,6 +127,7 @@ export default function IndexedProvider({
         .where({ name: name })
         .modify({ folders: existingFolders });
 
+      setUpdatedItems(addedItems);
       return {
         msg: `${
           addedItems.length > 0 ? `${addedItems.length} new items, ` : ""
@@ -141,6 +143,7 @@ export default function IndexedProvider({
     <IndexedContext.Provider
       value={{
         loading,
+        updatedItems,
         setLoading,
         getSubjectByName,
         addOrUpdateSubject,

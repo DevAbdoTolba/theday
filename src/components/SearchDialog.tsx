@@ -20,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import Fade from "@mui/material/Fade";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIndexedContext } from "../context/IndexedContext";
 
 interface Data {
   id: string;
@@ -80,10 +81,14 @@ const itemVariants = {
 };
 
 export default function AlertDialogSlide({ open, setOpen, data }: Props) {
+  const { updatedItems } = useIndexedContext();
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
 
-  const filtersArray = Object.keys(data);
+  const filtersArray = [
+    ...Object.keys(data),
+    ...(updatedItems.length > 0 ? ["New"] : []), // only add "New" if updatedItems has items
+  ];
   const [folder, setFolder] = React.useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,6 +110,8 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     if (open) {
       searchRef?.current?.focus();
     }
+    console.log(updatedItems);
+
     return () => {
       setFolder("");
     };
@@ -293,13 +300,12 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                 <Chip
                   key={index}
                   label={filteredFolder}
+                  color={filteredFolder === "New" ? "info" : "default"}
                   variant={filteredFolder === folder ? "filled" : "outlined"}
                   onClick={() => {
                     if (filteredFolder === folder) {
                       setFolder("");
-                      return;
-                    }
-                    setFolder(filteredFolder);
+                    } else setFolder(filteredFolder);
                   }}
                   deleteIcon={
                     filteredFolder === folder ? <ClearIcon /> : <AddIcon />
@@ -307,9 +313,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                   onDelete={() => {
                     if (filteredFolder === folder) {
                       setFolder("");
-                      return;
-                    }
-                    setFolder(filteredFolder);
+                    } else setFolder(filteredFolder);
                   }}
                 />
               </>
@@ -320,13 +324,16 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
           <AnimatePresence>
             {data &&
               Object?.keys(data)
-                ?.filter(
-                  (key) =>
-                    data[key]?.some((subject) =>
+                ?.filter((key) =>
+                  data[key]?.some(
+                    (subject: { name: string; id: string }) =>
                       subject?.name
                         ?.toLowerCase()
-                        ?.includes(search?.toLowerCase())
-                    ) && (folder !== "" ? key === folder : true)
+                        ?.includes(search?.toLowerCase()) &&
+                      (folder === "New"
+                        ? updatedItems.includes(subject?.id)
+                        : folder === "" || key === folder)
+                  )
                 )
                 ?.map((key, index) => {
                   return (
@@ -378,11 +385,16 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                           }}
                         >
                           {data[key]
-                            ?.filter((subject) =>
-                              subject?.name
-                                ?.toLowerCase()
-                                ?.includes(search?.toLowerCase())
-                            )
+                            ?.filter((subject) => {
+                              const isMatch =
+                                subject?.name
+                                  ?.toLowerCase()
+                                  ?.includes(search?.toLowerCase()) &&
+                                (folder === "New"
+                                  ? updatedItems.includes(subject.id)
+                                  : true);
+                              return isMatch;
+                            })
                             ?.map((subject, index) => {
                               const displayName = (() => {
                                 let name = subject?.name;
