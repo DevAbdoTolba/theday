@@ -82,7 +82,7 @@ export default function IndexedProvider({
     }
   };
 
-  const compareAndUpdate = (  
+  const compareAndUpdate = (
     existingFolders: DataMap,
     newFolders: DataMap,
     name: string
@@ -112,18 +112,24 @@ export default function IndexedProvider({
       ];
 
       // Update the existing folder with new items
-      existingFolders[key] = newItems;
+      if (newItems.length > 0) {
+        existingFolders[key] = newItems;
+      } else {
+        // If the new folder has 0 length, delete the key
+        delete existingFolders[key];
+      }
     });
 
     if (addedItems.length || removedItems.length) {
-
       // @ts-ignore
       const res = db.subjects
         .where({ name: name })
         .modify({ folders: existingFolders });
 
       return {
-        msg: `${addedItems.length > 0 ? `${addedItems.length} new items, ` : ""}${removedItems.length > 0 ? `${removedItems.length} removed` : ""}`,
+        msg: `${
+          addedItems.length > 0 ? `${addedItems.length} new items, ` : ""
+        }${removedItems.length > 0 ? `${removedItems.length} removed` : ""}`,
         newItems: addedItems,
       };
     }
