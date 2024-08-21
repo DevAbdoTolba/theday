@@ -8,6 +8,7 @@ import Zoom from "@mui/material/Zoom";
 import { Chip, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
+import Link from "next/link";
 
 interface Props {
   search: string;
@@ -89,7 +90,9 @@ export default function MainPc({ search, currentSemester }: Props) {
                             .includes(search?.toLowerCase())
                       )
                       .map((subjects: any, subIndex: any) => (
-                        <Grid key={subIndex} item>
+                        <Grid 
+                        
+                        component={Link} href={"/subjects/"+subjects.abbreviation} key={subIndex} item>
                           <Tooltip
                             title={subjects?.name}
                             arrow
@@ -127,8 +130,7 @@ export default function MainPc({ search, currentSemester }: Props) {
                                     "\nIndex : " +
                                     index
                                 );
-                                window.location.href =
-                                  "/subjects/" + subjects.abbreviation;
+                             
                               }}
                             />
                           </Tooltip>

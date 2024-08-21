@@ -11,6 +11,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Link from "next/link";
 
 interface Props {
   search: string;
@@ -71,6 +72,8 @@ function MainPhone({ search, currentSemester }: Props) {
                     <Grid
                       key={subIndex}
                       item
+                      component={Link}
+                      href={"/subjects/" + subjects.abbreviation}
                       // sx={{
                       //   width: "100%",
                       // }}
@@ -108,8 +111,6 @@ function MainPhone({ search, currentSemester }: Props) {
                               "currentSemester",
                               index.toString()
                             );
-                            window.location.href =
-                              "/subjects/" + subjects.abbreviation;
                           }}
                         />
                       </Tooltip>
