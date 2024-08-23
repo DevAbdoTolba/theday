@@ -80,13 +80,12 @@ export default async function handler(req, res) {
     [subject], // Cache key based on subject
     {
       tags: [subject], // Tag the cache with subject for easier invalidation
-      revalidate: false, // Prevents automatic revalidation unless manually triggered
     }
   );
 
   try {
-
-    const data = await getCachedSubjectData(subject, auth);
+    // const data = await getCachedSubjectData(subject, auth);
+    const data = await GetDataOfSubject(subject, auth);
 
     const end = Date.now();
     console.log(`Execution time: ${end - start} ms`);
