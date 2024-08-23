@@ -1,37 +1,28 @@
-import React, { Suspense, lazy, useState, useEffect } from "react";
-
-import Header from "../../components/Header";
-import NoData from "../../components/NoData";
-import Search from "./Search";
-
-import CssBaseline from "@mui/material/CssBaseline";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
-  Typography,
-  Grid,
   Box,
   Tooltip,
+  LinearProgress,
   Snackbar,
   Paper,
   Alert,
 } from "@mui/material";
-import Head from "next/head";
 import { useRouter } from "next/router";
+import Head from "next/head";
+import { GetStaticProps, GetStaticPaths } from "next";
+import dynamic from "next/dynamic";
 
+import Header from "../../components/Header";
+import NoData from "../../components/NoData";
 import Offline from "../../components/Offline";
-import { offlineContext } from "../_app";
-import NavTabs from "./Tabs";
-import Drawer from "./AllDrawer";
-
-import LinearProgress from "@mui/material/LinearProgress";
-
-// import TabsPC from "./TabsPc";
-// import TabsPhone from "./TabsPhone";
+import Loading from "../../components/Loading";
 
 import { useIndexedContext } from "../../context/IndexedContext";
+import { offlineContext } from "../_app";
+import Drawer from "./AllDrawer";
 
-import Loading from "../../components/Loading";
-const TabsPC = lazy(() => import("./TabsPc"));
-const TabsPhone = lazy(() => import("./TabsPhone"));
+const TabsPC = dynamic(() => import("./TabsPc"));
+const TabsPhone = dynamic(() => import("./TabsPhone"));
 
 interface Data {
   id: string;
@@ -45,220 +36,149 @@ interface DataMap {
   [key: string]: Data[];
 }
 
-function SubjectPage() {
-  const [data, setData] = useState<DataMap>();
+interface SubjectPageProps {
+  subject: string;
+  initialData: DataMap | null;
+}
 
-  const router = useRouter();
-  // get parameters from url
-  const [subject, setSubject] = useState("");
-  const [subjectLoading, setSubjectLoading] = useState(true);
+export default function SubjectPage({
+  subject,
+  initialData,
+}: SubjectPageProps) {
+  const [data, setData] = useState<DataMap | null>(initialData);
+  const [subjectLoading, setSubjectLoading] = useState(!initialData);
   const [materialLoading, setMaterialLoading] = useState(false);
   const [newFetchLoading, setNewFetchLoading] = useState(false);
   const [newItemsMsg, setNewItemsMsg] = useState("");
-  const { getSubjectByName, addOrUpdateSubject, setLoading } =
-    useIndexedContext();
   const [newItems, setNewItems] = useState([]);
 
-  let showDrawerFromLocalStorage;
-
-  if (typeof window !== "undefined") {
-    showDrawerFromLocalStorage = localStorage.getItem("showDrawer");
-  }
-
-  const [showDrawer, setShowDrawer] = useState(
-    showDrawerFromLocalStorage === "true"
-      ? true
-      : showDrawerFromLocalStorage === "false"
-      ? false
-      : true
-  );
-
+  const { getSubjectByName, addOrUpdateSubject, setLoading } =
+    useIndexedContext();
   const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
+  const router = useRouter();
 
-  const loadData = async (subject: string) => {
-    setLoading(true);
-
-    const cachedSubject = await getSubjectByName(subject);
-
-    if (cachedSubject) {
-      setMaterialLoading(false);
-      setData(cachedSubject.folders);
-      setLoading(false);
-
-      setTimeout(() => {
-        setNewFetchLoading(true);
-        // Fetch the data and update if necessary
-        fetch(`/api/subjects/${subject}`)
-          .then((res) => res.json())
-          .then(async (fetchedData) => {
-            const result = await addOrUpdateSubject(subject, fetchedData);
-
-            setNewItems(result.newItems);
-            setNewItemsMsg(result.msg);
-
-            if (result.msg !== "No changes") {
-              setData(fetchedData);
-            }
-            setNewFetchLoading(false);
-            setMaterialLoading(false);
-          })
-          .catch((error) => {
-            console.error(error);
-            setNewFetchLoading(false);
-            setMaterialLoading(false);
-          });
-      }, 1000);
-    } else {
-      setMaterialLoading(true);
-      // Fetch data as the subject is not in the DB
-      fetch(`/api/subjects/${subject}`)
-        .then((res) => res.json())
-        .then(async (fetchedData) => {
-          setData(fetchedData);
-          await addOrUpdateSubject(subject, fetchedData);
-          setMaterialLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setMaterialLoading(false);
-        });
+  const [showDrawer, setShowDrawer] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("showDrawer") === "true";
     }
-
-    setSubjectLoading(false);
-    setLoading(false);
-  };
+    return true;
+  });
 
   useEffect(() => {
-    if (router.isReady) {
-      const { subject } = router.query;
-      loadData(subject as string);
-      setSubject(subject as string);
+    if (!initialData) {
+      // If initialData is not available, fetch it on the client side
+      const loadData = async () => {
+        setSubjectLoading(true);
+        const cachedSubject = await getSubjectByName(subject);
 
-      // event listen if shift + arrow left is pressed log hi
+        if (cachedSubject) {
+          setData(cachedSubject.folders);
+          setMaterialLoading(false);
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.shiftKey && e.key === "ArrowLeft") {
-          setShowDrawer((prev) => {
-            localStorage.setItem("showDrawer", (!prev).toString());
-            return !prev;
-          });
+          // Fetch new data
+          setNewFetchLoading(true);
+          fetch(`/api/subjects/${subject}`)
+            .then((res) => res.json())
+            .then(async (fetchedData) => {
+              const result = await addOrUpdateSubject(subject, fetchedData);
+              setNewItems(result.newItems);
+              setNewItemsMsg(result.msg);
+
+              if (result.msg !== "No changes") {
+                setData(fetchedData);
+              }
+              setNewFetchLoading(false);
+              setMaterialLoading(false);
+            })
+            .catch((error) => {
+              console.error(error);
+              setNewFetchLoading(false);
+              setMaterialLoading(false);
+            });
+        } else {
+          // If no cached data, fetch from API
+          fetch(`/api/subjects/${subject}`)
+            .then((res) => res.json())
+            .then(async (fetchedData) => {
+              setData(fetchedData);
+              await addOrUpdateSubject(subject, fetchedData);
+              setMaterialLoading(false);
+            })
+            .catch((error) => {
+              console.error(error);
+              setMaterialLoading(false);
+            });
         }
+
+        setSubjectLoading(false);
       };
 
-      addEventListener("keydown", handleKeyDown);
-
-      return () => {
-        removeEventListener("keydown", handleKeyDown);
-      };
+      loadData();
     }
-  }, [router.isReady]);
 
-  // fetch data from api
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === "ArrowLeft") {
+        setShowDrawer((prev) => {
+          const newState = !prev;
+          localStorage.setItem("showDrawer", newState.toString());
+          return newState;
+        });
+      }
+    };
 
-  // if data is not fetched yet
+    addEventListener("keydown", handleKeyDown);
 
-  // const router = useRouter();
-  // const [subjectAbbreviation, setSubjectAbbreviation] = React.useState("s");
-  // useEffect(() => {
-  //   const subject = router.query.subject;
-  //   console.log("useEffect before fun " + subject);
-  //   setSubjectAbbreviation(
-  //     fetch(`/api/subjects/${subject}`)
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         return data;
-  //       })
-  //   );
-  //   console.log("useEffect after fun " + subjectAbbreviation);
-  // }, []);
-  //   const { subjectID } = useParams();
+    return () => {
+      removeEventListener("keydown", handleKeyDown);
+    };
+  }, [initialData, subject]);
 
-  // get the subjcet from data that matches the subject param
-  //   const subjects = data.semesters.map((semester) =>
-  //     semester.subjects.filter((subject) => subject.abbreviation === subjectID)
-  //   );
-  //   const subject = subjects
-  //     .filter((subject) => subject.length > 0)
-  //     .map((subject) => subject[0]);
   if (subjectLoading || materialLoading) {
     return <Loading />;
   }
 
   return (
-    <Box
-      sx={{
-        overflowX: "hidden",
-      }}
-    >
+    <Box sx={{ overflowX: "hidden" }}>
       <Head>
-        <title>
-          {(() => {
-            // check if there is a localstorage named "first-visited-subject" if not set it to the current date
-
-            if (!localStorage.getItem("first-visited-subject")) {
-              localStorage.setItem(
-                "first-visited-subject",
-                subject.toUpperCase()
-              );
-            }
-            // update localstorage "last-visited-subject" to the current subjcet name
-            localStorage.setItem("last-visited-subject", subject.toUpperCase());
-            return subject.toUpperCase();
-          })()}
-        </title>
+        <title>{subject.toUpperCase()}</title>
         <link rel="icon" href={"../book.png"} />
-        <style>
-          {`
-              *{
-                scroll-behavior: smooth;
-              }
-            `}
-        </style>
       </Head>
 
       {offline && materialLoading ? (
         <Offline />
+      ) : !data ? (
+        <NoData />
+      ) : Object.keys(data).length === 0 ? (
+        <NoData />
       ) : (
         <>
-          {!data ? (
-            <NoData />
-          ) : !Object?.keys(data)?.length ? (
-            <NoData />
-          ) : (
-            <>
-              <Drawer
-                subjectLoading={subjectLoading}
-                subject={subject}
-                data={data}
-                materialLoading={materialLoading}
-                showDrawer={showDrawer}
-              />
-
-              <TabsPC
-                showDrawer={showDrawer}
-                subjectLoading={subjectLoading}
-                data={data}
-                newItems={newItems}
-              />
-              <TabsPhone data={data} newItems={newItems} />
-            </>
-          )}
+          <Drawer
+            subjectLoading={subjectLoading}
+            subject={subject}
+            data={data}
+            materialLoading={materialLoading}
+            showDrawer={showDrawer}
+          />
+          <TabsPC
+            showDrawer={showDrawer}
+            subjectLoading={subjectLoading}
+            data={data}
+            newItems={newItems}
+          />
+          <TabsPhone data={data} newItems={newItems} />
         </>
       )}
+
       {newFetchLoading && (
         <Tooltip title="Fetching new data..." placement="top">
           <LinearProgress
             sx={{
               position: "fixed",
-
               top: 0,
               left: 0,
               width: "100%",
               zIndex: 1000,
-              "&.MuiLinearProgress-root": {
-                backgroundColor: "#272727",
-              },
-
+              "&.MuiLinearProgress-root": { backgroundColor: "#272727" },
               "& .MuiLinearProgress-bar ": {
                 height: "1px",
                 borderRadius: "50px",
@@ -267,17 +187,11 @@ function SubjectPage() {
           />
         </Tooltip>
       )}
-      {/* simple notification alert showing result.msg  */}
+
       {newItemsMsg && (
         <Paper elevation={6}>
           <Snackbar
-            open={
-              newItemsMsg !== ""
-                ? newItemsMsg === "No changes"
-                  ? false
-                  : true
-                : false
-            }
+            open={newItemsMsg !== ""}
             autoHideDuration={6000}
             onClose={() => setNewItemsMsg("")}
             message={newItemsMsg}
@@ -288,29 +202,10 @@ function SubjectPage() {
                 borderRadius: "15rem",
                 color: "black",
                 textAlign: "center",
-                "& .MuiSnackbarContent-message": {
-                  width: "100%",
-                  fontSize: "1rem",
-                },
               },
             }}
           >
-            <Alert
-              severity="info"
-
-              // sx={{
-              //   "&::after": {
-              //     content: "'since last visit'",
-              //     fontSize: "1ch",
-              //     position: "absolute",
-              //     right: "10%",
-              //     bottom: "10%",
-              //     color: "black",
-              //   },
-              // }}
-            >
-              {newItemsMsg}
-            </Alert>
+            <Alert severity="info">{newItemsMsg}</Alert>
           </Snackbar>
         </Paper>
       )}
@@ -318,6 +213,33 @@ function SubjectPage() {
   );
 }
 
-export default SubjectPage;
+// Fetch data at build time
+export const getStaticProps: GetStaticProps = async (context) => {
+  const subject = context.params?.subject as string;
+  let initialData = null;
 
-// function to get subject data from subject api, using subject abbreviation
+  try {
+    const res = await fetch(`localhost:3000/api/subjects/${subject}`);
+    initialData = await res.json();
+  } catch (error) {
+    console.error("Failed to fetch initial data:", error);
+  }
+
+  return {
+    props: {
+      subject,
+      initialData,
+    },
+  };
+};
+
+// Define static paths if necessary
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Pre-generate some subject paths at build time
+  const subjects = ["CSS", "DLD"]; // Example subjects
+  const paths = subjects.map((subject) => ({
+    params: { subject },
+  }));
+
+  return { paths, fallback: "blocking" }; // Fallback blocking to generate at request time
+};
