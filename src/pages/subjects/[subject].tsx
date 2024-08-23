@@ -1,3 +1,5 @@
+const { google } = require("googleapis");
+
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   Box,
@@ -45,6 +47,8 @@ export default function SubjectPage({
   subject,
   initialData,
 }: SubjectPageProps) {
+  console.log("SubjectPage ", initialData);
+
   const [data, setData] = useState<DataMap | null>(initialData);
   const [subjectLoading, setSubjectLoading] = useState(!initialData);
   const [materialLoading, setMaterialLoading] = useState(false);
@@ -77,37 +81,25 @@ export default function SubjectPage({
 
           // Fetch new data
           setNewFetchLoading(true);
-          fetch(`/api/subjects/${subject}`)
-            .then((res) => res.json())
-            .then(async (fetchedData) => {
-              const result = await addOrUpdateSubject(subject, fetchedData);
-              setNewItems(result.newItems);
-              setNewItemsMsg(result.msg);
 
-              if (result.msg !== "No changes") {
-                setData(fetchedData);
-              }
-              setNewFetchLoading(false);
-              setMaterialLoading(false);
-            })
-            .catch((error) => {
-              console.error(error);
-              setNewFetchLoading(false);
-              setMaterialLoading(false);
-            });
+          const result = await addOrUpdateSubject(subject, initialData);
+          setNewItems(result.newItems);
+          setNewItemsMsg(result.msg);
+
+          if (result.msg !== "No changes") {
+            setData(initialData);
+          }
+          setNewFetchLoading(false);
+          setMaterialLoading(false);
+
+          setNewFetchLoading(false);
+          setMaterialLoading(false);
         } else {
           // If no cached data, fetch from API
-          fetch(`/api/subjects/${subject}`)
-            .then((res) => res.json())
-            .then(async (fetchedData) => {
-              setData(fetchedData);
-              await addOrUpdateSubject(subject, fetchedData);
-              setMaterialLoading(false);
-            })
-            .catch((error) => {
-              console.error(error);
-              setMaterialLoading(false);
-            });
+
+          setData(initialData);
+          await addOrUpdateSubject(subject, initialData);
+          setMaterialLoading(false);
         }
 
         setSubjectLoading(false);
@@ -218,9 +210,89 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
   let initialData = null;
 
+  const SCOPES = ["https://www.googleapis.com/auth/drive"];
+
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      type: process?.env?.TYPE,
+      project_id: process?.env?.PROJECT_ID,
+      private_key_id: process?.env?.PRIVATE_KEY_ID,
+      private_key: process?.env?.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      client_email: process?.env?.CLIENT_EMAIL,
+      client_id: process?.env?.CLIENT_ID,
+      auth_uri: process?.env?.AUTH_URI,
+      token_uri: process?.env?.TOKEN_URI,
+      auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
+      client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
+    },
+    scopes: SCOPES,
+  });
+  // @ts-ignore
+  const GetDataOfSubject = async (subject, auth) => {
+    let FilesData = {};
+    const drive = google.drive({ version: "v3", auth });
+
+    const { data: SubjectFolders } = await drive.files.list({
+      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
+      fields: "files(id, name)",
+    });
+
+    if (!SubjectFolders.files || SubjectFolders.files.length === 0) {
+      return FilesData;
+    }
+    // @ts-ignore
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
+    let Parents = "";
+    let dic = {};
+
+    for (const SubjectFolderId of SubjectFolderIds) {
+      const { data: SubjectSubFolders } = await drive.files.list({
+        q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
+        fields: "files(id, name)",
+      });
+
+      for (const subFolder of SubjectSubFolders.files) {
+        // @ts-ignore
+        dic[subFolder.id] = subFolder.name;
+        Parents += `'${subFolder.id}' in parents OR `;
+      }
+    }
+
+    Parents = Parents.slice(0, -4); // Remove the trailing " OR "
+
+    if (Parents.length <= 0) return FilesData;
+
+    const { data: Files } = await drive.files.list({
+      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
+      fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
+      pageSize: 1000,
+    });
+
+    // @ts-ignore
+    for (const file of Files.files) {
+      // @ts-ignore
+
+      const parentName = dic[file.parents[0]];
+      // @ts-ignore
+
+      if (!FilesData[parentName]) {
+        // @ts-ignore
+
+        FilesData[parentName] = [];
+      }
+      // @ts-ignore
+
+      FilesData[parentName].push(file);
+    }
+
+    return FilesData;
+  };
+
   try {
-    const res = await fetch(`localhost:3000/api/subjects/${subject}`);
-    initialData = await res.json();
+    const res = await GetDataOfSubject(subject, auth);
+
+    // @ts-ignore
+    initialData = res;
   } catch (error) {
     console.error("Failed to fetch initial data:", error);
   }
@@ -236,7 +308,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
 // Define static paths if necessary
 export const getStaticPaths: GetStaticPaths = async () => {
   // Pre-generate some subject paths at build time
-  const subjects = ["CSS", "DLD"]; // Example subjects
+  
+  const subjects = ["CSS", "DLD"]; // Example subjects // TODO code to fetch all materials
+  
   const paths = subjects.map((subject) => ({
     params: { subject },
   }));
