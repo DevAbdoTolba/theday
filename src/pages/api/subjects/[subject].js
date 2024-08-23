@@ -1,10 +1,9 @@
+import { unstable_cache } from "next/cache";
 const { google } = require("googleapis");
 
 export default async function handler(req, res) {
-  // calculate time
   const start = Date.now();
-
-  const { subject } = req.query;
+  const { subject, cache } = req.query;
 
   const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
@@ -24,12 +23,10 @@ export default async function handler(req, res) {
     scopes: SCOPES,
   });
 
-  const GetDataOfSubject = async (subject) => {
+  const GetDataOfSubject = async (subject, auth) => {
     let FilesData = {};
-
     const drive = google.drive({ version: "v3", auth });
 
-    // Fetch all folders with the given subject name
     const { data: SubjectFolders } = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
@@ -39,8 +36,7 @@ export default async function handler(req, res) {
       return FilesData;
     }
 
-    // Collect all SubjectFolderIds
-    const SubjectFolderIds = SubjectFolders.files.map(folder => folder.id);
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
     let Parents = "";
     let dic = {};
 
@@ -60,7 +56,6 @@ export default async function handler(req, res) {
 
     if (Parents.length <= 0) return FilesData;
 
-    // Fetch all files within the subfolders
     const { data: Files } = await drive.files.list({
       q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
       fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
@@ -78,13 +73,25 @@ export default async function handler(req, res) {
     return FilesData;
   };
 
+  const getCachedSubjectData = unstable_cache(
+    async (subject, auth) => {
+      return await GetDataOfSubject(subject, auth);
+    },
+    [subject], // Cache key based on subject
+    {
+      tags: [subject], // Tag the cache with subject for easier invalidation
+      revalidate: false, // Prevents automatic revalidation unless manually triggered
+    }
+  );
+
   try {
-    const GetDataOfSubjectData = await GetDataOfSubject(subject);
+
+    const data = await getCachedSubjectData(subject, auth);
 
     const end = Date.now();
     console.log(`Execution time: ${end - start} ms`);
 
-    res.status(200).json(GetDataOfSubjectData);
+    res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
