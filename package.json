@@ -21,7 +21,7 @@
     "framer-motion": "^11.3.28",
     "googleapis": "^118.0.0",
     "mongoose": "^8.4.3",
-    "next": "13.3.2",
+    "next": "13.4.2",
     "next-pwa": "^5.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
