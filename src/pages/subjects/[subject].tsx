@@ -47,12 +47,10 @@ export default function SubjectPage({
   subject,
   initialData,
 }: SubjectPageProps) {
-  console.log("SubjectPage ", initialData);
-
   const [data, setData] = useState<DataMap | null>(initialData);
-  const [subjectLoading, setSubjectLoading] = useState(!initialData);
-  const [materialLoading, setMaterialLoading] = useState(false);
-  const [newFetchLoading, setNewFetchLoading] = useState(false);
+  // const [subjectLoading, setSubjectLoading] = useState(!initialData);
+  // const [materialLoading, setMaterialLoading] = useState(false);
+  // const [newFetchLoading, setNewFetchLoading] = useState(false);
   const [newItemsMsg, setNewItemsMsg] = useState("");
   const [newItems, setNewItems] = useState([]);
 
@@ -69,44 +67,45 @@ export default function SubjectPage({
   });
 
   useEffect(() => {
-    if (!initialData) {
-      // If initialData is not available, fetch it on the client side
-      const loadData = async () => {
-        setSubjectLoading(true);
-        const cachedSubject = await getSubjectByName(subject);
+    // If initialData is not available, fetch it on the client side
+    const loadData = async () => {
+      // setSubjectLoading(true);
+      const cachedSubject = await getSubjectByName(subject);
 
-        if (cachedSubject) {
-          setData(cachedSubject.folders);
-          setMaterialLoading(false);
+      if (cachedSubject) {
+        // setMaterialLoading(false);
+        setData(cachedSubject.folders);
 
-          // Fetch new data
-          setNewFetchLoading(true);
+        // Fetch new data
+        // setNewFetchLoading(true);
 
-          const result = await addOrUpdateSubject(subject, initialData);
+        const result = await addOrUpdateSubject(subject, initialData);
+
+        if (result.msg !== "No changes") {
           setNewItems(result.newItems);
           setNewItemsMsg(result.msg);
-
-          if (result.msg !== "No changes") {
-            setData(initialData);
-          }
-          setNewFetchLoading(false);
-          setMaterialLoading(false);
-
-          setNewFetchLoading(false);
-          setMaterialLoading(false);
-        } else {
-          // If no cached data, fetch from API
-
-          setData(initialData);
-          await addOrUpdateSubject(subject, initialData);
-          setMaterialLoading(false);
         }
 
-        setSubjectLoading(false);
-      };
+        if (result.msg !== "No changes") {
+          setData(initialData);
+        }
+        // setNewFetchLoading(false);
+        // setMaterialLoading(false);
 
-      loadData();
-    }
+        // setNewFetchLoading(false);
+        // setMaterialLoading(false);
+      } else {
+        // If no cached data, fetch from API
+
+        setData(initialData);
+        await addOrUpdateSubject(subject, initialData);
+        // setMaterialLoading(false);
+      }
+
+      // setSubjectLoading(false);
+    };
+
+    loadData();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "ArrowLeft") {
@@ -123,11 +122,11 @@ export default function SubjectPage({
     return () => {
       removeEventListener("keydown", handleKeyDown);
     };
-  }, [initialData, subject]);
+  }, []);
 
-  if (subjectLoading || materialLoading) {
-    return <Loading />;
-  }
+  // if (subjectLoading || materialLoading) {
+  //   return <Loading />;
+  // }
 
   return (
     <Box sx={{ overflowX: "hidden" }}>
@@ -136,7 +135,7 @@ export default function SubjectPage({
         <link rel="icon" href={"../book.png"} />
       </Head>
 
-      {offline && materialLoading ? (
+      {offline ? (
         <Offline />
       ) : !data ? (
         <NoData />
@@ -145,15 +144,15 @@ export default function SubjectPage({
       ) : (
         <>
           <Drawer
-            subjectLoading={subjectLoading}
+            subjectLoading={false}
             subject={subject}
             data={data}
-            materialLoading={materialLoading}
+            materialLoading={false}
             showDrawer={showDrawer}
           />
           <TabsPC
             showDrawer={showDrawer}
-            subjectLoading={subjectLoading}
+            // subjectLoading={subjectLoading}
             data={data}
             newItems={newItems}
           />
@@ -161,7 +160,7 @@ export default function SubjectPage({
         </>
       )}
 
-      {newFetchLoading && (
+      {/* {
         <Tooltip title="Fetching new data..." placement="top">
           <LinearProgress
             sx={{
@@ -178,7 +177,7 @@ export default function SubjectPage({
             }}
           />
         </Tooltip>
-      )}
+      } */}
 
       {newItemsMsg && (
         <Paper elevation={6}>
@@ -308,9 +307,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
 // Define static paths if necessary
 export const getStaticPaths: GetStaticPaths = async () => {
   // Pre-generate some subject paths at build time
-  
+
   const subjects = ["CSS", "DLD"]; // Example subjects // TODO code to fetch all materials
-  
+
   const paths = subjects.map((subject) => ({
     params: { subject },
   }));
