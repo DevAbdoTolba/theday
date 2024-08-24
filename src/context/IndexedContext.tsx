@@ -149,7 +149,7 @@ export default function IndexedProvider({
         addOrUpdateSubject,
       }}
     >
-      {loading && <LinearProgress />}
+      {/* {loading && <LinearProgress />} */}
       {children}
     </IndexedContext.Provider>
   );
