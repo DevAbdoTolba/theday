@@ -47,6 +47,7 @@ export default function SubjectPage({
   subject,
   initialData,
 }: SubjectPageProps) {
+  
   const [data, setData] = useState<DataMap | null>(initialData);
   // const [subjectLoading, setSubjectLoading] = useState(!initialData);
   // const [materialLoading, setMaterialLoading] = useState(false);
