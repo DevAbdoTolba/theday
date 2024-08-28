@@ -47,7 +47,6 @@ export default function SubjectPage({
   subject,
   initialData,
 }: SubjectPageProps) {
-  
   const [data, setData] = useState<DataMap | null>(initialData);
   // const [subjectLoading, setSubjectLoading] = useState(!initialData);
   // const [materialLoading, setMaterialLoading] = useState(false);
@@ -129,6 +128,21 @@ export default function SubjectPage({
   //   return <Loading />;
   // }
 
+  // Handle fallback state when the page is being generated
+  if (router.isFallback) {
+    return <Loading />;
+  }
+
+  // If offline or no data, handle it gracefully
+  if (offline) {
+    return <Offline />;
+  }
+
+  // Show NoData component if no data is available after fetching
+  if (!data || Object.keys(data).length === 0) {
+    return <NoData />;
+  }
+
   return (
     <Box sx={{ overflowX: "hidden" }}>
       <Head>
@@ -136,30 +150,22 @@ export default function SubjectPage({
         <link rel="icon" href={"../book.png"} />
       </Head>
 
-      {offline ? (
-        <Offline />
-      ) : !data ? (
-        <NoData />
-      ) : Object.keys(data).length === 0 ? (
-        <NoData />
-      ) : (
-        <>
-          <Drawer
-            subjectLoading={false}
-            subject={subject}
-            data={data}
-            materialLoading={false}
-            showDrawer={showDrawer}
-          />
-          <TabsPC
-            showDrawer={showDrawer}
-            // subjectLoading={subjectLoading}
-            data={data}
-            newItems={newItems}
-          />
-          <TabsPhone data={data} newItems={newItems} />
-        </>
-      )}
+      <>
+        <Drawer
+          subjectLoading={false}
+          subject={subject}
+          data={data}
+          materialLoading={false}
+          showDrawer={showDrawer}
+        />
+        <TabsPC
+          showDrawer={showDrawer}
+          // subjectLoading={subjectLoading}
+          data={data}
+          newItems={newItems}
+        />
+        <TabsPhone data={data} newItems={newItems} />
+      </>
 
       {/* {
         <Tooltip title="Fetching new data..." placement="top">
