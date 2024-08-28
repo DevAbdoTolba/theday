@@ -321,5 +321,5 @@ export const getStaticPaths: GetStaticPaths = async () => {
     params: { subject },
   }));
 
-  return { paths, fallback: "blocking" }; // Fallback blocking to generate at request time
+  return { paths, fallback: "blocking" }; // Fallback blocking to generate at request time, TODO we need to be true in the feature
 };
