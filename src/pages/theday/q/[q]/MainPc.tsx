@@ -8,6 +8,7 @@ import Zoom from "@mui/material/Zoom";
 import { Chip, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
+import Link from "next/link";
 
 interface Props {
   search: string;
@@ -97,6 +98,8 @@ export default function MainPc({ search, currentSemester }: Props) {
                             disableInteractive
                           >
                             <Chip
+                              component={Link}
+                              href={`/subjects/${subjects.abbreviation}`}
                               sx={{
                                 width: "100%",
                                 MozBoxShadow:
@@ -111,24 +114,10 @@ export default function MainPc({ search, currentSemester }: Props) {
                               onClick={() => {
                                 // redirect
 
-                                console.log(
-                                  "currentSemester : " +
-                                    currentSemester +
-                                    "\nIndex : " +
-                                    index
-                                );
                                 localStorage.setItem(
                                   "currentSemester",
                                   index.toString()
                                 );
-                                console.log(
-                                  "currentSemester : " +
-                                    currentSemester +
-                                    "\nIndex : " +
-                                    index
-                                );
-                                window.location.href =
-                                  "/subjects/" + subjects.abbreviation;
                               }}
                             />
                           </Tooltip>
