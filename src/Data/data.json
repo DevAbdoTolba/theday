@@ -234,6 +234,10 @@
                 {
                     "name": "Robotics Applications",
                     "abbreviation": "ROB"
+                },
+                {
+                    "name": "Digital Image Processing",
+                    "abbreviation": "DIP"
                 }
             ]
         }
