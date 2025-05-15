@@ -1,8 +1,6 @@
 import { useContext } from "react";
 import { DataContext } from "../../../../context/TranscriptContext";
-
 import Box from "@mui/material/Box";
-import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
 import Zoom from "@mui/material/Zoom";
 import { Chip, Tooltip, Typography } from "@mui/material";
@@ -17,118 +15,119 @@ interface Props {
 
 export default function MainPc({ search, currentSemester }: Props) {
   const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
+    backgroundColor: theme.palette.mode === "dark" ? "#1A1A1A" : "#fff",
     ...theme.typography.body2,
-    padding: theme.spacing(1),
+    padding: theme.spacing(3),
     textAlign: "center",
-    borderBottom: "1px solid #1e1e1e",
-    //   shadow
-    boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
-    color: theme.palette.text.secondary,
+    borderRadius: "16px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(10px)",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      transform: "translateY(-5px)",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+    }
   }));
 
   const { transcript, loadingTranscript, error } = useContext(DataContext);
 
   return (
-    <>
-      <Box
-        sx={{
-          m: 2,
-          display: {
-            xs: "none",
-            sm: "block",
-          },
-        }}
-      >
-        <Grid container spacing={2}>
-          {/*Filter for search
-1-Semesters
-2-Subjects
-4-name
-5-abbreviation
-.filter?
-*/}
-          {/* @ts-ignore */}
-          {transcript.semesters
-            .filter(
-              (x: any) =>
-                x.index !== currentSemester &&
-                x.subjects.filter(
-                  (y: any) =>
-                    y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                    y?.abbreviation
-                      ?.toLowerCase()
-                      .includes(search?.toLowerCase())
-                ).length > 0
-            )
-            .map((item: any, index: any) => (
-              <Grid key={index} item xs={4}>
-                <Item
-                  sx={{
-                    minHeight: "100%",
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      WebkitBoxShadow: "0px 0px 5px 1px rgb(0 0 0 / 50%)",
-                      MozBoxShadow: "0px 0px 5px 1px rgba(0, 0, 0, 0.5)",
-                      boxShadow: "0px 0px 5px 1px rgb(0 0 0 / 50%)",
-                      transform: "scale(1.1)",
-                    },
+    <Box
+      sx={{
+        m: 4,
+        display: {
+          xs: "none",
+          sm: "block",
+        },
+      }}
+    >
+      <Grid container spacing={3}>
+        {transcript.semesters
+          .filter(
+            (x: any) =>
+              x.index !== currentSemester &&
+              x.subjects.filter(
+                (y: any) =>
+                  y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
+                  y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
+              ).length > 0
+          )
+          .map((item: any, index: any) => (
+            <Grid key={index} item xs={12} md={6} lg={4}>
+              <Item>
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    mb: 3,
+                    color: "#fff",
+                    fontWeight: 600,
+                    background: "linear-gradient(45deg, #0685da, #4FACFE)",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    display: "inline-block"
                   }}
                 >
-                  <Typography sx={{ marginBottom: 3, color: "#fff" }}>
-                    Semester {item.index}
-                  </Typography>
-                  <Grid container spacing={2} sx={{ marginBottom: 3 }}>
-                    {item.subjects
-                      .filter(
-                        (y: any) =>
-                          y?.name
-                            ?.toLowerCase()
-                            .includes(search?.toLowerCase()) ||
-                          y?.abbreviation
-                            ?.toLowerCase()
-                            .includes(search?.toLowerCase())
-                      )
-                      .map((subjects: any, subIndex: any) => (
-                        <Grid key={subIndex} item>
-                          <Tooltip
-                            title={subjects?.name}
-                            arrow
-                            TransitionComponent={Zoom}
-                            disableInteractive
-                          >
-                            <Chip
-                              component={Link}
-                              href={`/subjects/${subjects.abbreviation}`}
-                              sx={{
-                                width: "100%",
-                                MozBoxShadow:
-                                  "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
-                                boxShadow:
-                                  "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
-                              }}
-                              className="subject__chip"
-                              label={subjects.abbreviation}
-                              clickable
-                              // component={"a"}
-                              onClick={() => {
-                                // redirect
-
-                                localStorage.setItem(
-                                  "currentSemester",
-                                  index.toString()
-                                );
-                              }}
-                            />
-                          </Tooltip>
-                        </Grid>
-                      ))}
-                  </Grid>
-                </Item>
-              </Grid>
-            ))}
-        </Grid>
-      </Box>
-    </>
+                  Semester {item.index}
+                </Typography>
+                <Grid 
+                  container 
+                  spacing={2} 
+                  sx={{ 
+                    mb: 3,
+                    justifyContent: "center"
+                  }}
+                >
+                  {item.subjects
+                    .filter(
+                      (y: any) =>
+                        y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
+                        y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
+                    )
+                    .map((subjects: any, subIndex: any) => (
+                      <Grid key={subIndex} item xs={12} sm={6}>
+                        <Tooltip
+                          title={subjects?.name}
+                          arrow
+                          TransitionComponent={Zoom}
+                          disableInteractive
+                        >
+                          <Chip
+                            component={Link}
+                            href={`/subjects/${subjects.abbreviation}`}
+                            sx={{
+                              width: "100%",
+                              height: "auto",
+                              padding: "12px 8px",
+                              borderRadius: "12px",
+                              fontSize: "1rem",
+                              fontWeight: 500,
+                              background: "rgba(6, 133, 218, 0.1)",
+                              border: "1px solid rgba(6, 133, 218, 0.2)",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                background: "rgba(6, 133, 218, 0.2)",
+                                transform: "scale(1.02)",
+                              }
+                            }}
+                            className="subject__chip"
+                            label={subjects.abbreviation}
+                            clickable
+                            onClick={() => {
+                              localStorage.setItem(
+                                "currentSemester",
+                                index.toString()
+                              );
+                            }}
+                          />
+                        </Tooltip>
+                      </Grid>
+                    ))}
+                </Grid>
+              </Item>
+            </Grid>
+          ))}
+      </Grid>
+    </Box>
   );
 }

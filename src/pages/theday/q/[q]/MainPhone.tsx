@@ -1,10 +1,7 @@
 import { useContext } from "react";
 import { DataContext } from "../../../../context/TranscriptContext";
-
 import Box from "@mui/material/Box";
-import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
-import Dialog from "./Dialog";
 import Zoom from "@mui/material/Zoom";
 import { Chip, Tooltip, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
@@ -20,6 +17,7 @@ interface Props {
 
 function MainPhone({ search, currentSemester }: Props) {
   const { transcript, loadingTranscript, error } = useContext(DataContext);
+  
   return (
     <Box
       sx={{
@@ -30,7 +28,6 @@ function MainPhone({ search, currentSemester }: Props) {
         },
       }}
     >
-      {/* @ts-ignore */}
       {transcript.semesters
         .filter(
           (x: any) =>
@@ -44,38 +41,43 @@ function MainPhone({ search, currentSemester }: Props) {
           <Accordion
             key={index}
             sx={{
-              mb: 3,
-              borderBottom: "1px solid #1e1e1e",
-              //   shadow
-              boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
+              mb: 2,
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "rgba(26, 26, 26, 0.8)",
+              backdropFilter: "blur(10px)",
+              "&:before": {
+                display: "none",
+              },
+              "&.Mui-expanded": {
+                margin: "8px 0",
+              }
             }}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
+              sx={{
+                background: "linear-gradient(45deg, #0685da, #4FACFE)",
+                "& .MuiAccordionSummary-content": {
+                  margin: "12px 0",
+                }
+              }}
             >
-              <Typography>Semester {item.index}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Semester {item.index}
+              </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Grid container spacing={2} sx={{ marginBottom: 3 }}>
+              <Grid container spacing={2}>
                 {item.subjects
                   .filter(
                     (y: any) =>
                       y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                      y?.abbreviation
-                        ?.toLowerCase()
-                        .includes(search?.toLowerCase())
+                      y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
                   )
-
                   .map((subjects: any, subIndex: any) => (
-                    <Grid
-                      key={subIndex}
-                      item
-                      // sx={{
-                      //   width: "100%",
-                      // }}
-                    >
+                    <Grid key={subIndex} item xs={12}>
                       <Tooltip
                         title={subjects?.name}
                         arrow
@@ -86,25 +88,29 @@ function MainPhone({ search, currentSemester }: Props) {
                         disableTouchListener
                       >
                         <Chip
-                        component={Link}
-                        href={`/subjects/${subjects.abbreviation}`}
+                          component={Link}
+                          href={`/subjects/${subjects.abbreviation}`}
                           sx={{
                             width: "100%",
-                            MozBoxShadow:
-                              "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
-                            boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
+                            height: "auto",
+                            padding: "12px 8px",
+                            borderRadius: "12px",
+                            fontSize: "1rem",
+                            background: "rgba(6, 133, 218, 0.1)",
+                            border: "1px solid rgba(6, 133, 218, 0.2)",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              background: "rgba(6, 133, 218, 0.2)",
+                            }
                           }}
                           className="subject__chip"
                           label={subjects.name}
                           clickable
-                          // component={"a"}
                           onClick={() => {
-
                             localStorage.setItem(
                               "currentSemester",
                               index.toString()
                             );
-                       
                           }}
                         />
                       </Tooltip>
