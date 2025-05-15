@@ -15,7 +15,10 @@ import NextLink from "next/link";
 import NativeSelect from "@mui/material/NativeSelect";
 import { DataContext } from "../context/TranscriptContext";
 import KeyIcon from "@mui/icons-material/Key";
-
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import { useTheme } from "@mui/material/styles";
+import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 
@@ -136,6 +139,8 @@ export default function Header({
   const { setLoadingTranscript, className, setClassName } =
     React.useContext(DataContext);
   const router = useRouter();
+  const theme = useTheme();
+  const colorMode = React.useContext(ColorModeContext);
 
   React.useEffect(() => {
     // const classNameLocally = (localStorage.getItem("className") as string) || "";
@@ -192,13 +197,19 @@ export default function Header({
       <AppBar
         position={position || "static"}
         sx={{
-          height: { sm: "5rem", xs: "4rem" },
+          height: { sm: "3.5rem", xs: "3.5rem" },
           display: "flex",
           justifyContent: "center",
+          background: theme.palette.mode === "light" ? "#2563eb" : theme.palette.background.paper,
+          boxShadow: "0 2px 8px 0 rgba(21,26,44,0.12)",
           ...sx,
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{
+          minHeight: { sm: "5.5rem", xs: "4.5rem" },
+          px: { sm: 4, xs: 2 },
+          py: { sm: 2, xs: 1 },
+        }}>
           {/* <IconButton
             edge="start"
             color="inherit"
@@ -220,12 +231,16 @@ export default function Header({
             }}
           >
             <Typography
-              variant="h5"
+              variant="h4"
               noWrap
               component="div"
               sx={{
                 display: "block",
-                fontSize: { sm: "1.5rem", xs: "1.5rem" },
+                fontSize: { sm: "2.1rem", xs: "1.5rem" },
+                fontWeight: 800,
+                color: theme.palette.text.primary,
+                letterSpacing: 0.5,
+                lineHeight: 1.2,
               }}
             >
               <Tooltip
@@ -398,6 +413,12 @@ export default function Header({
               <SearchDialog open={open} setOpen={setOpen} data={data} />
             </>
           )}
+          {/* Theme Toggle Button */}
+          <Tooltip title={theme.palette.mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+            <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+              {theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+          </Tooltip>
         </Toolbar>
         <KeyDialog open={openKeyDialog} setOpen={setOpenKeyDialog} />
       </AppBar>

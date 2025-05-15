@@ -22,6 +22,7 @@ import MuiAlert from "@mui/material/Alert";
 import Offline from "../../../../components/Offline";
 import { offlineContext } from "../../../_app";
 import { DataContext } from "../../../../context/TranscriptContext";
+import { useTheme } from "@mui/material/styles";
 
 const Main = lazy(() => import("./Main"));
 
@@ -39,6 +40,8 @@ function App() {
   const [isMaxSemester, setIsMaxSemester] = useState(0);
 
   const [offline, setOffline] = useContext(offlineContext);
+
+  const theme = useTheme();
 
   const handleClick = () => {
     setOpen(true);
@@ -61,13 +64,12 @@ function App() {
     const semester = JSON.parse(localStorage.getItem("semester") as string);
     console.log(transcript);
 
-    if (
-      // @ts-ignore
-      semester == transcript.semesters[transcript.semesters.length - 1].index
-    ) {
-      setIsMaxSemester(1);
-    } else {
-      setIsMaxSemester(0);
+    if (transcript && 'semesters' in transcript && transcript.semesters.length > 0) {
+      if (semester == transcript.semesters[transcript.semesters.length - 1].index) {
+        setIsMaxSemester(1);
+      } else {
+        setIsMaxSemester(0);
+      }
     }
   }, [transcript]);
 
@@ -100,6 +102,9 @@ function App() {
             justifyContent: "center",
             alignItems: "center",
             overflow: "hidden",
+            background: theme.palette.mode === "dark" ? "#151a2c" : "#fff",
+            borderRadius: 0,
+            p: 3,
           }}
         >
           {currentSemester !== -1 && (
@@ -117,6 +122,9 @@ function App() {
               minHeight: "100dvh",
               maxWidth: { sm: "80%", xs: "100%" },
               position: "relative",
+              // background: "#181f33",
+              background: theme.palette.mode === "dark" ? "#181f33" : "#fff",
+
             }}
           >
             <Suspense

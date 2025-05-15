@@ -2,7 +2,7 @@ import "../styles/Material.css";
 import "../styles/DribbleButton.css";
 import "../styles/RainbowBorder.css";
 
-import React, { useContext } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Button, CssBaseline } from "@mui/material";
 import { Analytics } from "@vercel/analytics/react";
@@ -29,13 +29,7 @@ import IndexedProvider from "../context/IndexedContext";
 //   },
 // }));
 
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
-
-// custom CssBaseline with dark mode
+export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
 export const offlineContext = React.createContext<any>({});
 
@@ -79,6 +73,47 @@ export default function App({
     }
   }
 
+  const [mode, setMode] = useState<'light' | 'dark'>("dark");
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+      },
+    }),
+    []
+  );
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          ...(mode === "light"
+            ? {
+                background: {
+                  default: "#f4f6fb",
+                  paper: "#f4f6fb",
+                },
+                text: {
+                  primary: "#151a2c",
+                },
+              }
+            : {
+                background: {
+                  default: "#151a2c",
+                  paper: "#151a2c",
+                },
+                text: {
+                  primary: "#fff",
+                },
+              }),
+        },
+        shape: { borderRadius: 12 },
+        transitions: { duration: { shortest: 150 } },
+      }),
+    [mode]
+  );
+
   return (
     <>
       <Head>
@@ -89,25 +124,27 @@ export default function App({
       <IndexedProvider>
         <TranscriptContextProvider>
           <offlineContext.Provider value={[offline, setOffline]}>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <Image
-                src={"/icon-512x512.png"}
-                alt="icon"
-                width={"200"}
-                height={"200"}
-                style={{
-                  position: "fixed",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: -100,
-                  opacity: 0,
-                }}
-              />
-              <Component {...pageProps} />
-              <Analytics />
-            </ThemeProvider>
+            <ColorModeContext.Provider value={colorMode}>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Image
+                  src={"/icon-512x512.png"}
+                  alt="icon"
+                  width={"200"}
+                  height={"200"}
+                  style={{
+                    position: "fixed",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: -100,
+                    opacity: 0,
+                  }}
+                />
+                <Component {...pageProps} />
+                <Analytics />
+              </ThemeProvider>
+            </ColorModeContext.Provider>
           </offlineContext.Provider>
         </TranscriptContextProvider>
       </IndexedProvider>

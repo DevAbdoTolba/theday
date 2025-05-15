@@ -1,6 +1,5 @@
 "use client";
 import React, { createContext, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import default2110 from "../Data/data.json";
 import Loading from "../components/Loading";
@@ -51,8 +50,8 @@ export const DataContext = createContext<DataContextValue>(
 export const TranscriptContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const q = useSearchParams().get("q") ?? "";
   const router = useRouter();
+  const q = router.query.q ?? "";
   const [transcript, setTranscript] = useState<Transcript | defaultData | null>(
     null
   );
@@ -62,7 +61,7 @@ export const TranscriptContextProvider: React.FC<{
 
   useEffect(() => {
     if (!router.isReady) return;
-    console.log("here " + q + " <== Q");
+    console.log("here == ", q);
 
     function thereQ() {}
     function noQ() {}
@@ -170,7 +169,7 @@ export const TranscriptContextProvider: React.FC<{
 
           setError("Error fetching data");
           // ========= !VALID =========
-          console.log("Not Valid");
+          console.log("Not Valid, setting transcript to default2110", default2110);
 
           setTranscript(default2110);
           setClassName("default");
@@ -182,6 +181,13 @@ export const TranscriptContextProvider: React.FC<{
         });
     }
     function handlingContext() {
+      if (q === "default") {
+        console.log("Default route detected, setting transcript to default2110", default2110);
+        setTranscript(default2110);
+        setClassName("default");
+        setLoadingTranscript(false);
+        return;
+      }
       if (q) {
         // check if stored
         const storedClasses =

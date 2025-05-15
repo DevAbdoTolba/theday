@@ -361,11 +361,11 @@ export default function footer() {
           sx={{
             position: "relative",
             color: "#0685da",
-            bgcolor: "#121212",
-            transition: "all .2s ease-in-out",
-            "&:hover": {
-              transform: "scale(1.2) rotate(5deg)",
-            },
+            // bgcolor: "#121212",
+            // transition: "all .2s ease-in-out",
+            // "&:hover": {
+            //   transform: "scale(1.2) rotate(5deg)",
+            // },
             "&::after": {
               content: '""',
               position: "absolute",
@@ -398,11 +398,11 @@ export default function footer() {
           sx={{
             position: "relative",
             color: "#0685da",
-            bgcolor: "#121212",
-            transition: "all .2s ease-in-out",
-            "&:hover": {
-              transform: "scale(1.2) rotate(5deg)",
-            },
+            // bgcolor: "#121212",
+            // transition: "all .2s ease-in-out",
+            // "&:hover": {
+            //   transform: "scale(1.2) rotate(5deg)",
+            // },
             "&::after": {
               content: '""',
               position: "absolute",
@@ -438,11 +438,11 @@ export default function footer() {
           sx={{
             position: "relative",
             color: "#0685da",
-            bgcolor: "#121212",
-            transition: "all .2s ease-in-out",
-            "&:hover": {
-              transform: "scale(1.2) rotate(5deg)",
-            },
+            // bgcolor: "#121212",
+            // transition: "all .2s ease-in-out",
+            // "&:hover": {
+            //   transform: "scale(1.2) rotate(5deg)",
+            // },
             "&::after": {
               content: '""',
               position: "absolute",

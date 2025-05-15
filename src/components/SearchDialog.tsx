@@ -183,7 +183,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
         aria-describedby="alert-dialog-slide-description"
         sx={{
           "& .MuiDialog-paper": {
-            backgroundColor: "#292929",
+            backgroundColor: "#151a2c",
             backgroundImage: "none",
             borderRadius: {
               sm: "20px ",

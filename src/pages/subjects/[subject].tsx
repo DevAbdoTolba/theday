@@ -144,7 +144,7 @@ export default function SubjectPage({
   }
 
   return (
-    <Box sx={{ overflowX: "hidden" }}>
+    <Box sx={{ overflowX: "hidden", background: "#151a2c" }}>
       <Head>
         <title>{subject.toUpperCase()}</title>
         <link rel="icon" href={"../book.png"} />

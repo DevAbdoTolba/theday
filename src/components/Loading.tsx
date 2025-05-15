@@ -19,7 +19,7 @@ const Loading = () => {
           position: "absolute",
           inset: "0",
           zIndex: "100",
-          backgroundColor: "#1e1e1e",
+          backgroundColor: "#151a2c",
         }}
       >
         <Box

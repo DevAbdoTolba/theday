@@ -47,9 +47,10 @@ export default function CurrentSemester({
   }));
 
   useEffect(() => {
-    // @ts-ignore
-    setSubjects(transcript.semesters[currentSemester].subjects);
-  }, []);
+    if (transcript && 'semesters' in transcript && transcript.semesters[currentSemester]) {
+      setSubjects(transcript.semesters[currentSemester].subjects);
+    }
+  }, [transcript, currentSemester]);
 
   return (
     <Box

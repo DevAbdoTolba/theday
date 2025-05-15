@@ -161,9 +161,11 @@ function Material({
         Object?.keys(data)?.map((key, index) => (
           <Paper
             key={index}
+            elevation={3}
             sx={{
               p: "0.5rem",
               m: "1rem",
+              background: "#151a2c",
             }}
           >
             <Box
