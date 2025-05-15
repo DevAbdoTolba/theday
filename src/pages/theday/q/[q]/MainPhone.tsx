@@ -1,11 +1,7 @@
 import { useContext } from "react";
 import { DataContext } from "../../../../context/TranscriptContext";
-import { useTheme } from "@mui/material/styles";
-
 import Box from "@mui/material/Box";
-import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
-import Dialog from "./Dialog";
 import Zoom from "@mui/material/Zoom";
 import { Chip, Tooltip, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
@@ -21,8 +17,7 @@ interface Props {
 
 function MainPhone({ search, currentSemester }: Props) {
   const { transcript, loadingTranscript, error } = useContext(DataContext);
-  const theme = useTheme();
-  console.log("Transcript in MainPhone:", transcript);
+  
   return (
     <Box
       sx={{
@@ -31,14 +26,9 @@ function MainPhone({ search, currentSemester }: Props) {
           sm: "none",
           xs: "block",
         },
-        background: theme.palette.background.paper,
-        minHeight: "100vh",
-        borderRadius: 2,
-        p: 1,
       }}
     >
-      {/* @ts-ignore */}
-      {transcript && 'semesters' in transcript && transcript.semesters
+      {transcript.semesters
         .filter(
           (x: any) =>
             x.subjects.filter(
@@ -51,38 +41,40 @@ function MainPhone({ search, currentSemester }: Props) {
           <Accordion
             key={index}
             sx={{
-              mb: 3,
-              background: theme.palette.mode === "dark" ? "#19223c" : "#e3e8f7",
-              borderRadius: 2,
-              border: theme.palette.mode === "dark" ? "1px solid #232b3e" : "1px solid #bcd0fa",
-              boxShadow: "0 2px 12px 0 rgba(59,130,246,0.10)",
-              color: theme.palette.text.primary,
-              '&:before': { display: 'none' },
+              mb: 2,
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "rgba(26, 26, 26, 0.8)",
+              backdropFilter: "blur(10px)",
+              "&:before": {
+                display: "none",
+              },
+              "&.Mui-expanded": {
+                margin: "8px 0",
+              }
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.mode === "dark" ? '#3b82f6' : '#2563eb' }} />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
+              expandIcon={<ExpandMoreIcon />}
               sx={{
-                background: theme.palette.mode === "dark" ? "#232f55" : "#2563eb",
-                borderTopLeftRadius: 8,
-                borderTopRightRadius: 8,
-                px: 2,
-                py: 1.2,
+                background: "linear-gradient(45deg, #0685da, #4FACFE)",
+                "& .MuiAccordionSummary-content": {
+                  margin: "12px 0",
+                }
               }}
             >
-              <Typography sx={{ fontWeight: 800, fontSize: 18, color: theme.palette.mode === "dark" ? '#fff' : '#fff' }}>Semester {item.index}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Semester {item.index}
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ background: theme.palette.mode === "dark" ? "#151a2c" : "#fff", borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }}>
-              <Grid container spacing={1} sx={{ marginBottom: 1 }}>
+            <AccordionDetails>
+              <Grid container spacing={2}>
                 {item.subjects
                   .filter(
                     (y: any) =>
                       y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                      y?.abbreviation
-                        ?.toLowerCase()
-                        .includes(search?.toLowerCase())
+                      y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
                   )
                   .map((subjects: any, subIndex: any) => (
                     <Grid key={subIndex} item xs={12}>
@@ -95,48 +87,32 @@ function MainPhone({ search, currentSemester }: Props) {
                         disableFocusListener
                         disableTouchListener
                       >
-                        <Box
+                        <Chip
                           component={Link}
                           href={`/subjects/${subjects.abbreviation}`}
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            background: theme.palette.mode === "dark" ? "#232b3e" : "#e3e8f7",
-                            borderRadius: 1,
-                            px: 2,
-                            py: 1.2,
-                            boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
-                            mt: 1.5,
-                            mb: .5,
-                            fontWeight: 600,
-                            fontSize: 15,
-                            color: theme.palette.text.primary,
-                            minHeight: 48,
-                            transition: "all 0.18s",
-                            cursor: "pointer",
-                            textDecoration: 'none',
-                            '&:hover': {
-                              background: theme.palette.mode === "dark" ? '#2563eb' : '#bcd0fa',
-                              color: theme.palette.mode === "dark" ? '#fff' : theme.palette.text.primary,
-                              boxShadow: '0 4px 16px 0 rgba(59,130,246,0.13)',
-                            },
+                            width: "100%",
+                            height: "auto",
+                            padding: "12px 8px",
+                            borderRadius: "12px",
+                            fontSize: "1rem",
+                            background: "rgba(6, 133, 218, 0.1)",
+                            border: "1px solid rgba(6, 133, 218, 0.2)",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              background: "rgba(6, 133, 218, 0.2)",
+                            }
                           }}
-                        >
-                          <b style={{ fontSize: 15, marginRight: 8, textDecoration: 'none' }}>{subjects.abbreviation}</b>
-                          <span style={{
-                            fontWeight: 400,
-                            fontSize: 14,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            color: "inherit",
-                            textDecoration: 'none',
-                          }}>
-                            {subjects.name.length > 20
-                              ? subjects.name.slice(0, 20) + "..."
-                              : subjects.name}
-                          </span>
-                        </Box>
+                          className="subject__chip"
+                          label={subjects.name}
+                          clickable
+                          onClick={() => {
+                            localStorage.setItem(
+                              "currentSemester",
+                              index.toString()
+                            );
+                          }}
+                        />
                       </Tooltip>
                     </Grid>
                   ))}
