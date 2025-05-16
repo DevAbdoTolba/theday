@@ -374,7 +374,7 @@ export default function footer() {
               height: "1%",
               width: "0",
               transition: "all .2s ease-in-out",
-              bgcolor: "red",
+              bgcolor: "#3b82f6",
             },
             "&:hover::after": {
               width: "100%",
@@ -411,7 +411,7 @@ export default function footer() {
               height: "1%",
               width: "0",
               transition: "all .2s ease-in-out",
-              bgcolor: "red",
+              bgcolor: "#3b82f6",
             },
             "&:hover::after": {
               width: "100%",
@@ -451,7 +451,7 @@ export default function footer() {
               height: "1%",
               width: "0",
               transition: "all .2s ease-in-out",
-              bgcolor: "red",
+              bgcolor: "#3b82f6",
             },
             "&:hover::after": {
               width: "100%",

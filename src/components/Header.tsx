@@ -197,10 +197,12 @@ export default function Header({
       <AppBar
         position={position || "static"}
         sx={{
-          height: { sm: "3.5rem", xs: "3.5rem" },
+          height: { sm: "3.5rem", xs: "2.5rem" },
           display: "flex",
           justifyContent: "center",
-          background: theme.palette.mode === "light" ? "#2563eb" : theme.palette.background.paper,
+          background: theme.palette.mode === "light"
+            ? "#2563eb"
+            : "linear-gradient(180deg, #151a2c 0%, #19223c 100%)",
           boxShadow: "0 2px 8px 0 rgba(21,26,44,0.12)",
           ...sx,
         }}

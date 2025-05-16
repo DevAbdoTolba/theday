@@ -2,7 +2,7 @@ import "../styles/Material.css";
 import "../styles/DribbleButton.css";
 import "../styles/RainbowBorder.css";
 
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Button, CssBaseline } from "@mui/material";
 import { Analytics } from "@vercel/analytics/react";
@@ -77,11 +77,20 @@ export default function App({
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        const newMode = mode === 'light' ? 'dark' : 'light';
+        setMode(newMode);
+        localStorage.setItem('themeMode', newMode);
       },
     }),
-    []
+    [mode]
   );
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem('themeMode');
+    if (savedMode === 'light' || savedMode === 'dark') {
+      setMode(savedMode);
+    }
+  }, []);
 
   const theme = useMemo(
     () =>

@@ -1,9 +1,7 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import SearchIcon from "@mui/icons-material/Search";
@@ -11,14 +9,14 @@ import {
   Box,
   Chip,
   Divider,
-  Paper,
   TextField,
   Typography,
+  useTheme,
+  Badge,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
-import Fade from "@mui/material/Fade";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIndexedContext } from "../context/IndexedContext";
 
@@ -40,16 +38,6 @@ interface Props {
   data: DataMap;
 }
 
-const buttonStyle = {
-  backgroundColor: "#1e1e1e",
-  color: "#fff",
-  fontSize: "1.5ch",
-  cursor: "pointer",
-  letterSpacing: "0.3ch",
-  borderRadius: "7px",
-  padding: ".5ch 1ch",
-  border: "2px solid #3f3f3f",
-};
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -60,7 +48,6 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// Define motion variants for reusable animations
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -74,35 +61,27 @@ const containerVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.3 } },
-};
-
 export default function AlertDialogSlide({ open, setOpen, data }: Props) {
   const { updatedItems } = useIndexedContext();
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
+  const [folder, setFolder] = React.useState("");
+  const theme = useTheme();
 
   const filtersArray = [
     ...Object.keys(data),
-    ...(updatedItems.length > 0 ? ["New"] : []), // only add "New" if updatedItems has items
+    ...(updatedItems.length > 0 ? ["New"] : []),
   ];
-  const [folder, setFolder] = React.useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e?.target?.value);
-  };
-
-  const handleClickOpen = () => {
-    setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setTimeout(() => {
       setSearch("");
+      setFolder("");
     }, 15);
   };
 
@@ -110,394 +89,332 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
     if (open) {
       searchRef?.current?.focus();
     }
-    console.log(updatedItems);
-
     return () => {
       setFolder("");
     };
   }, [open]);
 
-  // filter logic
+  // Filtered section keys
+  const filteredKeys = Object.keys(data || {}).filter((key) => {
+    if (folder && key !== folder && folder !== "New") return false;
+    return data[key]?.some((subject) =>
+      subject?.name?.toLowerCase()?.includes(search?.toLowerCase()) &&
+      (folder === "New"
+        ? updatedItems.includes(subject?.id)
+        : folder === "" || key === folder)
+    );
+  });
 
   return (
     <>
       <Button
+        variant="outlined"
+        startIcon={<SearchIcon />}
         sx={{
-          position: "relative",
-          backgroundColor: "rgba(0,0,0,0.5)",
-          marginLeft: "0",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "auto",
-          fontSize: "1.6ch",
-          padding: ".7ch 2ch",
-          color: "#fff",
-          borderRadius: "1ch",
-          border: "2px solid #3f3f3f",
-          "&:hover": {
-            cursor: "pointer",
-            backgroundColor: "rgba(50,50,50,0.7)",
-          },
-          "&:focus": {
-            outline: "1px solid #fff",
-          },
-          "& > *:not(:first-of-type, :last-child)": {
-            margin: "0 2ch",
-          },
+          position: "fixed",
+          bottom: 32,
+          right: 5,
+          zIndex: 1200,
+          borderRadius: "50%",
+          minWidth: 56,
+          minHeight: 56,
+          boxShadow: 3,
+          background: theme.palette.background.paper,
         }}
-        disableRipple
-        variant="text"
-        onClick={handleClickOpen}
+        onClick={() => setOpen(true)}
       >
-        <SearchIcon />
-        <Typography
-          sx={{
-            display: {
-              sm: "block",
-              xs: "none",
-            },
-          }}
-        >
-          Search &nbsp; &nbsp;
-        </Typography>
-        <Box
-          sx={{
-            ...buttonStyle,
-            display: {
-              sm: "block",
-              xs: "none",
-            },
-          }}
-        >
-          ctr+k
-        </Box>
+        {/* You can hide the text for a floating icon button */}
       </Button>
-
       <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
-        sx={{
-          "& .MuiDialog-paper": {
-            backgroundColor: "#151a2c",
-            backgroundImage: "none",
-            borderRadius: {
-              sm: "20px ",
-              xs: "0",
-            },
-            position: "absolute",
-            top: {
-              sm: "10%",
-              xs: "0",
-            },
-            margin: "0 !important",
-            padding: "0 !important",
-            border: ".5px solid #727272",
-            boxShadow: "0px 0px 10px 0px rgba(0,0,0,1)",
-          },
-          "& .MuiDialog-paperWidthSm": {
-            minHeight: {
-              sm: "50vh",
-              xs: "100vh",
-            },
-            height: {
-              sm: "fit-content",
-              xs: "100vh",
-            },
-            width: {
-              sm: "50vw",
-              xs: "100vw",
-            },
-            maxHeight: {
-              sm: "80vh",
-              xs: "100vh",
-            },
-            maxWidth: {
-              sm: "50vw",
-              xs: "100vw",
-            },
-          },
-        }}
-      >
-        <Box
+          open={open}
+          TransitionComponent={Transition}
+          keepMounted
+          onClose={handleClose}
+          aria-describedby="alert-dialog-slide-description"
+          fullWidth
+          maxWidth={false}
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "1ch",
-            position: "relative",
-            backgroundColor: "#292929",
-            p: "2ch",
-            margin: 0,
-            "&::after": {
-              content: "''",
-              position: "absolute",
-              bottom: "0",
-              left: "0",
-              width: "100%",
-              height: "1px",
-              backgroundColor: "#727272",
+            zIndex: 1302,
+            '& .MuiDialog-paper': {
+              width: { xs: '100vw', sm: '50vw' },  // full width on mobile, custom on desktop
+              maxWidth: { xs: '90vw', sm: '95vw' },
+              minWidth: '320px',
+              height: { xs: '100vh', sm: 'auto' }, // full height on mobile
+              backgroundColor: theme.palette.background.paper,
+              backgroundImage: 'none',
+              borderRadius: { xs: 4, sm: 4 },
+              position: { xs: 'fixed', sm: 'absolute' },
+              top: { xs: '3%', sm: '3%' },
+              margin: '0 !important',
+              padding: { xs: 1, sm: 3 },
+              border: `1.5px solid ${theme.palette.divider}`,
+              boxShadow: theme.shadows[8],
             },
           }}
         >
-          <SearchIcon
-            sx={{
-              color: "#fff",
-              fontSize: "2rem",
-            }}
-          />
+        <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <SearchIcon sx={{ color: theme.palette.text.secondary, fontSize: 28 }} />
           <TextField
             inputRef={searchRef}
-            type="text"
             value={search}
-            placeholder="Search..."
-            style={{
-              width: "100%",
-              backgroundColor: "#292929",
-              color: "#fff",
-            }}
             onChange={handleChange}
+            placeholder="Search..."
             variant="standard"
+            fullWidth
             InputProps={{
               disableUnderline: true,
-              autoComplete: "off",
               style: {
-                fontSize: "1.3rem",
-                color: "#fff",
-                padding: ".5ch 2.5ch",
+                fontSize: '1.15rem',
+                background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[100],
+                borderRadius: 8,
+                padding: '8px 16px',
+                color: theme.palette.text.primary,
               },
+            }}
+            sx={{
+              flex: 1,
+              background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[100],
+              borderRadius: 2,
+              boxShadow: theme.shadows[0],
             }}
           />
           <Button
-            style={buttonStyle}
-            disableRipple
-            variant="text"
+            variant="outlined"
+            color="inherit"
+            onClick={handleClose}
             sx={{
-              "&:focus": {
-                outline: "1px solid #fff",
+              fontWeight: 600,
+              borderRadius: 2,
+              minWidth: 56,
+              ml: 1,
+              px: 2,
+              py: 1,
+              color: theme.palette.text.secondary,
+              borderColor: theme.palette.divider,
+              background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[50],
+              '&:hover': {
+                background: theme.palette.action.hover,
               },
             }}
-            onClick={handleClose}
           >
-            esc
+            ESC
           </Button>
+        </DialogTitle>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2, px: 3 }}>
+          {filtersArray.map((filteredFolder, index) => (
+            <Chip
+              key={index}
+              label={filteredFolder}
+              clickable
+              color={folder === filteredFolder ? 'primary' : filteredFolder === 'New' ? 'info' : 'default'}
+              variant={folder === filteredFolder ? 'filled' : 'outlined'}
+              onClick={() => {
+                if (filteredFolder === folder) {
+                  setFolder("");
+                } else setFolder(filteredFolder);
+              }}
+              deleteIcon={folder === filteredFolder ? <ClearIcon /> : <AddIcon />}
+              onDelete={() => {
+                if (filteredFolder === folder) {
+                  setFolder("");
+                } else setFolder(filteredFolder);
+              }}
+              sx={{
+                fontWeight: 500,
+                fontSize: '0.95em',
+                px: 1.5,
+                background: folder === filteredFolder
+                  ? theme.palette.mode === 'dark'
+                    ? theme.palette.primary.dark
+                    : theme.palette.primary.light
+                  : undefined,
+                color: folder === filteredFolder
+                  ? theme.palette.primary.contrastText
+                  : theme.palette.text.primary,
+              }}
+            />
+          ))}
         </Box>
-        <Box
-          mt={1}
-          mx={2}
-          display={"flex"}
-          justifyContent={"flex-start"}
-          flexWrap={"wrap"}
-          gap={"1ch"}
-        >
-          {filtersArray.map((filteredFolder, index) => {
-            return (
-              <>
-                <Chip
-                  key={index}
-                  label={filteredFolder}
-                  color={filteredFolder === "New" ? "info" : "default"}
-                  variant={filteredFolder === folder ? "filled" : "outlined"}
-                  onClick={() => {
-                    if (filteredFolder === folder) {
-                      setFolder("");
-                    } else setFolder(filteredFolder);
-                  }}
-                  deleteIcon={
-                    filteredFolder === folder ? <ClearIcon /> : <AddIcon />
-                  }
-                  onDelete={() => {
-                    if (filteredFolder === folder) {
-                      setFolder("");
-                    } else setFolder(filteredFolder);
-                  }}
-                />
-              </>
-            );
-          })}
-        </Box>
-        <DialogContent>
+        <DialogContent sx={{ px: 3, pt: 0, pb: 2 }}>
           <AnimatePresence>
-            {data &&
-              Object?.keys(data)
-                ?.filter((key) =>
-                  data[key]?.some(
-                    (subject: { name: string; id: string }) =>
-                      subject?.name
-                        ?.toLowerCase()
-                        ?.includes(search?.toLowerCase()) &&
-                      (folder === "New"
-                        ? updatedItems.includes(subject?.id)
-                        : folder === "" || key === folder)
-                  )
-                )
-                ?.map((key, index) => {
-                  return (
-                    <motion.div
-                      key={index}
-                      variants={containerVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
+            {filteredKeys.length === 0 && (
+              <Typography color="text.secondary" sx={{ mt: 4, textAlign: "center" }}>
+                No results found.
+              </Typography>
+            )}
+            {filteredKeys.map((key, index) => (
+              <motion.div
+                key={index}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <Box sx={{ mb: 3 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      mb: 1,
+                      gap: 1,
+                      flexWrap: 'nowrap',
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 700,
+                        color: theme.palette.text.primary,
+                        fontSize: { xs: '1rem', sm: '1.1rem' },
+                        maxWidth: { xs: '70vw', sm: 'none' },
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
                     >
-                      <Box
-                        key={index}
-                        sx={{
-                          padding: "1ch 0",
-                          "&:not(:last-child)": {
-                            borderBottom: "1px solid #727272",
-                          },
-                        }}
-                      >
-                        <Box display={"flex"} justifyContent={"flex-start"}>
-                          <Typography
-                            fontSize={"1.5rem"}
-                            fontWeight={"bold"}
-                            color={"#fff"}
-                            padding={"0.5ch 0"}
-                          >
-                            {key}
-                          </Typography>
-                          <Typography
-                            fontSize={"1rem"}
-                            fontWeight={"bolder"}
-                            color={"grey"}
-                            padding={"0.5ch .2ch"}
-                          >
-                            {data[key].length}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            flexWrap: "wrap",
-                            overflowX: "auto",
-                            // scroll bar x height 4px
-                            "&::-webkit-scrollbar": {
-                              height: "4px",
-                            },
-                            gap: "1ch",
-                          }}
-                        >
-                          {data[key]
-                            ?.filter((subject) => {
-                              const isMatch =
-                                subject?.name
-                                  ?.toLowerCase()
-                                  ?.includes(search?.toLowerCase()) &&
-                                (folder === "New"
-                                  ? updatedItems.includes(subject.id)
-                                  : true);
-                              return isMatch;
-                            })
-                            ?.map((subject, index) => {
-                              const displayName = (() => {
-                                let name = subject?.name;
-                                if (name.includes("%20")) {
-                                  name = name.replace(/%20/g, " ");
-                                }
-                                if (name.includes("http")) {
-                                  let url: URL | string = "";
-                                  let name_split = name.split(" ");
-                                  let urlIndex = name_split.findIndex((name) =>
-                                    name.includes("http")
-                                  );
-                                  const name_split_no_url = name_split.filter(
-                                    (name) => !name.includes("http")
-                                  );
-                                  if (name_split_no_url.length > 0) {
-                                    return name_split_no_url.join(" ");
-                                  }
-                                  try {
-                                    url = new URL(name_split[urlIndex]);
-                                    if (url.hostname.includes("youtube")) {
-                                      url.hostname = "yout-ube.com";
-                                    }
-                                    return url.hostname;
-                                  } catch {
-                                    try {
-                                      url = new URL(
-                                        decodeURIComponent(name_split[urlIndex])
-                                      );
-                                    } catch {
-                                      return subject?.name;
-                                    }
-                                  }
-                                }
+                      {key}
+                    </Typography>
+                    <Badge
+                      badgeContent={data[key].length}
+                      color="primary"
+                      sx={{
+                        ml: { xs: 1, sm: 3 },
+                        '& .MuiBadge-badge': {
+                          fontSize: { xs: '0.75rem', sm: '0.9rem' },
+                          minWidth: { xs: 18, sm: 22 },
+                          height: { xs: 18, sm: 22 },
+                        },
+                      }}
+                    />
+                  </Box>
+                  <Divider sx={{ mb: 1 }} />
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {data[key]
+                      ?.filter((subject) =>
+                        subject?.name?.toLowerCase()?.includes(search?.toLowerCase()) &&
+                        (folder === 'New'
+                          ? updatedItems.includes(subject.id)
+                          : true)
+                      )
+                      ?.map((subject, idx) => {
+                        const displayName = (() => {
+                          let name = subject?.name;
+                          if (name.includes("%20")) {
+                            name = name.replace(/%20/g, " ");
+                          }
+                          if (name.includes("http")) {
+                            let url: URL | string = "";
+                            let name_split = name.split(" ");
+                            let urlIndex = name_split.findIndex((name) =>
+                              name.includes("http")
+                            );
+                            const name_split_no_url = name_split.filter(
+                              (name) => !name.includes("http")
+                            );
+                            if (name_split_no_url.length > 0) {
+                              return name_split_no_url.join(" ");
+                            }
+                            try {
+                              url = new URL(name_split[urlIndex]);
+                              if (url.hostname.includes("youtube")) {
+                                url.hostname = "yout-ube.com";
+                              }
+                              return url.hostname;
+                            } catch {
+                              try {
+                                url = new URL(
+                                  decodeURIComponent(name_split[urlIndex])
+                                );
+                              } catch {
                                 return subject?.name;
-                              })();
+                              }
+                            }
+                          }
+                          return subject?.name;
+                        })();
 
-                              const validURL = (() => {
-                                if (subject?.name.includes("http")) {
-                                  let url: URL | string = "";
-                                  let name_split = subject.name.split(" ");
-                                  let urlIndex = name_split.findIndex((name) =>
-                                    name.includes("http")
-                                  );
-                                  try {
-                                    url = new URL(name_split[urlIndex]);
-                                    if (url.hostname.includes("youtube")) {
-                                      url.hostname = "yout-ube.com";
-                                    }
-                                    return url.href;
-                                  } catch {
-                                    try {
-                                      url = new URL(
-                                        decodeURIComponent(name_split[urlIndex])
-                                      );
-                                      if (url.hostname.includes("youtube")) {
-                                        url.hostname = "yout-ube.com";
-                                      }
-                                      return url.href;
-                                    } catch {
-                                      return null;
-                                    }
-                                  }
+                        const validURL = (() => {
+                          if (subject?.name.includes("http")) {
+                            let url: URL | string = "";
+                            let name_split = subject.name.split(" ");
+                            let urlIndex = name_split.findIndex((name) =>
+                              name.includes("http")
+                            );
+                            try {
+                              url = new URL(name_split[urlIndex]);
+                              if (url.hostname.includes("youtube")) {
+                                url.hostname = "yout-ube.com";
+                              }
+                              return url.href;
+                            } catch {
+                              try {
+                                url = new URL(
+                                  decodeURIComponent(name_split[urlIndex])
+                                );
+                                if (url.hostname.includes("youtube")) {
+                                  url.hostname = "yout-ube.com";
                                 }
+                                return url.href;
+                              } catch {
                                 return null;
-                              })();
+                              }
+                            }
+                          }
+                          return null;
+                        })();
 
-                              return (
-                                <Button
-                                  href={
-                                    validURL ||
-                                    `https://drive.google.com/file/d/${subject?.id}/preview`
-                                  }
-                                  target="_blank"
-                                  key={index}
-                                  sx={{
-                                    all: "unset",
-                                    backgroundColor: "#292929",
-                                    padding: "0.5ch",
-                                    cursor: "pointer",
-                                    "&:hover": {
-                                      backgroundColor: "#333333",
-                                    },
-                                    borderRadius: "0.5ch",
-                                  }}
-                                >
-                                  <Typography
-                                    sx={{
-                                      color: "#ddd",
-                                      textAlign: "left",
-                                    }}
-                                  >
-                                    {displayName}
-                                  </Typography>
-                                </Button>
-                              );
-                            })}
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </motion.div>
-                  );
-                })}
+                        return (
+                          <Button
+                            href={
+                              validURL ||
+                              `https://drive.google.com/file/d/${subject?.id}/preview`
+                            }
+                            target="_blank"
+                            key={idx}
+                            sx={{
+                              all: 'unset',
+                              backgroundColor:
+                                theme.palette.mode === 'dark'
+                                  ? theme.palette.background.default
+                                  : theme.palette.grey[50],
+                              padding: '0.7ch 1.2ch 0.7ch 2.5ch',
+                              wordBreak: 'break-all',
+                              lineHeight: '1.5rem',
+                              borderRadius: 2,
+                              color: theme.palette.text.primary,
+                              fontSize: '1.05rem',
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                              transition: 'background 0.15s, color 0.15s',
+                              border: `1px solid ${theme.palette.divider}`,
+                              '&:hover': {
+                                backgroundColor:
+                                  theme.palette.mode === 'dark'
+                                    ? theme.palette.action.selected
+                                    : theme.palette.primary.light,
+                                color: theme.palette.mode === 'dark'
+                                  ? theme.palette.primary.light
+                                  : theme.palette.primary.dark,
+                              },
+                              textAlign: 'left',
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                color: 'inherit',
+                                textAlign: 'left',
+                              }}
+                            >
+                              {displayName}
+                            </Typography>
+                          </Button>
+                        );
+                      })}
+                  </Box>
+                </Box>
+              </motion.div>
+            ))}
           </AnimatePresence>
         </DialogContent>
       </Dialog>
