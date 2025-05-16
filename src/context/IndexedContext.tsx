@@ -57,7 +57,9 @@ export default function IndexedProvider({
   const [updatedItems, setUpdatedItems] = useState<string[]>([]);
 
   const getSubjectByName = async (name: string) => {
-    return await db.subjects.where("name").equals(name).first();
+    const data = await db.subjects.where("name").equals(name).first();
+    console.log("Fetched data:", data);
+    return data;
   };
 
   const addOrUpdateSubject = async (name: string, folders: DataMap) => {
@@ -72,28 +74,28 @@ export default function IndexedProvider({
       );
       return updateResult;
     } else {
-      // If the subject is not found, add it to the database
-      await db.subjects.add({ name, folders });
+      // Always save folders as an object
+      await db.subjects.add({ name, folders: folders || {} });
       return {
         msg: "Subject added",
-        newItems: Object.keys(folders).flatMap((key) =>
-          folders[key].map((item) => item.id)
+        newItems: Object.keys(folders || {}).flatMap((key) =>
+          (folders?.[key] || []).map((item) => item.id)
         ),
       };
     }
   };
 
   const compareAndUpdate = (
-    existingFolders: DataMap,
-    newFolders: DataMap,
+    existingFolders: DataMap = {},
+    newFolders: DataMap = {},
     name: string
   ) => {
     let addedItems: string[] = [];
     let removedItems: string[] = [];
 
     const allKeys = new Set([
-      ...Object.keys(existingFolders),
-      ...Object.keys(newFolders),
+      ...Object.keys(existingFolders || {}),
+      ...Object.keys(newFolders || {}),
     ]);
 
     allKeys.forEach((key) => {

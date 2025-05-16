@@ -140,7 +140,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               maxWidth: { xs: '90vw', sm: '95vw' },
               minWidth: '320px',
               height: { xs: '100vh', sm: 'auto' }, // full height on mobile
-              backgroundColor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper ,
               backgroundImage: 'none',
               borderRadius: { xs: 4, sm: 4 },
               position: { xs: 'fixed', sm: 'absolute' },
@@ -193,7 +193,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               borderColor: theme.palette.divider,
               background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[50],
               '&:hover': {
-                background: theme.palette.action.hover,
+                background: theme.palette.action.hover ,
               },
             }}
           >
@@ -391,8 +391,8 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                               '&:hover': {
                                 backgroundColor:
                                   theme.palette.mode === 'dark'
-                                    ? theme.palette.action.selected
-                                    : theme.palette.primary.light,
+                                    ? "#2563eb"
+                                    : "#bcd0fa",
                                 color: theme.palette.mode === 'dark'
                                   ? theme.palette.primary.light
                                   : theme.palette.primary.dark,
