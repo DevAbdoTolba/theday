@@ -40,7 +40,7 @@ export default function footer() {
       dataHref: ["https://linktr.ee/omarfarouk27"],
     },
     {
-      name: "Yasser Shaban",
+      name: "Yaser Shaban",
       dataName: ["LinkTree"],
       dataHref: ["https://linktr.ee/yasershaban03"],
     },
@@ -385,7 +385,7 @@ export default function footer() {
           }}
         >
           <NameHref
-            name="Yasser Shaban"
+            name="Yaser Shaban"
             dataName={["LinkTree"]}
             dataHref={["https://linktr.ee/yasershaban03"]}
           />
