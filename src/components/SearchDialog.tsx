@@ -19,6 +19,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIndexedContext } from "../context/IndexedContext";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface Data {
   id: string;
@@ -67,6 +68,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
   const [search, setSearch] = React.useState("");
   const [folder, setFolder] = React.useState("");
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const filtersArray = [
     ...Object.keys(data),
@@ -107,24 +109,24 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        startIcon={<SearchIcon />}
-        sx={{
-          position: "fixed",
-          bottom: 32,
-          right: 5,
-          zIndex: 1200,
-          borderRadius: "50%",
-          minWidth: 56,
-          minHeight: 56,
-          boxShadow: 3,
-          background: theme.palette.background.paper,
-        }}
-        onClick={() => setOpen(true)}
-      >
-        {/* You can hide the text for a floating icon button */}
-      </Button>
+      {isMobile && (
+        <Button
+          variant="outlined"
+          startIcon={<SearchIcon />}
+          sx={{
+            position: "fixed",
+            bottom: 32,
+            right: 5,
+            zIndex: 1200,
+            borderRadius: "50%",
+            minWidth: 56,
+            minHeight: 56,
+            boxShadow: 3,
+            background: theme.palette.background.paper,
+          }}
+          onClick={() => setOpen(true)}
+        />
+      )}
       <Dialog
           open={open}
           TransitionComponent={Transition}
@@ -400,14 +402,30 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                               textAlign: 'left',
                             }}
                           >
-                            <Typography
-                              sx={{
-                                color: 'inherit',
-                                textAlign: 'left',
-                              }}
-                            >
-                              {displayName}
-                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                              <Typography
+                                sx={{
+                                  color: 'inherit',
+                                  textAlign: 'left',
+                                }}
+                              >
+                                {displayName}
+                              </Typography>
+                              {(() => {
+                                const type = subject.mimeType;
+                                if (type?.startsWith('video/')) return <Chip size="small" label="Video" color="info" />;
+                                if (type?.startsWith('image/')) return <Chip size="small" label="Image" color="success" />;
+                                if (type === 'application/pdf') return <Chip size="small" label="PDF" color="error" />;
+                                if (type?.includes('presentation')) return <Chip size="small" label="Slides" color="warning" />;
+                                if (type?.includes('spreadsheet')) return <Chip size="small" label="Sheet" color="secondary" />;
+                                if (type?.includes('document')) return <Chip size="small" label="Doc" color="primary" />;
+                                if (type?.includes('audio')) return <Chip size="small" label="Audio" color="secondary" />;
+                                if (type?.includes('youtube')) return <Chip size="small" label="youtube" color="primary" />;
+                                if (type === 'application/vnd.google-apps.folder') return <Chip size="small" label="Folder" sx={{ bgcolor: theme.palette.grey[400], color: theme.palette.text.primary }} />;
+                                if (!type) return <Chip size="small" label="Unknown" color="default" />;
+                                return <Chip size="small" label={type.split('/')[1] || 'File'} color="default" />;
+                              })()}
+                            </Box>
                           </Button>
                         );
                       })}
