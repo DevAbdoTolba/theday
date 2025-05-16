@@ -185,7 +185,21 @@ function Material({
   return (
     <>
       {/* Tab Bar */}
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          mb: 3,
+          overflowX: "auto",
+          whiteSpace: "nowrap",
+          pb: 1,
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE and Edge
+        }}
+      >
         {tabOptions.map((tab) => (
           <Button
             key={tab.key}
@@ -197,6 +211,8 @@ function Material({
               background: selectedTab === tab.key ? "#334155" : "transparent",
               color: selectedTab === tab.key ? "#fff" : "inherit",
               "&:hover": { background: "#475569", color: "#fff" },
+              minWidth: { xs: 80, sm: 120 }, // responsive min width
+              flexShrink: 0,
             }}
           >
             {tab.label}
