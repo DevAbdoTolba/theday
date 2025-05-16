@@ -228,7 +228,7 @@ function Material({
           sx={{
             p: "0.5rem",
             m: "1rem",
-            background: theme.palette.mode === "dark" ? "#151a2c" : "#faf7f7",
+            background: theme.palette.background.paper,
           }}
         >
           <Box
@@ -311,21 +311,21 @@ function Material({
               flexWrap: "noWrap",
               justifyContent: "flex-start",
               overflowX: "scroll",
-              backgroundColor: theme.palette.mode === "dark" ? "#151a2c" : "transparent",
+              backgroundColor: theme.palette.background.default,
               '&::-webkit-scrollbar': {
                 height: 8,
                 background: 'transparent',
               },
               '&::-webkit-scrollbar-track': {
-                background: theme.palette.mode === 'dark' ? '#222b3a' : '#f1f1f1',
+                background: theme.palette.primary.light,
                 borderRadius: 8,
               },
               '&::-webkit-scrollbar-thumb': {
-                background: theme.palette.mode === 'dark' ? '#334155' : '#cbd5e1',
+                background: theme.palette.primary.main,
                 borderRadius: 8,
               },
               '&::-webkit-scrollbar-thumb:hover': {
-                background: theme.palette.mode === 'dark' ? '#475569' : '#94a3b8',
+                background: theme.palette.primary.dark,
               },
               pl: { xs: 1, sm: 2 },
               pr: { xs: 1, sm: 2 },

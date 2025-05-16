@@ -21,6 +21,7 @@ import { useTheme } from "@mui/material/styles";
 import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface Data {
   id: string;
@@ -141,6 +142,8 @@ export default function Header({
   const router = useRouter();
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
   React.useEffect(() => {
     // const classNameLocally = (localStorage.getItem("className") as string) || "";
@@ -412,10 +415,41 @@ export default function Header({
           )}
           {isSubjectSearch && data && (
             <>
-              <SearchDialog open={open} setOpen={setOpen} data={data} />
+              <SearchDialog open={searchDialogOpen} setOpen={setSearchDialogOpen} data={data} />
             </>
           )}
-          {/* Theme Toggle Button */}
+          {isDesktop && data && (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: theme.palette.mode === "dark" ? theme.palette.background.default : "#f4f6fb",
+                  borderRadius: 3,
+                  px: 2,
+                  py: 0.5,
+                  boxShadow: theme.shadows[1],
+                  minWidth: 220,
+                  maxWidth: 340,
+                  ml: 2,
+                  cursor: "pointer",
+                  border: `1.5px solid ${theme.palette.divider}`,
+                  transition: "box-shadow 0.2s, border 0.2s",
+                  "&:hover": {
+                    boxShadow: theme.shadows[4],
+                    border: `1.5px solid ${theme.palette.primary.main}`,
+                  },
+                }}
+                onClick={() => setSearchDialogOpen(true)}
+              >
+                <SearchIcon sx={{ color: theme.palette.text.secondary, mr: 1 }} />
+                <Typography color="text.secondary" sx={{ fontWeight: 500, fontSize: 16 }}>
+                  Search for anything...
+                </Typography>
+              </Box>
+              <SearchDialog open={searchDialogOpen} setOpen={setSearchDialogOpen} data={data} />
+            </>
+          )}
           <Tooltip title={theme.palette.mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
             <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
               {theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
