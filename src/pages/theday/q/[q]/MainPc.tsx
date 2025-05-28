@@ -3,10 +3,14 @@ import { DataContext } from "../../../../context/TranscriptContext";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import Zoom from "@mui/material/Zoom";
-import { Chip, Tooltip, Typography, Card, CardContent, Divider } from "@mui/material";
-import Link from "next/link";
+import {
+  Tooltip,
+  Typography,
+  Card,
+  CardContent,
+} from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
+import Link from "next/link";
 
 interface Props {
   search: string;
@@ -41,23 +45,25 @@ export default function MainPc({ search, currentSemester }: Props) {
 .filter?
 */}
           {/* @ts-ignore */}
-          {transcript && 'semesters' in transcript && transcript.semesters
-            .filter(
-              (x: any) =>
-                x.index !== currentSemester &&
-                x.subjects.filter(
-                  (y: any) =>
-                    y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                    y?.abbreviation
-                      ?.toLowerCase()
-                      .includes(search?.toLowerCase())
-                ).length > 0
-            )
-            .map((item: any, index: any) => (
-              <Grid key={index} item xs={12} sm={6} md={4}>
-                <SemesterCard semester={item} />
-              </Grid>
-            ))}
+          {transcript &&
+            "semesters" in transcript &&
+            transcript.semesters
+              .filter(
+                (x: any) =>
+                  x.index !== currentSemester &&
+                  x.subjects.filter(
+                    (y: any) =>
+                      y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
+                      y?.abbreviation
+                        ?.toLowerCase()
+                        .includes(search?.toLowerCase())
+                  ).length > 0
+              )
+              .map((item: any, index: any) => (
+                <Grid key={index} item xs={12} sm={6} md={4}>
+                  <SemesterCard semester={item} />
+                </Grid>
+              ))}
         </Grid>
       </Box>
     </>
@@ -121,58 +127,104 @@ function SemesterCard({ semester }: SemesterCardProps) {
         <Grid container spacing={1}>
           {semester.subjects.map((subject, idx) => (
             <Grid item xs={12} sm={6} key={idx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  background: pillBg,
-                  borderRadius: 1,
-                  px: 2,
-                  py: 1.2,
-                  boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
-                  mb: 1,
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: textColor,
-                  minHeight: 56,
-                  transition: "all 0.18s",
-                  cursor: "pointer",
-                  '&:hover': {
-                    background: pillHoverBg,
-                    color: theme.palette.mode === "dark" ? "#fff" : textColor,
-                    boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
-                    '& .MuiSvgIcon-root': {
-                      color: theme.palette.mode === "dark" ? "#fff" : iconColor,
+              <Tooltip
+                title={subject.name}
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor:
+                        theme.palette.mode === "dark" ? "#1e293b" : "#e3e8f7",
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                      fontSize: 14,
+                      fontWeight: 500,
+                      borderRadius: 1.5,
+                      border:
+                        theme.palette.mode === "dark"
+                          ? "0.1ch solid #fff"
+                          : "0.1ch solid #000",
+
+                      boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
+                      maxWidth: 300,
                     },
                   },
-                  textDecoration: 'none',
                 }}
-                component="a"
-                href={`/subjects/${subject.abbreviation}`}
               >
-                <SchoolIcon sx={{ fontSize: 20, color: iconColor, mr: 1.5, transition: "color 0.18s" }} />
-                <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0 }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <b style={{ fontSize: 16, marginRight: 6, textDecoration: 'none' }}>{subject.abbreviation}</b>
-                  </Box>
-                  <Tooltip title={subject.name} arrow>
-                    <span style={{
-                      fontWeight: 400,
-                      fontSize: 14,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      color: "inherit",
-                      textDecoration: 'none',
-                    }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    background: pillBg,
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1.2,
+                    boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
+                    mb: 1,
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: textColor,
+                    minHeight: 56,
+                    transition: "all 0.18s",
+                    cursor: "pointer",
+                    "&:hover": {
+                      background: pillHoverBg,
+                      color: theme.palette.mode === "dark" ? "#fff" : textColor,
+                      boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
+                      "& .MuiSvgIcon-root": {
+                        color:
+                          theme.palette.mode === "dark" ? "#fff" : iconColor,
+                      },
+                    },
+                    textDecoration: "none",
+                  }}
+                  component={Link}
+                  href={`/subjects/${subject.abbreviation}`}
+                >
+                  <SchoolIcon
+                    sx={{
+                      fontSize: 20,
+                      color: iconColor,
+                      mr: 1.5,
+                      transition: "color 0.18s",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <b
+                        style={{
+                          fontSize: 16,
+                          marginRight: 6,
+                          textDecoration: "none",
+                        }}
+                      >
+                        {subject.abbreviation}
+                      </b>
+                    </Box>
+                    <span
+                      style={{
+                        fontWeight: 400,
+                        fontSize: 14,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        color: "inherit",
+                        textDecoration: "none",
+                      }}
+                    >
                       {subject.name.length > 20
                         ? subject.name.slice(0, 20) + "..."
                         : subject.name}
                     </span>
-                  </Tooltip>
+                  </Box>
                 </Box>
-              </Box>
+              </Tooltip>
             </Grid>
           ))}
         </Grid>
