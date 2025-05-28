@@ -61,7 +61,7 @@ export const TranscriptContextProvider: React.FC<{
 
   useEffect(() => {
     if (!router.isReady) return;
-    console.log("here == ", q);
+      console.log("here " + q + " <== Q");
 
     function thereQ() {}
     function noQ() {}
