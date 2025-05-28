@@ -579,7 +579,7 @@ function Material({
                         backgroundSize: "cover",
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
-                        aspectRatio: "2 / 3",
+                        aspectRatio: "3 / 3",
                         flexBasis: "50%",
                         cursor: "pointer",
                         // p: "4rem",
