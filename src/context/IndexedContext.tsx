@@ -93,14 +93,18 @@ export default function IndexedProvider({
     let addedItems: string[] = [];
     let removedItems: string[] = [];
 
+    // Ensure we have valid objects to work with
+    const safeExistingFolders = existingFolders || {};
+    const safeNewFolders = newFolders || {};
+
     const allKeys = new Set([
-      ...Object.keys(existingFolders || {}),
-      ...Object.keys(newFolders || {}),
+      ...Object.keys(safeExistingFolders),
+      ...Object.keys(safeNewFolders),
     ]);
 
     allKeys.forEach((key) => {
-      const existingItems = existingFolders[key] || [];
-      const newItems = newFolders[key] || [];
+      const existingItems = safeExistingFolders[key] || [];
+      const newItems = safeNewFolders[key] || [];
 
       const existingIds = existingItems.map((item) => item.id);
       const newIds = newItems.map((item) => item.id);
@@ -116,10 +120,10 @@ export default function IndexedProvider({
 
       // Update the existing folder with new items
       if (newItems.length > 0) {
-        existingFolders[key] = newItems;
+        safeExistingFolders[key] = newItems;
       } else {
         // If the new folder has 0 length, delete the key
-        delete existingFolders[key];
+        delete safeExistingFolders[key];
       }
     });
 
@@ -127,7 +131,7 @@ export default function IndexedProvider({
       // @ts-ignore
       const res = db.subjects
         .where({ name: name })
-        .modify({ folders: existingFolders });
+        .modify({ folders: safeExistingFolders });
 
       setUpdatedItems(addedItems);
       return {

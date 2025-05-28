@@ -93,7 +93,7 @@ export default function SimpleSnackbar() {
       <Snackbar
         sx={{
           "& .MuiPaper-root": {
-            bgcolor: "#1f1f1f",
+            bgcolor: "#1e293b",
             color: "#fff",
           },
         }}

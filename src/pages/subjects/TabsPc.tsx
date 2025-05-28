@@ -21,13 +21,16 @@ function TabPanel(props: any) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ 
-          p: 3,
-          background: theme.palette.mode === "dark" ? "#1e293b" : "#fff",
-          borderRadius: 2,
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-          height: "100%"
-        }}>
+        <Box
+          sx={{
+            p: 3,
+            background: theme.palette.mode === "dark" ? "#1e293b" : "#fff",
+            borderRadius: 2,
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            height: "100%",
+          }}
+        >
           <>{children}</>
         </Box>
       )}
@@ -56,21 +59,6 @@ export default function VerticalTabs(props: any) {
     setValue(newValue);
   };
 
-  const filterFoldersByFirstWord = (data: any, firstWord: string): { [key: string]: any } => {
-    const result: { [key: string]: any } = {};
-    Object.entries(data || {}).forEach(([key, value]) => {
-      if (key.toLowerCase().startsWith(firstWord.toLowerCase())) {
-        result[key] = value;
-      }
-    });
-    return result;
-  };
-
-  const lecturesData = filterFoldersByFirstWord(props.data, "lecture");
-  const onlineLecturesData = filterFoldersByFirstWord(props.data, "online");
-  const sectionsData = filterFoldersByFirstWord(props.data, "section");
-  const examsData = filterFoldersByFirstWord(props.data, "ex");
-
   return (
     <Box
       sx={{
@@ -83,7 +71,7 @@ export default function VerticalTabs(props: any) {
         },
         flexDirection: "column",
         p: 3,
-        gap: 0
+        gap: 0,
       }}
     >
       {/* <Box sx={{ 
@@ -119,16 +107,7 @@ export default function VerticalTabs(props: any) {
       {/* </Box> */}
       <Box sx={{ flex: 1, overflow: "auto" }}>
         <TabPanel value={value} index={0}>
-          <Material data={lecturesData} {...props} />
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <Material data={onlineLecturesData} {...props} />
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          <Material data={sectionsData} {...props} />
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          <Material data={examsData} {...props} />
+          <Material {...props} />
         </TabPanel>
       </Box>
     </Box>

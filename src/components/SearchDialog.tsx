@@ -279,7 +279,6 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                     </Typography>
                     <Badge
                       badgeContent={data[key].length}
-                      color="primary"
                       sx={{
                         ml: { xs: 1, sm: 3 },
                         '& .MuiBadge-badge': {
@@ -411,20 +410,23 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
                               >
                                 {displayName}
                               </Typography>
-                              {(() => {
+                                {(() => {
                                 const type = subject.mimeType;
-                                if (type?.startsWith('video/')) return <Chip size="small" label="Video" color="info" />;
-                                if (type?.startsWith('image/')) return <Chip size="small" label="Image" color="success" />;
-                                if (type === 'application/pdf') return <Chip size="small" label="PDF" color="error" />;
-                                if (type?.includes('presentation')) return <Chip size="small" label="Slides" color="warning" />;
-                                if (type?.includes('spreadsheet')) return <Chip size="small" label="Sheet" color="secondary" />;
-                                if (type?.includes('document')) return <Chip size="small" label="Doc" color="primary" />;
-                                if (type?.includes('audio')) return <Chip size="small" label="Audio" color="secondary" />;
-                                if (type?.includes('youtube')) return <Chip size="small" label="youtube" color="primary" />;
-                                if (type === 'application/vnd.google-apps.folder') return <Chip size="small" label="Folder" sx={{ bgcolor: theme.palette.grey[400], color: theme.palette.text.primary }} />;
-                                if (!type) return <Chip size="small" label="Unknown" color="default" />;
-                                return <Chip size="small" label={type.split('/')[1] || 'File'} color="default" />;
-                              })()}
+                                if (type?.startsWith('video/')) return <Chip size="small" label="Video" sx={{ bgcolor: 'rgba(3, 169, 244, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type?.startsWith('image/')) return <Chip size="small" label="Image" sx={{ bgcolor: 'rgba(76, 175, 80, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type === 'application/pdf') return <Chip size="small" label="PDF" sx={{ bgcolor: 'rgba(244, 67, 54, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type?.includes('presentation')) return <Chip size="small" label="Slides" sx={{ bgcolor: 'rgba(255, 152, 0, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type?.includes('spreadsheet')) return <Chip size="small" label="Sheet" sx={{ bgcolor: 'rgba(156, 39, 176, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type?.includes('document')) return <Chip size="small" label="Doc" sx={{ bgcolor: 'rgba(33, 150, 243, 0.15)', color: theme.palette.text.primary }} />;
+                                if (type?.includes('audio')) return <Chip size="small" label="Audio" sx={{ bgcolor: 'rgba(156, 39, 176, 0.15)', color: theme.palette.text.primary }} />;
+                                if (validURL) {
+                                  if (validURL.includes('youtube') || validURL.includes('yout-ube')) 
+                                  return <Chip size="small" label="YouTube" sx={{ bgcolor: 'rgba(244, 67, 54, 0.38)', color: theme.palette.text.primary }} />;
+                                  return <Chip size="small" label="URL" sx={{ bgcolor: 'rgba(33, 150, 243, 0.15)', color: theme.palette.text.primary }} />;
+                                }
+                                if (type === 'application/vnd.google-apps.folder') return <Chip size="small" label="Folder" sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(158, 158, 158, 0.2)' : 'rgba(158, 158, 158, 0.15)', color: theme.palette.text.primary }} />;
+                                return <Chip size="small" label="Material" sx={{ bgcolor: 'rgba(97, 97, 97, 0.15)', color: theme.palette.text.primary }} />;
+                                })()}
                             </Box>
                           </Button>
                         );
