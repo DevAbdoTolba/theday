@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import {
   Box,
   Grid,
@@ -15,10 +15,23 @@ import {
   DialogActions,
   Checkbox,
   FormControlLabel,
+  TextField,
+  Alert,
+  Fade,
+  Divider,
+  DialogContentText,
+  Paper,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import SchoolIcon from "@mui/icons-material/School";
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import EditIcon from '@mui/icons-material/Edit';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CheckIcon from '@mui/icons-material/Check';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 import { DataContext } from "../../../../context/TranscriptContext";
 
@@ -26,6 +39,32 @@ interface Props {
   currentSemester: number;
   handleClick: () => void;
   setOpen: (value: boolean) => void;
+}
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
 }
 
 export default function CurrentSemester({
@@ -42,6 +81,17 @@ export default function CurrentSemester({
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<{ name: string; abbreviation: string; semester: number }[]>([]);
+  const [hasCustomSubjects, setHasCustomSubjects] = useState(false);
+  const [emptyCustomSubjects, setEmptyCustomSubjects] = useState(false);
+  const [semesterName, setSemesterName] = useState(`Semester ${currentSemester}`);
+  const [editingSemesterName, setEditingSemesterName] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [isFirstTimeCustomize, setIsFirstTimeCustomize] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const customizeButtonRef = useRef<HTMLButtonElement>(null);
+  const customizeIconRef = useRef<HTMLButtonElement>(null);
 
   const { transcript, loadingTranscript, error } = useContext(DataContext);
   const theme = useTheme();
@@ -55,15 +105,35 @@ export default function CurrentSemester({
 
   useEffect(() => {
     const custom = localStorage.getItem("customSemesterSubjects");
+    const customName = localStorage.getItem("customSemesterName");
+    const firstTimeCustomize = localStorage.getItem("firstTimeCustomizeSemester");
+
+    if (!firstTimeCustomize) {
+      setIsFirstTimeCustomize(true);
+    }
+
+    if (customName) {
+      setSemesterName(customName);
+    } else {
+      setSemesterName(`Semester ${currentSemester}`);
+    }
+    
     if (custom) {
       const abbrs = JSON.parse(custom);
+      setHasCustomSubjects(true);
+      setEmptyCustomSubjects(abbrs.length === 0);
+      
       // Find the subject objects for these abbreviations
       if (transcript && 'semesters' in transcript) {
         const allSubjects = transcript.semesters.flatMap((sem: any) => sem.subjects);
         setSubjects(allSubjects.filter((subj: any) => abbrs.includes(subj.abbreviation)));
       }
-    } else if (transcript && 'semesters' in transcript && transcript.semesters[currentSemester]) {
-      setSubjects(transcript.semesters[currentSemester].subjects);
+    } else {
+      setHasCustomSubjects(false);
+      setEmptyCustomSubjects(false);
+      if (transcript && 'semesters' in transcript && transcript.semesters[currentSemester]) {
+        setSubjects(transcript.semesters[currentSemester].subjects);
+      }
     }
   }, [transcript, currentSemester]);
 
@@ -78,6 +148,64 @@ export default function CurrentSemester({
       setAllCourses(courses);
     }
   }, [transcript]);
+  
+  // Show tooltip after delay for customize icon animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(true);
+      
+      // Auto hide after 6 seconds
+      const hideTimer = setTimeout(() => {
+        setShowTooltip(false);
+      }, 6000);
+      
+      return () => clearTimeout(hideTimer);
+    }, 4000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleResetCustomSemester = () => {
+    localStorage.removeItem("customSemesterSubjects");
+    localStorage.removeItem("customSemesterName");
+    setSemesterName(`Semester ${currentSemester}`);
+    setHasCustomSubjects(false);
+    setEmptyCustomSubjects(false);
+    
+    if (transcript && 'semesters' in transcript && transcript.semesters[currentSemester]) {
+      setSubjects(transcript.semesters[currentSemester].subjects);
+    }
+    
+    setResetDialogOpen(false);
+  };
+
+  const handleSaveSemesterName = () => {
+    // Prevent empty semester name
+    if (!semesterName.trim()) {
+      setSemesterName(`Semester ${currentSemester}`);
+    }
+    
+    localStorage.setItem("customSemesterName", semesterName.trim() || `Semester ${currentSemester}`);
+    setEditingSemesterName(false);
+  };
+
+  const handleCustomizeClick = () => {
+    if (isFirstTimeCustomize) {
+      setHelpDialogOpen(true);
+      localStorage.setItem("firstTimeCustomizeSemester", "shown");
+      setIsFirstTimeCustomize(false);
+    } else {
+      if (subjects) {
+        setSelectedCourses(subjects.map((s) => s.abbreviation));
+      }
+      setCustomizeOpen(true);
+    }
+    setShowTooltip(false);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   return (
     <Box
@@ -120,130 +248,252 @@ export default function CurrentSemester({
           }}
         >
           <SchoolIcon sx={{ mr: 1, fontSize: 24, color: iconColor }} />
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 800,
-              fontSize: 20,
-              color: textColor,
-              mb: 0,
-            }}
-          >
-            Semester {currentSemester}
-          </Typography>
-          <Tooltip title="Remove Shortcut Semester" disableInteractive>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{
-                position: "absolute",
-                right: "2%",
-                "&:hover *": {
-                  color: "#900",
-                },
-              }}
-              onClick={() => {
-                handleClick();
-                localStorage.setItem("semester", "-1");
-              }}
-            >
-              <RemoveCircleOutlineIcon
-                sx={{
-                  color: textColor,
-                  cursor: "pointer",
+          
+          {editingSemesterName ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                value={semesterName}
+                onChange={(e) => setSemesterName(e.target.value)}
+                size="small"
+                variant="standard"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSaveSemesterName();
+                  }
                 }}
+                error={!semesterName.trim()}
+                helperText={!semesterName.trim() ? "Name cannot be empty" : ""}
+                sx={{ 
+                  fontWeight: 800,
+                  fontSize: 20,
+                  color: textColor,
+                  mb: 0,
+                  width: 200
+                }}
+                inputProps={{ 
+                  style: { fontWeight: 800, fontSize: 20 },
+                  // Add this for mobile devices to show the "done" button on virtual keyboard
+                  enterKeyHint: 'done',
+                }}
+                // Add this for form submission handling on mobile
+                onBlur={handleSaveSemesterName}
               />
-            </IconButton>
-          </Tooltip>
+              <IconButton 
+                onClick={handleSaveSemesterName} 
+                size="small" 
+                sx={{ ml: 1 }}
+              >
+                <CheckIcon sx={{ fontSize: 18, color: iconColor }} />
+              </IconButton>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: 20,
+                  color: textColor,
+                  mb: 0,
+                }}
+              >
+                {semesterName}
+              </Typography>
+              <Tooltip title="Rename" placement="top" arrow>
+                <IconButton 
+                  size="small" 
+                  onClick={() => setEditingSemesterName(true)}
+                  sx={{ 
+                    ml: 1, 
+                    color: iconColor, 
+                    '&:hover': { backgroundColor: 'rgba(59,130,246,0.08)' } 
+                  }}
+                >
+                  <EditIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
+          
+          <Box sx={{ position: "absolute", right: "2%", display: "flex" }}>
+            {hasCustomSubjects && (
+              <Tooltip title="Reset to Default Semester" placement="top" arrow>
+                <IconButton
+                  color="inherit"
+                  onClick={() => setResetDialogOpen(true)}
+                  sx={{
+                    mr: 1,
+                    "&:hover *": {
+                      color: theme.palette.warning.main,
+                    },
+                  }}
+                >
+                  <RestartAltIcon
+                    sx={{
+                      color: textColor,
+                      cursor: "pointer",
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
+            )}
+            
+            <Tooltip 
+              title="Customize your semester to make it personal to you!"
+              placement="top" 
+              arrow
+              open={showTooltip}
+              TransitionComponent={Zoom}
+              TransitionProps={{ timeout: 200 }}
+            >
+              <IconButton
+                ref={customizeIconRef}
+                color="inherit"
+                onClick={handleCustomizeClick}
+                sx={{
+                  mr: 1,
+                  animation: showTooltip ? 'bounceAndGlow 0.6s infinite alternate' : 'none',
+                  '@keyframes bounceAndGlow': {
+                    '0%': {
+                      transform: 'scale(1)',
+                      boxShadow: '0 0 0 rgba(37, 99, 235, 0)',
+                    },
+                    '100%': {
+                      transform: 'scale(1.3)',
+                      boxShadow: '0 0 15px rgba(37, 99, 235, 0.8)',
+                    }
+                  },
+                  borderRadius: '50%',
+                  "&:hover": {
+                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(37, 99, 235, 0.2)' : 'rgba(37, 99, 235, 0.1)',
+                    "& .MuiSvgIcon-root": {
+                      color: theme.palette.primary.main,
+                    }
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <SettingsIcon
+                  sx={{
+                    color: showTooltip ? theme.palette.primary.main : iconColor,
+                    cursor: "pointer",
+                    fontSize: 22,
+                    transition: 'color 0.3s ease',
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="Remove Shortcut Semester" placement="top" arrow>
+              <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{
+                  "&:hover *": {
+                    color: "#900",
+                  },
+                }}
+                onClick={() => {
+                  handleClick();
+                  localStorage.setItem("semester", "-1");
+                }}
+              >
+                <RemoveCircleOutlineIcon
+                  sx={{
+                    color: textColor,
+                    cursor: "pointer",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
 
         <CardContent sx={{ pb: 2, px: 3, pt: 2 }}>
-          <Grid container spacing={1}>
-            {subjects?.map((subject, idx) => (
-              <Grid item xs={12} sm={6} key={idx}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    background: pillBg,
-                    borderRadius: 1,
-                    px: 2,
-                    py: 1.2,
-                    boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
-                    mb: 1,
-                    fontWeight: 600,
-                    fontSize: 15,
-                    color: textColor,
-                    minHeight: 56,
-                    transition: "all 0.18s",
-                    cursor: "pointer",
-                    '&:hover': {
-                      background: pillHoverBg,
-                      color: theme.palette.mode === "dark" ? "#fff" : textColor,
-                      boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
-                      '& .MuiSvgIcon-root': {
-                        color: theme.palette.mode === "dark" ? "#fff" : iconColor,
-                      },
-                    },
-                    textDecoration: 'none',
-                  }}
-                  component="a"
-                  href={`/subjects/${subject.abbreviation}`}
+          {emptyCustomSubjects ? (
+            <Alert 
+              severity="info" 
+              icon={<SettingsIcon fontSize="inherit" />}
+              sx={{ 
+                mb: 2, 
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(59,130,246,0.1)'
+              }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={handleCustomizeClick}
                 >
-                  <SchoolIcon sx={{ fontSize: 20, color: iconColor, mr: 1.5, transition: "color 0.18s" }} />
-                  <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <b style={{ fontSize: 16, marginRight: 6, textDecoration: 'none' }}>{subject.abbreviation}</b>
+                  Add Subjects
+                </Button>
+              }
+            >
+              Please select subjects to be added in your shortcut menu.
+            </Alert>
+          ) : (
+            <Grid container spacing={1}>
+              {subjects?.map((subject, idx) => (
+                <Grid item xs={12} sm={6} key={idx}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      background: pillBg,
+                      borderRadius: 1,
+                      px: 2,
+                      py: 1.2,
+                      boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
+                      mb: 1,
+                      fontWeight: 600,
+                      fontSize: 15,
+                      color: textColor,
+                      minHeight: 56,
+                      transition: "all 0.18s",
+                      cursor: "pointer",
+                      '&:hover': {
+                        background: pillHoverBg,
+                        color: theme.palette.mode === "dark" ? "#fff" : textColor,
+                        boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
+                        '& .MuiSvgIcon-root': {
+                          color: theme.palette.mode === "dark" ? "#fff" : iconColor,
+                        },
+                      },
+                      textDecoration: 'none',
+                    }}
+                    component="a"
+                    href={`/subjects/${subject.abbreviation}`}
+                  >
+                    <SchoolIcon sx={{ fontSize: 20, color: iconColor, mr: 1.5, transition: "color 0.18s" }} />
+                    <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0 }}>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <b style={{ fontSize: 16, marginRight: 6, textDecoration: 'none' }}>{subject.abbreviation}</b>
+                      </Box>
+                      <Tooltip title={subject.name} arrow>
+                        <span style={{
+                          fontWeight: 400,
+                          fontSize: 14,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          color: "inherit",
+                          textDecoration: 'none',
+                        }}>
+                          {subject.name}
+                        </span>
+                      </Tooltip>
                     </Box>
-                    <Tooltip title={subject.name} arrow>
-                      <span style={{
-                        fontWeight: 400,
-                        fontSize: 14,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        color: "inherit",
-                        textDecoration: 'none',
-                      }}>
-                        {subject.name}
-                      </span>
-                    </Tooltip>
                   </Box>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </CardContent>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2, width: "100%", fontWeight: 700 }}
-          onClick={() => {
-            if (subjects) {
-              setSelectedCourses(subjects.map((s) => s.abbreviation));
-            }
-            setCustomizeOpen(true);
-          }}
-        >
-          Customize My Semester
-        </Button>
-
-        <Button
-          variant="outlined"
-          color="secondary"
-          sx={{ mt: 2, width: "100%", fontWeight: 700 }}
-          onClick={() => {
-            localStorage.removeItem("customSemesterSubjects");
-            if (transcript && 'semesters' in transcript && transcript.semesters[currentSemester]) {
-              setSubjects(transcript.semesters[currentSemester].subjects);
-            }
-          }}
-        >
-          Reset to Default Semester
-        </Button>
+        {/* Removing the large customization button and keeping only the icon in header */}
       </Card>
 
       {/* Modal Dialog for Customizing Semester */}
@@ -260,9 +510,17 @@ export default function CurrentSemester({
             borderTopRightRadius: 8,
             mb: 1,
             py: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}
         >
-          Select Your Courses
+          <span>Select Your Courses</span>
+          <Tooltip title="Help" placement="top">
+            <IconButton onClick={() => setHelpDialogOpen(true)}>
+              <HelpOutlineIcon color="primary" />
+            </IconButton>
+          </Tooltip>
         </DialogTitle>
         <DialogContent
           dividers
@@ -380,6 +638,8 @@ export default function CurrentSemester({
               if (transcript && 'semesters' in transcript) {
                 const allSubjects = transcript.semesters.flatMap((sem: any) => sem.subjects);
                 setSubjects(allSubjects.filter((subj: any) => selectedCourses.includes(subj.abbreviation)));
+                setHasCustomSubjects(true);
+                setEmptyCustomSubjects(selectedCourses.length === 0);
               }
               setOpen(false);
               setCustomizeOpen(false);
@@ -392,6 +652,170 @@ export default function CurrentSemester({
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
-  );
-}
+
+      {/* Confirmation Dialog for Reset */}
+      <Dialog open={resetDialogOpen} onClose={() => setResetDialogOpen(false)}>
+        <DialogTitle sx={{ 
+          fontWeight: 700, 
+          backgroundColor: theme.palette.mode === "dark" ? "#1e293b" : "#e3e8f7",
+          color: theme.palette.primary.main
+        }}>
+          Reset Custom Semester?
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, mt: 1, minWidth: 300 }}>
+          <Typography>
+            This will restore the default semester courses and remove your customizations. Are you sure?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setResetDialogOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleResetCustomSemester} 
+            variant="contained" 
+            color="warning"
+            startIcon={<RestartAltIcon />}
+          >
+            Reset
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Help Dialog in both languages */}
+      <Dialog 
+        open={helpDialogOpen} 
+        onClose={() => {
+          setHelpDialogOpen(false);
+          if (isFirstTimeCustomize) {
+            if (subjects) {
+              setSelectedCourses(subjects.map((s) => s.abbreviation));
+            }
+            setCustomizeOpen(true);
+          }
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          fontWeight: 700, 
+          backgroundColor: theme.palette.mode === "dark" ? "#1e293b" : "#e3e8f7",
+          color: theme.palette.primary.main,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>Customize Semester Helper</span>
+          <Paper elevation={0} sx={{ bgcolor: 'background.paper' }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+            >
+              <Tab label="English" />
+              <Tab label="العربية" />
+            </Tabs>
+          </Paper>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ p: 0 }}>
+          <TabPanel value={tabValue} index={0}>
+            <Box sx={{ px: 2, py: 1 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                How to Customize Your Semester
+              </Typography>
+              <Typography paragraph>
+                The semester customization feature allows you to create your own personalized view of subjects from any semester.
+              </Typography>
+              
+              <Typography sx={{ fontWeight: 600, mt: 2, mb: 1 }}>Features:</Typography>
+              <Typography component="div">
+                <ul>
+                  <li>Select courses from any semester to display in your shortcut menu</li>
+                  <li>Rename your semester to anything you want</li>
+                  <li>Easily reset to the default semester view when needed</li>
+                  <li>Quick access to all your important subjects in one place</li>
+                </ul>
+              </Typography>
+              
+              <Typography sx={{ fontWeight: 600, mt: 2, mb: 1 }}>How to use:</Typography>
+              <Typography paragraph>
+                1. Click on the checkboxes next to the courses you want to include<br/>
+                2. Click "Save" to create your custom semester view<br/>
+                3. Your selections will be remembered whenever you return
+              </Typography>
+              
+              <Box sx={{ mt: 3, p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(66, 153, 225, 0.08)' : 'rgba(66, 153, 225, 0.05)', borderRadius: 2 }}>
+                <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                  Tip: You can always modify your custom semester by clicking on the settings icon in the top right corner.
+                </Typography>
+              </Box>
+            </Box>
+          </TabPanel>
+          
+          <TabPanel value={tabValue} index={1}>
+            <Box sx={{ px: 2, py: 1 }} dir="rtl">
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                كيفية تخصيص الفصل الدراسي الخاص بك
+              </Typography>
+              <Typography paragraph>
+                تتيح لك ميزة تخصيص الفصل الدراسي إنشاء عرض مخصص للمواد من أي فصل دراسي.
+              </Typography>
+              
+              <Typography sx={{ fontWeight: 600, mt: 2, mb: 1 }}>الميزات:</Typography>
+              <Typography component="div">
+                <ul>
+                  <li>اختر المقررات من أي فصل دراسي لعرضها في قائمة الاختصارات</li>
+                  <li>أعد تسمية الفصل الدراسي الخاص بك إلى أي شيء تريده</li>
+                  <li>إعادة التعيين بسهولة إلى عرض الفصل الدراسي الافتراضي عند الحاجة</li>
+                  <li>وصول سريع إلى جميع المواد المهمة في مكان واحد</li>
+                </ul>
+              </Typography>
+              
+              <Typography sx={{ fontWeight: 600, mt: 2, mb: 1 }}>كيفية الاستخدام:</Typography>
+              <Typography paragraph>
+                1. انقر على مربعات الاختيار بجانب المقررات التي تريد تضمينها<br/>
+                2. انقر على "حفظ" لإنشاء عرض الفصل الدراسي المخصص الخاص بك<br/>
+                3. سيتم تذكر اختياراتك عند العودة
+              </Typography>
+              
+              <Box sx={{ mt: 3, p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(66, 153, 225, 0.08)' : 'rgba(66, 153, 225, 0.05)', borderRadius: 2 }}>
+                <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                  نصيحة: يمكنك دائمًا تعديل الفصل الدراسي المخصص الخاص بك بالنقر على أيقونة الإعدادات في الزاوية العلوية اليمنى.
+                </Typography>
+              </Box>
+            </Box>
+          </TabPanel>
+        </DialogContent>
+        
+        <DialogActions sx={{ 
+          background: theme.palette.mode === "dark" ? "#232b3e" : "#e3e8f7",
+          p: 2 
+        }}>
+          {isFirstTimeCustomize ? (
+            <Button 
+              onClick={() => {
+                setHelpDialogOpen(false);
+                if (subjects) {
+                  setSelectedCourses(subjects.map((s) => s.abbreviation));
+                }
+                setCustomizeOpen(true);
+              }}
+              variant="contained" 
+              color="primary"
+              autoFocus
+              sx={{ fontWeight: 600 }}
+            >
+              Continue to Customization
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => setHelpDialogOpen(false)}
+              variant="contained" 
+              color="primary"
+              autoFocus
+              sx={{ fontWeight: 600 }}
+            >
+              Got it!
+            </Button>          )}        </DialogActions>      </Dialog>    </Box>  );}
