@@ -438,7 +438,6 @@ export default function CurrentSemester({
               title="Customize your semester to make it personal to you!"
               placement="bottom"
               arrow
-
               open={showTooltip}
               TransitionComponent={Zoom}
               TransitionProps={{ timeout: 200 }}
@@ -589,99 +588,101 @@ export default function CurrentSemester({
             <Grid container spacing={1}>
               {subjects?.map((subject, idx) => (
                 <Grid item xs={12} sm={6} key={idx}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      background: pillBg,
-                      borderRadius: 1,
-                      px: 2,
-                      py: 1.2,
-                      boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
-                      mb: 1,
-                      fontWeight: 600,
-                      fontSize: 15,
-                      color: textColor,
-                      minHeight: 56,
-                      transition: "all 0.18s",
-                      cursor: "pointer",
-                      "&:hover": {
-                        background: pillHoverBg,
-                        color:
-                          theme.palette.mode === "dark" ? "#fff" : textColor,
-                        boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
-                        "& .MuiSvgIcon-root": {
+                  <Tooltip
+                    title={subject.name}
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          bgcolor:
+                            theme.palette.mode === "dark"
+                              ? "#1e293b"
+                              : "#e3e8f7",
                           color:
-                            theme.palette.mode === "dark" ? "#fff" : iconColor,
+                            theme.palette.mode === "dark" ? "#fff" : "#000",
+                          fontSize: 14,
+                          fontWeight: 500,
+                          borderRadius: 1.5,
+                          border:
+                            theme.palette.mode === "dark"
+                              ? "0.1ch solid #fff"
+                              : "0.1ch solid #000",
+
+                          boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
+                          maxWidth: 300,
                         },
                       },
-                      textDecoration: "none",
+                      arrow: {
+                        sx: {
+                          color:
+                            theme.palette.mode === "dark"
+                              ? "#1e293b"
+                              : "#e3e8f7",
+                        },
+                      },
                     }}
-                    component="a"
-                    href={`/subjects/${subject.abbreviation}`}
                   >
-                    <SchoolIcon
-                      sx={{
-                        fontSize: 20,
-                        color: iconColor,
-                        mr: 1.5,
-                        transition: "color 0.18s",
-                      }}
-                    />
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "column",
-                        flexGrow: 1,
-                        minWidth: 0,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        background: pillBg,
+                        borderRadius: 1,
+                        px: 2,
+                        py: 1.2,
+                        boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
+                        mb: 1,
+                        fontWeight: 600,
+                        fontSize: 15,
+                        color: textColor,
+                        minHeight: 56,
+                        transition: "all 0.18s",
+                        cursor: "pointer",
+                        "&:hover": {
+                          background: pillHoverBg,
+                          color:
+                            theme.palette.mode === "dark" ? "#fff" : textColor,
+                          boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
+                          "& .MuiSvgIcon-root": {
+                            color:
+                              theme.palette.mode === "dark"
+                                ? "#fff"
+                                : iconColor,
+                          },
+                        },
+                        textDecoration: "none",
                       }}
+                      component="a"
+                      href={`/subjects/${subject.abbreviation}`}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <b
-                          style={{
-                            fontSize: 16,
-                            marginRight: 6,
-                            textDecoration: "none",
-                          }}
-                        >
-                          {subject.abbreviation}
-                        </b>
-                      </Box>
-                      <Tooltip
-                        title={subject.name}
-                        arrow
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              bgcolor:
-                                theme.palette.mode === "dark"
-                                  ? "#1e293b"
-                                  : "#e3e8f7",
-                              color:
-                                theme.palette.mode === "dark" ? "#fff" : "#000",
-                              fontSize: 14,
-                              fontWeight: 500,
-                              borderRadius: 1.5,
-                              border:
-                                theme.palette.mode === "dark"
-                                  ? "0.1ch solid #fff"
-                                  : "0.1ch solid #000",
-
-                              boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
-                              maxWidth: 300,
-                            },
-                          },
-                          arrow: {
-                            sx: {
-                              color:
-                                theme.palette.mode === "dark"
-                                  ? "#1e293b"
-                                  : "#e3e8f7",
-                            },
-                          },
+                      <SchoolIcon
+                        sx={{
+                          fontSize: 20,
+                          color: iconColor,
+                          mr: 1.5,
+                          transition: "color 0.18s",
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          flexGrow: 1,
+                          minWidth: 0,
                         }}
                       >
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <b
+                            style={{
+                              fontSize: 16,
+                              marginRight: 6,
+                              textDecoration: "none",
+                            }}
+                          >
+                            {subject.abbreviation}
+                          </b>
+                        </Box>
+
                         <span
                           style={{
                             fontWeight: 400,
@@ -695,9 +696,9 @@ export default function CurrentSemester({
                         >
                           {subject.name}
                         </span>
-                      </Tooltip>
+                      </Box>
                     </Box>
-                  </Box>
+                  </Tooltip>
                 </Grid>
               ))}
             </Grid>
