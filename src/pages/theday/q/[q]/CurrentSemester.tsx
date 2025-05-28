@@ -58,11 +58,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -174,10 +170,7 @@ export default function CurrentSemester({
       "firstTimeCustomizeSemester"
     );
     // If the customize icon is not in the DOM yet, we can't show the tooltip
-    if (
-      firstTimeCustomize === "shown"
-    )
-      return;
+    if (firstTimeCustomize === "shown") return;
     // Show tooltip after 4 seconds
     const timer = setTimeout(() => {
       setShowTooltip(true);
@@ -439,123 +432,124 @@ export default function CurrentSemester({
               title="Customize your semester to make it personal to you!!!"
               placement="bottom"
               arrow
+              disableInteractive
               slotProps={{
                 tooltip: {
+                  
                   sx: {
-                    display: showTooltip ? "none" : "block", // Hide when animated tooltip is showing
+                    display: showTooltip ? "none" : "block", // Hide when animated tooltip is active
                     bgcolor:
-                      theme.palette.mode === "dark" ? "#1e293b" : "#e3e8f7",
+                      theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
                     color: theme.palette.mode === "dark" ? "#fff" : "#000",
                     fontSize: 14,
                     fontWeight: 500,
                     borderRadius: 1.5,
+                    p: 1.5,
                     boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
                     maxWidth: 300,
-                    zIndex: 1000, // Lower z-index for the regular tooltip
                   },
                 },
                 arrow: {
                   sx: {
                     color:
-                      theme.palette.mode === "dark" ? "#1e293b" : "#e3e8f7",
+                      theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
                   },
                 },
               }}
-              // Hide the regular tooltip when the animated one is showing
-              open={showTooltip}
             >
               <Box>
-
-              {/* Second tooltip for animation - controlled by showTooltip state */}
-              <Tooltip
-                title="Customize your semester to make it personal to you!!!!!"
-                placement="bottom"
-                arrow
-                open={showTooltip === true}
-                TransitionComponent={Zoom}
-                TransitionProps={{ timeout: 200 }}
-                PopperProps={{
-                  sx: {
-                    zIndex: 1100, // Higher z-index for the animated tooltip to ensure it's on top
-                  },
-                }}
-                slotProps={{
-                  tooltip: {
+                {/* Second tooltip for animation - controlled by showTooltip state */}
+                <Tooltip
+                  title="Customize your semester to make it personal to you!!!!!"
+                  placement="bottom"
+                  arrow
+                  open={showTooltip}
+                  TransitionComponent={Zoom}
+                  TransitionProps={{ timeout: 200 }}
+                  PopperProps={{
                     sx: {
-                      bgcolor:
-                        theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                      fontSize: 14,
-                      fontWeight: 500,
-                      borderRadius: 1.5,
-                      p: 1.5,
-                      boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
-                      maxWidth: 300,
-                      animation: "pulse 2s infinite",
-                      "@keyframes pulse": {
-                        "0%": {
-                          boxShadow: "0 0 0 0 rgba(59, 130, 246, 0.7)",
+                      display: showTooltip ? "block" : "none", // Show only when animated tooltip is active
+                      zIndex: 1100, // Higher z-index for the animated tooltip to ensure it's on top
+                    },
+                  }}
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor:
+                          theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
+                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                        fontSize: 14,
+                        fontWeight: 500,
+                        borderRadius: 1.5,
+                        p: 1.5,
+                        boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
+                        maxWidth: 300,
+                        animation: "pulse 2s infinite",
+                        "@keyframes pulse": {
+                          "0%": {
+                            boxShadow: "0 0 0 0 rgba(59, 130, 246, 0.7)",
+                          },
+                          "70%": {
+                            boxShadow: "0 0 0 10px rgba(59, 130, 246, 0)",
+                          },
+                          "100%": {
+                            boxShadow: "0 0 0 0 rgba(59, 130, 246, 0)",
+                          },
                         },
-                        "70%": {
-                          boxShadow: "0 0 0 10px rgba(59, 130, 246, 0)",
-                        },
-                        "100%": {
-                          boxShadow: "0 0 0 0 rgba(59, 130, 246, 0)",
-                        },
                       },
                     },
-                  },
-                  arrow: {
-                    sx: {
-                      color:
-                        theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
-                    },
-                  },
-                }}
-              >
-                <IconButton
-                  ref={customizeIconRef}
-                  color="inherit"
-                  onClick={handleCustomizeClick}
-                  sx={{
-                    animation: showTooltip
-                      ? "bounceAndGlow 0.6s infinite alternate"
-                      : "none",
-                    "@keyframes bounceAndGlow": {
-                      "0%": {
-                        transform: "scale(1)",
-                        boxShadow: "0 0 0 rgba(37, 99, 235, 0)",
-                      },
-                      "100%": {
-                        transform: "scale(1.3)",
-                        boxShadow: "0 0 15px rgba(37, 99, 235, 0.8)",
+                    arrow: {
+                      sx: {
+                        color:
+                          theme.palette.mode === "dark" ? "#3b82f6" : "#e3e8f7",
                       },
                     },
-                    borderRadius: "50%",
-                    "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "rgba(37, 99, 235, 0.2)"
-                          : "rgba(37, 99, 235, 0.1)",
-                      "& .MuiSvgIcon-root": {
-                        color: theme.palette.primary.main,
-                      },
-                    },
-                    transition: "all 0.2s ease",
                   }}
                 >
-                  <SettingsIcon
+                  <IconButton
+                    ref={customizeIconRef}
+                    color="inherit"
+                    onClick={handleCustomizeClick}
                     sx={{
-                      color: showTooltip ? theme.palette.primary.main : iconColor,
-                      cursor: "pointer",
-                      fontSize: 24,
-                      transition: "color 0.3s ease",
+                      animation: showTooltip
+                        ? "bounceAndGlow 0.6s infinite alternate"
+                        : "none",
+                      "@keyframes bounceAndGlow": {
+                        "0%": {
+                          transform: "scale(1)",
+                          boxShadow: "0 0 0 rgba(37, 99, 235, 0)",
+                        },
+                        "100%": {
+                          transform: "scale(1.3)",
+                          boxShadow: "0 0 15px rgba(37, 99, 235, 0.8)",
+                        },
+                      },
+                      borderRadius: "50%",
+                      "&:hover": {
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(37, 99, 235, 0.2)"
+                            : "rgba(37, 99, 235, 0.1)",
+                        "& .MuiSvgIcon-root": {
+                          color: theme.palette.primary.main,
+                        },
+                      },
+                      transition: "all 0.2s ease",
                     }}
-                  />
-                </IconButton>
-              </Tooltip>
+                  >
+                    <SettingsIcon
+                      sx={{
+                        color: showTooltip
+                          ? theme.palette.primary.main
+                          : iconColor,
+                        cursor: "pointer",
+                        fontSize: 24,
+                        transition: "color 0.3s ease",
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
               </Box>
-
             </Tooltip>
 
             <Tooltip
