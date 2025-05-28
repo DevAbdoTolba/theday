@@ -338,6 +338,7 @@ export default function CurrentSemester({
                 {semesterName}
               </Typography>
               <Tooltip
+                disableInteractive
                 title="Rename"
                 placement="top"
                 arrow
@@ -389,6 +390,7 @@ export default function CurrentSemester({
           >
             {hasCustomSubjects && (
               <Tooltip
+                disableInteractive
                 title="Reset to Default Semester"
                 placement="top"
                 arrow
@@ -435,6 +437,7 @@ export default function CurrentSemester({
             )}
 
             <Tooltip
+              disableInteractive
               title="Customize your semester to make it personal to you!"
               placement="bottom"
               arrow
@@ -508,6 +511,7 @@ export default function CurrentSemester({
             </Tooltip>
 
             <Tooltip
+              disableInteractive
               title="Remove Shortcut Semester"
               placement="top"
               arrow
@@ -733,6 +737,7 @@ export default function CurrentSemester({
         >
           <span>Select Your Courses</span>
           <Tooltip
+            disableInteractive
             title="Help"
             placement="top"
             slotProps={{
