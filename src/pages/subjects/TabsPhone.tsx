@@ -21,13 +21,16 @@ function TabPanel(props: any) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ 
-          p: 2,
-          background: theme.palette.mode === "dark" ? "#1e293b" : "#fff",
-          borderRadius: 2,
-          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-          mt: 0
-        }}>
+        <Box
+          sx={{
+            p: 2,
+            background: theme.palette.mode === "dark" ? "#1e293b" : "#fff",
+            borderRadius: 2,
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            mt: 0,
+          }}
+        >
           <>{children}</>
         </Box>
       )}
@@ -56,22 +59,6 @@ export default function BasicTabs(props: any) {
     setValue(newValue);
   };
 
-  // Filter data for each section based on the first word of the folder name
-  const getFirstFolderFiles = (data: any, firstWords: string[]): any[] => {
-    for (const [key, value] of Object.entries(data || {})) {
-      const firstWord = key.split(" ")[0].toLowerCase();
-      if (firstWords.map((w: string) => w.toLowerCase()).includes(firstWord)) {
-        return Array.isArray(value) ? value : [];
-      }
-    }
-    return [];
-  };
-
-  const lecturesData = getFirstFolderFiles(props.data, ["lecture"]);
-  const onlineLecturesData = getFirstFolderFiles(props.data, ["online"]);
-  const sectionsData = getFirstFolderFiles(props.data, ["section"]);
-  const examsData = getFirstFolderFiles(props.data, ["ex"]);
-
   return (
     <Box
       sx={{
@@ -80,20 +67,11 @@ export default function BasicTabs(props: any) {
           xs: "block",
           md: "none",
         },
-        p: 2
+        p: 2,
       }}
     >
       <TabPanel value={value} index={0}>
-        <Material data={lecturesData} {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Material data={onlineLecturesData} {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <Material data={sectionsData} {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={3}>
-        <Material data={examsData} {...props} />
+        <Material {...props} />
       </TabPanel>
     </Box>
   );
