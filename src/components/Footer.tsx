@@ -422,7 +422,7 @@ export default function footer() {
           }}
         >
           <NameHref
-            name="Abdulrahman Tolba"
+            name="Abdelrahman Tolba"
             dataName={["Github", "LinkedIn"]}
             dataHref={[
               "https://github.com/DevAbdoTolba",
@@ -467,9 +467,47 @@ export default function footer() {
             dataHref={["https://linktr.ee/omarfarouk27"]}
           />
         </Box>
+                <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
+          &nbsp; | &nbsp;
+        </Typography>
+
+        <Box
+          sx={{
+            position: "relative",
+            color: "#0685da",
+            // bgcolor: "#121212",
+            // transition: "all .2s ease-in-out",
+            // "&:hover": {
+            //   transform: "scale(1.2) rotate(5deg)",
+            // },
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              height: "1%",
+              width: "0",
+              transition: "all .2s ease-in-out",
+              bgcolor: "#3b82f6",
+            },
+            "&:hover::after": {
+              width: "100%",
+            },
+            "& *": {
+              textDecoration: "none !important",
+            },
+          }}
+        >
+          <NameHref
+            name="Kareem Mohamed"
+            dataName={["Portfolio", "Github"]}
+            dataHref={["https://kareemmohammed.netlify.app", "https://github.com/karemsaeed21"]}
+          />
+        </Box>
         <Typography variant="subtitle2" fontWeight={"100"} textAlign={"center"}>
           &nbsp;
         </Typography>
+        
       </Grid>
     </Box>
   );
