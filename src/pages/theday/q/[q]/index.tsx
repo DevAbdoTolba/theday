@@ -9,6 +9,8 @@ import React, {
 
 import Header from "../../../../components/Header";
 import Footer from "../../../../components/Footer";
+import GoogleDriveSearch from "../../../../components/GoogleDriveSearch";
+import { SearchProvider } from "../../../../context/SearchContext";
 
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
@@ -87,26 +89,25 @@ function App() {
     console.log("offline", offline);
     console.log("loading", loading);
   }, [offline, loading]);
-
   return (
-    <>
-      <Header title="TheDay" setSearch={setSearch} isSearch={true} />
+    <>      <Header title="TheDay" isSearch={false} />
       {loadingTranscript && offline && <Offline />}
       {!loadingTranscript && (
-        <Box
-          sx={{
-            pt: { sm: "2%", xs: "10%" },
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-            background: theme.palette.mode === "dark" ? "#151a2c" : "#fff",
-            borderRadius: 0,
-            p: 3,
-          }}
-        >
+        <SearchProvider>
+          <Box
+            sx={{
+              pt: { sm: "2%", xs: "10%" },
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              overflow: "hidden",
+              background: theme.palette.mode === "dark" ? "#151a2c" : "#fff",
+              borderRadius: 0,
+              p: 3,
+            }}
+          >{transcript && <GoogleDriveSearch transcript={transcript} currentSemester={currentSemester} />}
           {currentSemester !== -1 && (
             <>
               <CurrentSemester
@@ -139,9 +140,9 @@ function App() {
               }
             >
               <Main search={search} currentSemester={currentSemester} />
-            </Suspense>
-          </Paper>
+            </Suspense>          </Paper>
         </Box>
+        </SearchProvider>
       )}
 
       <Snackbar open={open} autoHideDuration={6000}>
