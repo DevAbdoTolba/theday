@@ -114,18 +114,20 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
           variant="outlined"
           startIcon={<SearchIcon />}
           sx={{
-            position: "fixed",
-            bottom: 32,
-            right: 5,
+            
             zIndex: 1200,
-            borderRadius: "50%",
-            minWidth: 56,
-            minHeight: 56,
+            // borderRadius: "50%",
+            // minWidth: 56,
+            // minHeight: 56,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             boxShadow: 3,
             background: theme.palette.background.paper,
+            
           }}
           onClick={() => setOpen(true)}
-        />
+        >&nbsp;👀&nbsp;</Button>
       )}
       <Dialog
           open={open}
@@ -140,17 +142,20 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             '& .MuiDialog-paper': {
               width: { xs: '100vw', sm: '50vw' },  // full width on mobile, custom on desktop
               maxWidth: { xs: '90vw', sm: '95vw' },
-              minWidth: '320px',
+              minWidth: {xs: "100vw" ,sm:'320px'},
+              minHeight: { xs: '100dvh', sm: 'auto' }, // full height on mobile, auto on desktop
               height: { xs: '100vh', sm: 'auto' }, // full height on mobile
               backgroundColor: theme.palette.background.paper ,
               backgroundImage: 'none',
-              borderRadius: { xs: 4, sm: 4 },
               position: { xs: 'fixed', sm: 'absolute' },
-              top: { xs: '3%', sm: '3%' },
+              // top: { xs: '3%', sm: '3%' },
               margin: '0 !important',
               padding: { xs: 1, sm: 3 },
               border: `1.5px solid ${theme.palette.divider}`,
               boxShadow: theme.shadows[8],
+
+              borderRadius: { xs: 0, sm: 4 }, // No border radius on mobile, rounded on desktop
+              top: { xs: 0, sm: 'auto' },
             },
           }}
         >
@@ -237,6 +242,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             />
           ))}
         </Box>
+        <Divider sx={{mb:1}}/>
         <DialogContent sx={{ px: 3, pt: 0, pb: 2 }}>
           <AnimatePresence>
             {filteredKeys.length === 0 && (
