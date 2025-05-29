@@ -160,6 +160,11 @@ function SemesterCard({ semester }: SemesterCardProps) {
                     },
                     textDecoration: "none",
                   }}
+                  onClick={() => {
+                    // redirect
+
+                    localStorage.setItem("currentSemester", semester.index.toString());
+                  }}
                   component={Link}
                   href={`/subjects/${subject.abbreviation}`}
                 >

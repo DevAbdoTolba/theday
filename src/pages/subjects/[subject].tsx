@@ -1,6 +1,6 @@
 const { google } = require("googleapis");
 
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense, useContext } from "react";
 import {
   Box,
   Tooltip,
@@ -19,9 +19,11 @@ import Header from "../../components/Header";
 import NoData from "../../components/NoData";
 import Offline from "../../components/Offline";
 import Loading from "../../components/Loading";
+import SubjectSemesterBar from "../../components/SubjectSemesterBar";
 
 import { useIndexedContext } from "../../context/IndexedContext";
 import { offlineContext } from "../_app";
+import { DataContext } from "../../context/TranscriptContext";
 import Drawer from "./AllDrawer";
 
 const TabsPC = dynamic(() => import("./TabsPc"));
@@ -52,12 +54,15 @@ export default function SubjectPage({
   // const [subjectLoading, setSubjectLoading] = useState(!initialData);
   // const [materialLoading, setMaterialLoading] = useState(false);
   // const [newFetchLoading, setNewFetchLoading] = useState(false);
-  const [newItemsMsg, setNewItemsMsg] = useState("");
-  const [newItems, setNewItems] = useState([]);
+  const [newItemsMsg, setNewItemsMsg] = useState("");  const [newItems, setNewItems] = useState([]);  
+  const [showSemesterPrompt, setShowSemesterPrompt] = useState(false);
+  const [currentSemesterValue, setCurrentSemesterValue] = useState<number>(0);
+  const [subjectFullName, setSubjectFullName] = useState<string>("");
 
   const { getSubjectByName, addOrUpdateSubject, setLoading } =
     useIndexedContext();
   const [offline, setOffline] = React.useContext<boolean[]>(offlineContext);
+  const { transcript } = useContext(DataContext);
   const router = useRouter();
 
   const [showDrawer, setShowDrawer] = useState(() => {
@@ -67,9 +72,29 @@ export default function SubjectPage({
     return true;
   });
 
-  const theme = useTheme();
+  const theme = useTheme();  useEffect(() => {
+    // Check if the user has already set a semester
+    const semesterInStorage = localStorage.getItem("semester");
+    const currentSemester = localStorage.getItem("currentSemester");
+    
+    // If we have a current semester value but the user hasn't chosen if this is their semester yet
+    if (currentSemester && (!semesterInStorage || semesterInStorage === "-1" || semesterInStorage === "-2")) {
+      setCurrentSemesterValue(parseInt(currentSemester));
+      // Show the semester prompt
+      setShowSemesterPrompt(true);
+    }
 
-  useEffect(() => {
+    // Find the full subject name from the transcript data
+    if (transcript && "semesters" in transcript) {
+      // Look through all semesters and find the subject with matching abbreviation
+      const allSubjects = transcript.semesters.flatMap(sem => sem.subjects);
+      const foundSubject = allSubjects.find(sub => sub.abbreviation === subject);
+      
+      if (foundSubject && foundSubject.name) {
+        setSubjectFullName(foundSubject.name);
+      }
+    }
+    
     // If initialData is not available, fetch it on the client side
     const loadData = async () => {
       // setSubjectLoading(true);
@@ -834,14 +859,12 @@ export default function SubjectPage({
           return newState;
         });
       }
-    };
-
-    addEventListener("keydown", handleKeyDown);
+    };    addEventListener("keydown", handleKeyDown);
 
     return () => {
       removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [subject, transcript, initialData, getSubjectByName, addOrUpdateSubject]);
 
   // if (subjectLoading || materialLoading) {
   //   return <Loading />;
@@ -861,7 +884,6 @@ export default function SubjectPage({
   if (!data || Object.keys(data).length === 0) {
     return <NoData />;
   }
-
   return (
     <Box sx={{ overflowX: "hidden", background: theme.palette.mode === "dark" ? "#151a2c" : "#f9fafb" }}>
       <Head>
@@ -883,8 +905,16 @@ export default function SubjectPage({
           data={data}
           newItems={newItems}
         />
-        <TabsPhone data={data} newItems={newItems} />
-      </>
+        <TabsPhone data={data} newItems={newItems} />      </>
+
+      {/* Display the semester prompt if needed */}
+      {showSemesterPrompt && (
+        <SubjectSemesterBar 
+          subject={subject} 
+          semester={currentSemesterValue} 
+          subjectFullName={subjectFullName}
+        />
+      )}
 
       {/* {
         <Tooltip title="Fetching new data..." placement="top">

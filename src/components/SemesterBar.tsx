@@ -6,7 +6,10 @@ import CloseIcon from "@mui/icons-material/Close";
 
 export default function SimpleSnackbar() {
   const [open, setOpen] = React.useState(false);
+  const [askAgain, setAskAgain] = React.useState(false);
+  const [showConfirmation, setShowConfirmation] = React.useState(false);
   const [currentSemester, setCurrentSemester] = React.useState(0);
+  const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     const currentSemester = parseInt(localStorage.getItem("currentSemester")!);
@@ -37,7 +40,6 @@ export default function SimpleSnackbar() {
         { once: true }
       );
   }, []);
-
   const handleClick = () => {
     setOpen(true);
   };
@@ -52,6 +54,38 @@ export default function SimpleSnackbar() {
     setOpen(false);
   };
 
+  const handleNo = () => {
+    // Handle No response to the first prompt
+    setOpen(false);
+    
+    // Set a timer to show the second prompt after 5 seconds
+    const timeoutId = setTimeout(() => {
+      setAskAgain(true);
+    }, 5000); // 5 seconds delay
+    
+    setTimer(timeoutId);
+  };
+
+  const handleSecondYes = () => {
+    // Create a custom semester with just a placeholder
+    // Since this is the general semester bar without a specific subject
+    const customSemesterSubjects = JSON.stringify([]);
+    localStorage.setItem("customSemesterSubjects", customSemesterSubjects);
+    localStorage.setItem("customSemesterName", "Special for you 🌹");
+    
+    // Set a custom semester flag
+    localStorage.setItem("semester", "-2"); // Use -2 to indicate custom special semester
+    setAskAgain(false);
+    
+    // Show confirmation message
+    setShowConfirmation(true);
+    
+    // Auto-hide the confirmation after 4 seconds
+    setTimeout(() => {
+      setShowConfirmation(false);
+    }, 4000);
+  };
+
   const handleClose = (
     event: React.SyntheticEvent | Event,
     reason?: string
@@ -62,14 +96,44 @@ export default function SimpleSnackbar() {
     }
 
     setOpen(false);
+    setAskAgain(false);
+    if (timer) {
+      clearTimeout(timer);
+    }
   };
-
-  const action = (
+  // First prompt actions
+  const firstPromptActions = (
     <React.Fragment>
       <Button
         color="success"
         size="small"
         onClick={handelYes}
+        sx={{
+          fontWeight: "bolder",
+        }}
+      >
+        Yes
+      </Button>
+      <Button
+        color="primary"
+        size="small"
+        onClick={handleNo}
+        sx={{
+          fontWeight: "bolder",
+        }}
+      >
+        No
+      </Button>
+    </React.Fragment>
+  );
+
+  // Second prompt actions
+  const secondPromptActions = (
+    <React.Fragment>
+      <Button
+        color="success"
+        size="small"
+        onClick={handleSecondYes}
         sx={{
           fontWeight: "bolder",
         }}
@@ -87,10 +151,9 @@ export default function SimpleSnackbar() {
     </React.Fragment>
   );
   //   after 4 seconds, show the snackbar
-
   return (
     <>
-      <Snackbar
+      {/* <Snackbar
         sx={{
           "& .MuiPaper-root": {
             bgcolor: "#1e293b",
@@ -100,10 +163,34 @@ export default function SimpleSnackbar() {
         open={open}
         onClose={handleClose}
         message={"Are you in semester " + currentSemester + " ?"}
-        action={action}
+        action={
+          <React.Fragment>
+            <Button
+              color="success"
+              size="small"
+              onClick={handelYes}
+              sx={{
+                fontWeight: "bolder",
+              }}
+            >
+              Yes
+            </Button>
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={handleNo}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
         transitionDuration={600}
-        autoHideDuration={10000}
+        autoHideDuration={20000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       />
+       */}
+
     </>
   );
 }

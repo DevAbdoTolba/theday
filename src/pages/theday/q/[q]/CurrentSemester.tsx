@@ -85,6 +85,7 @@ export default function CurrentSemester({
     `Semester ${currentSemester}`
   );
   const [editingSemesterName, setEditingSemesterName] = useState(false);
+  const [isSpecialCustomSemester, setIsSpecialCustomSemester] = useState(false);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
@@ -113,15 +114,27 @@ export default function CurrentSemester({
     if (!firstTimeCustomize) {
       setIsFirstTimeCustomize(true);
     }
-
+    
+    // Check if this is a special custom semester
+    const semesterStatus = localStorage.getItem("semester");
+    const isSpecialSemester = semesterStatus === "-2";
+    setIsSpecialCustomSemester(isSpecialSemester);
+    
     if (customName) {
       setSemesterName(customName);
+    } else if (isSpecialSemester) {
+      // Default name for special custom semester
+      setSemesterName("Special for you 🌹");
+      // Save it to localStorage for consistency
+      localStorage.setItem("customSemesterName", "Special for you 🌹");
     } else {
       setSemesterName(`Semester ${currentSemester}`);
-    }
-
-    if (custom) {
-      const abbrs = JSON.parse(custom);
+    }// Check if we're in a special custom semester
+ 
+    
+    if (custom || isSpecialSemester) {
+      // Handle both normal custom subjects and our special custom semester
+      const abbrs = JSON.parse(custom || "[]");
       setHasCustomSubjects(true);
       setEmptyCustomSubjects(abbrs.length === 0);
 
@@ -134,9 +147,15 @@ export default function CurrentSemester({
           allSubjects.filter((subj: any) => abbrs.includes(subj.abbreviation))
         );
       }
+      
+      // If this is our special custom semester, make sure the semester name is set correctly
+      if (isSpecialSemester && !localStorage.getItem("customSemesterName")) {
+        setSemesterName("Special for you 🌹");
+      }
     } else {
       setHasCustomSubjects(false);
       setEmptyCustomSubjects(false);
+      
       if (
         transcript &&
         "semesters" in transcript &&
@@ -192,6 +211,7 @@ export default function CurrentSemester({
     setSemesterName(`Semester ${currentSemester}`);
     setHasCustomSubjects(false);
     setEmptyCustomSubjects(false);
+    setIsSpecialCustomSemester(false);
 
     if (
       transcript &&
@@ -379,7 +399,8 @@ export default function CurrentSemester({
               gap: 1, // Add consistent gap between buttons
             }}
           >
-            {hasCustomSubjects && (
+            {/* Only show reset button for custom semester but not special custom semester */}
+            {hasCustomSubjects && !isSpecialCustomSemester && (
               <Tooltip
                 disableInteractive
                 title="Reset to Default Semester"
@@ -394,7 +415,6 @@ export default function CurrentSemester({
                       fontSize: 14,
                       fontWeight: 500,
                       borderRadius: 1.5,
-
                       boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
                       maxWidth: 300,
                     },
@@ -411,7 +431,6 @@ export default function CurrentSemester({
                   color="inherit"
                   onClick={() => setResetDialogOpen(true)}
                   sx={{
-                    // Remove the right margin as we're using gap now
                     "&:hover *": {
                       color: theme.palette.warning.main,
                     },

@@ -127,6 +127,14 @@ function MainPhone({ search, currentSemester }: Props) {
                         }}
                       >
                         <Box
+                          onClick={() => {
+                            // redirect
+
+                            localStorage.setItem(
+                              "currentSemester",
+                              index.toString()
+                            );
+                          }}
                           component={Link}
                           href={`/subjects/${subjects.abbreviation}`}
                           sx={{
