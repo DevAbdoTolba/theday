@@ -17,6 +17,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import useSearchShortcut from "../hooks/useSearchShortcut";
 import { useSearch } from "../context/SearchContext";
@@ -287,8 +288,11 @@ export default function GoogleDriveSearch({
     setIsOpen(true);
   };
 
-  const handleItemClick = (abbreviation: string) => {
-    router.push(`/subjects/${abbreviation}`);
+  const handleItemClick = (abbreviation: string, semesterIndex: number) => {
+    // Set currentSemester in localStorage
+    localStorage.setItem("currentSemester", semesterIndex.toString());
+    
+    // Close the search and clear the query
     setIsOpen(false);
     setSearchQuery("");
   };
@@ -390,48 +394,53 @@ export default function GoogleDriveSearch({
                   <React.Fragment
                     key={`${result.semester.index}-${result.subject.abbreviation}`}
                   >
-                    <SearchResultItem
-                      selected={index === selectedIndex}
-                      onClick={() =>
-                        handleItemClick(result.subject.abbreviation)
-                      }
+                    <Link 
+                      href={`/subjects/${result.subject.abbreviation}`}
+                      passHref 
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      onClick={() => handleItemClick(result.subject.abbreviation, result.semester.index)}
                     >
-                      <Box sx={{ width: "100%" }}>
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Typography variant="subtitle1" fontWeight={500}>
-                            {result.subject.abbreviation}
+                      <SearchResultItem
+                        selected={index === selectedIndex}
+                        component="div" // Change to div since it's wrapped in Link
+                      >
+                        <Box sx={{ width: "100%" }}>
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <Typography variant="subtitle1" fontWeight={500}>
+                              {result.subject.abbreviation}
+                            </Typography>
+                            <Chip
+                              label={`Semester ${result.semester.index}`}
+                              size="small"
+                              sx={{
+                                fontWeight: 500,
+                                fontSize: "0.7rem",
+                                height: 24,
+                                bgcolor:
+                                  theme.palette.mode === "dark"
+                                    ? "#232f55"
+                                    : "#e3e8f7",
+                                color:
+                                  theme.palette.mode === "dark"
+                                    ? "#fff"
+                                    : theme.palette.text.primary,
+                              }}
+                            />
+                          </Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            noWrap
+                          >
+                            {result.subject.name}
                           </Typography>
-                          <Chip
-                            label={`Semester ${result.semester.index}`}
-                            size="small"
-                            sx={{
-                              fontWeight: 500,
-                              fontSize: "0.7rem",
-                              height: 24,
-                              bgcolor:
-                                theme.palette.mode === "dark"
-                                  ? "#232f55"
-                                  : "#e3e8f7",
-                              color:
-                                theme.palette.mode === "dark"
-                                  ? "#fff"
-                                  : theme.palette.text.primary,
-                            }}
-                          />
                         </Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          noWrap
-                        >
-                          {result.subject.name}
-                        </Typography>
-                      </Box>
-                    </SearchResultItem>
+                      </SearchResultItem>
+                    </Link>
                     {index < searchResults.length - 1 && (
                       <Divider sx={{ my: 0.5, opacity: 0.6 }} />
                     )}
