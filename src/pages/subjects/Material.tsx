@@ -470,8 +470,7 @@ function Material({
                   "&::-webkit-scrollbar-thumb:hover": {
                     background: theme.palette.primary.dark,
                   },
-                  pl: { xs: 1, sm: 2 },
-                  pr: { xs: 1, sm: 2 },
+                  px: { xs: 1, sm: 2 },
                 }}
               >
                 {filteredData[key]?.map((item: Data, index: number) => (
@@ -490,6 +489,10 @@ function Material({
                       },
                       // Maintain exact spacing
                       maxWidth: {
+                        sm: "15%",
+                        xs: "33%",
+                      },
+                      minWidth: {
                         sm: "15%",
                         xs: "33%",
                       },
@@ -638,6 +641,7 @@ function Material({
                       style={itemStyle}
                       disableRipple
                       sx={{
+                     
                         all: "unset",
                         backgroundImage: () => {
                           if (item?.name.includes("http")) {
@@ -689,6 +693,10 @@ function Material({
                           outline: "1px solid #fff",
                           boxShadow: "10px 10px 70px 30px rgba(0, 0, 0, 0.8)",
                         },
+                        maxWidth: {
+                          sm: "15%",
+                          xs: "150%",
+                        },
                       }}
                       href={
                         (() => {
@@ -725,7 +733,7 @@ function Material({
                         })() as string
                       }
                       target="_blank"
-                    ></Button>
+                    />
                   </Box>
                 ))}
               </Box>
