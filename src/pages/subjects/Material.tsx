@@ -266,7 +266,7 @@ function Material({
   const handleTabChange = (newTab: string) => {
     // Skip effect if clicking the same tab
     if (newTab === selectedTab) return;
-    
+
     setIsTransitioning(true);
 
     // Short timeout to allow fade out before changing data
@@ -301,6 +301,11 @@ function Material({
           userSelect: "none", // Prevent text selection during drag
           WebkitUserSelect: "none", // For Safari
           MozUserSelect: "none", // For Firefox
+
+          mx: {
+            sm: "2ch",
+            xs: "0", // Responsive margin
+          },
         }}
       >
         <Box
@@ -316,7 +321,14 @@ function Material({
               variant={selectedTab === tab.key ? "contained" : "text"}
               onClick={() => handleTabChange(tab.key)} // Use new handler
               sx={{
-                fontWeight: 700,
+                fontWeight: {
+                  sm: 700,
+                  xs: 500, // Responsive font weight
+                },
+                fontSize: {
+                  sm: "1.6ch",
+                  xs: "1.2ch", // Responsive font size
+                },
                 borderRadius: 3,
                 background: selectedTab === tab.key ? "#334155" : "transparent",
                 color: selectedTab === tab.key ? "#fff" : "inherit",
@@ -324,6 +336,10 @@ function Material({
                 minWidth: { xs: 80, sm: 120 }, // responsive min width
                 flexShrink: 0,
                 mx: ".6ch",
+                border: {
+                  sm: selectedTab === tab.key ? "none" : "none",
+                  xs: selectedTab === tab.key ? "none" : "0.1px solid #444",
+                }, // responsive border
               }}
             >
               {tab.label}
@@ -408,13 +424,9 @@ function Material({
                       transition: "background 0.2s, color 0.2s",
                       "&:hover": {
                         backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "#334155"
-                            : "#e0e7ef",
+                          theme.palette.mode === "dark" ? "#334155" : "#e0e7ef",
                         color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "#a5b4fc"
-                            : "#2563eb",
+                          theme.palette.mode === "dark" ? "#a5b4fc" : "#2563eb",
                       },
                     }}
                   >
@@ -516,8 +528,8 @@ function Material({
                           let name_split = name.split(" ");
                           // Check which index is the url
 
-                          let urlIndex = name_split.findIndex(
-                            (name: string) => name.includes("http")
+                          let urlIndex = name_split.findIndex((name: string) =>
+                            name.includes("http")
                           );
                           const name_split_no_url = name_split.filter(
                             (name: string) => !name.includes("http")
@@ -556,9 +568,7 @@ function Material({
                                 ? "#1e293b"
                                 : "#e3e8f7",
                             color:
-                              theme.palette.mode === "dark"
-                                ? "#fff"
-                                : "#000",
+                              theme.palette.mode === "dark" ? "#fff" : "#000",
                             fontSize: 14,
                             fontWeight: 500,
                             borderRadius: 1.5,
@@ -677,8 +687,7 @@ function Material({
                         "&:focus": {
                           margin: "3px",
                           outline: "1px solid #fff",
-                          boxShadow:
-                            "10px 10px 70px 30px rgba(0, 0, 0, 0.8)",
+                          boxShadow: "10px 10px 70px 30px rgba(0, 0, 0, 0.8)",
                         },
                       }}
                       href={
