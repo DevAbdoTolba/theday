@@ -16,7 +16,6 @@ function Main({ search, currentSemester }: Props) {
   
   // Use either the context search query or the prop-based search
   const effectiveSearch = searchQuery || search;
-  
   return (
     <>
       <MainPc search={effectiveSearch} currentSemester={currentSemester} />

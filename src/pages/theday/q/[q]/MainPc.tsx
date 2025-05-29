@@ -3,12 +3,7 @@ import { DataContext } from "../../../../context/TranscriptContext";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import {
-  Tooltip,
-  Typography,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Tooltip, Typography, Card, CardContent } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import Link from "next/link";
 
@@ -47,23 +42,11 @@ export default function MainPc({ search, currentSemester }: Props) {
           {/* @ts-ignore */}
           {transcript &&
             "semesters" in transcript &&
-            transcript.semesters
-              .filter(
-                (x: any) =>
-                  x.index !== currentSemester &&
-                  x.subjects.filter(
-                    (y: any) =>
-                      y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                      y?.abbreviation
-                        ?.toLowerCase()
-                        .includes(search?.toLowerCase())
-                  ).length > 0
-              )
-              .map((item: any, index: any) => (
-                <Grid key={index} item xs={12} sm={6} md={4}>
-                  <SemesterCard semester={item} />
-                </Grid>
-              ))}
+            transcript.semesters.map((item: any, index: any) => (
+              <Grid key={index} item xs={12} sm={6} md={4}>
+                <SemesterCard semester={item} />
+              </Grid>
+            ))}
         </Grid>
       </Box>
     </>

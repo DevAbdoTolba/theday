@@ -11,7 +11,7 @@ import {
   Divider,
   ClickAwayListener,
   useTheme,
-  Chip
+  Chip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { styled } from "@mui/material/styles";
@@ -59,7 +59,8 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   transition: "all 0.2s ease-in-out",
   "&:hover": {
-    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    boxShadow:
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
   },
   "&:focus-within": {
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -81,28 +82,43 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchResultItem = styled(ListItem)<{ selected?: boolean }>(({ theme, selected }) => ({
-  padding: "8px 16px",
-  cursor: "pointer",
-  backgroundColor: selected ? (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)") : "transparent",
-  borderRadius: theme.shape.borderRadius,
-  transition: "background-color 0.2s ease-in-out",
-  "&:hover": {
-    backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)",
-  },
-}));
+const SearchResultItem = styled(ListItem)<{ selected?: boolean }>(
+  ({ theme, selected }) => ({
+    padding: "8px 16px",
+    cursor: "pointer",
+    backgroundColor: selected
+      ? theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.08)"
+        : "rgba(0, 0, 0, 0.04)"
+      : "transparent",
+    borderRadius: theme.shape.borderRadius,
+    transition: "background-color 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor:
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.05)"
+          : "rgba(0, 0, 0, 0.02)",
+    },
+  })
+);
 
-export default function GoogleDriveSearch({ transcript, currentSemester }: GoogleDriveSearchProps) {
+export default function GoogleDriveSearch({
+  transcript,
+  currentSemester,
+}: GoogleDriveSearchProps) {
   const { searchQuery, setSearchQuery } = useSearch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<Array<{ semester: Semester; subject: Subject }>>([]);  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [searchResults, setSearchResults] = useState<
+    Array<{ semester: Semester; subject: Subject }>
+  >([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const searchBarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [popperWidth, setPopperWidth] = useState<number | null>(null);
   const theme = useTheme();
   const router = useRouter();
-  
+
   // Use the search shortcut hook
   useSearchShortcut({
     onOpen: () => {
@@ -120,18 +136,16 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
     }
 
     const results: Array<{ semester: Semester; subject: Subject }> = [];
-    
+
     transcript.semesters.forEach((semester) => {
-      if (semester.index !== currentSemester) { // Don't include current semester
-        semester.subjects.forEach((subject) => {
-          if (
-            subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            subject.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
-          ) {
-            results.push({ semester, subject });
-          }
-        });
-      }
+      semester.subjects.forEach((subject) => {
+        if (
+          subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          subject.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
+        ) {
+          results.push({ semester, subject });
+        }
+      });
     });
 
     setSearchResults(results);
@@ -193,7 +207,9 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
   // Scroll selected item into view
   useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
-      const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
+      const selectedElement = listRef.current.children[
+        selectedIndex
+      ] as HTMLElement;
       if (selectedElement) {
         selectedElement.scrollIntoView({
           block: "nearest",
@@ -220,17 +236,24 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
 
   return (
     <ClickAwayListener onClickAway={() => setIsOpen(false)}>
-      <Box sx={{ position: "relative", width: { xs: "90%", sm: 650 }, mx: "auto", my: 2 }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: { xs: "100%", sm: 650 },
+          mx: "auto",
+          my: 2,
+        }}
+      >
         <SearchBar ref={searchBarRef} elevation={0}>
-          <SearchIcon 
-            sx={{ 
-              color: theme.palette.text.secondary, 
-              mr: 1.5, 
-              fontSize: 22
-            }} 
+          <SearchIcon
+            sx={{
+              color: theme.palette.text.secondary,
+              mr: 1.5,
+              fontSize: 22,
+            }}
           />
           <StyledInputBase
-            placeholder="Search for subjects across semesters..."
+            placeholder="Search"
             inputProps={{ "aria-label": "search" }}
             value={searchQuery}
             onChange={handleChange}
@@ -240,15 +263,16 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
           />
           <Box
             sx={{
-              backgroundColor: theme.palette.mode === "dark" 
-                ? "rgba(255, 255, 255, 0.08)" 
-                : "rgba(0, 0, 0, 0.05)",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(0, 0, 0, 0.05)",
               borderRadius: 1,
               px: 1,
               py: 0.5,
-              fontSize: "0.75rem",
+              fontSize: { xs: "0.5rem", sm: "0.75rem" },
               color: theme.palette.text.secondary,
-              display: "flex",
+              display: { sm: "flex", xs: "none" },
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -283,29 +307,47 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
             {searchResults.length > 0 ? (
               <List ref={listRef} sx={{ py: 0.5 }}>
                 {searchResults.map((result, index) => (
-                  <React.Fragment key={`${result.semester.index}-${result.subject.abbreviation}`}>
+                  <React.Fragment
+                    key={`${result.semester.index}-${result.subject.abbreviation}`}
+                  >
                     <SearchResultItem
                       selected={index === selectedIndex}
-                      onClick={() => handleItemClick(result.subject.abbreviation)}
+                      onClick={() =>
+                        handleItemClick(result.subject.abbreviation)
+                      }
                     >
                       <Box sx={{ width: "100%" }}>
-                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
                           <Typography variant="subtitle1" fontWeight={500}>
                             {result.subject.abbreviation}
                           </Typography>
-                          <Chip 
+                          <Chip
                             label={`Semester ${result.semester.index}`}
                             size="small"
-                            sx={{ 
+                            sx={{
                               fontWeight: 500,
                               fontSize: "0.7rem",
                               height: 24,
-                              bgcolor: theme.palette.mode === "dark" ? "#232f55" : "#e3e8f7",
-                              color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
+                              bgcolor:
+                                theme.palette.mode === "dark"
+                                  ? "#232f55"
+                                  : "#e3e8f7",
+                              color:
+                                theme.palette.mode === "dark"
+                                  ? "#fff"
+                                  : theme.palette.text.primary,
                             }}
                           />
                         </Box>
-                        <Typography variant="body2" color="text.secondary" noWrap>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
                           {result.subject.name}
                         </Typography>
                       </Box>
@@ -316,7 +358,8 @@ export default function GoogleDriveSearch({ transcript, currentSemester }: Googl
                   </React.Fragment>
                 ))}
               </List>
-            ) : (              <Box sx={{ p: 3, textAlign: "center" }}>
+            ) : (
+              <Box sx={{ p: 3, textAlign: "center" }}>
                 <Typography color="text.secondary">
                   No results found for &quot;{searchQuery}&quot;
                 </Typography>
