@@ -76,6 +76,7 @@ export default function CurrentSemester({
   >();
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [initialSelectedCourses, setInitialSelectedCourses] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<
     { name: string; abbreviation: string; semester: number }[]
   >([]);
@@ -107,12 +108,17 @@ export default function CurrentSemester({
   useEffect(() => {
     const custom = localStorage.getItem("customSemesterSubjects");
     const customName = localStorage.getItem("customSemesterName");
-    const firstTimeCustomize = localStorage.getItem(
-      "firstTimeCustomizeSemester"
-    );
-
+    
+    // Check and initialize firstTimeCustomize flag
+    const firstTimeCustomize = localStorage.getItem("firstTimeCustomizeSemester");
+    
     if (!firstTimeCustomize) {
+      // If flag doesn't exist in localStorage, this is first time - set the state to true
       setIsFirstTimeCustomize(true);
+      // But don't set in localStorage yet - we'll do that when they click the customize button
+    } else {
+      // Flag already exists, not first time anymore
+      setIsFirstTimeCustomize(false);
     }
     
     // Check if this is a special custom semester
@@ -239,12 +245,17 @@ export default function CurrentSemester({
 
   const handleCustomizeClick = () => {
     if (isFirstTimeCustomize) {
+      // First time user is accessing customize feature
       setHelpDialogOpen(true);
+      // Mark that user has seen the help dialog
       localStorage.setItem("firstTimeCustomizeSemester", "shown");
       setIsFirstTimeCustomize(false);
     } else {
+      // Regular customize flow
       if (subjects) {
-        setSelectedCourses(subjects.map((s) => s.abbreviation));
+        const currentSelection = subjects.map(s => s.abbreviation);
+        setSelectedCourses(currentSelection);
+        setInitialSelectedCourses(currentSelection); // Save initial selection for comparison
       }
       setCustomizeOpen(true);
     }
@@ -479,7 +490,7 @@ export default function CurrentSemester({
               <Box>
                 {/* Second tooltip for animation - controlled by showTooltip state */}
                 <Tooltip
-                  title="Customize your semester to make it personal to you!!!!!"
+                  title="Customize your semester to make it personal to you!"
                   placement="bottom"
                   arrow
                   open={showTooltip}
@@ -955,22 +966,34 @@ export default function CurrentSemester({
           </Button>
           <Button
             onClick={() => {
-              localStorage.setItem(
-                "customSemesterSubjects",
-                JSON.stringify(selectedCourses)
-              );
-              if (transcript && "semesters" in transcript) {
-                const allSubjects = transcript.semesters.flatMap(
-                  (sem: any) => sem.subjects
+              // Check if the selection has actually changed
+              const hasSelectionChanged = 
+                selectedCourses.length !== initialSelectedCourses.length || 
+                selectedCourses.some(course => !initialSelectedCourses.includes(course)) ||
+                initialSelectedCourses.some(course => !selectedCourses.includes(course));
+                
+              if (hasSelectionChanged) {
+                localStorage.setItem(
+                  "customSemesterSubjects",
+                  JSON.stringify(selectedCourses)
                 );
-                setSubjects(
-                  allSubjects.filter((subj: any) =>
-                    selectedCourses.includes(subj.abbreviation)
-                  )
-                );
-                setHasCustomSubjects(true);
-                setEmptyCustomSubjects(selectedCourses.length === 0);
+                
+                if (transcript && "semesters" in transcript) {
+                  const allSubjects = transcript.semesters.flatMap(
+                    (sem: any) => sem.subjects
+                  );
+                  setSubjects(
+                    allSubjects.filter((subj: any) =>
+                      selectedCourses.includes(subj.abbreviation)
+                    )
+                  );
+                  setHasCustomSubjects(true);
+                  setEmptyCustomSubjects(selectedCourses.length === 0);
+                }
+              } else {
+                console.log("No changes detected in course selection, skipping save");
               }
+              
               setOpen(false);
               setCustomizeOpen(false);
             }}
