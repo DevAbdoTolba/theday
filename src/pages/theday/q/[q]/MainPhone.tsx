@@ -1,12 +1,10 @@
 import { useContext } from "react";
 import { DataContext } from "../../../../context/TranscriptContext";
-
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import data from "src/Data/data.json";
 import Grid from "@mui/material/Grid";
-import Dialog from "./Dialog";
 import Zoom from "@mui/material/Zoom";
-import { Chip, Tooltip, Typography } from "@mui/material";
+import { Tooltip, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -20,6 +18,8 @@ interface Props {
 
 function MainPhone({ search, currentSemester }: Props) {
   const { transcript, loadingTranscript, error } = useContext(DataContext);
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -28,37 +28,69 @@ function MainPhone({ search, currentSemester }: Props) {
           sm: "none",
           xs: "block",
         },
+        background: theme.palette.background.paper,
+        minHeight: "100vh",
+        borderRadius: 2,
+        p: 1,
       }}
     >
-      {/* @ts-ignore */}
-      {transcript.semesters
-        .filter(
-          (x: any) =>
-            x.subjects.filter(
-              (y: any) =>
-                y?.name?.toLowerCase().includes(search?.toLowerCase()) ||
-                y?.abbreviation?.toLowerCase().includes(search?.toLowerCase())
-            ).length > 0
-        )
-        .map((item: any, index: any) => (
+      {transcript &&
+        "semesters" in transcript &&
+        Array.isArray(transcript.semesters) &&
+        transcript.semesters.map((item: any, index: any) => (
           <Accordion
             key={index}
             sx={{
               mb: 3,
-              borderBottom: "1px solid #1e1e1e",
-              //   shadow
-              boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
+              background: theme.palette.mode === "dark" ? "#19223c" : "#e3e8f7",
+              borderRadius: 2,
+              border:
+                theme.palette.mode === "dark"
+                  ? "1px solid #232b3e"
+                  : "1px solid #bcd0fa",
+              boxShadow: "0 2px 12px 0 rgba(59,130,246,0.10)",
+              color: theme.palette.text.primary,
+              "&:before": { display: "none" },
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+              expandIcon={
+                <ExpandMoreIcon
+                  sx={{
+                    color:
+                      theme.palette.mode === "dark" ? "#3b82f6" : "#2563eb",
+                  }}
+                />
+              }
               aria-controls="panel1a-content"
               id="panel1a-header"
+              sx={{
+                background:
+                  theme.palette.mode === "dark" ? "#232f55" : "#2563eb",
+                borderTopLeftRadius: 8,
+                borderTopRightRadius: 8,
+                px: 2,
+                py: 1.2,
+              }}
             >
-              <Typography>Semester {item.index}</Typography>
+              <Typography
+                sx={{
+                  fontWeight: 800,
+                  fontSize: 18,
+                  color: theme.palette.mode === "dark" ? "#fff" : "#fff",
+                }}
+              >
+                Semester {item.index}
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <Grid container spacing={2} sx={{ marginBottom: 3 }}>
+            <AccordionDetails
+              sx={{
+                background: theme.palette.mode === "dark" ? "#151a2c" : "#fff",
+                borderBottomLeftRadius: 8,
+                borderBottomRightRadius: 8,
+              }}
+            >
+              <Grid container spacing={1} sx={{ marginBottom: 1 }}>
                 {item.subjects
                   .filter(
                     (y: any) =>
@@ -67,46 +99,102 @@ function MainPhone({ search, currentSemester }: Props) {
                         ?.toLowerCase()
                         .includes(search?.toLowerCase())
                   )
-
                   .map((subjects: any, subIndex: any) => (
-                    <Grid
-                      key={subIndex}
-                      item
-                      // sx={{
-                      //   width: "100%",
-                      // }}
-                    >
+                    <Grid key={subIndex} item xs={12}>
                       <Tooltip
                         title={subjects?.name}
-                        arrow
                         TransitionComponent={Zoom}
-                        disableInteractive
-                        disableHoverListener
-                        disableFocusListener
-                        disableTouchListener
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              bgcolor:
+                                theme.palette.mode === "dark"
+                                  ? "#1e293b"
+                                  : "#e3e8f7",
+                              color:
+                                theme.palette.mode === "dark" ? "#fff" : "#000",
+                              fontSize: 14,
+                              fontWeight: 500,
+                              borderRadius: 1.5,
+                              border:
+                                theme.palette.mode === "dark"
+                                  ? "0.1ch solid #fff"
+                                  : "0.1ch solid #000",
+                              boxShadow: "0 4px 16px 0 rgba(0,0,0,0.15)",
+                              maxWidth: 300,
+                            },
+                          },
+                        }}
                       >
-                        <Chip
-                        component={Link}
-                        href={`/subjects/${subjects.abbreviation}`}
-                          sx={{
-                            width: "100%",
-                            MozBoxShadow:
-                              "0px 1.2px 2px 0.5px rgba(0, 0, 0, 0.5)",
-                            boxShadow: "0px 1.2px 2px 0.5px rgb(0 0 0 / 50%)",
-                          }}
-                          className="subject__chip"
-                          label={subjects.name}
-                          clickable
-                          // component={"a"}
+                        <Box
                           onClick={() => {
+                            // redirect
 
                             localStorage.setItem(
                               "currentSemester",
                               index.toString()
                             );
-                       
                           }}
-                        />
+                          component={Link}
+                          href={`/subjects/${subjects.abbreviation}`}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            background:
+                              theme.palette.mode === "dark"
+                                ? "#232b3e"
+                                : "#e3e8f7",
+                            borderRadius: 1,
+                            px: 2,
+                            py: 1.2,
+                            boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
+                            mt: 1.5,
+                            mb: 0.5,
+                            fontWeight: 600,
+                            fontSize: 15,
+                            color: theme.palette.text.primary,
+                            minHeight: 48,
+                            transition: "all 0.18s",
+                            cursor: "pointer",
+                            textDecoration: "none",
+                            "&:hover": {
+                              background:
+                                theme.palette.mode === "dark"
+                                  ? "#2563eb"
+                                  : "#bcd0fa",
+                              color:
+                                theme.palette.mode === "dark"
+                                  ? "#fff"
+                                  : theme.palette.text.primary,
+                              boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
+                            },
+                          }}
+                        >
+                          <b
+                            style={{
+                              fontSize: 15,
+                              marginRight: 8,
+                              textDecoration: "none",
+                            }}
+                          >
+                            {subjects.abbreviation}
+                          </b>
+                          <span
+                            style={{
+                              fontWeight: 400,
+                              fontSize: 14,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              color: "inherit",
+                              textDecoration: "none",
+                            }}
+                          >
+                            {subjects.name.length > 20
+                              ? subjects.name.slice(0, 20) + "..."
+                              : subjects.name}
+                          </span>
+                        </Box>
                       </Tooltip>
                     </Grid>
                   ))}

@@ -4,12 +4,13 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import { useTheme } from "@mui/material/styles";
 
-import Schedule from "./Schedule";
 import Material from "./Material";
 
 function TabPanel(props: any) {
   const { children, value, index, data, ...other } = props;
+  const theme = useTheme();
 
   return (
     <div
@@ -20,7 +21,16 @@ function TabPanel(props: any) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box
+          sx={{
+            p: 2,
+            background: theme.palette.mode === "dark" ? "#1e293b" : "#fff",
+            borderRadius: 2,
+            boxShadow:
+              "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            mt: 0,
+          }}
+        >
           <>{children}</>
         </Box>
       )}
@@ -43,6 +53,7 @@ function a11yProps(index: number) {
 
 export default function BasicTabs(props: any) {
   const [value, setValue] = React.useState(0);
+  const theme = useTheme();
 
   const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
@@ -56,27 +67,11 @@ export default function BasicTabs(props: any) {
           xs: "block",
           md: "none",
         },
+        p: 2,
       }}
     >
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          aria-label="basic tabs example"
-        >
-          <Tab label="Material" {...a11yProps(0)} />
-          <Tab label="Schedule" {...a11yProps(1)} />
-          <Tab label="Previous Exams" {...a11yProps(2)} />
-        </Tabs>
-      </Box>
       <TabPanel value={value} index={0}>
         <Material {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Schedule {...props} />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        {"Not Yet :)"}
       </TabPanel>
     </Box>
   );

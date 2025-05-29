@@ -92,10 +92,10 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
     setStoredDialogOpen(false);
   };
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (loading) return;
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(event.currentTarget.querySelector('form') as HTMLFormElement);
     const formJson = Object.fromEntries((formData as any).entries());
 
     const key = formJson.key;
@@ -167,9 +167,10 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
         open={open}
         onClose={() => setCloseKeyDialog()}
         PaperProps={{
+          // @ts-ignore or use proper type casting
           component: "form",
           onSubmit: handleFormSubmit,
-        }}
+        } as any}
       >
         <DialogTitle
           sx={{

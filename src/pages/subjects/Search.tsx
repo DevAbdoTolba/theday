@@ -224,7 +224,7 @@ export default function Search({ data }: Props) {
         <Paper
           id="search"
           sx={{
-            backgroundColor: "#1e1e1e",
+            backgroundColor: "#151a2c",
             position: "fixed",
             top: {
               sm: "15%",

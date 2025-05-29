@@ -57,7 +57,9 @@ export default function IndexedProvider({
   const [updatedItems, setUpdatedItems] = useState<string[]>([]);
 
   const getSubjectByName = async (name: string) => {
-    return await db.subjects.where("name").equals(name).first();
+    const data = await db.subjects.where("name").equals(name).first();
+    console.log("Fetched data:", data);
+    return data;
   };
 
   const addOrUpdateSubject = async (name: string, folders: DataMap) => {
@@ -72,33 +74,37 @@ export default function IndexedProvider({
       );
       return updateResult;
     } else {
-      // If the subject is not found, add it to the database
-      await db.subjects.add({ name, folders });
+      // Always save folders as an object
+      await db.subjects.add({ name, folders: folders || {} });
       return {
         msg: "Subject added",
-        newItems: Object.keys(folders).flatMap((key) =>
-          folders[key].map((item) => item.id)
+        newItems: Object.keys(folders || {}).flatMap((key) =>
+          (folders?.[key] || []).map((item) => item.id)
         ),
       };
     }
   };
 
   const compareAndUpdate = (
-    existingFolders: DataMap,
-    newFolders: DataMap,
+    existingFolders: DataMap = {},
+    newFolders: DataMap = {},
     name: string
   ) => {
     let addedItems: string[] = [];
     let removedItems: string[] = [];
 
+    // Ensure we have valid objects to work with
+    const safeExistingFolders = existingFolders || {};
+    const safeNewFolders = newFolders || {};
+
     const allKeys = new Set([
-      ...Object.keys(existingFolders),
-      ...Object.keys(newFolders),
+      ...Object.keys(safeExistingFolders),
+      ...Object.keys(safeNewFolders),
     ]);
 
     allKeys.forEach((key) => {
-      const existingItems = existingFolders[key] || [];
-      const newItems = newFolders[key] || [];
+      const existingItems = safeExistingFolders[key] || [];
+      const newItems = safeNewFolders[key] || [];
 
       const existingIds = existingItems.map((item) => item.id);
       const newIds = newItems.map((item) => item.id);
@@ -114,10 +120,10 @@ export default function IndexedProvider({
 
       // Update the existing folder with new items
       if (newItems.length > 0) {
-        existingFolders[key] = newItems;
+        safeExistingFolders[key] = newItems;
       } else {
         // If the new folder has 0 length, delete the key
-        delete existingFolders[key];
+        delete safeExistingFolders[key];
       }
     });
 
@@ -125,7 +131,7 @@ export default function IndexedProvider({
       // @ts-ignore
       const res = db.subjects
         .where({ name: name })
-        .modify({ folders: existingFolders });
+        .modify({ folders: safeExistingFolders });
 
       setUpdatedItems(addedItems);
       return {
