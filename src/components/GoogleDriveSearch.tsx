@@ -157,6 +157,26 @@ export default function GoogleDriveSearch({
     };
   }, [isOpen]);
   
+  // Globally disable browser's Ctrl+K shortcut
+  useEffect(() => {
+    // This handler will run for ALL Ctrl+K keydown events
+    const disableBrowserCtrlK = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.code === "KeyK" || e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    
+    // Add event listeners at both document and window level with capture phase
+    document.addEventListener("keydown", disableBrowserCtrlK, { capture: true });
+    window.addEventListener("keydown", disableBrowserCtrlK, { capture: true });
+    
+    return () => {
+      document.removeEventListener("keydown", disableBrowserCtrlK, { capture: true });
+      window.removeEventListener("keydown", disableBrowserCtrlK, { capture: true });
+    };
+  }, []);
+  
   // Auto-focus search input on page load
   useEffect(() => {
     // Small timeout to ensure the component is fully rendered
