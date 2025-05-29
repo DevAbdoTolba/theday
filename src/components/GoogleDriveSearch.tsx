@@ -12,8 +12,10 @@ import {
   ClickAwayListener,
   useTheme,
   Chip,
+  IconButton,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import useSearchShortcut from "../hooks/useSearchShortcut";
@@ -234,6 +236,11 @@ export default function GoogleDriveSearch({
     setSearchQuery("");
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    inputRef.current?.focus();
+  };
+
   return (
     <ClickAwayListener onClickAway={() => setIsOpen(false)}>
       <Box
@@ -261,26 +268,42 @@ export default function GoogleDriveSearch({
             onKeyDown={handleKeyDown}
             inputRef={inputRef}
           />
-          <Box
-            sx={{
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.08)"
-                  : "rgba(0, 0, 0, 0.05)",
-              borderRadius: 1,
-              px: 1,
-              py: 0.5,
-              fontSize: { xs: "0.5rem", sm: "0.75rem" },
-              color: theme.palette.text.secondary,
-              display: { sm: "flex", xs: "none" },
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="caption" fontWeight={500}>
-              Ctrl+K
-            </Typography>
-          </Box>
+          {searchQuery ? (
+            <IconButton
+              size="small"
+              onClick={handleClearSearch}
+              sx={{ p: 0.5 }}
+              aria-label="clear search"
+            >
+              <CloseIcon
+                sx={{
+                  fontSize: 18,
+                  color: theme.palette.text.secondary,
+                }}
+              />
+            </IconButton>
+          ) : (
+            <Box
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.08)"
+                    : "rgba(0, 0, 0, 0.05)",
+                borderRadius: 1,
+                px: 1,
+                py: 0.5,
+                fontSize: { xs: "0.5rem", sm: "0.75rem" },
+                color: theme.palette.text.secondary,
+                display: { sm: "flex", xs: "none" },
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="caption" fontWeight={500}>
+                Ctrl+K
+              </Typography>
+            </Box>
+          )}
         </SearchBar>
 
         <Popper
