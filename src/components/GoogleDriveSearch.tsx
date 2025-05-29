@@ -249,7 +249,7 @@ export default function GoogleDriveSearch({
 
       case KeyMap.ENTER:
         if (selectedIndex >= 0 && selectedIndex < searchResults.length) {
-          handleItemClick(searchResults[selectedIndex].subject.abbreviation);
+          handleItemClick(searchResults[selectedIndex].subject.abbreviation, searchResults[selectedIndex].semester.index);
         }
         break;
 
@@ -291,7 +291,8 @@ export default function GoogleDriveSearch({
   const handleItemClick = (abbreviation: string, semesterIndex: number) => {
     // Set currentSemester in localStorage
     localStorage.setItem("currentSemester", semesterIndex.toString());
-    
+    router.push(`/subjects/${abbreviation}`);
+
     // Close the search and clear the query
     setIsOpen(false);
     setSearchQuery("");
@@ -402,7 +403,7 @@ export default function GoogleDriveSearch({
                     >
                       <SearchResultItem
                         selected={index === selectedIndex}
-                        component="div" // Change to div since it's wrapped in Link
+                        slots={{ root: 'div' }} // Using slots API instead of deprecated component prop
                       >
                         <Box sx={{ width: "100%" }}>
                           <Box
