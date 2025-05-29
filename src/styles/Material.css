@@ -64,7 +64,7 @@
 
 .Material_container::-webkit-scrollbar-track {
   /* make it fit the theme  */
-  background-color: #1e1e1e;
+  background-color: var(--scrollbar-track-bg, #f1f1f1);
   border-radius: 3px;
 }
 
@@ -151,4 +151,11 @@
   75% {
     transform: translateX(-6px) rotate(-1.2deg);
   }
+}
+
+body.light {
+  --scrollbar-track-bg: #f1f1f1;
+}
+body.dark {
+  --scrollbar-track-bg: #1e1e1e;
 }

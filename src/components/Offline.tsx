@@ -47,7 +47,7 @@ export default function Offline() {
       p={0}
       m={0}
       zIndex={9999}
-      bgcolor={filterPercent > 1 && gift ? "#fff" : "#121212"}
+      bgcolor={filterPercent > 1 && gift ? "#fff" : "#151a2c"}
       // hide the scroll bar from the parent
     >
       <Head>
