@@ -120,15 +120,52 @@ export default function GoogleDriveSearch({
   const [popperWidth, setPopperWidth] = useState<number | null>(null);
   const theme = useTheme();
   const router = useRouter();
+  const [keyboardShortcut, setKeyboardShortcut] = useState<string>("Ctrl+K");
 
-  // Use the search shortcut hook
-  useSearchShortcut({
-    onOpen: () => {
+  // Detect OS for appropriate shortcut display
+  useEffect(() => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                  navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+    setKeyboardShortcut(isMac ? "⌘K" : "Ctrl+K");
+  }, []);
+
+  // Direct keyboard shortcut implementation
+  useEffect(() => {
+    // Ctrl+K or / to open the search dialog
+    const handleSearchShortcut = (e: KeyboardEvent) => {
+      // Check for Ctrl+K (or Cmd+K on Mac)
+      const isCtrlK = (e.ctrlKey || e.metaKey) && (e.code === "KeyK" || e.key.toLowerCase() === 'k');
+      // Check for forward slash
+      const isSlash = e.code === "Slash" || e.key === "/" || e.key === "ظ";
+      
+      // Only trigger when not already in a text input
+      const isInputElement = ['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName || '');
+      
+      if ((isCtrlK || isSlash) && !isInputElement && !isOpen) {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setIsOpen(true);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener("keydown", handleSearchShortcut, { capture: true });
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener("keydown", handleSearchShortcut, { capture: true });
+    };
+  }, [isOpen]);
+  
+  // Auto-focus search input on page load
+  useEffect(() => {
+    // Small timeout to ensure the component is fully rendered
+    const timer = setTimeout(() => {
       inputRef.current?.focus();
-      setIsOpen(true);
-    },
-    isInputFocused: isOpen,
-  });
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Filter results when search query changes
   useEffect(() => {
@@ -300,7 +337,7 @@ export default function GoogleDriveSearch({
               }}
             >
               <Typography variant="caption" fontWeight={500}>
-                Ctrl+K
+                {keyboardShortcut}
               </Typography>
             </Box>
           )}
