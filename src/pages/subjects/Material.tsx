@@ -264,6 +264,9 @@ function Material({
 
   // Handle tab change with transition
   const handleTabChange = (newTab: string) => {
+    // Skip effect if clicking the same tab
+    if (newTab === selectedTab) return;
+    
     setIsTransitioning(true);
 
     // Short timeout to allow fade out before changing data
