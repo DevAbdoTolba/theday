@@ -179,9 +179,77 @@ function Material({
   }, [theme.palette.mode]);
 
   const [selectedTab, setSelectedTab] = useState<string>(tabOptions[0].key);
-
-  // Add state to manage transition
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Improved drag scrolling
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle mouse down event with improved starting position tracking
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
+
+    // Prevent default behavior to avoid text selection
+    e.preventDefault();
+
+    const slider = scrollContainerRef.current;
+    setIsDragging(true);
+    setStartX(e.clientX);
+    setScrollLeft(slider.scrollLeft);
+
+    // Change cursor immediately for better feedback
+    slider.style.cursor = "grabbing";
+  };
+
+  // Handle mouse move with smoother scrolling
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+
+    // Calculate distance moved and update scroll position
+    const slider = scrollContainerRef.current;
+    const x = e.clientX;
+    const distance = x - startX;
+    slider.scrollLeft = scrollLeft - distance;
+  };
+
+  // Clean up on mouse up/leave
+  const handleMouseUp = () => {
+    if (!scrollContainerRef.current) return;
+
+    setIsDragging(false);
+    scrollContainerRef.current.style.cursor = "grab";
+  };
+
+  // Ensure we clean up if mouse leaves the container during drag
+  const handleMouseLeave = () => {
+    if (isDragging && scrollContainerRef.current) {
+      setIsDragging(false);
+      scrollContainerRef.current.style.cursor = "grab";
+    }
+  };
+
+  // Add and remove event listeners with proper cleanup
+  useEffect(() => {
+    const slider = scrollContainerRef.current;
+    if (!slider) return;
+
+    const handleMouseUpGlobal = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        slider.style.cursor = "grab";
+      }
+    };
+
+    document.addEventListener("mouseup", handleMouseUpGlobal);
+    document.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUpGlobal);
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [isDragging, startX, scrollLeft]);
 
   // Filter data based on selected tab
   const filteredData: DataMap =
@@ -210,6 +278,10 @@ function Material({
     <>
       {/* Tab Bar */}
       <Box
+        ref={scrollContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         sx={{
           display: "flex",
           gap: 2,
@@ -222,6 +294,10 @@ function Material({
           },
           scrollbarWidth: "none", // Firefox
           msOverflowStyle: "none", // IE and Edge
+          cursor: "grab",
+          userSelect: "none", // Prevent text selection during drag
+          WebkitUserSelect: "none", // For Safari
+          MozUserSelect: "none", // For Firefox
         }}
       >
         <Box
