@@ -92,21 +92,23 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
     setStoredDialogOpen(false);
   };
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLDivElement>) => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (loading) return;
-    const formData = new FormData(event.currentTarget.querySelector('form') as HTMLFormElement);
-    const formJson = Object.fromEntries((formData as any).entries());
+    
+    // The event.currentTarget is the form itself
+    const formElement = event.currentTarget;
+    const keyInput = formElement.elements.namedItem('key') as HTMLInputElement;
+    const keyValue = keyInput?.value;
+    
+    setKey(keyValue);
 
-    const key = formJson.key;
-    setKey(key);
-
-    if (!key) {
+    if (!keyValue) {
       setError("Key is required");
       return;
     }
 
-    if (!key.match(/^[0-9a-fA-F]{24}$/)) {
+    if (!keyValue.match(/^[0-9a-fA-F]{24}$/)) {
       setError(
         language === "en" ? "Key is invalid" : "يرجى إدخال المفتاح بشكل صحيح"
       );
@@ -118,13 +120,13 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
     const storedClasses =
       JSON.parse(localStorage.getItem("classes") as string) || [];
     const isStored = storedClasses.some(
-      (storedClass: any) => storedClass.id === key
+      (storedClass: any) => storedClass.id === keyValue
     );
 
     if (isStored) {
       setStoredDialogOpen(true);
       setKeyClass(
-        storedClasses.find((storedClass: any) => storedClass.id === key)
+        storedClasses.find((storedClass: any) => storedClass.id === keyValue)
       );
       // setClassName(
       //   storedClasses.find((storedClass: any) => storedClass.id === key).class
