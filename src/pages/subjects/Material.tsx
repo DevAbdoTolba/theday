@@ -301,7 +301,7 @@ function Material({
           userSelect: "none", // Prevent text selection during drag
           WebkitUserSelect: "none", // For Safari
           MozUserSelect: "none", // For Firefox
-
+          width: "fit-content",
           mx: {
             sm: "2ch",
             xs: "0", // Responsive margin
