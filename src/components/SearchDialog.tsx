@@ -143,8 +143,8 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               width: { xs: '100vw', sm: '50vw' },  // full width on mobile, custom on desktop
               maxWidth: { xs: '90vw', sm: '95vw' },
               minWidth: {xs: "100vw" ,sm:'320px'},
-              minHeight: { xs: '100dvh', sm: 'auto' }, // full height on mobile, auto on desktop
-              height: { xs: '100vh', sm: 'auto' }, // full height on mobile
+              minHeight: { xs: '100dvh', sm: '90dvh' }, // full height on mobile, auto on desktop
+              height: { xs: '100vh', sm: '90dvh' }, // full height on mobile
               backgroundColor: theme.palette.background.paper ,
               backgroundImage: 'none',
               position: { xs: 'fixed', sm: 'absolute' },
