@@ -1,6 +1,15 @@
 {
   "extends": [
-    "next/core-web-vitals",
-    "plugin:storybook/recommended"
+    "next/core-web-vitals"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.stories.*",
+        "**/.storybook/**",
+        "src/stories/**"
+      ],
+      "extends": ["plugin:storybook/recommended"]
+    }
   ]
 }

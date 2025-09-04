@@ -5,6 +5,10 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV !== "development",
   },
+  eslint: {
+    // Don't run ESLint during builds (Vercel runs separate checks)
+    ignoreDuringBuilds: true,
+  },
 };
 
 const withPWA = require("next-pwa")({
