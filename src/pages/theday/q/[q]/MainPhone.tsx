@@ -10,6 +10,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Link from "next/link";
+import { setItem } from "@/src/utils/storage";
 
 interface Props {
   search: string;
@@ -128,12 +129,8 @@ function MainPhone({ search, currentSemester }: Props) {
                       >
                         <Box
                           onClick={() => {
-                            // redirect
-
-                            localStorage.setItem(
-                              "currentSemester",
-                              index.toString()
-                            );
+                            // Remember chosen semester
+                            setItem("currentSemester", index.toString());
                           }}
                           component={Link}
                           href={`/subjects/${subjects.abbreviation}`}

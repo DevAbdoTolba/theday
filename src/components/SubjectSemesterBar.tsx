@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { getItem, setItem, hasItem } from "../utils/storage";
 
 interface SubjectSemesterBarProps {
   subject: string;
@@ -23,20 +24,33 @@ export default function SubjectSemesterBar({ subject, semester, subjectFullName 
     : subject;
 
   // Function to show the snackbar
-  const handleClick = () => {
+  const handleClick = React.useCallback(() => {
     if (semester > 0) {
       setOpen(true);
     }
-  };
+  }, [semester]);
+
+  const showPromptOnNextInteraction = React.useCallback(() => {
+    // Wait for any mouse click, then open after small delay
+    document.addEventListener(
+      "mousedown",
+      () => {
+        setTimeout(() => {
+          handleClick();
+        }, 4000);
+      },
+      { once: true }
+    );
+  }, [handleClick]);
 
   React.useEffect(() => {
-    const currentSem = parseInt(localStorage.getItem("currentSemester") || "-1");
+    const currentSem = parseInt(getItem("currentSemester") || "-1");
     setCurrentSemester(currentSem);
 
     // Check if there is a semester in local storage
     const noSemesterSet = 
-      parseInt(localStorage.getItem("semester") || "-1") === -1 || 
-      !localStorage.hasOwnProperty("semester");
+      parseInt(getItem("semester") || "-1") === -1 || 
+      !hasItem("semester");
 
     console.log(
       "semester : " + noSemesterSet + "\ncurrentSemester : " + currentSem
@@ -44,25 +58,14 @@ export default function SubjectSemesterBar({ subject, semester, subjectFullName 
 
     // If the semester is not set (-1) or no semester stored, and currentSemester is valid
     if (noSemesterSet && currentSem) {
-      // Wait for any mouse click or keyboard press
-      document.addEventListener(
-        "mousedown",
-        () => {
-          console.log("called");
-
-          setTimeout(() => {
-            handleClick();
-          }, 4000);
-        },
-        { once: true }
-      );
+      showPromptOnNextInteraction();
     }
-  }, [semester]);
+  }, [semester, showPromptOnNextInteraction]);
 
   // Handle Yes response to the first prompt
   const handleYes = () => {
     // Set current semester to the passed semester number
-    localStorage.setItem("semester", semester.toString());
+  setItem("semester", semester.toString());
     setOpen(false);
   };
 
@@ -81,11 +84,11 @@ export default function SubjectSemesterBar({ subject, semester, subjectFullName 
   const handleSecondYes = () => {
     // Create a custom semester with the subject
     const customSemesterSubjects = JSON.stringify([subject]);
-    localStorage.setItem("customSemesterSubjects", customSemesterSubjects);
-    localStorage.setItem("customSemesterName", "Special for you 🌹");
+  setItem("customSemesterSubjects", customSemesterSubjects);
+  setItem("customSemesterName", "Special for you 🌹");
     
     // Set a custom semester flag so the app knows this is not a standard semester
-    localStorage.setItem("semester", "-2"); // Use -2 to indicate custom special semester
+  setItem("semester", "-2"); // Use -2 to indicate custom special semester
     
     // Close the snackbar
     setAskAgain(false);
@@ -110,7 +113,7 @@ export default function SubjectSemesterBar({ subject, semester, subjectFullName 
           },
         }}
         open={open}
-        onClose={(event, reason) => {
+  onClose={(event: React.SyntheticEvent | Event, reason?: string) => {
           if (reason === 'clickaway') {
             return; // Prevent closing on click away
           }
@@ -153,7 +156,7 @@ export default function SubjectSemesterBar({ subject, semester, subjectFullName 
           },
         }}
         open={askAgain}
-        onClose={(event, reason) => {
+  onClose={(event: React.SyntheticEvent | Event, reason?: string) => {
           if (reason === 'clickaway') {
             return; // Prevent closing on click away
           }

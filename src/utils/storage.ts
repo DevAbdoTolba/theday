@@ -38,3 +38,18 @@ export function setJSON(key: string, value: unknown): void {
     // ignore
   }
 }
+
+// Remove a key from storage safely
+export function removeItem(key: string): void {
+  if (!isBrowser) return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+// Check if a key exists in storage
+export function hasItem(key: string): boolean {
+  return getItem(key) !== null;
+}

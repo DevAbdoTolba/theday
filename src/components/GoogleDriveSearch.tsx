@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import useSearchShortcut from "../hooks/useSearchShortcut";
 import { useSearch } from "../context/SearchContext";
+import { setItem } from "@/src/utils/storage";
 
 interface Subject {
   name: string;
@@ -49,7 +50,7 @@ enum KeyMap {
   ESCAPE = "Escape",
 }
 
-const SearchBar = styled(Paper)(({ theme }) => ({
+const SearchBar = styled(Paper)(({ theme }: { theme: any }) => ({
   position: "relative",
   display: "flex",
   alignItems: "center",
@@ -71,7 +72,7 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({ theme }: { theme: any }) => ({
   width: "100%",
   "& .MuiInputBase-input": {
     padding: "8px 8px 8px 0",
@@ -86,7 +87,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const SearchResultItem = styled(ListItem)<{ selected?: boolean }>(
-  ({ theme, selected }) => ({
+  ({ theme, selected }: { theme: any; selected?: boolean }) => ({
     padding: "8px 16px",
     cursor: "pointer",
     backgroundColor: selected
@@ -235,14 +236,14 @@ export default function GoogleDriveSearch({
     switch (e.key) {
       case KeyMap.ARROW_DOWN:
         e.preventDefault();
-        setSelectedIndex((prev) =>
+  setSelectedIndex((prev: number) =>
           prev < searchResults.length - 1 ? prev + 1 : 0
         );
         break;
 
       case KeyMap.ARROW_UP:
         e.preventDefault();
-        setSelectedIndex((prev) =>
+  setSelectedIndex((prev: number) =>
           prev > 0 ? prev - 1 : searchResults.length - 1
         );
         break;
@@ -289,8 +290,8 @@ export default function GoogleDriveSearch({
   };
 
   const handleItemClick = (abbreviation: string, semesterIndex: number) => {
-    // Set currentSemester in localStorage
-    localStorage.setItem("currentSemester", semesterIndex.toString());
+    // Remember chosen semester
+    setItem("currentSemester", semesterIndex.toString());
     router.push(`/subjects/${abbreviation}`);
 
     // Close the search and clear the query
@@ -391,7 +392,7 @@ export default function GoogleDriveSearch({
           >
             {searchResults.length > 0 ? (
               <List ref={listRef} sx={{ py: 0.5 }}>
-                {searchResults.map((result, index) => (
+                {searchResults.map((result: { semester: Semester; subject: Subject }, index: number) => (
                   <React.Fragment
                     key={`${result.semester.index}-${result.subject.abbreviation}`}
                   >

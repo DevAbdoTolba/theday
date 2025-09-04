@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext, useRef } from "react";
+import type React from "react";
 import {
   Box,
   Grid,
@@ -34,6 +35,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 import { DataContext } from "../../../../context/TranscriptContext";
+import { getItem, setItem, removeItem } from "@/src/utils/storage";
 
 interface Props {
   currentSemester: number;
@@ -106,11 +108,11 @@ export default function CurrentSemester({
   const pillHoverBg = theme.palette.mode === "dark" ? "#2563eb" : "#bcd0fa";
 
   useEffect(() => {
-    const custom = localStorage.getItem("customSemesterSubjects");
-    const customName = localStorage.getItem("customSemesterName");
+    const custom = getItem("customSemesterSubjects");
+    const customName = getItem("customSemesterName");
     
     // Check and initialize firstTimeCustomize flag
-    const firstTimeCustomize = localStorage.getItem("firstTimeCustomizeSemester");
+  const firstTimeCustomize = getItem("firstTimeCustomizeSemester");
     
     if (!firstTimeCustomize) {
       // If flag doesn't exist in localStorage, this is first time - set the state to true
@@ -122,7 +124,7 @@ export default function CurrentSemester({
     }
     
     // Check if this is a special custom semester
-    const semesterStatus = localStorage.getItem("semester");
+  const semesterStatus = getItem("semester");
     const isSpecialSemester = semesterStatus === "-2";
     setIsSpecialCustomSemester(isSpecialSemester);
     
@@ -132,7 +134,7 @@ export default function CurrentSemester({
       // Default name for special custom semester
       setSemesterName("Special for you 🌹");
       // Save it to localStorage for consistency
-      localStorage.setItem("customSemesterName", "Special for you 🌹");
+  setItem("customSemesterName", "Special for you 🌹");
     } else {
       setSemesterName(`Semester ${currentSemester}`);
     }// Check if we're in a special custom semester
@@ -155,7 +157,7 @@ export default function CurrentSemester({
       }
       
       // If this is our special custom semester, make sure the semester name is set correctly
-      if (isSpecialSemester && !localStorage.getItem("customSemesterName")) {
+  if (isSpecialSemester && !getItem("customSemesterName")) {
         setSemesterName("Special for you 🌹");
       }
     } else {
@@ -191,9 +193,7 @@ export default function CurrentSemester({
   // Show tooltip after delay for customize icon animation
   useEffect(() => {
     // check local stroage for first time customize
-    const firstTimeCustomize = localStorage.getItem(
-      "firstTimeCustomizeSemester"
-    );
+    const firstTimeCustomize = getItem("firstTimeCustomizeSemester");
     // If the customize icon is not in the DOM yet, we can't show the tooltip
     if (firstTimeCustomize === "shown") return;
     // Show tooltip after 4 seconds
@@ -212,8 +212,8 @@ export default function CurrentSemester({
   }, []);
 
   const handleResetCustomSemester = () => {
-    localStorage.removeItem("customSemesterSubjects");
-    localStorage.removeItem("customSemesterName");
+    removeItem("customSemesterSubjects");
+    removeItem("customSemesterName");
     setSemesterName(`Semester ${currentSemester}`);
     setHasCustomSubjects(false);
     setEmptyCustomSubjects(false);
@@ -236,7 +236,7 @@ export default function CurrentSemester({
       setSemesterName(`Semester ${currentSemester}`);
     }
 
-    localStorage.setItem(
+    setItem(
       "customSemesterName",
       semesterName.trim() || `Semester ${currentSemester}`
     );
@@ -248,12 +248,12 @@ export default function CurrentSemester({
       // First time user is accessing customize feature
       setHelpDialogOpen(true);
       // Mark that user has seen the help dialog
-      localStorage.setItem("firstTimeCustomizeSemester", "shown");
+  setItem("firstTimeCustomizeSemester", "shown");
       setIsFirstTimeCustomize(false);
     } else {
       // Regular customize flow
       if (subjects) {
-        const currentSelection = subjects.map(s => s.abbreviation);
+        const currentSelection = subjects.map((s: { name: string; abbreviation: string }) => s.abbreviation);
         setSelectedCourses(currentSelection);
         setInitialSelectedCourses(currentSelection); // Save initial selection for comparison
       }
@@ -312,11 +312,11 @@ export default function CurrentSemester({
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <TextField
                 value={semesterName}
-                onChange={(e) => setSemesterName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSemesterName(e.target.value)}
                 size="small"
                 variant="standard"
                 autoFocus
-                onKeyDown={(e) => {
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") {
                     handleSaveSemesterName();
                   }
@@ -621,10 +621,10 @@ export default function CurrentSemester({
                 }}
                 onClick={() => {
                   handleClick();
-                  localStorage.setItem("semester", "-1");
-                  localStorage.removeItem("customSemesterName");
-                  localStorage.removeItem("customSemesterSubjects");
-                  localStorage.removeItem("firstTimeCustomizeSemester");
+                  setItem("semester", "-1");
+                  removeItem("customSemesterName");
+                  removeItem("customSemesterSubjects");
+                  removeItem("firstTimeCustomizeSemester");
                 }}
               >
                 <RemoveCircleOutlineIcon
@@ -662,7 +662,7 @@ export default function CurrentSemester({
             </Alert>
           ) : (
             <Grid container spacing={1}>
-              {subjects?.map((subject, idx) => (
+              {subjects?.map((subject: { name: string; abbreviation: string }, idx: number) => (
                 <Grid item xs={12} sm={6} key={idx}>
                   <Tooltip
                     title={subject.name}
@@ -854,7 +854,7 @@ export default function CurrentSemester({
         >
           <Box sx={{ maxHeight: 420, overflowY: "auto" }}>
             {Object.entries(
-              allCourses.reduce((acc, course) => {
+              allCourses.reduce((acc: { [key: number]: typeof allCourses }, course: { name: string; abbreviation: string; semester: number }) => {
                 acc[course.semester] = acc[course.semester] || [];
                 acc[course.semester].push(course);
                 return acc;
@@ -894,7 +894,7 @@ export default function CurrentSemester({
                     Semester {semester}
                   </Box>
                   <Box sx={{ pl: 1, pt: 1 }}>
-                    {courses.map((course) => (
+                    {(courses as typeof allCourses).map((course: { name: string; abbreviation: string; semester: number }) => (
                       <FormControlLabel
                         key={course.abbreviation + course.semester}
                         control={
@@ -902,12 +902,12 @@ export default function CurrentSemester({
                             checked={selectedCourses.includes(
                               course.abbreviation
                             )}
-                            onChange={(_, checked) => {
-                              setSelectedCourses((prev) =>
+                            onChange={(_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+                              setSelectedCourses((prev: string[]) =>
                                 checked
                                   ? [...prev, course.abbreviation]
                                   : prev.filter(
-                                      (abbr) => abbr !== course.abbreviation
+                                      (abbr: string) => abbr !== course.abbreviation
                                     )
                               );
                             }}
@@ -969,11 +969,11 @@ export default function CurrentSemester({
               // Check if the selection has actually changed
               const hasSelectionChanged = 
                 selectedCourses.length !== initialSelectedCourses.length || 
-                selectedCourses.some(course => !initialSelectedCourses.includes(course)) ||
-                initialSelectedCourses.some(course => !selectedCourses.includes(course));
+                selectedCourses.some((course: string) => !initialSelectedCourses.includes(course)) ||
+                initialSelectedCourses.some((course: string) => !selectedCourses.includes(course));
                 
               if (hasSelectionChanged) {
-                localStorage.setItem(
+                setItem(
                   "customSemesterSubjects",
                   JSON.stringify(selectedCourses)
                 );
@@ -1041,10 +1041,10 @@ export default function CurrentSemester({
       <Dialog
         open={helpDialogOpen}
         onClose={() => {
-          setHelpDialogOpen(false);
-          if (isFirstTimeCustomize) {
+            setHelpDialogOpen(false);
+            if (isFirstTimeCustomize) {
             if (subjects) {
-              setSelectedCourses(subjects.map((s) => s.abbreviation));
+              setSelectedCourses(subjects.map((s: { name: string; abbreviation: string }) => s.abbreviation));
             }
             setCustomizeOpen(true);
           }
@@ -1216,7 +1216,7 @@ export default function CurrentSemester({
               onClick={() => {
                 setHelpDialogOpen(false);
                 if (subjects) {
-                  setSelectedCourses(subjects.map((s) => s.abbreviation));
+                  setSelectedCourses(subjects.map((s: { name: string; abbreviation: string }) => s.abbreviation));
                 }
                 setCustomizeOpen(true);
               }}

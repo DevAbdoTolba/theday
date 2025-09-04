@@ -14,6 +14,7 @@ import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
+import { getItem, setItem } from "../../utils/storage";
 
 import Header from "../../components/Header";
 import NoData from "../../components/NoData";
@@ -65,17 +66,16 @@ export default function SubjectPage({
   const { transcript } = useContext(DataContext);
   const router = useRouter();
 
-  const [showDrawer, setShowDrawer] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("showDrawer") === "true";
-    }
-    return true;
-  });
+  const [showDrawer, setShowDrawer] = useState<boolean>(true);
 
-  const theme = useTheme();  useEffect(() => {
+  const theme = useTheme();
+  useEffect(() => {
+    // Initialize showDrawer from storage on mount
+    const storedShow = getItem("showDrawer");
+    if (storedShow !== null) setShowDrawer(storedShow === "true");
     // Check if the user has already set a semester
-    const semesterInStorage = localStorage.getItem("semester");
-    const currentSemester = localStorage.getItem("currentSemester");
+    const semesterInStorage = getItem("semester");
+    const currentSemester = getItem("currentSemester");
     
     // If we have a current semester value but the user hasn't chosen if this is their semester yet
     if (currentSemester && (!semesterInStorage || semesterInStorage === "-1" || semesterInStorage === "-2")) {
@@ -87,8 +87,8 @@ export default function SubjectPage({
     // Find the full subject name from the transcript data
     if (transcript && "semesters" in transcript) {
       // Look through all semesters and find the subject with matching abbreviation
-      const allSubjects = transcript.semesters.flatMap(sem => sem.subjects);
-      const foundSubject = allSubjects.find(sub => sub.abbreviation === subject);
+      const allSubjects = transcript.semesters.flatMap((sem: any) => sem.subjects);
+      const foundSubject = allSubjects.find((sub: any) => sub.abbreviation === subject);
       
       if (foundSubject && foundSubject.name) {
         setSubjectFullName(foundSubject.name);
@@ -96,7 +96,7 @@ export default function SubjectPage({
     }
     
     // If initialData is not available, fetch it on the client side
-    const loadData = async () => {
+  const loadData = async () => {
       // setSubjectLoading(true);
       const cachedSubject = await getSubjectByName(subject);
 
@@ -851,15 +851,16 @@ export default function SubjectPage({
 // }
 // );
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "ArrowLeft") {
-        setShowDrawer((prev) => {
+    setShowDrawer((prev: boolean) => {
           const newState = !prev;
-          localStorage.setItem("showDrawer", newState.toString());
+      setItem("showDrawer", newState.toString());
           return newState;
         });
       }
-    };    addEventListener("keydown", handleKeyDown);
+    };
+    addEventListener("keydown", handleKeyDown);
 
     return () => {
       removeEventListener("keydown", handleKeyDown);

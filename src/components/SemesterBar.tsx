@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { getItem, setItem, removeItem } from "@/src/utils/storage";
 
 export default function SimpleSnackbar() {
   const [open, setOpen] = React.useState(false);
@@ -12,21 +13,21 @@ export default function SimpleSnackbar() {
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
-    const currentSemester = parseInt(localStorage.getItem("currentSemester")!);
-    setCurrentSemester(currentSemester);
+  const current = parseInt(getItem("currentSemester") || "0");
+  setCurrentSemester(current);
     // only setTimeout if currentSemester is not -1 or null
 
     // check if there is a semester in local storage
     const semester =
-      parseInt(localStorage.getItem("semester")!) == -1 ||
-      !localStorage.hasOwnProperty("semester");
+      parseInt(getItem("semester") || "-1") === -1 ||
+      getItem("semester") === null;
 
     console.log(
-      "semester : " + semester + "\ncurrentSemester : " + currentSemester
+      "semester : " + semester + "\ncurrentSemester : " + current
     );
 
     // if the semester that is in the main page is not set (-1) or there is no error so the currentSemester was set correctly
-    if (semester && currentSemester)
+  if (semester && current)
       // wait for any mouse click or keyboard press
       document.addEventListener(
         "mousedown",
@@ -46,7 +47,7 @@ export default function SimpleSnackbar() {
 
   const handelYes = (event: React.SyntheticEvent | Event, reason?: string) => {
     // set current semester to currentSemester
-    localStorage.setItem("semester", currentSemester.toString());
+    setItem("semester", currentSemester.toString());
     if (reason === "clickaway") {
       return;
     }
@@ -59,7 +60,7 @@ export default function SimpleSnackbar() {
     setOpen(false);
     
     // Set a timer to show the second prompt after 5 seconds
-    const timeoutId = setTimeout(() => {
+  const timeoutId = setTimeout(() => {
       setAskAgain(true);
     }, 5000); // 5 seconds delay
     
@@ -69,12 +70,12 @@ export default function SimpleSnackbar() {
   const handleSecondYes = () => {
     // Create a custom semester with just a placeholder
     // Since this is the general semester bar without a specific subject
-    const customSemesterSubjects = JSON.stringify([]);
-    localStorage.setItem("customSemesterSubjects", customSemesterSubjects);
-    localStorage.setItem("customSemesterName", "Special for you 🌹");
+  const customSemesterSubjects = JSON.stringify([]);
+  setItem("customSemesterSubjects", customSemesterSubjects);
+  setItem("customSemesterName", "Special for you 🌹");
     
     // Set a custom semester flag
-    localStorage.setItem("semester", "-2"); // Use -2 to indicate custom special semester
+  setItem("semester", "-2"); // Use -2 to indicate custom special semester
     setAskAgain(false);
     
     // Show confirmation message
@@ -95,8 +96,8 @@ export default function SimpleSnackbar() {
       return;
     }
 
-    setOpen(false);
-    setAskAgain(false);
+  setOpen(false);
+  setAskAgain(false);
     if (timer) {
       clearTimeout(timer);
     }
@@ -153,7 +154,7 @@ export default function SimpleSnackbar() {
   //   after 4 seconds, show the snackbar
   return (
     <>
-      {/* <Snackbar
+      <Snackbar
         sx={{
           "& .MuiPaper-root": {
             bgcolor: "#1e293b",
@@ -161,7 +162,10 @@ export default function SimpleSnackbar() {
           },
         }}
         open={open}
-        onClose={handleClose}
+        onClose={(event: React.SyntheticEvent | Event, reason?: string) => {
+          if (reason === "clickaway") return;
+          handleClose(event, reason);
+        }}
         message={"Are you in semester " + currentSemester + " ?"}
         action={
           <React.Fragment>
@@ -169,28 +173,47 @@ export default function SimpleSnackbar() {
               color="success"
               size="small"
               onClick={handelYes}
-              sx={{
-                fontWeight: "bolder",
-              }}
+              sx={{ fontWeight: "bolder" }}
             >
               Yes
             </Button>
-            <IconButton
-              size="small"
-              aria-label="close"
-              color="inherit"
-              onClick={handleNo}
-            >
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleNo}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </React.Fragment>
         }
         transitionDuration={600}
-        autoHideDuration={20000}
+        autoHideDuration={null}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       />
-       */}
 
+      <Snackbar
+        sx={{
+          "& .MuiPaper-root": {
+            bgcolor: "#1e293b",
+            color: "#fff",
+          },
+        }}
+        open={askAgain}
+        onClose={(event: React.SyntheticEvent | Event, reason?: string) => {
+          if (reason === "clickaway") return;
+          handleClose(event, reason);
+        }}
+        message={"Would you like to create a special custom semester instead?"}
+        action={
+          <React.Fragment>
+            <Button color="success" size="small" onClick={handleSecondYes} sx={{ fontWeight: "bolder" }}>
+              Yes
+            </Button>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+        transitionDuration={600}
+        autoHideDuration={null}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      />
     </>
   );
 }

@@ -22,7 +22,7 @@ import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { getJSON } from "../utils/storage";
+import { getJSON, getItem } from "../utils/storage";
 
 interface Data {
   id: string;
@@ -275,7 +275,7 @@ export default function Header({
               // add a default selected option
               onChange={(e: any) => {
                 // setLoadingTranscript(true);
-                if (localStorage.getItem(e.target.value) === null) {
+                if (getItem(e.target.value) === null) {
                   setLoadingTranscript(true);
                 }
                 setClassName(e.target.value);

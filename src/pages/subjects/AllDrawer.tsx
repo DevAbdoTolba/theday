@@ -21,6 +21,7 @@ import {
 import subjectsData from "../../Data/data.json";
 import Link from "@mui/material/Link";
 import nextLink from "next/link";
+import { getJSON, getItem } from "@/src/utils/storage";
 
 const drawerWidth = 200;
 
@@ -41,20 +42,18 @@ export default function AllDrawer({
 }: Props) {
   const [transcript, setTranscript] = React.useState<any>(null);
   React.useEffect(() => {
-    setTranscript(JSON.parse(localStorage.getItem("transcript") as string));
-    console.log("Transcript in AllDrawer:", JSON.parse(localStorage.getItem("transcript") as string));
+    setTranscript(getJSON("transcript", null));
   }, []);
 
-  let currentSemester = -1;
-  let showDrawerFromLocalStorage: undefined | boolean = undefined;
-  if (typeof window !== "undefined") {
-    currentSemester = localStorage.getItem("currentSemester")
-      ? parseInt(localStorage.getItem("currentSemester") as string)
-      : -1;
+  const currentSemester = React.useMemo(() => {
+    const stored = getItem("currentSemester");
+    return stored ? parseInt(stored) : -1;
+  }, []);
 
-    showDrawerFromLocalStorage =
-      localStorage.getItem("showDrawer") == "true" ? true : false;
-  }
+  const showDrawerFromLocalStorage: boolean | undefined = React.useMemo(() => {
+    const stored = getItem("showDrawer");
+    return stored ? stored === "true" : undefined;
+  }, []);
 
   const [expanded, setExpanded] = React.useState<string | false>(
     currentSemester !== -1 ? "panel" + currentSemester : ""
@@ -68,8 +67,8 @@ export default function AllDrawer({
     };
 
   // when clicking on the side drawer, send a messge snakbar syaing click shift + left arrow
-  const handleDrawerClick = (e: any) => {
-    setClicked((prev) => {
+  const handleDrawerClick = (e: React.MouseEvent) => {
+    setClicked((prev: number) => {
       return prev + 1;
     });
     if (clicked === 2 && !showDrawerFromLocalStorage) {
@@ -151,7 +150,7 @@ export default function AllDrawer({
               variant={showDrawer ? "permanent" : "temporary"}
               anchor="left"
             >
-              {transcript && 'semesters' in transcript && transcript.semesters.map((item: any, index: any) => (
+              {transcript && "semesters" in transcript && transcript.semesters.map((item: any, index: number) => (
                 <Accordion
                   key={index}
                   expanded={expanded === "panel" + index}
@@ -192,7 +191,7 @@ export default function AllDrawer({
                       },
                     }}
                   >
-                    {item?.subjects.map((item: any, index: any) => (
+                    {item?.subjects.map((item: any, index: number) => (
                       <Box
                         key={index}
                         display={"flex"}
@@ -242,7 +241,7 @@ export default function AllDrawer({
               },
             }}
             open={open}
-            onClose={(e, reason) => {
+            onClose={(e: React.SyntheticEvent | Event, reason?: string) => {
               if (reason === "clickaway") {
                 return;
               }

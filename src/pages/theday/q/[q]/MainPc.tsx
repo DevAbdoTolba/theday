@@ -6,6 +6,7 @@ import Grid from "@mui/material/Grid";
 import { Tooltip, Typography, Card, CardContent } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import Link from "next/link";
+import { setItem } from "@/src/utils/storage";
 
 interface Props {
   search: string;
@@ -161,9 +162,8 @@ function SemesterCard({ semester }: SemesterCardProps) {
                     textDecoration: "none",
                   }}
                   onClick={() => {
-                    // redirect
-
-                    localStorage.setItem("currentSemester", semester.index.toString());
+                    // Remember chosen semester
+                    setItem("currentSemester", semester.index.toString());
                   }}
                   component={Link}
                   href={`/subjects/${subject.abbreviation}`}
