@@ -22,6 +22,7 @@ import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { getJSON } from "../utils/storage";
 
 interface Data {
   id: string;
@@ -137,6 +138,7 @@ export default function Header({
   const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
   const [openKeyDialog, setOpenKeyDialog] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { setLoadingTranscript, className, setClassName } =
     React.useContext(DataContext);
   const router = useRouter();
@@ -144,52 +146,30 @@ export default function Header({
   const colorMode = React.useContext(ColorModeContext);
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  shortCutActivate = shortCutActivate || false;
 
+  // Load classes and resolve active q when className changes
   React.useEffect(() => {
-    // const classNameLocally = (localStorage.getItem("className") as string) || "";
-    const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
+    const storedClasses = getJSON<any[]>("classes", []);
+    setClasses(storedClasses);
+    setQ(storedClasses.find((c: any) => c.class === className)?.id || "");
+  }, [className]);
 
-    // setClassName(classNameLocally);
-    setClasses(classes);
-    setQ(classes.find((c: any) => c.class === className)?.id || "");
-
-    // const classToStore = JSON.parse(localStorage.getItem("classes") as string);
-    // setClasses(classToStore);
-    // const className = localStorage.getItem("className") as string;
-    // if (classToStore?.length > 0) {
-    //   // search for which class is stored and get the id
-    //   console.log("INSIDE IF");
-    //   const classId = classToStore.find((e: any) => e === className)?.id;
-    //   console.log("classId", classId);
-    //   console.log("🚀 ~ React.useEffect ~ className:", className);
-    //   setClassName(classId);
-    // } else {
-    //   setClassName("1");
-
-    // Ctrl K to open the search dialog
+  // Keyboard shortcut listener
+  React.useEffect(() => {
     const handleCtrlK = (e: KeyboardEvent) => {
       if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
         e?.preventDefault();
-        console.log("ctrl+k");
         setOpen(true);
       }
     };
-
-    if (shortCutActivate === true)
+    if (shortCutActivate) {
       window.addEventListener("keydown", handleCtrlK);
-
+    }
     return () => {
       window.removeEventListener("keydown", handleCtrlK);
     };
-    // }
-  }, []);
-
-  React.useEffect(() => {
-    console.log("🚀 ~ React.useEffect ~ className", className);
-  }, [className]);
-
-  const [open, setOpen] = useState(false);
-  shortCutActivate = shortCutActivate || false;
+  }, [shortCutActivate]);
 
   return (
     <Box

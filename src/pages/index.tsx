@@ -1,22 +1,19 @@
-import React from "react";
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
-import { useEffect } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { getItem, getJSON, isBrowser } from "../utils/storage";
 
 export default function Home() {
-  // redirect to theday
-  React.useEffect(() => {
-    const className = localStorage.getItem("className");
-    const classes = JSON.parse(localStorage.getItem("classes") as string);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isBrowser) return;
+    const className = getItem("className");
+    const classes = getJSON<any[]>("classes", []);
     const Class = classes?.find((c: any) => c?.class === className);
-    if (Class && className && classes) {
-      window.location.href = `/theday/q/${Class.id}`;
-    } else {
-      window.location.href = "/theday/q/default";
-    }
-  });
-  return <></>;
+    const target = Class && className ? `/theday/q/${Class.id}` : "/theday/q/default";
+    // Use router to keep SPA behavior
+    router.replace(target);
+  }, [router]);
+
+  return null;
 }

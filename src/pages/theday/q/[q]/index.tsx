@@ -10,7 +10,6 @@ import React, {
 import Header from "../../../../components/Header";
 import Footer from "../../../../components/Footer";
 import GoogleDriveSearch from "../../../../components/GoogleDriveSearch";
-import { SearchProvider } from "../../../../context/SearchContext";
 
 import CurrentSemester from "./CurrentSemester";
 import Skeleton from "@mui/material/Skeleton";
@@ -25,6 +24,7 @@ import Offline from "../../../../components/Offline";
 import { offlineContext } from "../../../_app";
 import { DataContext } from "../../../../context/TranscriptContext";
 import { useTheme } from "@mui/material/styles";
+import { getItem } from "../../../../utils/storage";
 
 const Main = lazy(() => import("./Main"));
 
@@ -35,13 +35,7 @@ const Alert = forwardRef(function Alert(props: any, ref: any) {
 function App() {
   const { transcript, loadingTranscript, error } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
-  const [currentSemester, setCurrentSemester] = useState(() => {
-    const semesterValue = localStorage.getItem("semester");
-
-    const semester = semesterValue ? JSON.parse(semesterValue) : null;
-
-    return semester !== null ? semester : -1; // Default to -1 if no semester is set
-  });
+  const [currentSemester, setCurrentSemester] = useState(-1);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [upTo, setUpTo] = useState(0);
@@ -68,14 +62,16 @@ function App() {
     setOpen(false);
   };
   useEffect(() => {
-    const semesterValue = localStorage.getItem("semester");
-    const semester = semesterValue ? JSON.parse(semesterValue) : null;
+    const semesterRaw = getItem("semester");
+    const semester = semesterRaw ? parseInt(semesterRaw) : null;
+    
     console.log(transcript);
 
     if (
       transcript &&
       "semesters" in transcript &&
-      transcript.semesters.length > 0
+      transcript.semesters.length > 0 &&
+      semester !== null
     ) {
       // Check if we're at the regular maximum semester
       if (
@@ -90,8 +86,8 @@ function App() {
   }, [transcript]);
 
   useEffect(() => {
-    const semesterValue = localStorage.getItem("semester");
-    const semester = semesterValue ? JSON.parse(semesterValue) : null;
+    const semesterRaw = getItem("semester");
+    const semester = semesterRaw ? parseInt(semesterRaw) : null;
 
     if (semester !== null) {
       // Special handling for custom semester (-2)
@@ -118,8 +114,7 @@ function App() {
       {" "}
       <Header title="TheDay" isSearch={false} />
       {loadingTranscript && offline && <Offline />}
-      {!loadingTranscript && (
-        <SearchProvider>
+  {!loadingTranscript && (
           <Box
             sx={{
               pt: { sm: "2%", xs: "10%" },
@@ -175,7 +170,6 @@ function App() {
               </Suspense>{" "}
             </Paper>
           </Box>
-        </SearchProvider>
       )}
       <Snackbar open={open} autoHideDuration={6000}>
         {!isMaxSemester ? (

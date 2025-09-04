@@ -1,20 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { getItem, getJSON, isBrowser } from "../../../utils/storage";
 
 export default function Index() {
-  {
-    /* navigate to the page that is the default for className from localStorage if there was nothing located then fetch for default */
-  }
-  React.useEffect(() => {
-    const className = localStorage.getItem("className");
-    const classes = JSON.parse(localStorage.getItem("classes") as string);
+  const router = useRouter();
+  // Navigate to class-specific page or default
+  useEffect(() => {
+    if (!isBrowser) return;
+    const className = getItem("className");
+    const classes = getJSON<any[]>("classes", []);
     const q = classes?.find((c: any) => c?.class === className);
-    if (q && className && classes) {
-      window.location.href = `/theday/q/${q.id}`;
-    } else {
-      window.location.href = "/theday/q/default";
-    }
-  });
-  return <></>;
+    const target = q && className ? `/theday/q/${q.id}` : "/theday/q/default";
+    router.replace(target);
+  }, [router]);
+  return null;
 }

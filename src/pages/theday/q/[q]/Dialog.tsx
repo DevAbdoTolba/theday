@@ -7,6 +7,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Chip from "@mui/material/Chip";
 import Zoom from "@mui/material/Zoom";
 import { Box, Tooltip } from "@mui/material";
+import { useRouter } from "next/router";
+import { setItem } from "../../../../utils/storage";
 
 interface Subject {
   name: string;
@@ -29,11 +31,11 @@ export default function AlertDialog({
   currentSemester,
 }: Props) {
   const [open, setOpen] = React.useState(false);
+  const router = useRouter();
 
   const handleClickOpen = (subject: string) => {
-    console.log("currentSemester : " + currentSemester + "\nIndex : " + index);
-    localStorage.setItem("currentSemester", index.toString());
-    window.location.href = "/subjects/" + subject;
+    setItem("currentSemester", index.toString());
+    router.push("/subjects/" + subject);
   };
 
   const handleClose = () => {
@@ -86,9 +88,8 @@ export default function AlertDialog({
               variant="contained"
               onClick={() => {
                 // store in local storage index as and key and index as value
-                localStorage.setItem("semester", index.toString());
-                // redirect to subject page
-                window.location.href = "/subjects/" + subject.abbreviation;
+                setItem("semester", index.toString());
+                router.push("/subjects/" + subject.abbreviation);
               }}
             >
               Yes
@@ -97,7 +98,7 @@ export default function AlertDialog({
               sx={{ m: 2 }}
               variant="contained"
               onClick={() => {
-                window.location.href = "/subjects/" + subject.abbreviation;
+                router.push("/subjects/" + subject.abbreviation);
               }}
             >
               No
