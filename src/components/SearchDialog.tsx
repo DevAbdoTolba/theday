@@ -37,6 +37,8 @@ interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   data: DataMap;
+  /** Optional override for which item ids are considered newly added (used by Storybook controls) */
+  newItemIds?: string[];
 }
 
 
@@ -62,13 +64,14 @@ const containerVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
 };
 
-export default function AlertDialogSlide({ open, setOpen, data }: Props) {
-  const { updatedItems } = useIndexedContext();
+export default function AlertDialogSlide({ open, setOpen, data, newItemIds }: Props) {
+  const { updatedItems: ctxUpdatedItems } = useIndexedContext();
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState("");
   const [folder, setFolder] = React.useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const updatedItems = React.useMemo(() => newItemIds ?? ctxUpdatedItems ?? [], [newItemIds, ctxUpdatedItems]);
 
   const filtersArray = [
     ...Object.keys(data),
