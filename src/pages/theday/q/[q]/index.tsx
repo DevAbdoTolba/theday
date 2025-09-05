@@ -21,7 +21,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
 import Offline from "../../../../components/Offline";
-import { offlineContext } from "../../../_app";
+import { offlineContext } from "../../../../context/AppContext";
 import { DataContext } from "../../../../context/TranscriptContext";
 import { useTheme } from "@mui/material/styles";
 import { getItem } from "../../../../utils/storage";

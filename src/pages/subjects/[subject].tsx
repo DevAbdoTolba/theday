@@ -23,7 +23,7 @@ import Loading from "../../components/Loading";
 import SubjectSemesterBar from "../../components/SubjectSemesterBar";
 
 import { useIndexedContext } from "../../context/IndexedContext";
-import { offlineContext } from "../_app";
+import { offlineContext } from "../../context/AppContext";
 import { DataContext } from "../../context/TranscriptContext";
 import Drawer from "./AllDrawer";
 

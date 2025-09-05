@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, Suspense, lazy } from "react";
-import Header from "../../components/Header";
+import AppLayout from "@/src/components/AppLayout";
 
 import { useState, useEffect } from "react";
 import { Box, Grid } from "@mui/material";
@@ -8,6 +8,7 @@ import FormDialog from "./FormDialog";
 import Head from "next/head";
 import Image from "next/image";
 import Loading from "../../components/Loading";
+import usePersistentState from "@/src/hooks/usePersistentState";
 
 interface note {
   title: string;
@@ -16,23 +17,7 @@ interface note {
 
 const Main = lazy(() => import("./Main"));
 function useLocalNotes(): [note[], Dispatch<SetStateAction<note[]>>] {
-  const [notes, setNotes] = useState<note[]>([]);
-  useEffect(() => {
-    try {
-      const notes = window.localStorage.getItem("notes");
-      if (notes) {
-        const parsedNotes = JSON.parse(notes);
-        setNotes(parsedNotes);
-      }
-    } catch (error) {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem("notes", JSON.stringify(notes));
-      console.log(notes.length);
-    } catch (error) {}
-  }, [notes]);
+  const [notes, setNotes] = usePersistentState<note[]>("notes", []);
   return [notes, setNotes];
 }
 const App = () => {
@@ -46,23 +31,7 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{"Keeper"}</title>
-        {/* <meta name="description" content={description} /> */}
-        <link
-          rel="icon"
-          href={
-            "https://media.discordapp.net/attachments/1008571067398369291/1072747425141366804/Hotpot_3.png?width=238&height=238"
-          }
-        />
-      </Head>
-      <Header
-        search={search}
-        setSearch={setSearch}
-        title="Keeper"
-        isSearch={true}
-      />
+    <AppLayout title="Keeper" header={{ isSearch: true, search, setSearch }}>
       <Box
         sx={{
           m: 2,
@@ -130,7 +99,7 @@ const App = () => {
         )}
         <FormDialog setNotes={setNotes} />
       </Box>
-    </>
+    </AppLayout>
   );
 };
 

@@ -3,6 +3,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import default2110 from "../Data/data.json";
 import Loading from "../components/Loading";
+import { getItem, getJSON, setItem, removeItem, setJSON } from "@/src/utils/storage";
 
 interface Transcript {
   transcript: {
@@ -74,28 +75,20 @@ export const TranscriptContextProvider: React.FC<{
 
     function handlingWeekCacheClearAndAdd() {
       // check if the transcript is stored for more than a week
-      if (!localStorage.getItem("transcriptStoredAt")) {
-        localStorage.setItem(
-          "transcriptStoredAt",
-          new Date().getTime().toString()
-        );
+      const storedAtRaw = getItem("transcriptStoredAt");
+      if (!storedAtRaw) {
+        setItem("transcriptStoredAt", new Date().getTime().toString());
       } else {
-        const storedAt = parseInt(
-          localStorage.getItem("transcriptStoredAt") as string
-        );
+        const storedAt = parseInt(storedAtRaw);
 
         if (new Date().getTime() - storedAt > 604800000) {
-          localStorage.setItem(
-            "transcriptStoredAt",
-            new Date().getTime().toString()
-          );
-          localStorage.removeItem("transcript");
+          setItem("transcriptStoredAt", new Date().getTime().toString());
+          removeItem("transcript");
           // remove each class which name is in classes
-          const classes =
-            JSON.parse(localStorage.getItem("classes") as string) || [];
+          const classes = getJSON<any[]>("classes", []) || [];
           classes.forEach((storedClass: any) => {
             try {
-              localStorage.removeItem(storedClass.class);
+              removeItem(storedClass.class);
             } catch (e) {
               console.log(e);
             }
@@ -133,34 +126,23 @@ export const TranscriptContextProvider: React.FC<{
 
           // caching data to localStorage store for 1 week
           // transcript
-          localStorage.setItem(
-            "transcript",
-            JSON.stringify({ semesters: res.transcript.data })
-          );
+          setJSON("transcript", { semesters: res.transcript.data });
 
           // className
           setClassName(className);
 
           // class cache
-          if (className)
-            localStorage.setItem(
-              className,
-              JSON.stringify({ semesters: res.transcript.data })
-            );
+          if (className) setJSON(className, { semesters: res.transcript.data });
 
           // classes
-          const classes =
-            JSON.parse(localStorage.getItem("classes") as string) || [];
+          const classes = getJSON<any[]>("classes", []) || [];
 
           const isDuplicate = classes.some(
             (storedClass: any) =>
               storedClass.class === className && storedClass.id === q
           );
           if (!isDuplicate) {
-            localStorage.setItem(
-              "classes",
-              JSON.stringify([...classes, { class: className, id: q }])
-            );
+            setJSON("classes", [...classes, { class: className, id: q }]);
           }
         })
         .catch((error) => {
@@ -190,24 +172,21 @@ export const TranscriptContextProvider: React.FC<{
       }
       if (q) {
         // check if stored
-        const storedClasses =
-          JSON.parse(localStorage.getItem("classes") as string) || [];
+  const storedClasses = getJSON<any[]>("classes", []) || [];
 
         if (storedClasses.some((storedClass: any) => storedClass.id === q)) {
           console.log("Stored");
 
           // ========= STORED =========
-          const storedClasses =
-            JSON.parse(localStorage.getItem("classes") as string) || [];
+          const storedClasses = getJSON<any[]>("classes", []) || [];
           const storedClass = storedClasses.find(
             (storedClass: any) => storedClass.id === q
           );
 
           if (storedClass) {
-            if (localStorage.getItem(storedClass.class)) {
-              setTranscript(
-                JSON.parse(localStorage.getItem(storedClass.class) as string)
-              );
+            const stored = getJSON<any>(storedClass.class, null);
+            if (stored) {
+              setTranscript(stored);
               setClassName(storedClass.class);
               setLoadingTranscript(false);
             } else {
@@ -220,14 +199,11 @@ export const TranscriptContextProvider: React.FC<{
           fetchData();
         }
       } else {
-        if (localStorage.getItem("className")) {
-          setClassName(localStorage.getItem("className") as string);
-          setTranscript(
-            JSON.parse(
-              // @ts-ignore
-              localStorage.getItem(localStorage.getItem("className")) as string
-            )
-          );
+        const storedClassName = getItem("className");
+        if (storedClassName) {
+          setClassName(storedClassName);
+          // @ts-ignore
+          setTranscript(getJSON<any>(storedClassName, null));
           setLoadingTranscript(false);
         } else {
           setTranscript(default2110);
@@ -245,9 +221,9 @@ export const TranscriptContextProvider: React.FC<{
   useEffect(() => {
     if (className == "-1") return;
     if (className) {
-      localStorage.setItem("className", className);
+      setItem("className", className);
       // @ts-ignore
-      localStorage.setItem("transcript", localStorage.getItem(className));
+      setJSON("transcript", getJSON<any>(className, null));
     }
   }, [className]);
 

@@ -10,7 +10,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Button, IconButton, Link, MenuItem, Select } from "@mui/material";
+import { Button, IconButton, Link, MenuItem, Select, Tooltip as MuiTooltip } from "@mui/material";
 import NextLink from "next/link";
 import NativeSelect from "@mui/material/NativeSelect";
 import { DataContext } from "../context/TranscriptContext";
@@ -18,7 +18,7 @@ import KeyIcon from "@mui/icons-material/Key";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { useTheme } from "@mui/material/styles";
-import { ColorModeContext } from "../pages/_app";
+import { ColorModeContext } from "../context/AppContext";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -69,7 +69,7 @@ interface Props {
 //   ],
 // };
 
-const Search = styled("div")(({ theme }) => ({
+const Search = styled("div")(({ theme }: any) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.black, 0.15),
@@ -88,7 +88,7 @@ const Search = styled("div")(({ theme }) => ({
   },
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
+const SearchIconWrapper = styled("div")(({ theme }: any) => ({
   padding: theme.spacing(0, 2),
   height: "100%",
   position: "absolute",
@@ -98,7 +98,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({ theme }: any) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
@@ -252,6 +252,16 @@ export default function Header({
                 </Button>
               </Tooltip>
             </Typography>
+
+            <MuiTooltip title={`Switch to ${theme.palette.mode === "dark" ? "light" : "dark"} mode`}>
+              <IconButton color="inherit" onClick={colorMode.toggleColorMode}>
+                {theme.palette.mode === "dark" ? (
+                  <Brightness7Icon />
+                ) : (
+                  <Brightness4Icon />
+                )}
+              </IconButton>
+            </MuiTooltip>
 
             <Tooltip title={"Insert a key"}>
               <IconButton

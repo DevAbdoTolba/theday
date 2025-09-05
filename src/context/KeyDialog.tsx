@@ -13,6 +13,7 @@ import NextLink from "next/link";
 
 import { useRouter } from "next/router";
 import { DataContext } from "./TranscriptContext";
+import { getJSON, setItem } from "@/src/utils/storage";
 
 type FormDialogProps = {
   open: boolean;
@@ -117,8 +118,7 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
     setError("");
     setLoading(true);
 
-    const storedClasses =
-      JSON.parse(localStorage.getItem("classes") as string) || [];
+  const storedClasses = getJSON<any[]>("classes", []) || [];
     const isStored = storedClasses.some(
       (storedClass: any) => storedClass.id === keyValue
     );
@@ -276,7 +276,7 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
             onClick={() => {
               setStoredDialogOpen(false);
               setCloseKeyDialog();
-              localStorage.setItem("className", keyClass.class);
+              setItem("className", keyClass.class);
               router.push(`/theday/q/${key}`);
             }}
           >
