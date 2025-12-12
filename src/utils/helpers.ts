@@ -66,7 +66,15 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
 
 export const getYoutubeThumbnail = (id: string | null) => {
   if (!id) return null;
-  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+  let vidId ;
+  try{
+    let tempUrl = new URL(id);
+    vidId = tempUrl.searchParams.get("v");
+  } catch{
+    // not a url
+    return null;
+  }   
+  return `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
 };
 
 export const getYoutubeId = (url: string) => {
