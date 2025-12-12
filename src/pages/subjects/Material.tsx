@@ -642,7 +642,7 @@ function Material({
                       sx={{
                      
                         all: "unset",
-                        backgroundImage: () => {
+                        backgroundImage: () => {                          
                           if (item?.name.includes("http")) {
                             if (item?.name.includes("youtube")) {
                               let vId = "";
@@ -655,12 +655,12 @@ function Material({
                               url = decodeURIComponent(url);
                               try {
                                 url = new URL(url);
-                                vId = url.searchParams.get("v") || "";
-                                return vId
+                                vId = url.searchParams.get("v") || "";                                
+                                return (vId != ""
                                   ? `url(https://img.youtube.com/vi/${vId}/0.jpg)`
                                   : (() => {
                                       throw new Error("");
-                                    })();
+                                    })());
                               } catch (e) {
                                 return "url(/link.jpg)";
                               }
