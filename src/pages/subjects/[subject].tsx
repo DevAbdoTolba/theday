@@ -68,7 +68,7 @@ export default function SubjectPage({
         onMobileOpen={() => setMobileOpen(true)} // <--- Add this prop
       />
 
-      <ModernHeader title={subject} isSearch={true} data={initialData} />
+      <ModernHeader title={subject} isSearch={true} data={initialData} onMenuClick={handleDrawerToggle} />
 
       <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
         {!initialData ? (
