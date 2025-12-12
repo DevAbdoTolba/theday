@@ -3,65 +3,74 @@ import { DriveFile, ParsedFile } from './types';
 
 // Robust parsing for "URL Name" or "Name" formats
 export const parseGoogleFile = (file: DriveFile): ParsedFile => {
-  let name = file.name.trim();
+  // 1. Decode the filename first (Fixes the %3A%2F issue)
+  let rawName = decodeURIComponent(file.name);
+  let name = rawName;
   let url = `https://drive.google.com/file/d/${file.id}/preview`;
-  let isExternalLink = false;
   let type: ParsedFile['type'] = 'unknown';
+  let isExternalLink = false;
+  let youtubeId = null;
 
-  // 1. Handle URL in name (e.g., "https://youtube.com/... Lecture 1")
-  // Regex to capture a URL at the start or end of the string
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const match = name.match(urlRegex);
+  // 2. Check if the name STARTS with a URL (Http/Https)
+  // This regex looks for http(s) followed by the link, then a space, then the name
+  const urlPrefixRegex = /^(https?:\/\/[^\s]+)(.*)$/;
+  const match = rawName.match(urlPrefixRegex);
 
   if (match) {
-    const extractedUrl = decodeURIComponent(match[0]);
-    // Remove the URL from the name
-    name = name.replace(match[0], '').trim().replace(/%20/g, ' ');
+    const extractedUrl = match[1]; // The URL part
+    const remainingName = match[2].trim(); // The Name part (e.g. "DFS_BFS-Part1")
     
-    // Determine if it's a YouTube link
-    if (extractedUrl.includes('youtube.com') || extractedUrl.includes('youtu.be')) {
-      url = extractedUrl.replace('youtube.com', 'yout-ube.com'); // Use privacy-friendly proxy if needed, or standard
+    url = extractedUrl;
+    name = remainingName || "Untitled Link"; // Fallback if no name provided
+    isExternalLink = true;
+
+    // 3. Determine if it's YouTube or Generic URL
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
       type = 'youtube';
-      isExternalLink = true;
+      youtubeId = getYoutubeId(url);
     } else {
-      url = extractedUrl;
-      isExternalLink = true;
+      type = 'url';
     }
   } else {
-    // Clean potential URL encoding in name
-    name = name.replace(/%20/g, ' ');
-  }
-
-  // 2. Determine Type from MimeType (if not already set via URL)
-  if (type === 'unknown') {
+    // Standard File Logic (PDFs, Images, etc.)
+    // Clean up any other weird encoding
+    name = name.replace(/%20/g, ' '); 
+    
     if (file.mimeType.includes('folder')) type = 'folder';
     else if (file.mimeType.includes('pdf')) type = 'pdf';
     else if (file.mimeType.includes('image')) type = 'image';
     else if (file.mimeType.includes('video')) type = 'video';
-    else if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) type = 'slide';
-    else if (file.mimeType.includes('spreadsheet') || file.mimeType.includes('excel')) type = 'sheet';
-    else if (file.mimeType.includes('document') || file.mimeType.includes('word')) type = 'doc';
+    else if (file.mimeType.includes('presentation')) type = 'slide';
+    else if (file.mimeType.includes('spreadsheet')) type = 'sheet';
+    else if (file.mimeType.includes('document')) type = 'doc';
+  }
+
+  // 4. Generate Thumbnail URL
+  let thumbnailUrl;
+  if (type === 'youtube' && youtubeId) {
+    thumbnailUrl = getYoutubeThumbnail(youtubeId);
+  } else if (type === 'image' || type === 'video') {
+    thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
   }
 
   return {
     id: file.id,
-    name: name || "Untitled", // Fallback for empty names
+    name,
     url,
     type,
     isExternalLink,
-    thumbnailUrl: type === 'image' || type === 'video' 
-      ? `https://drive.google.com/thumbnail?id=${file.id}&sz=w400` 
-      : undefined
+    thumbnailUrl,
+    youtubeId // We pass this ID so the player can use it
   };
 };
 
-export const getYoutubeThumbnail = (url: string) => {
-  try {
-    const urlObj = new URL(url);
-    const vId = urlObj.searchParams.get("v");
-    if (vId) return `https://img.youtube.com/vi/${vId}/0.jpg`;
-  } catch (e) {
-    return null;
-  }
-  return null;
+export const getYoutubeThumbnail = (id: string | null) => {
+  if (!id) return null;
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+};
+
+export const getYoutubeId = (url: string) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
 };

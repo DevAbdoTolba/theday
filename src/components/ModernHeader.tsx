@@ -1,69 +1,118 @@
-import React, { useState } from 'react';
-import { 
-  AppBar, Toolbar, Typography, Box, IconButton, 
-  Button, useTheme, Tooltip, useMediaQuery, alpha 
-} from '@mui/material';
-import { 
-  Search, Brightness4, Brightness7, Home,
-  Menu as MenuIcon, ArrowBack
-} from '@mui/icons-material';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import SearchDialog from '../components/SearchDialog'; // Assuming you keep your existing search dialog logic
-import { ColorModeContext } from '../pages/_app';
+import React, { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  Button,
+  useTheme,
+  Tooltip,
+  useMediaQuery,
+  alpha,
+} from "@mui/material";
+import {
+  Search,
+  Brightness4,
+  Brightness7,
+  Home,
+  Menu as MenuIcon,
+  ArrowBack,
+} from "@mui/icons-material";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import SearchDialog from "../components/SearchDialog"; // Assuming you keep your existing search dialog logic
+import { ColorModeContext } from "../pages/_app";
+import { WifiOff, CloudDone } from "@mui/icons-material";
+import { offlineContext } from "../pages/_app";
 
 interface Props {
   title: string;
   isSearch?: boolean; // If true, shows search icon
-  isHome?: boolean;   // If true, we are on home page
-  data?: any;         // Data for search dialog
+  isHome?: boolean; // If true, we are on home page
+  data?: any; // Data for search dialog
 }
 
 export default function ModernHeader({ title, isSearch = true, data }: Props) {
   const theme = useTheme();
   const router = useRouter();
   const colorMode = React.useContext(ColorModeContext);
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isOffline] = React.useContext(offlineContext);
 
-  const isHomePage = router.pathname.includes('/theday');
+  const isHomePage = router.pathname.includes("/theday");
 
   return (
     <>
-      <AppBar 
-        position="sticky" 
+      <AppBar
+        position="sticky"
         elevation={0}
         sx={{
-          backdropFilter: 'blur(12px)',
+          backdropFilter: "blur(12px)",
           backgroundColor: alpha(theme.palette.background.default, 0.8),
           borderBottom: `1px solid ${theme.palette.divider}`,
           color: theme.palette.text.primary,
-          zIndex: 1200
+          zIndex: 1200,
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 60, md: 70 } }}>
-          
+        <Toolbar
+          sx={{
+            justifyContent: "space-between",
+            minHeight: { xs: 60, md: 70 },
+          }}
+        >
           {/* LEFT: Branding or Back Button */}
           <Box display="flex" alignItems="center" gap={1}>
+            {isOffline && (
+              <Tooltip title="You are offline. Content may be outdated.">
+                <Box
+                  sx={{
+                    bgcolor: "error.main",
+                    color: "white",
+                    borderRadius: 2,
+                    px: 1,
+                    py: 0.5,
+                    display: "flex",
+                    alignItems: "center",
+                    animation: "pulse 2s infinite",
+                  }}
+                >
+                  <WifiOff fontSize="small" />
+                </Box>
+              </Tooltip>
+            )}
             {!isHomePage && (
-              <IconButton 
-                edge="start" 
-                color="inherit" 
+              <IconButton
+                edge="start"
+                color="inherit"
                 onClick={() => router.back()}
                 sx={{ mr: 1 }}
               >
                 <ArrowBack />
               </IconButton>
             )}
-            
-            <Link href="/theday" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+
+            <Link
+              href="/theday"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               {!isHomePage ? (
-                 <Typography variant="h6" fontWeight={700} noWrap sx={{ ml: 1 }}>
-                   {title}
-                 </Typography>
+                <Typography variant="h6" fontWeight={700} noWrap sx={{ ml: 1 }}>
+                  {title}
+                </Typography>
               ) : (
                 <Box display="flex" flexDirection="column">
-                  <Typography variant="h5" fontWeight={900} sx={{ letterSpacing: '-0.5px' }}>
+                  <Typography
+                    variant="h5"
+                    fontWeight={900}
+                    sx={{ letterSpacing: "-0.5px" }}
+                  >
                     TheDay
                   </Typography>
                 </Box>
@@ -79,17 +128,17 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
               onClick={() => setSearchOpen(true)}
               sx={{
                 width: 400,
-                justifyContent: 'flex-start',
+                justifyContent: "flex-start",
                 borderRadius: 3,
                 borderColor: theme.palette.divider,
                 color: theme.palette.text.secondary,
                 bgcolor: alpha(theme.palette.text.primary, 0.03),
-                textTransform: 'none',
-                '&:hover': {
-                    borderColor: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.05)
+                textTransform: "none",
+                "&:hover": {
+                  borderColor: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.05),
                 },
-            }}
+              }}
             >
               Search... (Ctrl+K)
             </Button>
@@ -106,7 +155,11 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
 
             <Tooltip title="Toggle Theme">
               <IconButton onClick={colorMode.toggleColorMode} color="inherit">
-                {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+                {theme.palette.mode === "dark" ? (
+                  <Brightness7 />
+                ) : (
+                  <Brightness4 />
+                )}
               </IconButton>
             </Tooltip>
           </Box>
@@ -114,7 +167,9 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
       </AppBar>
 
       {/* Global Search Dialog Connection */}
-      {data && <SearchDialog open={searchOpen} setOpen={setSearchOpen} data={data} />}
+      {data && (
+        <SearchDialog open={searchOpen} setOpen={setSearchOpen} data={data} />
+      )}
     </>
   );
 }

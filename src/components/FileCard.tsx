@@ -10,9 +10,11 @@ import {
 } from '@mui/icons-material';
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
+import { PlayCircle, Link as LinkIcon } from '@mui/icons-material';
 
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
   switch (type) {
+    case 'youtube': return <PlayCircle color="error" />; // Specific YouTube Icon
     case 'pdf': return <PictureAsPdf color="error" />;
     case 'folder': return <Folder color="primary" />;
     case 'image': return <ImageIcon color="secondary" />;
@@ -25,7 +27,12 @@ const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
   }
 };
 
-export const FileCard = ({ file }: { file: ParsedFile }) => {
+interface FileCardProps {
+  file: ParsedFile;
+  onClick?: () => void;
+}
+
+export const FileCard = ({ file, onClick }: FileCardProps) => {
   const theme = useTheme();
   
   // Determine thumbnail source
@@ -49,6 +56,13 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[4],
           borderColor: theme.palette.primary.main,
+        }
+      }}
+      onClick={(e) => {
+        // Prevent default link behavior if we are handling it manually (like YouTube)
+        if (file.type === 'youtube') {
+          e.preventDefault();
+          if (onClick) onClick();
         }
       }}
     >
@@ -87,8 +101,8 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
           <Box display="flex" gap={1} mb={1}>
             <Chip 
               size="small" 
-              label={file.type.toUpperCase()} 
-              color={file.type === 'folder' ? 'primary' : 'default'}
+              label={file.type === 'url' ? 'URL' : file.type.toUpperCase()} 
+              color={file.type === 'youtube' ? 'error' : file.type === 'folder' ? 'primary' : 'default'}
               variant="outlined"
               sx={{ fontSize: '0.65rem', height: 20 }}
             />
