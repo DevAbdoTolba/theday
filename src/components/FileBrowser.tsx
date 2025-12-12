@@ -1,3 +1,5 @@
+import YoutubePlayer from './YoutubePlayer';
+import VisualState from './feedback/VisualState';
 import React, { useState, useMemo } from 'react';
 import { 
   Box, Tabs, Tab, Grid, Typography, Fade, 
@@ -21,6 +23,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [playingVideo, setPlayingVideo] = useState<{ id: string, title: string } | null>(null);
 
   // Categories
   const categories = useMemo(() => ['All', ...Object.keys(data)], [data]);
@@ -38,6 +41,13 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
   const handleViewChange = (_: React.MouseEvent<HTMLElement>, nextView: 'grid' | 'list') => {
     if (nextView !== null) setViewMode(nextView);
+  };
+  const handleFileClick = (file: ParsedFile) => {
+    if (file.type === 'youtube' && file.youtubeId) {
+      setPlayingVideo({ id: file.youtubeId, title: file.name });
+    } else {
+      window.open(file.url, '_blank');
+    }
   };
 
   if (!data || Object.keys(data).length === 0) {
@@ -100,24 +110,39 @@ export default function FileBrowser({ data, subjectName }: Props) {
               <Grid container spacing={3}>
                 {filteredFiles.map((file) => (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-                    <FileCard file={file} />
+                    <FileCard 
+                      file={file} 
+                      // PASS THE CLICK HANDLER
+                      onClick={() => handleFileClick(file)} 
+                    />
                   </Grid>
                 ))}
               </Grid>
             ) : (
               <Box>
                 {filteredFiles.map((file) => (
-                  <FileListItem key={file.id} file={file} />
+                  <FileListItem 
+                    key={file.id} 
+                    file={file} 
+                    // PASS THE CLICK HANDLER
+                    onClick={() => handleFileClick(file)} 
+                  />
                 ))}
               </Box>
             )
           ) : (
-            <Box textAlign="center" py={8} color="text.secondary">
-              <Typography>No matching files found.</Typography>
-            </Box>
+            <VisualState type="empty" message="No materials found." />
           )}
         </Box>
       </Fade>
+
+      {/* RENDER THE PLAYER */}
+      <YoutubePlayer 
+        open={!!playingVideo}
+        onClose={() => setPlayingVideo(null)}
+        videoId={playingVideo?.id || null}
+        title={playingVideo?.title || ""}
+      />
     </Box>
   );
 }
