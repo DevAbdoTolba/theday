@@ -1,242 +1,329 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo, useRef } from 'react';
 import {
   Box, Typography, useTheme, Snackbar, Alert,
-  alpha, Drawer, List, ListItem, ListItemButton, ListItemText, IconButton
+  alpha, Drawer, List, ListItemButton, ListItemText, IconButton, Collapse, Divider
 } from '@mui/material';
-import { School, InfoOutlined, KeyboardDoubleArrowRight, Close } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  School, InfoOutlined, KeyboardDoubleArrowRight, Close, 
+  ExpandLess, ExpandMore, Book 
+} from '@mui/icons-material';
 import Link from 'next/link';
 import { DataContext } from '../context/TranscriptContext';
 
 interface Props {
   currentSubject: string;
-  mobileOpen: boolean;       
-  onMobileClose: () => void; 
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
-
-// CONFIGURATION
-const RADIUS = 400; 
-const ITEM_SPACING_DEG = 10; 
 
 export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClose }: Props) {
   const theme = useTheme();
   const { transcript } = useContext(DataContext);
-  const [isOpen, setIsOpen] = useState(false); // Desktop State
+  const [isOpen, setIsOpen] = useState(false);
+  const [expandedSemesters, setExpandedSemesters] = useState<Set<number>>(new Set());
   const [showHelper, setShowHelper] = useState(false);
-  const [isTriggerHovered, setIsTriggerHovered] = useState(false);
   
-  const [flatSubjects, setFlatSubjects] = useState<any[]>([]);
-  
-  useEffect(() => {
+  // Ref to the scroll container to manage auto-scrolling
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeItemRef = useRef<HTMLDivElement>(null);
+
+  // --- 1. DATA PREPARATION (Memoized for Performance) ---
+  const semesterData = useMemo(() => {
     if (transcript && 'semesters' in transcript) {
-      const flat = transcript.semesters.flatMap((sem: any) => 
-        sem.subjects.map((sub: any) => ({ ...sub, semesterIndex: sem.index }))
-      );
-      setFlatSubjects(flat);
+      return transcript.semesters;
     }
+    return [];
   }, [transcript]);
 
-  // Lock body scroll when Desktop sidebar is open
+  // --- 2. AUTO-OPEN LOGIC ---
+  // Runs only when data loads or current subject changes
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (semesterData.length > 0 && currentSubject) {
+      const foundSemester = semesterData.find((sem: any) => 
+        sem.subjects.some((s: any) => s.abbreviation === currentSubject)
+      );
+      if (foundSemester) {
+        setExpandedSemesters(prev => new Set(prev).add(foundSemester.index));
+      }
     }
-    return () => { document.body.style.overflow = ''; };
+  }, [semesterData, currentSubject]);
+
+  // --- 3. AUTO-SCROLL TO ACTIVE ITEM ---
+  // Runs when sidebar opens to ensure user sees their current location
+  useEffect(() => {
+    if (isOpen && activeItemRef.current) {
+      setTimeout(() => {
+        activeItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100); // Small delay to allow CSS transition to finish
+    }
   }, [isOpen]);
 
-  // Keyboard Shortcuts
+  // --- 4. KEYBOARD SHORTCUTS ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'b')) {
-        setIsOpen(prev => !prev);
-      }
+      if (e.shiftKey && (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'b')) setIsOpen(p => !p);
       if (e.key === 'Escape') setIsOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // --- SCROLL WHEEL LOGIC ---
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (flatSubjects.length > 0 && currentSubject) {
-      const idx = flatSubjects.findIndex((s: any) => s.abbreviation === currentSubject);
-      if (idx !== -1) setActiveIndex(idx);
-    }
-  }, [flatSubjects, currentSubject]);
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (!isOpen) return;
-    const direction = e.deltaY > 0 ? 1 : -1;
-    setActiveIndex((prev) => {
-      const next = prev + direction;
-      return Math.max(0, Math.min(next, flatSubjects.length - 1));
+  const handleToggleSemester = (index: number) => {
+    setExpandedSemesters(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
     });
   };
 
+  // --- RENDER HELPERS ---
+  const SidebarContent = (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        p: 2, 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        bgcolor: theme.palette.background.paper,
+        borderBottom: `1px solid ${theme.palette.divider}`
+      }}>
+        <Typography variant="h6" fontWeight="800" color="primary">
+          Curriculum
+        </Typography>
+        <IconButton onClick={() => setIsOpen(false)} sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Close />
+        </IconButton>
+        <IconButton onClick={onMobileClose} sx={{ display: { xs: 'flex', md: 'none' } }}>
+          <Close />
+        </IconButton>
+      </Box>
+
+      {/* NATIVE CSS SCROLL CONTAINER */}
+      <Box 
+        ref={scrollContainerRef}
+        sx={{ 
+          flexGrow: 1, 
+          overflowY: 'auto', // NATIVE SCROLLING
+          overflowX: 'hidden',
+          p: 1.5,
+          // Custom Scrollbar Styling
+          '&::-webkit-scrollbar': { width: '6px' },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
+          '&::-webkit-scrollbar-thumb': { 
+            background: alpha(theme.palette.primary.main, 0.2), 
+            borderRadius: '10px' 
+          },
+          '&::-webkit-scrollbar-thumb:hover': { 
+            background: alpha(theme.palette.primary.main, 0.5) 
+          }
+        }}
+      >
+        <List disablePadding>
+          {semesterData.map((sem: any) => {
+            const isExpanded = expandedSemesters.has(sem.index);
+            const hasActiveItem = sem.subjects.some((s:any) => s.abbreviation === currentSubject);
+
+            return (
+              <Box key={sem.index} sx={{ mb: 1 }}>
+                {/* Semester Header */}
+                <ListItemButton 
+                  onClick={() => handleToggleSemester(sem.index)}
+                  sx={{
+                    borderRadius: 2,
+                    mb: 0.5,
+                    bgcolor: hasActiveItem ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                    border: hasActiveItem ? `1px solid ${alpha(theme.palette.primary.main, 0.2)}` : '1px solid transparent',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.05)
+                    }
+                  }}
+                >
+                  <Book sx={{ mr: 1.5, fontSize: 20, color: hasActiveItem ? 'primary.main' : 'text.secondary' }} />
+                  <ListItemText 
+                    primary={`Semester ${sem.index}`} 
+                    primaryTypographyProps={{ fontWeight: 700 }}
+                  />
+                  {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+
+                {/* Subjects List */}
+                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    <Box sx={{ 
+                      ml: 2.5, 
+                      pl: 2, 
+                      borderLeft: `2px solid ${alpha(theme.palette.divider, 0.5)}` 
+                    }}>
+                      {sem.subjects.map((sub: any) => {
+                        const isActive = sub.abbreviation === currentSubject;
+                        return (
+                          <Link 
+                            key={sub.abbreviation} 
+                            href={`/subjects/${sub.abbreviation}`} 
+                            passHref 
+                            style={{textDecoration:'none', color:'inherit'}}
+                            onClick={onMobileClose}
+                          >
+                            <Box ref={isActive ? activeItemRef : null}>
+                              <ListItemButton
+                                selected={isActive}
+                                sx={{
+                                  borderRadius: 2,
+                                  py: 0.5,
+                                  my: 0.5,
+                                  '&.Mui-selected': {
+                                    bgcolor: theme.palette.primary.main,
+                                    color: theme.palette.primary.contrastText,
+                                    '&:hover': { bgcolor: theme.palette.primary.dark },
+                                    '& .MuiSvgIcon-root': { color: theme.palette.primary.contrastText }
+                                  }
+                                }}
+                              >
+                                <School sx={{ 
+                                  mr: 1.5, 
+                                  fontSize: 16, 
+                                  opacity: isActive ? 1 : 0.7,
+                                  color: isActive ? 'inherit' : 'text.disabled'
+                                }} />
+                                <ListItemText 
+                                  primary={sub.abbreviation}
+                                  secondary={sub.name}
+                                  primaryTypographyProps={{ 
+                                    fontWeight: isActive ? 700 : 500,
+                                    fontSize: '0.9rem'
+                                  }}
+                                  secondaryTypographyProps={{ 
+                                    fontSize: '0.75rem',
+                                    noWrap: true,
+                                    color: isActive ? alpha('#fff', 0.8) : 'text.secondary'
+                                  }}
+                                />
+                              </ListItemButton>
+                            </Box>
+                          </Link>
+                        );
+                      })}
+                    </Box>
+                  </List>
+                </Collapse>
+              </Box>
+            );
+          })}
+        </List>
+      </Box>
+    </Box>
+  );
+
   return (
     <>
-      {/* ========================================= */}
-      {/* 1. MOBILE DRAWER (Standard Side Bar)      */}
-      {/* ========================================= */}
+      {/* 1. MOBILE DRAWER */}
       <Drawer
         variant="temporary"
         anchor="left"
         open={mobileOpen}
         onClose={onMobileClose}
         ModalProps={{ keepMounted: true }}
-        sx={{
-          display: { xs: 'block', md: 'none' }, // Mobile only
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 280 },
-        }}
+        sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 280 } }}
       >
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h6" fontWeight="bold" color="primary">
-            Navigation
-          </Typography>
-          <IconButton onClick={onMobileClose}>
-            <Close />
-          </IconButton>
-        </Box>
-        <List>
-          {flatSubjects.map((subject) => (
-            <Link 
-              key={subject.abbreviation} 
-              href={`/subjects/${subject.abbreviation}`} 
-              passHref
-              style={{ textDecoration: 'none', color: 'inherit' }}
-              onClick={onMobileClose}
-            >
-              <ListItem disablePadding>
-                <ListItemButton 
-                  selected={subject.abbreviation === currentSubject}
-                  sx={{
-                    '&.Mui-selected': { bgcolor: alpha(theme.palette.primary.main, 0.1) }
-                  }}
-                >
-                  <School sx={{ mr: 2, fontSize: 20, color: subject.abbreviation === currentSubject ? 'primary.main' : 'text.secondary' }} />
-                  <ListItemText 
-                    primary={subject.abbreviation} 
-                    secondary={`Semester ${subject.semesterIndex}`} 
-                    primaryTypographyProps={{ fontWeight: subject.abbreviation === currentSubject ? 700 : 400 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </Link>
-          ))}
-        </List>
+        {SidebarContent}
       </Drawer>
 
-      {/* ========================================= */}
-      {/* 2. DESKTOP ROULETTE SIDEBAR               */}
-      {/* ========================================= */}
-      
-      {/* Hover Trigger */}
-      <Box
-        onMouseEnter={() => setIsTriggerHovered(true)}
-        onMouseLeave={() => setIsTriggerHovered(false)}
-        onClick={() => setIsOpen(true)}
-        sx={{
-          display: { xs: 'none', md: isOpen ? 'none' : 'flex' },
-          position: 'fixed',
-          left: 0,
-          top: '30%',
-          height: '40vh',
-          width: '40px',
-          zIndex: 1300,
-          alignItems: 'center',
-          cursor: 'pointer',
-        }}
-      >
-        <AnimatePresence>
-          {isTriggerHovered && (
-            <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ 
-                x: 0, 
-                opacity: 1,
-                y: [0, -8, 0],
-                filter: ["hue-rotate(0deg)", "hue-rotate(45deg)", "hue-rotate(0deg)"]
-              }}
-              exit={{ x: -50, opacity: 0 }}
-              transition={{ 
-                x: { duration: 0.2, ease: "easeOut" },
-                y: { repeat: Infinity, duration: 1.5, ease: "easeInOut" },
-                filter: { repeat: Infinity, duration: 3, ease: "linear" }
-              }}
-              style={{
-                width: '100%',
-                height: '80px',
-                background: theme.palette.primary.main,
-                borderRadius: '0 20px 20px 0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                color: '#fff'
-              }}
-            >
-              <KeyboardDoubleArrowRight />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* 2. DESKTOP SIDEBAR & TRIGGER */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        
+        {/* Invisible Hover Trigger */}
+        <Box
+          onClick={() => setIsOpen(true)}
+          sx={{
+            position: 'fixed',
+            left: 0,
+            top: '25%', // Vertically centered hit area
+            height: '50vh',
+            width: '20px', // Narrow hit zone
+            zIndex: 1250,
+            display: isOpen ? 'none' : 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            // CSS Animation for the button appearance
+            '&:hover .trigger-btn': {
+              opacity: 1,
+              transform: 'translateX(0)',
+            }
+          }}
+        >
+          {/* Pure CSS Animated Button (No JS Render Cycle) */}
+          <Box
+            className="trigger-btn"
+            sx={{
+              width: 40,
+              height: 100,
+              bgcolor: 'primary.main',
+              borderRadius: '0 50px 50px 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              boxShadow: 4,
+              opacity: 0, // Hidden by default
+              transform: 'translateX(-100%)', // Off screen by default
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              animation: 'pulse-glow 2s infinite',
+              '@keyframes pulse-glow': {
+                '0%': { filter: 'brightness(1)' },
+                '50%': { filter: 'brightness(1.2)' },
+                '100%': { filter: 'brightness(1)' }
+              }
+            }}
+          >
+            <KeyboardDoubleArrowRight />
+          </Box>
+        </Box>
+
+        {/* Sidebar Container (Native CSS Transition) */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            height: '100vh',
+            width: 320,
+            bgcolor: 'background.default',
+            borderRight: `1px solid ${theme.palette.divider}`,
+            zIndex: 1300,
+            transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: isOpen ? 24 : 0,
+            willChange: 'transform', // Optimizes rendering
+          }}
+        >
+          {SidebarContent}
+        </Box>
+
+        {/* Backdrop for Desktop */}
+        {isOpen && (
+          <Box
+            onClick={() => setIsOpen(false)}
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              zIndex: 1290,
+              backdropFilter: 'blur(2px)',
+              animation: 'fade-in 0.3s',
+              '@keyframes fade-in': {
+                from: { opacity: 0 },
+                to: { opacity: 1 }
+              }
+            }}
+          />
+        )}
       </Box>
 
-      {/* Roulette Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-              style={{
-                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1299,
-                backdropFilter: 'blur(3px)'
-              }}
-            />
-
-            <motion.div
-              initial={{ x: -100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -100, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-              onWheel={handleWheel}
-              style={{
-                position: 'fixed',
-                left: 0, top: 0, bottom: 0,
-                width: '400px',
-                zIndex: 1300,
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Box sx={{ position: 'relative', height: '100%', width: '100%', pointerEvents: 'auto' }}>
-                {/* RENDER ALL ITEMS TO PREVENT GLITCHES */}
-                {flatSubjects.map((item, index) => {
-                  const offset = index - activeIndex;
-                  return (
-                    <WheelItem 
-                      key={item.abbreviation}
-                      item={item}
-                      offset={offset}
-                      isActive={index === activeIndex}
-                      onClick={() => setShowHelper(true)}
-                      theme={theme}
-                    />
-                  );
-                })}
-              </Box>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
+      {/* Helper Notification */}
       <Snackbar
         open={showHelper}
         autoHideDuration={3000}
@@ -244,94 +331,9 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert severity="info" variant="filled" icon={<InfoOutlined />}>
-          Press <b>Shift + Left Arrow</b> to close.
+          Press <b>Shift + Left Arrow</b> to toggle menu.
         </Alert>
       </Snackbar>
     </>
-  );
-}
-
-// --- ITEM LOGIC ---
-function WheelItem({ item, offset, isActive, onClick, theme }: any) {
-  // Math: Calculate positions for ALL items
-  const angleDeg = offset * ITEM_SPACING_DEG;
-  const angleRad = (angleDeg * Math.PI) / 180;
-
-  const centerX = -RADIUS + 50; 
-  
-  // Basic Circular Motion
-  const x = centerX + (RADIUS * Math.cos(angleRad)); 
-  const y = RADIUS * Math.sin(angleRad);
-
-  // Visibilty logic: Fade out items far away, but don't unmount them
-  const isFar = Math.abs(offset) > 10;
-  const opacity = isFar ? 0 : 1 - Math.abs(offset * 0.15);
-  const pointerEvents = isFar ? 'none' : 'auto';
-
-  return (
-    <Link 
-      href={`/subjects/${item.abbreviation}`} 
-      passHref 
-      style={{ textDecoration: 'none', pointerEvents: pointerEvents as any }}
-      onClick={onClick}
-    >
-      <motion.div
-        // We animate all props so they slide into place smoothly
-        animate={{ 
-          x: x + 40,
-          y: `calc(50vh + ${y}px - 25px)`, 
-          opacity: opacity,
-          scale: 1 - Math.abs(offset * 0.05),
-          display: isFar ? 'none' : 'block' // Performance optimization
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 40 }}
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '280px',
-          height: '50px',
-        }}
-      >
-        <Box sx={{
-          bgcolor: isActive 
-            ? theme.palette.primary.main 
-            : theme.palette.background.paper,
-          color: isActive 
-            ? theme.palette.primary.contrastText 
-            : theme.palette.text.primary,
-          
-          borderRadius: '0 25px 25px 0', 
-          border: `1px solid ${isActive ? 'transparent' : alpha(theme.palette.divider, 0.5)}`,
-          boxShadow: isActive 
-            ? `5px 0 25px ${alpha(theme.palette.primary.main, 0.4)}` 
-            : '2px 2px 10px rgba(0,0,0,0.1)',
-          
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          px: 2,
-          gap: 1.5,
-          cursor: 'pointer',
-          transition: 'transform 0.2s',
-          '&:hover': {
-            transform: 'translateX(15px)', 
-            bgcolor: isActive ? theme.palette.primary.dark : theme.palette.action.hover,
-          }
-        }}>
-          <School sx={{ fontSize: 18, opacity: isActive ? 1 : 0.6 }} />
-          <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="body2" fontWeight={800} noWrap>
-              {item.abbreviation}
-            </Typography>
-            {isActive && (
-              <Typography variant="caption" noWrap sx={{ opacity: 0.8, fontSize: '0.7rem' }}>
-                Semester {item.semesterIndex}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-      </motion.div>
-    </Link>
   );
 }
