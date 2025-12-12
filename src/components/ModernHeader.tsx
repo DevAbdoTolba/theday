@@ -86,12 +86,12 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
                 bgcolor: alpha(theme.palette.text.primary, 0.03),
                 textTransform: 'none',
                 '&:hover': {
-                  borderColor: theme.palette.primary.main,
-                  bgcolor: alpha(theme.palette.primary.main, 0.05)
-                }
-              }}
+                    borderColor: theme.palette.primary.main,
+                    bgcolor: alpha(theme.palette.primary.main, 0.05)
+                },
+            }}
             >
-              Search for subjects, files... (Ctrl+K)
+              Search... (Ctrl+K)
             </Button>
           )}
 
