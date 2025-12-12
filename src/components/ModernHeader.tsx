@@ -15,25 +15,25 @@ import {
   Search,
   Brightness4,
   Brightness7,
-  Home,
-  Menu as MenuIcon,
   ArrowBack,
+  WifiOff,
+  Menu as MenuIcon // Import Menu Icon
 } from "@mui/icons-material";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import SearchDialog from "../components/SearchDialog"; // Assuming you keep your existing search dialog logic
+import SearchDialog from "../components/SearchDialog";
 import { ColorModeContext } from "../pages/_app";
-import { WifiOff, CloudDone } from "@mui/icons-material";
 import { offlineContext } from "../pages/_app";
 
 interface Props {
   title: string;
-  isSearch?: boolean; // If true, shows search icon
-  isHome?: boolean; // If true, we are on home page
-  data?: any; // Data for search dialog
+  isSearch?: boolean;
+  isHome?: boolean;
+  data?: any;
+  onMenuClick?: () => void; // Add this prop
 }
 
-export default function ModernHeader({ title, isSearch = true, data }: Props) {
+export default function ModernHeader({ title, isSearch = true, data, onMenuClick }: Props) {
   const theme = useTheme();
   const router = useRouter();
   const colorMode = React.useContext(ColorModeContext);
@@ -62,8 +62,19 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
             minHeight: { xs: 60, md: 70 },
           }}
         >
-          {/* LEFT: Branding or Back Button */}
           <Box display="flex" alignItems="center" gap={1}>
+            {/* Show Menu Button on Mobile if onMenuClick is provided */}
+            {onMenuClick && (
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={onMenuClick}
+                sx={{ mr: 1, display: { md: 'none' } }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+
             {isOffline && (
               <Tooltip title="You are offline. Content may be outdated.">
                 <Box
@@ -82,6 +93,7 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
                 </Box>
               </Tooltip>
             )}
+            
             {!isHomePage && (
               <IconButton
                 edge="start"
@@ -120,7 +132,6 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
             </Link>
           </Box>
 
-          {/* CENTER: Search Bar (Desktop) */}
           {!isMobile && isSearch && data && (
             <Button
               variant="outlined"
@@ -144,9 +155,7 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
             </Button>
           )}
 
-          {/* RIGHT: Actions */}
           <Box display="flex" alignItems="center" gap={1}>
-            {/* Mobile Search Icon */}
             {isMobile && isSearch && data && (
               <IconButton onClick={() => setSearchOpen(true)} color="inherit">
                 <Search />
@@ -166,7 +175,6 @@ export default function ModernHeader({ title, isSearch = true, data }: Props) {
         </Toolbar>
       </AppBar>
 
-      {/* Global Search Dialog Connection */}
       {data && (
         <SearchDialog open={searchOpen} setOpen={setSearchOpen} data={data} />
       )}

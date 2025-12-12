@@ -1,41 +1,53 @@
-import React, { useState } from 'react';
-import Head from 'next/head';
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { useRouter } from 'next/router';
-import { google } from 'googleapis';
-import { Box, Container, CircularProgress, Alert } from '@mui/material';
+import React, { useState } from "react";
+import Head from "next/head";
+import { GetStaticProps, GetStaticPaths } from "next";
+import { useRouter } from "next/router";
+import { google } from "googleapis";
+import { Box, Container, CircularProgress, Alert } from "@mui/material";
 
-// Imports
-import ModernHeader from '../../components/ModernHeader'; // Use the new header
-import FileBrowser from '../../components/FileBrowser';
-import SubjectSemesterPrompt from '../../components/SubjectSemesterPrompt'; // Import the logic
-import { SubjectMaterials } from '../../utils/types';
+import ModernHeader from "../../components/ModernHeader";
+import FileBrowser from "../../components/FileBrowser";
+import SubjectSemesterPrompt from "../../components/SubjectSemesterPrompt";
+import SubjectSidebar from "../../components/SubjectSidebar"; // Import the new sidebar
+import { SubjectMaterials } from "../../utils/types";
 
 interface Props {
   subject: string;
   initialData: SubjectMaterials;
-  // In a real app, you'd pass the semester index of this subject from getStaticProps
-  // For now, we simulate or fetch it
-  semesterIndex?: number; 
+  semesterIndex?: number;
 }
 
-export default function SubjectPage({ subject, initialData, semesterIndex = 1 }: Props) {
+export default function SubjectPage({
+  subject,
+  initialData,
+  semesterIndex = 1,
+}: Props) {
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Helper to add to custom list (passed to Prompt)
   const handleAddToCustom = (abbr: string) => {
-    const current = JSON.parse(localStorage.getItem('customSemesterSubjects') || '[]');
+    const current = JSON.parse(
+      localStorage.getItem("customSemesterSubjects") || "[]"
+    );
     if (!current.includes(abbr)) {
       const updated = [...current, abbr];
-      localStorage.setItem('customSemesterSubjects', JSON.stringify(updated));
-      // Force custom semester mode
-      localStorage.setItem('semester', '-2');
+      localStorage.setItem("customSemesterSubjects", JSON.stringify(updated));
+      localStorage.setItem("semester", "-2");
     }
+  };
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
   };
 
   if (router.isFallback) {
     return (
-      <Box height="100vh" display="flex" justifyContent="center" alignItems="center">
+      <Box
+        height="100vh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -47,48 +59,44 @@ export default function SubjectPage({ subject, initialData, semesterIndex = 1 }:
         <title>{subject} | Materials</title>
       </Head>
 
-      {/* 2. APPLIED MODERN HEADER */}
-      <ModernHeader 
-        title={subject} 
-        isSearch={true} 
-        data={initialData} // Pass data so search dialog works
+      {/* 2. Add the Sidebar here. 
+          It floats on top, so it doesn't break your existing layout. */}
+      <SubjectSidebar
+        currentSubject={subject}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
       />
 
-      <Container maxWidth="xl" sx={{ py: 4, minHeight: '85vh' }}>
+      <ModernHeader title={subject} isSearch={true} data={initialData} />
+
+      <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
         {!initialData ? (
           <Alert severity="error">Failed to load data.</Alert>
         ) : (
-          <FileBrowser 
-            data={initialData} 
-            subjectName={subject} 
-          />
+          <FileBrowser data={initialData} subjectName={subject} />
         )}
       </Container>
 
-      {/* 1. APPLIED LOGIC PROMPT */}
-      <SubjectSemesterPrompt 
-        subjectAbbr={subject} 
-        semesterIndex={semesterIndex} // You need to ensure this is passed correctly
+      <SubjectSemesterPrompt
+        subjectAbbr={subject}
+        semesterIndex={semesterIndex}
         onAddToCustom={handleAddToCustom}
       />
     </>
   );
 }
 
-// ... getStaticProps and getStaticPaths remain the same as previous response ...
-// --- Server Side Data Fetching Logic ---
-
+// ... getStaticPaths and getStaticProps remain exactly the same as in your file ...
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Ideally fetch list of all subjects here
   return {
-    paths: [], // Generate on demand for faster builds
+    paths: [],
     fallback: true,
   };
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
-  
+
   if (!subject) return { notFound: true };
 
   try {
@@ -101,8 +109,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     });
 
     const drive = google.drive({ version: "v3", auth });
-    
-    // 1. Find the Subject Folder
+
     const subjectFolderRes = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
       fields: "files(id, name)",
@@ -114,52 +121,49 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     const subjectFolderId = subjectFolderRes.data.files[0].id;
 
-    // 2. Find Category Folders (Lectures, Exams, etc.)
     const categoriesRes = await drive.files.list({
       q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
       fields: "files(id, name)",
     });
 
-    const categoryMap: Record<string, string> = {}; // ID -> Name
+    const categoryMap: Record<string, string> = {};
     const categoryIds: string[] = [];
 
-    categoriesRes.data.files?.forEach(file => {
-      if(file.id && file.name) {
+    categoriesRes.data.files?.forEach((file) => {
+      if (file.id && file.name) {
         categoryMap[file.id] = file.name;
         categoryIds.push(file.id);
       }
     });
 
     if (categoryIds.length === 0) {
-       return { props: { subject, initialData: {} }, revalidate: 3600 };
+      return { props: { subject, initialData: {} }, revalidate: 3600 };
     }
 
-    // 3. Fetch Files inside Categories
-    // Batch query for efficiency
-    const parentsQuery = categoryIds.map(id => `'${id}' in parents`).join(' OR ');
-    
+    const parentsQuery = categoryIds
+      .map((id) => `'${id}' in parents`)
+      .join(" OR ");
+
     const filesRes = await drive.files.list({
       q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder' and trashed = false`,
       fields: "files(id, name, mimeType, parents, size, webViewLink)",
       pageSize: 1000,
     });
 
-    // 4. Organize Data
     const organizedData: SubjectMaterials = {};
 
-    filesRes.data.files?.forEach(file => {
+    filesRes.data.files?.forEach((file) => {
       const parentId = file.parents?.[0];
       if (parentId && categoryMap[parentId]) {
         const categoryName = categoryMap[parentId];
         if (!organizedData[categoryName]) organizedData[categoryName] = [];
-        
-        // @ts-ignore - Google Types are slightly loose, we cast strictly
+
         organizedData[categoryName].push({
           id: file.id!,
           name: file.name!,
           mimeType: file.mimeType!,
           parents: file.parents || [],
-          size: parseInt(file.size || '0'),
+          size: parseInt(file.size || "0"),
         });
       }
     });
@@ -169,14 +173,13 @@ export const getStaticProps: GetStaticProps = async (context) => {
         subject,
         initialData: organizedData,
       },
-      revalidate: 3600, // Revalidate every hour
+      revalidate: 3600,
     };
-
   } catch (error) {
     console.error("Drive API Error:", error);
-    return { 
-      props: { subject, initialData: {} }, 
-      revalidate: 60 // Retry sooner if error
+    return {
+      props: { subject, initialData: {} },
+      revalidate: 60,
     };
   }
 };
