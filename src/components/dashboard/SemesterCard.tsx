@@ -1,11 +1,22 @@
-import React from 'react';
-import { 
-  Paper, Typography, Box, Chip, Grid, 
-  IconButton, Collapse, useTheme, alpha 
-} from '@mui/material';
-import { School, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import React from "react";
+import {
+  Paper,
+  Typography,
+  Box,
+  Chip,
+  Grid,
+  IconButton,
+  Collapse,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import {
+  School,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+} from "@mui/icons-material";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 interface Subject {
   name: string;
@@ -16,19 +27,27 @@ interface SemesterCardProps {
   semesterIndex: number;
   subjects: Subject[];
   isCurrent?: boolean;
+  customTitle?: string;
 }
 
-export default function SemesterCard({ semesterIndex, subjects, isCurrent = false }: SemesterCardProps) {
+export default function SemesterCard({
+  semesterIndex,
+  subjects,
+  isCurrent = false,
+  customTitle,
+}: SemesterCardProps) {
   const theme = useTheme();
   const [expanded, setExpanded] = React.useState(true);
-  const isDark = theme.palette.mode === 'dark';
+  const isDark = theme.palette.mode === "dark";
 
   // --- Dynamic Color Logic ---
   // If current, use Primary color. If not, use standard background.
   // In Dark mode, we use lower opacity for backgrounds to avoid glare.
-  
-  const cardBorder = isCurrent 
-    ? `2px solid ${isDark ? theme.palette.primary.dark : theme.palette.primary.main}` 
+
+  const cardBorder = isCurrent
+    ? `2px solid ${
+        isDark ? theme.palette.primary.dark : theme.palette.primary.main
+      }`
     : `1px solid ${theme.palette.divider}`;
 
   const headerBg = isCurrent
@@ -36,15 +55,17 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
     : alpha(theme.palette.background.paper, 1);
 
   const iconBg = isCurrent
-    ? (isDark ? theme.palette.primary.dark : theme.palette.primary.main)
+    ? isDark
+      ? theme.palette.primary.dark
+      : theme.palette.primary.main
     : theme.palette.action.selected;
 
-  const iconColor = isCurrent ? '#fff' : theme.palette.text.secondary;
+  const iconColor = isCurrent ? "#fff" : theme.palette.text.secondary;
 
   // Animation variants
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
@@ -58,16 +79,19 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
         elevation={isCurrent ? 0 : 0} // Flat design is cleaner, use border for emphasis
         sx={{
           borderRadius: 4,
-          overflow: 'hidden',
-          height: '100%',
+          overflow: "hidden",
+          height: "100%",
           border: cardBorder,
           bgcolor: theme.palette.background.paper,
-          transition: 'all 0.2s',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, isDark ? 0.3 : 0.08)}`,
-            borderColor: isCurrent ? undefined : theme.palette.primary.light
-          }
+          transition: "all 0.2s",
+          "&:hover": {
+            transform: "translateY(-2px)",
+            boxShadow: `0 8px 24px ${alpha(
+              theme.palette.common.black,
+              isDark ? 0.3 : 0.08
+            )}`,
+            borderColor: isCurrent ? undefined : theme.palette.primary.light,
+          },
         }}
       >
         {/* Header */}
@@ -76,41 +100,47 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
           sx={{
             p: 2,
             bgcolor: headerBg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            borderBottom: `1px solid ${theme.palette.divider}`
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >
           <Box display="flex" alignItems="center" gap={1.5}>
-            <Box 
-              sx={{ 
-                p: 1, 
-                borderRadius: '50%', 
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: "50%",
                 bgcolor: iconBg,
                 color: iconColor,
-                display: 'flex',
-                boxShadow: isCurrent ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}` : 'none'
+                display: "flex",
+                boxShadow: isCurrent
+                  ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`
+                  : "none",
               }}
             >
               <School fontSize="small" />
             </Box>
-            <Typography 
-              variant="h6" 
-              fontWeight={700} 
+            <Typography
+              variant="h6"
+              fontWeight={700}
               fontSize="1.1rem"
-              color={isCurrent ? 'primary' : 'text.primary'}
+              color={isCurrent ? "primary" : "text.primary"}
             >
-              {semesterIndex === -2 ? "My Shortcuts" : `Semester ${semesterIndex}`}
+              {customTitle
+                ? customTitle
+                : semesterIndex === -2
+                ? "Shortcuts"
+                : `Semester ${semesterIndex}`}
             </Typography>
             {isCurrent && (
-              <Chip 
-                label="Active" 
-                size="small" 
-                color="primary" 
+              <Chip
+                label="Active"
+                size="small"
+                color="primary"
                 variant={isDark ? "outlined" : "filled"}
-                sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800 }} 
+                sx={{ height: 20, fontSize: "0.65rem", fontWeight: 800 }}
               />
             )}
           </Box>
@@ -125,40 +155,44 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
             <Grid container spacing={1}>
               {subjects.map((subj) => (
                 <Grid item xs={6} sm={12} md={6} key={subj.abbreviation}>
-                  <Link href={`/subjects/${subj.abbreviation}`} passHref style={{ textDecoration: 'none' }}>
+                  <Link
+                    href={`/subjects/${subj.abbreviation}`}
+                    passHref
+                    style={{ textDecoration: "none" }}
+                  >
                     <Box
                       sx={{
                         p: 1.5,
                         borderRadius: 3,
                         // Subtle background for items
                         bgcolor: alpha(theme.palette.text.primary, 0.03),
-                        border: '1px solid transparent',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
+                        border: "1px solid transparent",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        "&:hover": {
                           bgcolor: alpha(theme.palette.primary.main, 0.08),
                           borderColor: alpha(theme.palette.primary.main, 0.2),
-                          transform: 'scale(1.02)'
-                        }
+                          transform: "scale(1.02)",
+                        },
                       }}
                     >
-                      <Typography 
-                        variant="subtitle2" 
-                        fontWeight={800} 
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={800}
                         color={isDark ? "primary.light" : "primary.main"}
                         noWrap
                       >
                         {subj.abbreviation}
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary" 
-                        sx={{ 
-                          display: '-webkit-box',
-                          overflow: 'hidden',
-                          WebkitBoxOrient: 'vertical',
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: "-webkit-box",
+                          overflow: "hidden",
+                          WebkitBoxOrient: "vertical",
                           WebkitLineClamp: 1,
-                          lineHeight: 1.2
+                          lineHeight: 1.2,
                         }}
                       >
                         {subj.name}
