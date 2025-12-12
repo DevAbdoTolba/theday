@@ -35,4 +35,5 @@ export interface ParsedFile {
   type: 'folder' | 'pdf' | 'image' | 'video' | 'youtube' | 'doc' | 'sheet' | 'slide' | 'unknown';
   thumbnailUrl?: string;
   isExternalLink: boolean;
+  youtubeId?: string | null
 }
