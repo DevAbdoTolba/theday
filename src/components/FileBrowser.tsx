@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Box, Tabs, Tab, Grid, Typography, Fade, 
-  TextField, InputAdornment, useMediaQuery, useTheme 
+  TextField, InputAdornment, useTheme, ToggleButtonGroup, ToggleButton 
 } from '@mui/material';
-import { Search, SentimentDissatisfied } from '@mui/icons-material';
+import { 
+  Search, SentimentDissatisfied, GridView, ViewList 
+} from '@mui/icons-material';
 import { SubjectMaterials } from '../utils/types';
 import { parseGoogleFile } from '../utils/helpers';
 import { FileCard } from './FileCard';
+import { FileListItem } from './FileListItem';
 
 interface Props {
   data: SubjectMaterials;
@@ -15,79 +18,65 @@ interface Props {
 
 export default function FileBrowser({ data, subjectName }: Props) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // 1. Get Categories (Tabs)
-  const categories = useMemo(() => {
-    return ['All', ...Object.keys(data)];
-  }, [data]);
+  // Categories
+  const categories = useMemo(() => ['All', ...Object.keys(data)], [data]);
 
-  // 2. Flatten and Filter Data
+  // Flatten and Filter
   const filteredFiles = useMemo(() => {
     const currentCategory = categories[activeTab];
-    let files = [];
-
-    if (currentCategory === 'All') {
-      // Combine all files from all categories
-      files = Object.values(data).flat();
-    } else {
-      files = data[currentCategory] || [];
-    }
-
-    // Parse them first
+    let files = currentCategory === 'All' ? Object.values(data).flat() : data[currentCategory] || [];
     const parsed = files.map(parseGoogleFile);
-
-    // Apply text filter
     if (!filter) return parsed;
     return parsed.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
   }, [data, activeTab, filter, categories]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setActiveTab(newValue);
+
+  const handleViewChange = (_: React.MouseEvent<HTMLElement>, nextView: 'grid' | 'list') => {
+    if (nextView !== null) setViewMode(nextView);
   };
 
   if (!data || Object.keys(data).length === 0) {
     return (
       <Box display="flex" flexDirection="column" alignItems="center" py={10} opacity={0.6}>
         <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h6">No materials found for this subject yet.</Typography>
+        <Typography variant="h6">No materials found.</Typography>
       </Box>
     );
   }
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* Controls Area */}
-      <Box 
-        sx={{ 
-          mb: 4, 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          alignItems: { xs: 'stretch', md: 'center' },
-          gap: 2,
-          justifyContent: 'space-between'
-        }}
-      >
-        <Typography variant="h4" fontWeight={800} color="primary">
-          {subjectName}
-        </Typography>
-
-        <TextField
-          placeholder="Filter files..."
-          size="small"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search color="action" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ maxWidth: { xs: '100%', md: 300 } }}
-        />
+      {/* Header / Controls */}
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, justifyContent: 'space-between' }}>
+        <Typography variant="h4" fontWeight={800} color="primary">{subjectName}</Typography>
+        
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            placeholder="Search files..."
+            size="small"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            InputProps={{
+              startAdornment: (<InputAdornment position="start"><Search color="action" /></InputAdornment>),
+            }}
+            sx={{ flexGrow: 1, minWidth: 200 }}
+          />
+          <ToggleButtonGroup 
+            value={viewMode} 
+            exclusive 
+            onChange={handleViewChange} 
+            size="small"
+            sx={{ height: 40 }}
+          >
+            <ToggleButton value="grid"><GridView /></ToggleButton>
+            <ToggleButton value="list"><ViewList /></ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Box>
 
       {/* Tabs */}
@@ -95,40 +84,36 @@ export default function FileBrowser({ data, subjectName }: Props) {
         <Tabs 
           value={activeTab} 
           onChange={handleTabChange} 
-          variant="scrollable"
+          variant="scrollable" 
           scrollButtons="auto"
-          allowScrollButtonsMobile
-          sx={{
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '1rem',
-              minHeight: 48,
-            }
-          }}
+          sx={{ '& .MuiTab-root': { fontWeight: 600, textTransform: 'none' } }}
         >
-          {categories.map((cat) => (
-            <Tab key={cat} label={cat} />
-          ))}
+          {categories.map((cat) => <Tab key={cat} label={cat} />)}
         </Tabs>
       </Box>
 
-      {/* Grid Content */}
-      <Fade in={true} key={activeTab}>
+      {/* Content */}
+      <Fade in={true} key={`${activeTab}-${viewMode}`}>
         <Box>
           {filteredFiles.length > 0 ? (
-            <Grid container spacing={3}>
-              {filteredFiles.map((file) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-                  <FileCard file={file} />
-                </Grid>
-              ))}
-            </Grid>
+            viewMode === 'grid' ? (
+              <Grid container spacing={3}>
+                {filteredFiles.map((file) => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+                    <FileCard file={file} />
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Box>
+                {filteredFiles.map((file) => (
+                  <FileListItem key={file.id} file={file} />
+                ))}
+              </Box>
+            )
           ) : (
-            <Box textAlign="center" py={8}>
-              <Typography variant="body1" color="text.secondary">
-                No files found matching your criteria.
-              </Typography>
+            <Box textAlign="center" py={8} color="text.secondary">
+              <Typography>No matching files found.</Typography>
             </Box>
           )}
         </Box>
