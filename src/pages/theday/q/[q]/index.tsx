@@ -8,6 +8,7 @@ import Footer from '../../../../components/Footer';
 import GoogleDriveSearch from '../../../../components/GoogleDriveSearch';
 import DashboardHeader from '../../../../components/dashboard/DashboardHeader';
 import SemesterCard from '../../../../components/dashboard/SemesterCard';
+import ModernHeader from '../../../../components/ModernHeader';
 
 // Context
 import { SearchProvider } from '../../../../context/SearchContext';
@@ -73,7 +74,11 @@ export default function TheDayPage() {
   return (
     <SearchProvider>
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
-        <Header title="TheDay" isSearch={false} />
+       <ModernHeader 
+          title="Dashboard" 
+          isSearch={false} 
+          isHome={true} 
+        />
         
         <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 } }}>
           

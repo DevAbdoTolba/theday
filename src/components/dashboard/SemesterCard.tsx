@@ -21,6 +21,25 @@ interface SemesterCardProps {
 export default function SemesterCard({ semesterIndex, subjects, isCurrent = false }: SemesterCardProps) {
   const theme = useTheme();
   const [expanded, setExpanded] = React.useState(true);
+  const isDark = theme.palette.mode === 'dark';
+
+  // --- Dynamic Color Logic ---
+  // If current, use Primary color. If not, use standard background.
+  // In Dark mode, we use lower opacity for backgrounds to avoid glare.
+  
+  const cardBorder = isCurrent 
+    ? `2px solid ${isDark ? theme.palette.primary.dark : theme.palette.primary.main}` 
+    : `1px solid ${theme.palette.divider}`;
+
+  const headerBg = isCurrent
+    ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1) // Darker in dark mode
+    : alpha(theme.palette.background.paper, 1);
+
+  const iconBg = isCurrent
+    ? (isDark ? theme.palette.primary.dark : theme.palette.primary.main)
+    : theme.palette.action.selected;
+
+  const iconColor = isCurrent ? '#fff' : theme.palette.text.secondary;
 
   // Animation variants
   const cardVariants = {
@@ -36,20 +55,18 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
       transition={{ duration: 0.3 }}
     >
       <Paper
-        elevation={isCurrent ? 4 : 1}
+        elevation={isCurrent ? 0 : 0} // Flat design is cleaner, use border for emphasis
         sx={{
-          p: 0,
           borderRadius: 4,
           overflow: 'hidden',
           height: '100%',
-          border: isCurrent 
-            ? `2px solid ${theme.palette.primary.main}` 
-            : `1px solid ${theme.palette.divider}`,
+          border: cardBorder,
           bgcolor: theme.palette.background.paper,
-          transition: 'transform 0.2s, box-shadow 0.2s',
+          transition: 'all 0.2s',
           '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: theme.shadows[4],
+            transform: 'translateY(-2px)',
+            boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, isDark ? 0.3 : 0.08)}`,
+            borderColor: isCurrent ? undefined : theme.palette.primary.light
           }
         }}
       >
@@ -58,9 +75,7 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
           onClick={() => setExpanded(!expanded)}
           sx={{
             p: 2,
-            background: isCurrent 
-              ? alpha(theme.palette.primary.main, 0.1) 
-              : alpha(theme.palette.background.default, 0.5),
+            bgcolor: headerBg,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -73,21 +88,28 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
               sx={{ 
                 p: 1, 
                 borderRadius: '50%', 
-                bgcolor: isCurrent ? theme.palette.primary.main : theme.palette.action.selected,
-                color: isCurrent ? '#fff' : theme.palette.text.secondary,
-                display: 'flex'
+                bgcolor: iconBg,
+                color: iconColor,
+                display: 'flex',
+                boxShadow: isCurrent ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}` : 'none'
               }}
             >
               <School fontSize="small" />
             </Box>
-            <Typography variant="h6" fontWeight={700} fontSize="1.1rem">
+            <Typography 
+              variant="h6" 
+              fontWeight={700} 
+              fontSize="1.1rem"
+              color={isCurrent ? 'primary' : 'text.primary'}
+            >
               {semesterIndex === -2 ? "My Shortcuts" : `Semester ${semesterIndex}`}
             </Typography>
             {isCurrent && (
               <Chip 
-                label="Current" 
+                label="Active" 
                 size="small" 
                 color="primary" 
+                variant={isDark ? "outlined" : "filled"}
                 sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800 }} 
               />
             )}
@@ -107,21 +129,23 @@ export default function SemesterCard({ semesterIndex, subjects, isCurrent = fals
                     <Box
                       sx={{
                         p: 1.5,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.primary.main, 0.05),
+                        borderRadius: 3,
+                        // Subtle background for items
+                        bgcolor: alpha(theme.palette.text.primary, 0.03),
                         border: '1px solid transparent',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         '&:hover': {
-                          bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          borderColor: alpha(theme.palette.primary.main, 0.3),
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          borderColor: alpha(theme.palette.primary.main, 0.2),
+                          transform: 'scale(1.02)'
                         }
                       }}
                     >
                       <Typography 
                         variant="subtitle2" 
                         fontWeight={800} 
-                        color="primary"
+                        color={isDark ? "primary.light" : "primary.main"}
                         noWrap
                       >
                         {subj.abbreviation}
