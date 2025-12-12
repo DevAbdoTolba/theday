@@ -1,22 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { useRouter } from 'next/router';
 import { google } from 'googleapis';
 import { Box, Container, CircularProgress, Alert } from '@mui/material';
 
-import Header from '../../components/Header';
+// Imports
+import ModernHeader from '../../components/ModernHeader'; // Use the new header
 import FileBrowser from '../../components/FileBrowser';
+import SubjectSemesterPrompt from '../../components/SubjectSemesterPrompt'; // Import the logic
 import { SubjectMaterials } from '../../utils/types';
-import { unstable_cache } from 'next/cache';
 
 interface Props {
   subject: string;
   initialData: SubjectMaterials;
+  // In a real app, you'd pass the semester index of this subject from getStaticProps
+  // For now, we simulate or fetch it
+  semesterIndex?: number; 
 }
 
-export default function SubjectPage({ subject, initialData }: Props) {
+export default function SubjectPage({ subject, initialData, semesterIndex = 1 }: Props) {
   const router = useRouter();
+
+  // Helper to add to custom list (passed to Prompt)
+  const handleAddToCustom = (abbr: string) => {
+    const current = JSON.parse(localStorage.getItem('customSemesterSubjects') || '[]');
+    if (!current.includes(abbr)) {
+      const updated = [...current, abbr];
+      localStorage.setItem('customSemesterSubjects', JSON.stringify(updated));
+      // Force custom semester mode
+      localStorage.setItem('semester', '-2');
+    }
+  };
 
   if (router.isFallback) {
     return (
@@ -32,22 +47,35 @@ export default function SubjectPage({ subject, initialData }: Props) {
         <title>{subject} | Materials</title>
       </Head>
 
-      <Header title={subject} isSearch={false} />
+      {/* 2. APPLIED MODERN HEADER */}
+      <ModernHeader 
+        title={subject} 
+        isSearch={true} 
+        data={initialData} // Pass data so search dialog works
+      />
 
       <Container maxWidth="xl" sx={{ py: 4, minHeight: '85vh' }}>
         {!initialData ? (
-          <Alert severity="error">Failed to load data. Please try again later.</Alert>
+          <Alert severity="error">Failed to load data.</Alert>
         ) : (
           <FileBrowser 
             data={initialData} 
-            subjectName={subject} // You might want to map Abbr -> Full Name here via context
+            subjectName={subject} 
           />
         )}
       </Container>
+
+      {/* 1. APPLIED LOGIC PROMPT */}
+      <SubjectSemesterPrompt 
+        subjectAbbr={subject} 
+        semesterIndex={semesterIndex} // You need to ensure this is passed correctly
+        onAddToCustom={handleAddToCustom}
+      />
     </>
   );
 }
 
+// ... getStaticProps and getStaticPaths remain the same as previous response ...
 // --- Server Side Data Fetching Logic ---
 
 export const getStaticPaths: GetStaticPaths = async () => {
