@@ -24,6 +24,7 @@ export function useSmartSubject(
 
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     const loadData = async () => {
       try {
@@ -48,7 +49,13 @@ export function useSmartSubject(
           setFetching(true);
         }
 
-        const response = await fetch(`/api/subjects/${encodeURIComponent(subject)}`);
+        const response = await fetch(
+          `/api/subjects/${encodeURIComponent(subject)}`,
+          { 
+            signal: abortController.signal,
+            // Add timeout for better error handling
+          }
+        );
         
         if (!response.ok) {
           throw new Error('Failed to fetch subject data');
@@ -67,6 +74,11 @@ export function useSmartSubject(
           setFetching(false);
         }
       } catch (err) {
+        // Ignore abort errors (component unmounted)
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        
         console.error('Error in useSmartSubject:', err);
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Unknown error');
@@ -80,6 +92,7 @@ export function useSmartSubject(
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, [subject, initialStaticData, getSubjectByName, addOrUpdateSubject]);
 
