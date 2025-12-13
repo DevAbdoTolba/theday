@@ -3,13 +3,15 @@ import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
 import { google } from "googleapis";
-import { Box, Container, CircularProgress, Alert } from "@mui/material";
+import { Box, Container, CircularProgress, Alert, LinearProgress } from "@mui/material";
 
 import ModernHeader from "../../components/ModernHeader";
 import FileBrowser from "../../components/FileBrowser";
 import SubjectSemesterPrompt from "../../components/SubjectSemesterPrompt";
 import SubjectSidebar from "../../components/SubjectSidebar"; // Import the new sidebar
 import { SubjectMaterials } from "../../utils/types";
+import { useSmartSubject } from "../../hooks/useSmartSubject";
+import IndexedProvider from "../../context/IndexedContext";
 
 interface Props {
   subject: string;
@@ -24,6 +26,12 @@ export default function SubjectPage({
 }: Props) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Use the smart hook
+  const { data, loading, fetching, newItems, error } = useSmartSubject(
+    subject,
+    initialData
+  );
 
   const handleAddToCustom = (abbr: string) => {
     const current = JSON.parse(
@@ -59,6 +67,13 @@ export default function SubjectPage({
         <title>{subject} | Materials</title>
       </Head>
 
+      {/* Background fetch indicator */}
+      {fetching && (
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999 }}>
+          <LinearProgress />
+        </Box>
+      )}
+
       {/* 2. Add the Sidebar here. 
           It floats on top, so it doesn't break your existing layout. */}
       <SubjectSidebar
@@ -67,13 +82,19 @@ export default function SubjectPage({
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      <ModernHeader title={subject} isSearch={true} data={initialData} onMenuClick={handleDrawerToggle} />
+      <ModernHeader title={subject} isSearch={true} data={data || initialData} onMenuClick={handleDrawerToggle} />
 
       <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
-        {!initialData ? (
+        {loading ? (
+          <Box display="flex" justifyContent="center" py={10}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error">{error}</Alert>
+        ) : !data ? (
           <Alert severity="error">Failed to load data.</Alert>
         ) : (
-          <FileBrowser data={initialData} subjectName={subject} />
+          <FileBrowser data={data} subjectName={subject} newItems={newItems} fetching={fetching} />
         )}
       </Container>
 
