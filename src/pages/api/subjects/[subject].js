@@ -37,19 +37,12 @@ export default async function handler(req, res) {
       return FilesData;
     }
 
-    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
+    // Use only the first subject folder (matching old logic)
+    const SubjectFolderId = SubjectFolders.files[0].id;
     
-    if (SubjectFolderIds.length === 0) {
-      return FilesData;
-    }
-    
-    // Step 2: Get all subfolders in a single query (optimized from loop)
-    const subFolderQuery = SubjectFolderIds
-      .map((id) => `'${id}' in parents`)
-      .join(" OR ");
-    
+    // Step 2: Get subfolders from the first subject folder
     const { data: SubjectSubFolders } = await drive.files.list({
-      q: `mimeType = 'application/vnd.google-apps.folder' and (${subFolderQuery})`,
+      q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
       fields: "files(id, name)",
       pageSize: 1000,
     });
