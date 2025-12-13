@@ -35,7 +35,6 @@ export const FileListItem = ({ file, onClick }: Props) => {
   // Right-side Action Icon Logic
   const getActionIcon = () => {
     if (file.type === 'folder') return <FolderOpen fontSize="small" />;
-    if (file.type === 'url') return <OpenInNew fontSize="small" />;
     if (file.type === 'youtube' || file.type === 'video') return <PlayCircle fontSize="small" />;
     // Default for docs, pdfs, images:
     return <Visibility fontSize="small" />;
@@ -88,7 +87,7 @@ export const FileListItem = ({ file, onClick }: Props) => {
       {/* 3. Type Chip (Hidden on mobile) */}
       <Box sx={{ display: { xs: 'none', sm: 'block' }, mr: 2 }}>
         <Chip 
-          label={file.type === 'url' ? 'LINK' : file.type.toUpperCase()} 
+          label={file.type.toUpperCase()} 
           size="small" 
           variant="outlined" 
           color={file.type === 'youtube' ? 'error' : 'default'}
@@ -97,7 +96,7 @@ export const FileListItem = ({ file, onClick }: Props) => {
       </Box>
 
       {/* 4. Action Icon (The Update) */}
-      <Tooltip title={file.type === 'url' ? "Open in new tab" : "Preview here"}>
+      <Tooltip title="Preview here">
         <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', opacity: 0.7 }}>
           {getActionIcon()}
         </Box>

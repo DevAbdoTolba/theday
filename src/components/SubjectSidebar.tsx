@@ -122,7 +122,7 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
             startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
-            sx: { borderRadius: 2, bgcolor: theme.palette.action.input }
+            sx: { borderRadius: 2, bgcolor: theme.palette.action.hover }
           }}
         />
       </Box>

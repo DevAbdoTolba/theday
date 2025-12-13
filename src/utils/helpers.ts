@@ -29,7 +29,7 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
       type = 'youtube';
       youtubeId = getYoutubeId(url);
     } else {
-      type = 'url';
+      type = 'unknown';
     }
   } else {
     // Standard File Logic (PDFs, Images, etc.)
@@ -46,9 +46,9 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
   }
 
   // 4. Generate Thumbnail URL
-  let thumbnailUrl;
+  let thumbnailUrl: string | undefined;
   if (type === 'youtube' && youtubeId) {
-    thumbnailUrl = getYoutubeThumbnail(youtubeId);
+    thumbnailUrl = getYoutubeThumbnail(youtubeId) ?? undefined;
   } else if (type === 'image' || type === 'video') {
     thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
   }

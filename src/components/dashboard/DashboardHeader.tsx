@@ -234,7 +234,7 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
           <Box display="flex" flexDirection="column" gap={2}>
             {filteredSemesters.length === 0 ? (
               <Box py={4} textAlign="center" color="text.secondary">
-                <Typography>No subjects found matching "{searchQuery}"</Typography>
+                <Typography>{`No subjects found matching "${searchQuery}"`}</Typography>
               </Box>
             ) : (
               filteredSemesters.map((sem) => {
