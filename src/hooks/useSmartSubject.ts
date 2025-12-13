@@ -51,10 +51,7 @@ export function useSmartSubject(
 
         const response = await fetch(
           `/api/subjects/${encodeURIComponent(subject)}`,
-          { 
-            signal: abortController.signal,
-            // Add timeout for better error handling
-          }
+          { signal: abortController.signal }
         );
         
         if (!response.ok) {
