@@ -3,10 +3,10 @@ import VisualState from './feedback/VisualState';
 import React, { useState, useMemo } from 'react';
 import { 
   Box, Tabs, Tab, Grid, Typography, Fade, 
-  TextField, InputAdornment, useTheme, ToggleButtonGroup, ToggleButton 
+  TextField, InputAdornment, useTheme, ToggleButtonGroup, ToggleButton, Chip 
 } from '@mui/material';
 import { 
-  Search, SentimentDissatisfied, GridView, ViewList 
+  Search, SentimentDissatisfied, GridView, ViewList, Brightness1 
 } from '@mui/icons-material';
 import { SubjectMaterials, ParsedFile } from '../utils/types';
 import { parseGoogleFile } from '../utils/helpers';
@@ -24,6 +24,7 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
+  const [showOnlyNew, setShowOnlyNew] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [playingVideo, setPlayingVideo] = useState<{ id: string, title: string } | null>(null);
 
@@ -35,9 +36,35 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
     const currentCategory = categories[activeTab];
     let files = currentCategory === 'All' ? Object.values(data).flat() : data[currentCategory] || [];
     const parsed = files.map(parseGoogleFile);
-    if (!filter) return parsed;
-    return parsed.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
-  }, [data, activeTab, filter, categories]);
+    
+    // Apply text filter
+    let filtered = parsed;
+    if (filter) {
+      filtered = filtered.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
+    }
+    
+    // Apply "new items only" filter
+    if (showOnlyNew) {
+      filtered = filtered.filter(f => newItems.includes(f.id));
+    }
+    
+    return filtered;
+  }, [data, activeTab, filter, showOnlyNew, newItems, categories]);
+  
+  // Count new items in current view (before applying showOnlyNew filter)
+  const newItemsInView = useMemo(() => {
+    const currentCategory = categories[activeTab];
+    let files = currentCategory === 'All' ? Object.values(data).flat() : data[currentCategory] || [];
+    const parsed = files.map(parseGoogleFile);
+    
+    // Apply text filter
+    let filtered = parsed;
+    if (filter) {
+      filtered = filtered.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
+    }
+    
+    return filtered.filter(f => newItems.includes(f.id)).length;
+  }, [data, activeTab, filter, newItems, categories]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setActiveTab(newValue);
 
@@ -67,7 +94,7 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
       <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, justifyContent: 'space-between' }}>
         <Typography variant="h4" fontWeight={800} color="primary">{subjectName}</Typography>
         
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <TextField
             placeholder="Search files..."
             size="small"
@@ -78,6 +105,79 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
             }}
             sx={{ flexGrow: 1, minWidth: 200 }}
           />
+          
+          {/* New Items Filter - Only show if there are new items in current view */}
+          {newItemsInView > 0 && (
+            <Chip
+              label={`New (${newItemsInView})`}
+              icon={<Brightness1 sx={{ fontSize: '0.8rem !important' }} />}
+              onClick={() => setShowOnlyNew(!showOnlyNew)}
+              color={showOnlyNew ? "success" : "default"}
+              variant={showOnlyNew ? "filled" : "outlined"}
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                height: 40,
+                px: 2,
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'visible',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                animation: 'fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                '@keyframes fadeInScale': {
+                  '0%': {
+                    opacity: 0,
+                    transform: 'scale(0.8)',
+                  },
+                  '100%': {
+                    opacity: 1,
+                    transform: 'scale(1)',
+                  },
+                },
+                '&::before': showOnlyNew ? {} : {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 'inherit',
+                  padding: '2px',
+                  background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light}, ${theme.palette.success.main})`,
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  animation: 'shimmer 2s infinite',
+                },
+                '@keyframes shimmer': {
+                  '0%': {
+                    backgroundPosition: '-200% 0',
+                  },
+                  '100%': {
+                    backgroundPosition: '200% 0',
+                  },
+                },
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: showOnlyNew 
+                    ? `0 4px 20px ${theme.palette.success.main}40`
+                    : `0 4px 20px ${theme.palette.primary.main}20`,
+                },
+                '& .MuiChip-icon': {
+                  color: showOnlyNew ? 'inherit' : theme.palette.success.main,
+                  animation: showOnlyNew ? 'none' : 'pulse 2s infinite',
+                },
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 1,
+                    transform: 'scale(1)',
+                  },
+                  '50%': {
+                    opacity: 0.7,
+                    transform: 'scale(1.2)',
+                  },
+                },
+              }}
+            />
+          )}
+          
           <ToggleButtonGroup 
             value={viewMode} 
             exclusive 
