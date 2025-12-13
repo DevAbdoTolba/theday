@@ -1,5 +1,5 @@
 import { Box, Typography, CircularProgress } from '@mui/material';
-import { Inbox, sentimentDissatisfied } from '@mui/icons-material';
+import { Inbox, SentimentDissatisfied } from '@mui/icons-material';
 
 interface Props {
   type: 'loading' | 'empty' | 'error';
@@ -19,7 +19,7 @@ export default function VisualState({ type, message }: Props) {
     >
       {type === 'loading' && <CircularProgress size={40} thickness={4} />}
       {type === 'empty' && <Inbox sx={{ fontSize: 60, opacity: 0.5 }} />}
-      {type === 'error' && <sentimentDissatisfied sx={{ fontSize: 60, color: 'error.main', opacity: 0.8 }} />}
+      {type === 'error' && <SentimentDissatisfied sx={{ fontSize: 60, color: 'error.main', opacity: 0.8 }} />}
       
       {message && <Typography variant="body2" fontWeight={600}>{message}</Typography>}
     </Box>

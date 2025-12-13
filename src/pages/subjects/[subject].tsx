@@ -65,7 +65,6 @@ export default function SubjectPage({
         currentSubject={subject}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
-        onMobileOpen={() => setMobileOpen(true)} // <--- Add this prop
       />
 
       <ModernHeader title={subject} isSearch={true} data={initialData} onMenuClick={handleDrawerToggle} />
