@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     let FilesData = {};
     const drive = google.drive({ version: "v3", auth });
 
+    // Step 1: Find subject folders
     const { data: SubjectFolders } = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
@@ -37,37 +38,54 @@ export default async function handler(req, res) {
     }
 
     const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
-    let Parents = "";
-    let dic = {};
+    
+    // Step 2: Get all subfolders in a single query (optimized from loop)
+    const subFolderQuery = SubjectFolderIds
+      .map((id) => `'${id}' in parents`)
+      .join(" OR ");
+    
+    const { data: SubjectSubFolders } = await drive.files.list({
+      q: `mimeType = 'application/vnd.google-apps.folder' and (${subFolderQuery})`,
+      fields: "files(id, name)",
+      pageSize: 1000,
+    });
 
-    for (const SubjectFolderId of SubjectFolderIds) {
-      const { data: SubjectSubFolders } = await drive.files.list({
-        q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
-        fields: "files(id, name)",
-      });
-
-      for (const subFolder of SubjectSubFolders.files) {
-        dic[subFolder.id] = subFolder.name;
-        Parents += `'${subFolder.id}' in parents OR `;
-      }
+    if (!SubjectSubFolders.files || SubjectSubFolders.files.length === 0) {
+      return FilesData;
     }
 
-    Parents = Parents.slice(0, -4); // Remove the trailing " OR "
+    // Build the dictionary and parent query
+    const dic = {};
+    const parentIds = [];
+    for (const subFolder of SubjectSubFolders.files) {
+      dic[subFolder.id] = subFolder.name;
+      parentIds.push(subFolder.id);
+    }
 
-    if (Parents.length <= 0) return FilesData;
+    // Step 3: Get all files in a single query
+    const parentsQuery = parentIds
+      .map((id) => `'${id}' in parents`)
+      .join(" OR ");
 
     const { data: Files } = await drive.files.list({
-      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
+      q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder'`,
       fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
       pageSize: 1000,
     });
 
+    if (!Files.files) {
+      return FilesData;
+    }
+
+    // Organize files by parent folder
     for (const file of Files.files) {
       const parentName = dic[file.parents[0]];
-      if (!FilesData[parentName]) {
-        FilesData[parentName] = [];
+      if (parentName) {
+        if (!FilesData[parentName]) {
+          FilesData[parentName] = [];
+        }
+        FilesData[parentName].push(file);
       }
-      FilesData[parentName].push(file);
     }
 
     return FilesData;
