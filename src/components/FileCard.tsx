@@ -30,9 +30,10 @@ const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
 interface FileCardProps {
   file: ParsedFile;
   onClick?: () => void;
+  isNew?: boolean;
 }
 
-export const FileCard = ({ file, onClick }: FileCardProps) => {
+export const FileCard = ({ file, onClick, isNew }: FileCardProps) => {
   const theme = useTheme();
   
   // Determine thumbnail source
@@ -50,8 +51,18 @@ export const FileCard = ({ file, onClick }: FileCardProps) => {
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 3,
-        border: `1px solid ${theme.palette.divider}`,
+        border: `1px solid ${isNew ? theme.palette.success.main : theme.palette.divider}`,
         transition: 'all 0.2s ease-in-out',
+        position: 'relative',
+        animation: isNew ? 'pulse 2s infinite' : 'none',
+        '@keyframes pulse': {
+          '0%, 100%': {
+            boxShadow: `0 0 0 0 ${theme.palette.success.main}40`,
+          },
+          '50%': {
+            boxShadow: `0 0 0 8px ${theme.palette.success.main}00`,
+          },
+        },
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[4],
@@ -98,7 +109,7 @@ export const FileCard = ({ file, onClick }: FileCardProps) => {
         )}
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
-          <Box display="flex" gap={1} mb={1}>
+          <Box display="flex" gap={1} mb={1} flexWrap="wrap">
             <Chip 
               size="small" 
               label={file.type.toUpperCase()} 
@@ -112,6 +123,23 @@ export const FileCard = ({ file, onClick }: FileCardProps) => {
                 icon={<OpenInNew sx={{ fontSize: '0.8rem !important' }} />}
                 label="LINK" 
                 sx={{ fontSize: '0.65rem', height: 20 }}
+              />
+            )}
+            {isNew && (
+              <Chip 
+                size="small" 
+                label="NEW" 
+                color="success"
+                sx={{ 
+                  fontSize: '0.65rem', 
+                  height: 20,
+                  fontWeight: 700,
+                  animation: 'blink 1.5s ease-in-out infinite',
+                  '@keyframes blink': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                  }
+                }}
               />
             )}
           </Box>
