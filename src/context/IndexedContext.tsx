@@ -57,12 +57,17 @@ export default function IndexedProvider({
   const [updatedItems, setUpdatedItems] = useState<string[]>([]);
 
   const getSubjectByName = async (name: string) => {
+    // --- FIX: Add Guard Clause Here ---
+    if (!name || typeof name !== 'string') return null; 
+    
     const data = await db.subjects.where("name").equals(name).first();
     console.log("Fetched data:", data);
     return data;
   };
 
   const addOrUpdateSubject = async (name: string, folders: DataMap) => {
+    if (!name) return; // Safety check
+
     const existingSubject = await getSubjectByName(name);
 
     if (existingSubject) {
@@ -155,7 +160,6 @@ export default function IndexedProvider({
         addOrUpdateSubject,
       }}
     >
-      {/* {loading && <LinearProgress />} */}
       {children}
     </IndexedContext.Provider>
   );

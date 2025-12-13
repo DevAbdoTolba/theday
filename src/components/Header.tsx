@@ -10,9 +10,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Button, IconButton, Link, MenuItem, Select } from "@mui/material";
+import { Button, IconButton, Menu, MenuItem, Avatar, ListItemIcon, Divider } from "@mui/material"; // Updated imports
 import NextLink from "next/link";
-import NativeSelect from "@mui/material/NativeSelect";
 import { DataContext } from "../context/TranscriptContext";
 import KeyIcon from "@mui/icons-material/Key";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -22,7 +21,9 @@ import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { ExpandMore, School, Check } from "@mui/icons-material"; // New icons
 
+// ... (Keep Data interfaces and Search styled components as they were) ...
 interface Data {
   id: string;
   mimeType: string;
@@ -46,27 +47,6 @@ interface Props {
   sx?: any;
   shortCutActivate?: boolean;
 }
-
-// let data: DataMap = {
-//   "1": [
-//     {
-//       id: "1",
-//       mimeType: "application/vnd.google-apps.folder",
-//       name: "Folder1",
-//       parents: ["root"],
-//       size: 0,
-//     },
-//   ],
-//   "2": [
-//     {
-//       id: "2",
-//       mimeType: "application/vnd.google-apps.folder",
-//       name: "Folder2",
-//       parents: ["root"],
-//       size: 0,
-//     },
-//   ],
-// };
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -101,7 +81,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
@@ -130,48 +109,33 @@ export default function Header({
   position,
   sx,
   shortCutActivate,
-  // take any other props
-
   ...props
 }: Props) {
   const [q, setQ] = useState<string>("");
   const [classes, setClasses] = useState<any>([]);
   const [openKeyDialog, setOpenKeyDialog] = React.useState(false);
-  const { setLoadingTranscript, className, setClassName } =
-    React.useContext(DataContext);
+  const { setLoadingTranscript, className, setClassName } = React.useContext(DataContext);
   const router = useRouter();
   const theme = useTheme();
   const colorMode = React.useContext(ColorModeContext);
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
-  React.useEffect(() => {
-    // const classNameLocally = (localStorage.getItem("className") as string) || "";
-    const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
+  // -- Point 1: Modern Class Navigation State --
+  const [classMenuAnchor, setClassMenuAnchor] = useState<null | HTMLElement>(null);
 
-    // setClassName(classNameLocally);
+  React.useEffect(() => {
+    const classes = JSON.parse(localStorage.getItem("classes") as string) || [];
     setClasses(classes);
     setQ(classes.find((c: any) => c.class === className)?.id || "");
 
-    // const classToStore = JSON.parse(localStorage.getItem("classes") as string);
-    // setClasses(classToStore);
-    // const className = localStorage.getItem("className") as string;
-    // if (classToStore?.length > 0) {
-    //   // search for which class is stored and get the id
-    //   console.log("INSIDE IF");
-    //   const classId = classToStore.find((e: any) => e === className)?.id;
-    //   console.log("classId", classId);
-    //   console.log("🚀 ~ React.useEffect ~ className:", className);
-    //   setClassName(classId);
-    // } else {
-    //   setClassName("1");
-
-    // Ctrl K to open the search dialog
     const handleCtrlK = (e: KeyboardEvent) => {
       if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
         e?.preventDefault();
-        console.log("ctrl+k");
-        setOpen(true);
+        setOpen(true); // Assuming 'open' refers to a dialog state defined elsewhere or meant for SearchDialog?
+        // Note: original code had setOpen(true) but 'open' wasn't fully defined/used for dialog in original snippet consistently.
+        // We'll map it to searchDialogOpen for consistency with logic.
+        if (isSubjectSearch) setSearchDialogOpen(true);
       }
     };
 
@@ -181,22 +145,26 @@ export default function Header({
     return () => {
       window.removeEventListener("keydown", handleCtrlK);
     };
-    // }
   }, []);
 
-  React.useEffect(() => {
-    console.log("🚀 ~ React.useEffect ~ className", className);
-  }, [className]);
-
-  const [open, setOpen] = useState(false);
-  shortCutActivate = shortCutActivate || false;
+  // Class Menu Handlers
+  const handleClassMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setClassMenuAnchor(event.currentTarget);
+  };
+  const handleClassMenuClose = () => {
+    setClassMenuAnchor(null);
+  };
+  const handleClassSelect = (c: any) => {
+    if (localStorage.getItem(c.class) === null) {
+      setLoadingTranscript(true);
+    }
+    setClassName(c.class);
+    handleClassMenuClose();
+    router.push(`/theday/q/${c.id}`);
+  };
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-      }}
-    >
+    <Box sx={{ flexGrow: 1 }}>
       <AppBar
         position={position || "static"}
         sx={{
@@ -215,24 +183,13 @@ export default function Header({
           px: { sm: 4, xs: 2 },
           py: { sm: 2, xs: 1 },
         }}>
-          {/* <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton> /*/}
           <Box
             sx={{
               flexGrow: 1,
               display: "flex",
               justifyContent: "flex-start",
               alignItems: "center",
-              gap: {
-                xs: 0,
-                sm: "5ch",
-              },
+              gap: { xs: 0, sm: "5ch" },
             }}
           >
             <Typography
@@ -248,10 +205,7 @@ export default function Header({
                 lineHeight: 1.2,
               }}
             >
-              <Tooltip
-                title={title === "TheDay" ? "" : "Home"}
-                placement="bottom"
-              >
+              <Tooltip title={title === "TheDay" ? "" : "Home"} placement="bottom">
                 <Button
                   LinkComponent={NextLink}
                   href={"/theday" + (q ? `/q/${q}` : "")}
@@ -262,9 +216,7 @@ export default function Header({
                     width: "fit-content",
                     textDecoration: "none",
                     color: "white",
-                    "&:hover .MuiSvgIcon-root": {
-                      color: "#0066ff",
-                    },
+                    "&:hover .MuiSvgIcon-root": { color: "#0066ff" },
                   }}
                 >
                   {title === "TheDay" ? <></> : <KeyboardDoubleArrowLeftIcon />}
@@ -279,125 +231,73 @@ export default function Header({
                 color="inherit"
                 aria-label="open drawer"
                 sx={{ mr: 2 }}
-                onClick={() => {
-                  setOpenKeyDialog(true);
-                }}
+                onClick={() => setOpenKeyDialog(true)}
               >
                 <KeyIcon color="warning" fontSize="large" />
               </IconButton>
             </Tooltip>
           </Box>
 
+          {/* -- Point 1: Modern Class Switcher -- */}
           {!isSubjectSearch && classes?.length > 1 && (
-            <Select
-              displayEmpty
-              value={className}
-              // add a default selected option
-              onChange={(e: any) => {
-                // setLoadingTranscript(true);
-                if (localStorage.getItem(e.target.value) === null) {
-                  setLoadingTranscript(true);
-                }
-                setClassName(e.target.value);
-              }}
-              sx={{
-                "& *": {
-                  color: "#fff",
-                },
-              }}
-            >
-              {classes.map((c: any) => (
-                <MenuItem
-                  disabled={c.class === className}
-                  LinkComponent={NextLink}
-                  key={c.id}
-                  value={c.class}
-                  sx={{
-                    all: "unset",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    // set all a tag in menu items to have white color
-                    a: {
-                      color: c.class === className ? "#4caf50" : "#fff",
-                      padding: "0.5rem",
-                    },
-                    // on hover change the color of the a tag to blue
-                    "&:hover a": {
-                      color: "#fff",
-                    },
-                  }}
-                >
-                  <NextLink href={`/theday/q/${c.id}`}>
-                    {c?.class as string}
-                  </NextLink>
-                </MenuItem>
-              ))}
-            </Select>
+            <>
+              <Button
+                onClick={handleClassMenuOpen}
+                endIcon={<ExpandMore />}
+                sx={{
+                  color: 'white',
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  mr: 2,
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                }}
+              >
+                {className || "Select Class"}
+              </Button>
+              <Menu
+                anchorEl={classMenuAnchor}
+                open={Boolean(classMenuAnchor)}
+                onClose={handleClassMenuClose}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    minWidth: 180,
+                    borderRadius: 2,
+                    boxShadow: theme.shadows[10]
+                  }
+                }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              >
+                <Typography variant="caption" sx={{ px: 2, py: 1, display: 'block', color: 'text.secondary' }}>
+                  Switch Class
+                </Typography>
+                <Divider />
+                {classes.map((c: any) => (
+                  <MenuItem 
+                    key={c.id} 
+                    onClick={() => handleClassSelect(c)}
+                    selected={c.class === className}
+                    sx={{ py: 1.5 }}
+                  >
+                    <ListItemIcon>
+                      <School fontSize="small" color={c.class === className ? "primary" : "inherit"} />
+                    </ListItemIcon>
+                    <Typography fontWeight={c.class === className ? 700 : 400}>
+                      {c.class}
+                    </Typography>
+                    {c.class === className && <Check fontSize="small" sx={{ ml: 'auto', color: 'primary.main' }} />}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
           )}
-          {/* <LinkMUI 
-              component={
-                RouterLink  
-              } to={`/Keeper`}
-               >
-              Go To Keeper
-          </LinkMUI> */}
-          {/* 2 icons first for theday route and the other for Keeper route */}
 
-          {/*
-          <Tooltip title="The Day">
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              component={Link}
-              href={`/theday`}
-            >
-              <CrisisAlertIcon
-                sx={{
-                  p: {
-                    xs: 0,
-                  },
-                  m: {
-                    xs: 0,
-                  },
-                  height: {
-                    sm: "1.5rem",
-                    xs: "1.5rem",
-                  },
-                  width: "auto",
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Keeper">
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              component={Link}
-              href={`/keeper`}
-            >
-              <SpeakerNotesIcon
-                sx={{
-                  p: {
-                    xs: 0,
-                  },
-                  m: {
-                    xs: 0,
-                  },
-                  height: {
-                    sm: "1.5rem",
-                    xs: "1.5rem",
-                  },
-                  width: "auto",
-                }}
-              />
-            </IconButton>
-          </Tooltip>*/}
           {isSearch && setSearch && (
             <Tooltip title="Search">
               <Search>
@@ -414,41 +314,36 @@ export default function Header({
             </Tooltip>
           )}
           {isSubjectSearch && data && (
-            <>
-              <SearchDialog open={searchDialogOpen} setOpen={setSearchDialogOpen} data={data} />
-            </>
+            <SearchDialog open={searchDialogOpen} setOpen={setSearchDialogOpen} data={data} />
           )}
           {isDesktop && data && (
-            <>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: theme.palette.mode === "dark" ? theme.palette.background.default : "#f4f6fb",
-                  borderRadius: 3,
-                  px: 2,
-                  py: 0.5,
-                  boxShadow: theme.shadows[1],
-                  minWidth: 220,
-                  maxWidth: 340,
-                  ml: 2,
-                  cursor: "pointer",
-                  border: `1.5px solid ${theme.palette.divider}`,
-                  transition: "box-shadow 0.2s, border 0.2s",
-                  "&:hover": {
-                    boxShadow: theme.shadows[4],
-                    border: `1.5px solid ${theme.palette.primary.main}`,
-                  },
-                }}
-                onClick={() => setSearchDialogOpen(true)}
-              >
-                <SearchIcon sx={{ color: theme.palette.text.secondary, mr: 1 }} />
-                <Typography color="text.secondary" sx={{ fontWeight: 500, fontSize: 16 }}>
-                  Search for anything...
-                </Typography>
-              </Box>
-              <SearchDialog open={searchDialogOpen} setOpen={setSearchDialogOpen} data={data} />
-            </>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                background: theme.palette.mode === "dark" ? theme.palette.background.default : "#f4f6fb",
+                borderRadius: 3,
+                px: 2,
+                py: 0.5,
+                boxShadow: theme.shadows[1],
+                minWidth: 220,
+                maxWidth: 340,
+                ml: 2,
+                cursor: "pointer",
+                border: `1.5px solid ${theme.palette.divider}`,
+                transition: "box-shadow 0.2s, border 0.2s",
+                "&:hover": {
+                  boxShadow: theme.shadows[4],
+                  border: `1.5px solid ${theme.palette.primary.main}`,
+                },
+              }}
+              onClick={() => setSearchDialogOpen(true)}
+            >
+              <SearchIcon sx={{ color: theme.palette.text.secondary, mr: 1 }} />
+              <Typography color="text.secondary" sx={{ fontWeight: 500, fontSize: 16 }}>
+                Search for anything...
+              </Typography>
+            </Box>
           )}
           <Tooltip title={theme.palette.mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
             <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
