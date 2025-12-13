@@ -8,7 +8,7 @@ import {
 import { 
   Search, SentimentDissatisfied, GridView, ViewList 
 } from '@mui/icons-material';
-import { SubjectMaterials } from '../utils/types';
+import { SubjectMaterials, ParsedFile } from '../utils/types';
 import { parseGoogleFile } from '../utils/helpers';
 import { FileCard } from './FileCard';
 import { FileListItem } from './FileListItem';
@@ -52,7 +52,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
   if (!data || Object.keys(data).length === 0) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" py={10} opacity={0.6}>
+      <Box display="flex" flexDirection="column" alignItems="center" py={10} sx={{ opacity: 0.6 }}>
         <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h6">No materials found.</Typography>
       </Box>

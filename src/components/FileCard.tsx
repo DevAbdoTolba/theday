@@ -101,7 +101,7 @@ export const FileCard = ({ file, onClick }: FileCardProps) => {
           <Box display="flex" gap={1} mb={1}>
             <Chip 
               size="small" 
-              label={file.type === 'url' ? 'URL' : file.type.toUpperCase()} 
+              label={file.type.toUpperCase()} 
               color={file.type === 'youtube' ? 'error' : file.type === 'folder' ? 'primary' : 'default'}
               variant="outlined"
               sx={{ fontSize: '0.65rem', height: 20 }}
