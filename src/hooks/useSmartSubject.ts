@@ -23,6 +23,9 @@ export function useSmartSubject(
   const { getSubjectByName, addOrUpdateSubject } = useIndexedContext();
 
   useEffect(() => {
+    // --- FIX: Stop execution if subject is undefined/null ---
+    if (!subject) return;
+
     let isMounted = true;
     const abortController = new AbortController();
 

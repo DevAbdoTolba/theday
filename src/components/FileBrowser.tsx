@@ -3,10 +3,10 @@ import VisualState from './feedback/VisualState';
 import React, { useState, useMemo } from 'react';
 import { 
   Box, Tabs, Tab, Grid, Typography, Fade, 
-  TextField, InputAdornment, useTheme, ToggleButtonGroup, ToggleButton, Chip 
+  TextField, InputAdornment, useTheme, ToggleButtonGroup, ToggleButton, Chip, Divider
 } from '@mui/material';
 import { 
-  Search, SentimentDissatisfied, GridView, ViewList, Brightness1 
+  Search, SentimentDissatisfied, GridView, ViewList, AutoAwesome
 } from '@mui/icons-material';
 import { SubjectMaterials, ParsedFile } from '../utils/types';
 import { parseGoogleFile } from '../utils/helpers';
@@ -51,19 +51,19 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
     return filtered;
   }, [data, activeTab, filter, showOnlyNew, newItems, categories]);
   
-  // Count new items in current view (before applying showOnlyNew filter)
+  // Count new items in current view
   const newItemsInView = useMemo(() => {
     const currentCategory = categories[activeTab];
     let files = currentCategory === 'All' ? Object.values(data).flat() : data[currentCategory] || [];
     const parsed = files.map(parseGoogleFile);
     
-    // Apply text filter
-    let filtered = parsed;
+    // Apply text filter for count
     if (filter) {
-      filtered = filtered.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
+      const lowerFilter = filter.toLowerCase();
+      return parsed.filter(f => newItems.includes(f.id) && f.name.toLowerCase().includes(lowerFilter)).length;
     }
     
-    return filtered.filter(f => newItems.includes(f.id)).length;
+    return parsed.filter(f => newItems.includes(f.id)).length;
   }, [data, activeTab, filter, newItems, categories]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setActiveTab(newValue);
@@ -91,102 +91,60 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
   return (
     <Box sx={{ width: '100%' }}>
       {/* Header / Controls */}
-      <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, justifyContent: 'space-between' }}>
-        <Typography variant="h4" fontWeight={800} color="primary">{subjectName}</Typography>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: { xs: 'stretch', md: 'center' }, justifyContent: 'space-between' }}>
         
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField
-            placeholder="Search files..."
-            size="small"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            InputProps={{
-              startAdornment: (<InputAdornment position="start"><Search color="action" /></InputAdornment>),
-            }}
-            sx={{ flexGrow: 1, minWidth: 200 }}
-          />
+        {/* Search Bar */}
+        <TextField
+          placeholder="Search files..."
+          size="small"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          InputProps={{
+            startAdornment: (<InputAdornment position="start"><Search color="action" /></InputAdornment>),
+            sx: { borderRadius: 2 }
+          }}
+          sx={{ flexGrow: 1, maxWidth: { md: 400 } }}
+        />
+        
+        {/* Right Side Controls Group */}
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', justifyContent: { xs: 'space-between', md: 'flex-end' } }}>
           
-          {/* New Items Filter - Only show if there are new items in current view */}
+          {/* New Items Filter - Positioned next to View Toggle */}
           {newItemsInView > 0 && (
             <Chip
               label={`New (${newItemsInView})`}
-              icon={<Brightness1 sx={{ fontSize: '0.8rem !important' }} />}
+              icon={<AutoAwesome sx={{ fontSize: '1rem !important' }} />}
               onClick={() => setShowOnlyNew(!showOnlyNew)}
-              color={showOnlyNew ? "success" : "default"}
+              color={showOnlyNew ? "primary" : "default"}
               variant={showOnlyNew ? "filled" : "outlined"}
               sx={{
-                fontWeight: 700,
-                fontSize: '0.875rem',
+                fontWeight: 600,
                 height: 40,
-                px: 2,
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'visible',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                animation: 'fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                '@keyframes fadeInScale': {
-                  '0%': {
-                    opacity: 0,
-                    transform: 'scale(0.8)',
-                  },
-                  '100%': {
-                    opacity: 1,
-                    transform: 'scale(1)',
-                  },
-                },
-                '&::before': showOnlyNew ? {} : {
-                  content: '""',
-                  position: 'absolute',
-                  inset: 0,
-                  borderRadius: 'inherit',
-                  padding: '2px',
-                  background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.light}, ${theme.palette.success.main})`,
-                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                  animation: 'shimmer 2s infinite',
-                },
-                '@keyframes shimmer': {
-                  '0%': {
-                    backgroundPosition: '-200% 0',
-                  },
-                  '100%': {
-                    backgroundPosition: '200% 0',
-                  },
-                },
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                  boxShadow: showOnlyNew 
-                    ? `0 4px 20px ${theme.palette.success.main}40`
-                    : `0 4px 20px ${theme.palette.primary.main}20`,
-                },
-                '& .MuiChip-icon': {
-                  color: showOnlyNew ? 'inherit' : theme.palette.success.main,
-                  animation: showOnlyNew ? 'none' : 'pulse 2s infinite',
-                },
-                '@keyframes pulse': {
-                  '0%, 100%': {
-                    opacity: 1,
-                    transform: 'scale(1)',
-                  },
-                  '50%': {
-                    opacity: 0.7,
-                    transform: 'scale(1.2)',
-                  },
-                },
+                borderRadius: 2,
+                border: showOnlyNew ? 'none' : `1px solid ${theme.palette.divider}`,
+                transition: 'all 0.2s ease',
               }}
             />
           )}
           
+          <Divider orientation="vertical" flexItem sx={{ height: 24, alignSelf: 'center', display: newItemsInView > 0 ? 'block' : 'none' }} />
+
           <ToggleButtonGroup 
             value={viewMode} 
             exclusive 
             onChange={handleViewChange} 
             size="small"
-            sx={{ height: 40 }}
+            sx={{ 
+              height: 40,
+              '& .MuiToggleButton-root': { 
+                borderRadius: 2,
+                px: 2,
+                border: `1px solid ${theme.palette.divider}`
+              } 
+            }}
           >
-            <ToggleButton value="grid"><GridView /></ToggleButton>
-            <ToggleButton value="list"><ViewList /></ToggleButton>
+            <ToggleButton value="grid"><GridView fontSize="small" /></ToggleButton>
+            <ToggleButton value="list"><ViewList fontSize="small" /></ToggleButton>
           </ToggleButtonGroup>
         </Box>
       </Box>
@@ -209,7 +167,7 @@ export default function FileBrowser({ data, subjectName, newItems = [], fetching
         <Box>
           {filteredFiles.length > 0 ? (
             viewMode === 'grid' ? (
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 {filteredFiles.map((file) => (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
                     <FileCard 

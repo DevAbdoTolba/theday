@@ -6,19 +6,17 @@ import {
 import { 
   PictureAsPdf, Folder, Image as ImageIcon, YouTube, 
   Article, Slideshow, TableChart, InsertDriveFile, 
-  OpenInNew 
+  OpenInNew, PlayCircle
 } from '@mui/icons-material';
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
-import { PlayCircle, Link as LinkIcon } from '@mui/icons-material';
 
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
   switch (type) {
-    case 'youtube': return <PlayCircle color="error" />; // Specific YouTube Icon
+    case 'youtube': return <PlayCircle color="error" />; 
     case 'pdf': return <PictureAsPdf color="error" />;
     case 'folder': return <Folder color="primary" />;
     case 'image': return <ImageIcon color="secondary" />;
-    case 'youtube': return <YouTube color="error" />;
     case 'video': return <YouTube color="action" />;
     case 'doc': return <Article color="primary" />;
     case 'slide': return <Slideshow color="warning" />;
@@ -49,20 +47,12 @@ export const FileCard = ({ file, onClick, isNew }: FileCardProps) => {
       sx={{ 
         height: '100%', 
         display: 'flex', 
-        flexDirection: 'column',
+        flexDirection: 'column', 
         borderRadius: 3,
-        border: `1px solid ${isNew ? theme.palette.success.main : theme.palette.divider}`,
+        // REMOVED ANIMATION, kept clean border
+        border: `1px solid ${isNew ? theme.palette.primary.main : theme.palette.divider}`,
         transition: 'all 0.2s ease-in-out',
         position: 'relative',
-        animation: isNew ? 'pulse 2s infinite' : 'none',
-        '@keyframes pulse': {
-          '0%, 100%': {
-            boxShadow: `0 0 0 0 ${theme.palette.success.main}40`,
-          },
-          '50%': {
-            boxShadow: `0 0 0 8px ${theme.palette.success.main}00`,
-          },
-        },
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[4],
@@ -70,7 +60,6 @@ export const FileCard = ({ file, onClick, isNew }: FileCardProps) => {
         }
       }}
       onClick={(e) => {
-        // Prevent default link behavior if we are handling it manually (like YouTube)
         if (file.type === 'youtube') {
           e.preventDefault();
           if (onClick) onClick();
@@ -115,31 +104,28 @@ export const FileCard = ({ file, onClick, isNew }: FileCardProps) => {
               label={file.type.toUpperCase()} 
               color={file.type === 'youtube' ? 'error' : file.type === 'folder' ? 'primary' : 'default'}
               variant="outlined"
-              sx={{ fontSize: '0.65rem', height: 20 }}
+              sx={{ fontSize: '0.65rem', height: 20 }} 
             />
             {file.isExternalLink && (
               <Chip 
                 size="small" 
                 icon={<OpenInNew sx={{ fontSize: '0.8rem !important' }} />}
                 label="LINK" 
-                sx={{ fontSize: '0.65rem', height: 20 }}
+                sx={{ fontSize: '0.65rem', height: 20 }} 
               />
             )}
+            {/* FIXED NEW BADGE: No Animation, Solid Color */}
             {isNew && (
               <Chip 
                 size="small" 
                 label="NEW" 
-                color="success"
+                color="primary"
                 sx={{ 
                   fontSize: '0.65rem', 
                   height: 20,
-                  fontWeight: 700,
-                  animation: 'blink 1.5s ease-in-out infinite',
-                  '@keyframes blink': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.5 },
-                  }
-                }}
+                  fontWeight: 800,
+                  borderRadius: 1
+                }} 
               />
             )}
           </Box>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Snackbar, Alert, IconButton, Tooltip, Typography, Slide } from '@mui/material';
-import { CheckCircle, Cancel, BookmarkAdd, School } from '@mui/icons-material';
+import { Box, Typography, Button, Paper, Slide, useTheme, alpha, IconButton } from '@mui/material';
+import { Close, Add, School } from '@mui/icons-material';
 
 interface Props {
   subjectAbbr: string;
@@ -10,10 +10,11 @@ interface Props {
 
 export default function SubjectSemesterPrompt({ subjectAbbr, semesterIndex, onAddToCustom }: Props) {
   const [step, setStep] = useState<'semester_check' | 'custom_add' | 'hidden'>('hidden');
+  const theme = useTheme();
 
   useEffect(() => {
     const currentSem = localStorage.getItem('semester');
-    // Logic: If user is "New" (no semester set), ask them.
+    // If user is "New" (no semester set) or special semester is active
     if (!currentSem || currentSem === '-1') {
       const timer = setTimeout(() => setStep('semester_check'), 2000);
       return () => clearTimeout(timer);
@@ -32,83 +33,115 @@ export default function SubjectSemesterPrompt({ subjectAbbr, semesterIndex, onAd
     setStep('hidden');
   };
 
-  return (
-    <>
-      {/* Step 1: Semester Check */}
-      <Snackbar 
-        open={step === 'semester_check'} 
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        TransitionComponent={Slide}
+  // Ultra-slim pill design using THEME colors
+  const SlimToast = ({ children }: { children: React.ReactNode }) => (
+    <Slide direction="up" in={true} mountOnEnter unmountOnExit>
+      <Paper
+        elevation={4}
+        sx={{
+          position: 'fixed',
+          bottom: 30,
+          left: '50%',
+          transform: 'translateX(-50%)', // Perfectly centered
+          zIndex: 2000,
+          borderRadius: 50, // Pill shape
+          px: 2.5,
+          py: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+          // Adaptive Background (Glassmorphism)
+          bgcolor: alpha(theme.palette.background.paper, 0.9),
+          backdropFilter: 'blur(8px)',
+          color: theme.palette.text.primary,
+          whiteSpace: 'nowrap',
+          maxWidth: '90vw',
+          // Adaptive Border
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.shadows[6]
+        }}
       >
-        <Alert 
-          severity="info" 
-          variant="filled"
-          icon={<School fontSize="inherit" />}
-          sx={{ 
-            alignItems: 'center', 
-            bgcolor: '#1e293b', 
-            borderRadius: 5,
-            py: 0, 
-            px: 2
-          }}
-          action={
-            <>
-              <Tooltip title="Yes, I am in this semester">
-                <IconButton color="inherit" size="small" onClick={handleYesSemester}>
-                  <CheckCircle />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="No, wrong semester">
-                <IconButton color="inherit" size="small" onClick={handleNoSemester}>
-                  <Cancel />
-                </IconButton>
-              </Tooltip>
-            </>
-          }
-        >
-          <Typography variant="body2" fontWeight={700} sx={{ mr: 1 }}>
-            Semester {semesterIndex}?
-          </Typography>
-        </Alert>
-      </Snackbar>
-
-      {/* Step 2: Custom Add */}
-      <Snackbar 
-        open={step === 'custom_add'} 
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        TransitionComponent={Slide}
-      >
-        <Alert 
-          severity="success" 
-          variant="filled"
-          icon={<BookmarkAdd fontSize="inherit" />}
-          sx={{ 
-            alignItems: 'center', 
-            bgcolor: '#059669', 
-            borderRadius: 5,
-            py: 0,
-            px: 2
-          }}
-          action={
-            <>
-              <Tooltip title={`Add ${subjectAbbr} to Shortcuts`}>
-                <IconButton color="inherit" size="small" onClick={handleAddToCustom}>
-                  <CheckCircle />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Dismiss">
-                <IconButton color="inherit" size="small" onClick={() => setStep('hidden')}>
-                  <Cancel />
-                </IconButton>
-              </Tooltip>
-            </>
-          }
-        >
-          <Typography variant="body2" fontWeight={700} sx={{ mr: 1 }}>
-            Add {subjectAbbr}?
-          </Typography>
-        </Alert>
-      </Snackbar>
-    </>
+        {children}
+      </Paper>
+    </Slide>
   );
+
+  const ActionBtn = ({ label, onClick, variant = 'text' }: any) => (
+    <Button
+      size="small"
+      onClick={onClick}
+      variant={variant === 'filled' ? 'contained' : 'text'}
+      sx={{
+        minWidth: 0,
+        px: 1.5,
+        py: 0.5,
+        borderRadius: 4,
+        fontSize: '0.85rem',
+        fontWeight: 700,
+        textTransform: 'none',
+        // Text Button Styles
+        ...(variant === 'text' && {
+          color: theme.palette.text.secondary,
+          '&:hover': {
+             color: theme.palette.text.primary,
+             bgcolor: alpha(theme.palette.text.primary, 0.05)
+          }
+        }),
+        // Filled Button Styles
+        ...(variant === 'filled' && {
+          boxShadow: 'none',
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+          '&:hover': {
+             bgcolor: theme.palette.primary.dark,
+             boxShadow: 'none'
+          }
+        })
+      }}
+    >
+      {label}
+    </Button>
+  );
+
+  if (step === 'semester_check') {
+    return (
+      <SlimToast>
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <School fontSize="small" color="primary" />
+          <Typography variant="body2" fontWeight={600}>
+            In <b>Semester {semesterIndex}</b>?
+          </Typography>
+        </Box>
+        <Box display="flex" gap={0.5}>
+          <ActionBtn label="No" onClick={handleNoSemester} />
+          <ActionBtn label="Yes" onClick={handleYesSemester} variant="filled" />
+        </Box>
+      </SlimToast>
+    );
+  }
+
+  if (step === 'custom_add') {
+    return (
+      <SlimToast>
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <Add fontSize="small" color="primary" />
+          <Typography variant="body2" fontWeight={600}>
+            Add <b>{subjectAbbr}</b> to shortcuts?
+          </Typography>
+        </Box>
+        <Box display="flex" gap={0.5}>
+          <IconButton 
+            size="small" 
+            onClick={() => setStep('hidden')}
+            sx={{ color: theme.palette.text.secondary, p: 0.5 }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+          <ActionBtn label="Add" onClick={handleAddToCustom} variant="filled" />
+        </Box>
+      </SlimToast>
+    );
+  }
+
+  return null;
 }

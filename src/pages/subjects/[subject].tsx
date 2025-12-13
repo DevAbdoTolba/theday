@@ -8,25 +8,27 @@ import { Box, Container, CircularProgress, Alert, LinearProgress } from "@mui/ma
 import ModernHeader from "../../components/ModernHeader";
 import FileBrowser from "../../components/FileBrowser";
 import SubjectSemesterPrompt from "../../components/SubjectSemesterPrompt";
-import SubjectSidebar from "../../components/SubjectSidebar"; // Import the new sidebar
+import SubjectSidebar from "../../components/SubjectSidebar";
 import { SubjectMaterials } from "../../utils/types";
 import { useSmartSubject } from "../../hooks/useSmartSubject";
+
+// Import local data to find semester index
+import coursesData from '../../Data/data.json';
 
 interface Props {
   subject: string;
   initialData: SubjectMaterials;
-  semesterIndex?: number;
+  semesterIndex: number;
 }
 
 export default function SubjectPage({
   subject,
   initialData,
-  semesterIndex = 1,
+  semesterIndex, // This is now correctly calculated
 }: Props) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Use the smart hook
   const { data, loading, fetching, newItems, error } = useSmartSubject(
     subject,
     initialData
@@ -49,12 +51,7 @@ export default function SubjectPage({
 
   if (router.isFallback) {
     return (
-      <Box
-        height="100vh"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Box height="100vh" display="flex" justifyContent="center" alignItems="center">
         <CircularProgress size={60} />
       </Box>
     );
@@ -66,15 +63,12 @@ export default function SubjectPage({
         <title>{subject} | Materials</title>
       </Head>
 
-      {/* Background fetch indicator */}
       {fetching && (
         <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999 }}>
           <LinearProgress />
         </Box>
       )}
 
-      {/* 2. Add the Sidebar here. 
-          It floats on top, so it doesn't break your existing layout. */}
       <SubjectSidebar
         currentSubject={subject}
         mobileOpen={mobileOpen}
@@ -106,7 +100,6 @@ export default function SubjectPage({
   );
 }
 
-// ... getStaticPaths and getStaticProps remain exactly the same as in your file ...
 export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: [],
@@ -118,6 +111,16 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
 
   if (!subject) return { notFound: true };
+
+  // --- Point 6 Fix: Calculate Semester Index ---
+  let semesterIndex = 1; // Default fallback
+  const foundSemester = coursesData.semesters.find(sem => 
+    sem.subjects.some(subj => subj.abbreviation === subject)
+  );
+  if (foundSemester) {
+    semesterIndex = foundSemester.index;
+  }
+  // ---------------------------------------------
 
   try {
     const auth = new google.auth.GoogleAuth({
@@ -136,7 +139,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     });
 
     if (!subjectFolderRes.data.files?.length) {
-      return { props: { subject, initialData: {} }, revalidate: 3600 };
+      return { props: { subject, initialData: {}, semesterIndex }, revalidate: 3600 };
     }
 
     const subjectFolderId = subjectFolderRes.data.files[0].id;
@@ -157,7 +160,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     });
 
     if (categoryIds.length === 0) {
-      return { props: { subject, initialData: {} }, revalidate: 3600 };
+      return { props: { subject, initialData: {}, semesterIndex }, revalidate: 3600 };
     }
 
     const parentsQuery = categoryIds
@@ -192,13 +195,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
       props: {
         subject,
         initialData: organizedData,
+        semesterIndex, // Pass to component
       },
       revalidate: 3600,
     };
   } catch (error) {
     console.error("Drive API Error:", error);
     return {
-      props: { subject, initialData: {} },
+      props: { subject, initialData: {}, semesterIndex },
       revalidate: 60,
     };
   }

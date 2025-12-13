@@ -12,16 +12,15 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
   let youtubeId = null;
 
   // 2. Check if the name STARTS with a URL (Http/Https)
-  // This regex looks for http(s) followed by the link, then a space, then the name
   const urlPrefixRegex = /^(https?:\/\/[^\s]+)(.*)$/;
   const match = rawName.match(urlPrefixRegex);
 
   if (match) {
     const extractedUrl = match[1]; // The URL part
-    const remainingName = match[2].trim(); // The Name part (e.g. "DFS_BFS-Part1")
+    const remainingName = match[2].trim(); // The Name part
     
     url = extractedUrl;
-    name = remainingName || "Untitled Link"; // Fallback if no name provided
+    name = remainingName || "Untitled Link";
     isExternalLink = true;
 
     // 3. Determine if it's YouTube or Generic URL
@@ -32,8 +31,7 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
       type = 'unknown';
     }
   } else {
-    // Standard File Logic (PDFs, Images, etc.)
-    // Clean up any other weird encoding
+    // Standard File Logic
     name = name.replace(/%20/g, ' '); 
     
     if (file.mimeType.includes('folder')) type = 'folder';
@@ -45,11 +43,12 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
     else if (file.mimeType.includes('document')) type = 'doc';
   }
 
-  // 4. Generate Thumbnail URL
+  // 4. Generate Thumbnail URL - UPDATED LOGIC (Point 8)
   let thumbnailUrl: string | undefined;
   if (type === 'youtube' && youtubeId) {
     thumbnailUrl = getYoutubeThumbnail(youtubeId) ?? undefined;
-  } else if (type === 'image' || type === 'video') {
+  } else if (['image', 'video', 'pdf', 'slide', 'doc', 'sheet'].includes(type)) {
+    // Google Drive generates thumbnails for all these types
     thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
   }
 
@@ -60,21 +59,20 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
     type,
     isExternalLink,
     thumbnailUrl,
-    youtubeId // We pass this ID so the player can use it
+    youtubeId 
   };
 };
 
 export const getYoutubeThumbnail = (id: string | null) => {
   if (!id) return null;
-  let vidId ;
-  try{
-    let tempUrl = new URL(id);
-    vidId = tempUrl.searchParams.get("v");
-  } catch{
-    // not a url
-    return null;
-  }   
-  return `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+  // If id is full URL, extract ID, else assume it is ID (simplified for the helper)
+  // The helper currently takes ID or URL in getYoutubeId, here we assume ID usually
+  // But let's be safe:
+  if (id.includes('http')) {
+      const extracted = getYoutubeId(id);
+      if(extracted) return `https://img.youtube.com/vi/${extracted}/hqdefault.jpg`;
+  }
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
 };
 
 export const getYoutubeId = (url: string) => {

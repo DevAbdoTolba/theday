@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState, useMemo, useRef } from 'react';
 import {
   Box, Typography, useTheme, Snackbar, Alert,
-  alpha, Drawer, List, ListItemButton, ListItemText, IconButton, Collapse, TextField, InputAdornment
+  alpha, Drawer, List, ListItemButton, ListItemText, IconButton, Collapse, CircularProgress
 } from '@mui/material';
 import { 
-  School, InfoOutlined, KeyboardDoubleArrowRight, Close, 
-  ExpandLess, ExpandMore, Book, Search 
+  School, InfoOutlined, KeyboardArrowRight, Close, 
+  ExpandLess, ExpandMore, Book, SentimentDissatisfied
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { DataContext } from '../context/TranscriptContext';
@@ -18,53 +18,54 @@ interface Props {
 
 export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClose }: Props) {
   const theme = useTheme();
-  const { transcript } = useContext(DataContext);
+  const { transcript, loadingTranscript } = useContext(DataContext);
   const [isOpen, setIsOpen] = useState(false);
   const [expandedSemesters, setExpandedSemesters] = useState<Set<number>>(new Set());
   const [showHelper, setShowHelper] = useState(false);
   
-  // Search State
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  // Proximity Button State
+  const [btnTransform, setBtnTransform] = useState(0); 
 
-  // Refs for scrolling
+  // Refs
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLDivElement>(null);
 
-  // --- 1. DATA PREPARATION ---
+  // --- ROBUST DATA PREPARATION ---
   const semesterData = useMemo(() => {
-    if (transcript && 'semesters' in transcript) {
-      return transcript.semesters;
+    if (!transcript) return [];
+    
+    // Check various structures the transcript might arrive in
+    if ('semesters' in transcript && Array.isArray(transcript.semesters)) {
+        return transcript.semesters;
     }
+    // Fallback if transcript itself is the array
+    if (Array.isArray(transcript)) {
+        return transcript;
+    }
+    // Fallback if nested inside 'transcript' key
+    // @ts-ignore
+    if (transcript.transcript && Array.isArray(transcript.transcript.data)) {
+        // @ts-ignore
+        return transcript.transcript.data;
+    }
+
     return [];
   }, [transcript]);
 
-  // --- 2. KEYBOARD SHORTCUTS & AUTO-FOCUS ---
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle Sidebar: Shift + Left Arrow OR Shift + B
-      if (e.shiftKey && (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'b')) {
+      if (e.shiftKey && (e.code === 'ArrowLeft' || e.code === 'KeyB')) {
         e.preventDefault();
         setIsOpen(prev => !prev);
       }
-      // Close: Escape
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.code === 'Escape') setIsOpen(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Auto-focus search when opened
-  useEffect(() => {
-    if (isOpen) {
-      // Small delay to wait for animation
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    }
-  }, [isOpen]);
-
-  // --- 3. AUTO-OPEN LOGIC ---
+  // Auto Open Active Semester
   useEffect(() => {
     if (semesterData.length > 0 && currentSubject) {
       const foundSemester = semesterData.find((sem: any) => 
@@ -76,13 +77,31 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
     }
   }, [semesterData, currentSubject]);
 
-  // --- 4. AUTO-SCROLL TO ACTIVE ITEM ---
+  // Scroll to active
   useEffect(() => {
     if (isOpen && activeItemRef.current) {
       setTimeout(() => {
         activeItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
+  }, [isOpen]);
+
+  // Mouse Proximity (NARROWER & SMOOTHER)
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isOpen) return;
+      const threshold = 100; // Only react when mouse is within 100px of left edge
+      if (e.clientX < threshold) {
+        let shift = -100 + (100 * (1 - (e.clientX / threshold)));
+        if (shift > 0) shift = 0;
+        if (shift < -100) shift = -100;
+        setBtnTransform(shift);
+      } else {
+        setBtnTransform(-100);
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [isOpen]);
 
   const handleToggleSemester = (index: number) => {
@@ -94,189 +113,145 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
     });
   };
 
-  // --- RENDER CONTENT ---
   const SidebarContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
-      
-      {/* Header & Search Area */}
       <Box sx={{ 
-        p: 2, 
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        bgcolor: alpha(theme.palette.background.default, 0.5)
+        p: 2, borderBottom: `1px solid ${theme.palette.divider}`,
+        bgcolor: alpha(theme.palette.background.default, 0.5),
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight="800" color="primary">
-            Curriculum
-          </Typography>
-          <IconButton onClick={() => { setIsOpen(false); onMobileClose(); }}>
-            <Close />
-          </IconButton>
-        </Box>
-
-        <TextField 
-          fullWidth 
-          size="small" 
-          placeholder="Search subjects..." 
-          value={searchQuery}
-          inputRef={searchInputRef}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
-            sx: { borderRadius: 2, bgcolor: theme.palette.action.hover }
-          }}
-        />
+        <Typography variant="h6" fontWeight="800" color="primary">Curriculum</Typography>
+        <IconButton onClick={() => { setIsOpen(false); onMobileClose(); }}><Close /></IconButton>
       </Box>
-
-      {/* Scrollable List */}
       <Box 
         ref={scrollContainerRef}
         sx={{ 
-          flexGrow: 1, 
-          overflowY: 'auto', 
-          overflowX: 'hidden',
-          p: 1.5,
+          flexGrow: 1, overflowY: 'auto', overflowX: 'hidden', p: 1.5,
           '&::-webkit-scrollbar': { width: '6px' },
-          '&::-webkit-scrollbar-thumb': { 
-            background: alpha(theme.palette.primary.main, 0.2), 
-            borderRadius: '10px' 
-          }
+          '&::-webkit-scrollbar-thumb': { background: alpha(theme.palette.primary.main, 0.2), borderRadius: '10px' }
         }}
       >
-        <List disablePadding>
-          {semesterData.map((sem: any) => {
-            // Filter Logic
-            const filteredSubjects = sem.subjects.filter((sub: any) => 
-              sub.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-              sub.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-
-            // If searching, show only semesters with matches. If not searching, show all.
-            if (searchQuery && filteredSubjects.length === 0) return null;
-
-            // Always expand if searching, otherwise use toggle state
-            const isExpanded = searchQuery ? true : expandedSemesters.has(sem.index);
-            const hasActiveItem = sem.subjects.some((s:any) => s.abbreviation === currentSubject);
-
-            return (
-              <Box key={sem.index} sx={{ mb: 1 }}>
-                <ListItemButton 
-                  onClick={() => handleToggleSemester(sem.index)}
-                  sx={{
-                    borderRadius: 2,
-                    mb: 0.5,
-                    bgcolor: hasActiveItem ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-                    border: hasActiveItem ? `1px solid ${alpha(theme.palette.primary.main, 0.2)}` : '1px solid transparent',
-                  }}
-                >
-                  <Book sx={{ mr: 1.5, fontSize: 20, color: hasActiveItem ? 'primary.main' : 'text.secondary' }} />
-                  <ListItemText 
-                    primary={`Semester ${sem.index}`} 
-                    primaryTypographyProps={{ fontWeight: 700 }}
-                  />
-                  {isExpanded ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-
-                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    <Box sx={{ ml: 2.5, pl: 2, borderLeft: `2px solid ${alpha(theme.palette.divider, 0.5)}` }}>
-                      {(searchQuery ? filteredSubjects : sem.subjects).map((sub: any) => {
-                        const isActive = sub.abbreviation === currentSubject;
-                        return (
-                          <Link 
-                            key={sub.abbreviation} 
-                            href={`/subjects/${sub.abbreviation}`} 
-                            passHref 
-                            style={{textDecoration:'none', color:'inherit'}}
-                            onClick={() => { setIsOpen(false); onMobileClose(); }}
-                          >
-                            <Box ref={isActive ? activeItemRef : null}>
-                              <ListItemButton
-                                selected={isActive}
-                                sx={{
-                                  borderRadius: 2,
-                                  py: 0.5,
-                                  my: 0.5,
-                                  '&.Mui-selected': {
-                                    bgcolor: theme.palette.primary.main,
-                                    color: theme.palette.primary.contrastText,
-                                    '&:hover': { bgcolor: theme.palette.primary.dark },
-                                    '& .MuiSvgIcon-root': { color: theme.palette.primary.contrastText }
-                                  }
-                                }}
-                              >
-                                <School sx={{ 
-                                  mr: 1.5, fontSize: 16, 
-                                  opacity: isActive ? 1 : 0.7,
-                                  color: isActive ? 'inherit' : 'text.disabled'
-                                }} />
-                                <ListItemText 
-                                  primary={sub.abbreviation}
-                                  secondary={sub.name}
-                                  primaryTypographyProps={{ fontWeight: isActive ? 700 : 500, fontSize: '0.9rem' }}
-                                  secondaryTypographyProps={{ fontSize: '0.75rem', noWrap: true, color: isActive ? alpha('#fff', 0.8) : 'text.secondary' }}
-                                />
-                              </ListItemButton>
-                            </Box>
-                          </Link>
-                        );
-                      })}
-                    </Box>
-                  </List>
-                </Collapse>
-              </Box>
-            );
-          })}
-        </List>
+        {loadingTranscript && semesterData.length === 0 ? (
+            <Box display="flex" justifyContent="center" mt={4}>
+                <CircularProgress size={30} />
+            </Box>
+        ) : semesterData.length === 0 ? (
+            <Box display="flex" flexDirection="column" alignItems="center" mt={4} color="text.secondary">
+                <SentimentDissatisfied sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="body2">No curriculum found.</Typography>
+            </Box>
+        ) : (
+            <List disablePadding>
+            {semesterData.map((sem: any) => {
+                const isExpanded = expandedSemesters.has(sem.index);
+                const hasActiveItem = sem.subjects.some((s:any) => s.abbreviation === currentSubject);
+                return (
+                <Box key={sem.index} sx={{ mb: 1 }}>
+                    <ListItemButton 
+                    onClick={() => handleToggleSemester(sem.index)}
+                    sx={{
+                        borderRadius: 2, mb: 0.5,
+                        bgcolor: hasActiveItem ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                        border: hasActiveItem ? `1px solid ${alpha(theme.palette.primary.main, 0.2)}` : '1px solid transparent',
+                    }}
+                    >
+                    <Book sx={{ mr: 1.5, fontSize: 20, color: hasActiveItem ? 'primary.main' : 'text.secondary' }} />
+                    <ListItemText primary={`Semester ${sem.index}`} primaryTypographyProps={{ fontWeight: 700 }} />
+                    {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        <Box sx={{ ml: 2.5, pl: 2, borderLeft: `2px solid ${alpha(theme.palette.divider, 0.5)}` }}>
+                        {sem.subjects.map((sub: any) => {
+                            const isActive = sub.abbreviation === currentSubject;
+                            return (
+                            <Link 
+                                key={sub.abbreviation} href={`/subjects/${sub.abbreviation}`} passHref 
+                                style={{textDecoration:'none', color:'inherit'}}
+                                onClick={() => { setIsOpen(false); onMobileClose(); }}
+                            >
+                                <Box ref={isActive ? activeItemRef : null}>
+                                <ListItemButton
+                                    selected={isActive}
+                                    sx={{
+                                    borderRadius: 2, py: 0.5, my: 0.5,
+                                    '&.Mui-selected': {
+                                        bgcolor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        '&:hover': { bgcolor: theme.palette.primary.dark },
+                                        '& .MuiSvgIcon-root': { color: theme.palette.primary.contrastText }
+                                    }
+                                    }}
+                                >
+                                    <School sx={{ mr: 1.5, fontSize: 16, opacity: isActive ? 1 : 0.7, color: isActive ? 'inherit' : 'text.disabled' }} />
+                                    <ListItemText 
+                                    primary={sub.abbreviation} secondary={sub.name}
+                                    primaryTypographyProps={{ fontWeight: isActive ? 700 : 500, fontSize: '0.9rem' }}
+                                    secondaryTypographyProps={{ fontSize: '0.75rem', noWrap: true, color: isActive ? alpha('#fff', 0.8) : 'text.secondary' }}
+                                    />
+                                </ListItemButton>
+                                </Box>
+                            </Link>
+                            );
+                        })}
+                        </Box>
+                    </List>
+                    </Collapse>
+                </Box>
+                );
+            })}
+            </List>
+        )}
       </Box>
     </Box>
   );
 
   return (
     <>
-      {/* 1. MOBILE DRAWER (Full Screen) */}
       <Drawer
-        variant="temporary"
-        anchor="left"
-        open={mobileOpen}
-        onClose={onMobileClose}
+        variant="temporary" anchor="left" open={mobileOpen} onClose={onMobileClose}
         ModalProps={{ keepMounted: true }}
-        sx={{ 
-          display: { xs: 'block', md: 'none' }, 
-          // Make drawer full width on mobile
-          '& .MuiDrawer-paper': { width: '100%', maxWidth: '100%' } 
-        }}
+        sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: '85%', maxWidth: '320px' } }}
       >
         {SidebarContent}
       </Drawer>
 
-      {/* 2. DESKTOP SIDEBAR & TRIGGER */}
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-        
-        {/* Invisible Hover Trigger */}
+        {/* Floating Trigger Button - FIXED WIDTH & CENTER */}
         <Box
           onClick={() => setIsOpen(true)}
           sx={{
-            position: 'fixed', left: 0, top: '25%', height: '50vh', width: '20px', zIndex: 1250,
-            display: isOpen ? 'none' : 'flex', alignItems: 'center', cursor: 'pointer',
-            '&:hover .trigger-btn': { opacity: 1, transform: 'translateX(0)' }
+            position: 'fixed', 
+            left: 0, 
+            top: '50%', // Perfectly centered vertically
+            marginTop: '-40px', // Offset by half height
+            height: 80, 
+            width: 24, // Narrower button
+            zIndex: 1250,
+            display: isOpen ? 'none' : 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            cursor: 'pointer',
+            bgcolor: 'primary.main',
+            borderRadius: '0 12px 12px 0',
+            color: '#fff',
+            boxShadow: 3,
+            transform: `translateX(${btnTransform}%)`,
+            transition: 'transform 0.1s linear', 
+            '&:hover': { transform: 'translateX(0%) !important' } 
           }}
         >
-          {/* Animated Button */}
-          <Box
-            className="trigger-btn"
-            sx={{
-              width: 40, height: 100, bgcolor: 'primary.main', borderRadius: '0 50px 50px 0',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: 4,
-              opacity: 0, transform: 'translateX(-100%)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              animation: 'pulse-glow 2s infinite',
-              '@keyframes pulse-glow': { '0%': { filter: 'brightness(1)' }, '50%': { filter: 'brightness(1.2)' }, '100%': { filter: 'brightness(1)' } }
-            }}
-          >
-            <KeyboardDoubleArrowRight />
-          </Box>
+          <KeyboardArrowRight fontSize="small" />
         </Box>
 
-        {/* Sidebar Container */}
+        {/* Trigger Zone (Invisible) - Narrowed */}
+        <Box 
+           sx={{ 
+             position: 'fixed', left: 0, top: 0, bottom: 0, width: '15px', zIndex: 1240, 
+             display: isOpen ? 'none' : 'block' 
+           }} 
+        />
+
         <Box
           sx={{
             position: 'fixed', top: 0, left: 0, height: '100vh', width: 320,
@@ -289,7 +264,6 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
           {SidebarContent}
         </Box>
 
-        {/* Backdrop for Desktop */}
         {isOpen && (
           <Box
             onClick={() => setIsOpen(false)}
@@ -302,11 +276,8 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
         )}
       </Box>
 
-      {/* Helper Notification */}
       <Snackbar
-        open={showHelper}
-        autoHideDuration={3000}
-        onClose={() => setShowHelper(false)}
+        open={showHelper} autoHideDuration={3000} onClose={() => setShowHelper(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert severity="info" variant="filled" icon={<InfoOutlined />}>
