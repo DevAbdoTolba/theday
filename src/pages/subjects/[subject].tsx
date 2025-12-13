@@ -11,7 +11,6 @@ import SubjectSemesterPrompt from "../../components/SubjectSemesterPrompt";
 import SubjectSidebar from "../../components/SubjectSidebar"; // Import the new sidebar
 import { SubjectMaterials } from "../../utils/types";
 import { useSmartSubject } from "../../hooks/useSmartSubject";
-import IndexedProvider from "../../context/IndexedContext";
 
 interface Props {
   subject: string;
