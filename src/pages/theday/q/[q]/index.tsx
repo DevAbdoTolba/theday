@@ -85,7 +85,7 @@ export default function TheDayPage() {
           {/* Global Search Bar - Always visible and centered */}
           <Box mb={6} sx={{ position: 'relative', zIndex: 2 }}>
             <GoogleDriveSearch 
-              transcript={transcript} 
+              transcript={transcript as any} 
               currentSemester={currentSemesterIndex} 
             />
           </Box>
