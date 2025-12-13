@@ -48,7 +48,7 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
   // 4. Generate Thumbnail URL
   let thumbnailUrl: string | undefined;
   if (type === 'youtube' && youtubeId) {
-    thumbnailUrl = getYoutubeThumbnail(youtubeId) || undefined;
+    thumbnailUrl = getYoutubeThumbnail(youtubeId) ?? undefined;
   } else if (type === 'image' || type === 'video') {
     thumbnailUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
   }
