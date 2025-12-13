@@ -39,6 +39,10 @@ export default async function handler(req, res) {
 
     const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
     
+    if (SubjectFolderIds.length === 0) {
+      return FilesData;
+    }
+    
     // Step 2: Get all subfolders in a single query (optimized from loop)
     const subFolderQuery = SubjectFolderIds
       .map((id) => `'${id}' in parents`)
