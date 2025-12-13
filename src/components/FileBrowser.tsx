@@ -16,9 +16,11 @@ import { FileListItem } from './FileListItem';
 interface Props {
   data: SubjectMaterials;
   subjectName: string;
+  newItems?: string[];
+  fetching?: boolean;
 }
 
-export default function FileBrowser({ data, subjectName }: Props) {
+export default function FileBrowser({ data, subjectName, newItems = [], fetching = false }: Props) {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
@@ -112,8 +114,8 @@ export default function FileBrowser({ data, subjectName }: Props) {
                   <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
                     <FileCard 
                       file={file} 
-                      // PASS THE CLICK HANDLER
-                      onClick={() => handleFileClick(file)} 
+                      onClick={() => handleFileClick(file)}
+                      isNew={newItems.includes(file.id)}
                     />
                   </Grid>
                 ))}
@@ -124,8 +126,8 @@ export default function FileBrowser({ data, subjectName }: Props) {
                   <FileListItem 
                     key={file.id} 
                     file={file} 
-                    // PASS THE CLICK HANDLER
-                    onClick={() => handleFileClick(file)} 
+                    onClick={() => handleFileClick(file)}
+                    isNew={newItems.includes(file.id)}
                   />
                 ))}
               </Box>

@@ -27,9 +27,10 @@ const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
 interface Props {
   file: ParsedFile;
   onClick: () => void;
+  isNew?: boolean;
 }
 
-export const FileListItem = ({ file, onClick }: Props) => {
+export const FileListItem = ({ file, onClick, isNew }: Props) => {
   const theme = useTheme();
 
   // Right-side Action Icon Logic
@@ -57,9 +58,10 @@ export const FileListItem = ({ file, onClick }: Props) => {
         mb: 1,
         textDecoration: 'none',
         borderRadius: 2,
-        border: `1px solid ${theme.palette.divider}`,
+        border: `1px solid ${isNew ? theme.palette.success.main : theme.palette.divider}`,
         transition: 'all 0.15s ease',
         cursor: 'pointer',
+        bgcolor: isNew ? `${theme.palette.success.main}08` : 'transparent',
         '&:hover': {
           bgcolor: theme.palette.action.hover,
           borderColor: theme.palette.primary.main,
@@ -85,7 +87,7 @@ export const FileListItem = ({ file, onClick }: Props) => {
       </Box>
 
       {/* 3. Type Chip (Hidden on mobile) */}
-      <Box sx={{ display: { xs: 'none', sm: 'block' }, mr: 2 }}>
+      <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, mr: 2, alignItems: 'center' }}>
         <Chip 
           label={file.type.toUpperCase()} 
           size="small" 
@@ -93,6 +95,23 @@ export const FileListItem = ({ file, onClick }: Props) => {
           color={file.type === 'youtube' ? 'error' : 'default'}
           sx={{ fontSize: '0.65rem', height: 20, width: 70 }} 
         />
+        {isNew && (
+          <Chip 
+            label="NEW" 
+            size="small" 
+            color="success"
+            sx={{ 
+              fontSize: '0.65rem', 
+              height: 20,
+              fontWeight: 700,
+              animation: 'blink 1.5s ease-in-out infinite',
+              '@keyframes blink': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              }
+            }}
+          />
+        )}
       </Box>
 
       {/* 4. Action Icon (The Update) */}
