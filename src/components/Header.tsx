@@ -132,7 +132,7 @@ export default function Header({
     const handleCtrlK = (e: KeyboardEvent) => {
       if ((e?.ctrlKey && e?.code === "KeyK") || e?.code === "Slash") {
         e?.preventDefault();
-        setOpen(true); // Assuming 'open' refers to a dialog state defined elsewhere or meant for SearchDialog?
+        // setOpen(true); // Assuming 'open' refers to a dialog state defined elsewhere or meant for SearchDialog?
         // Note: original code had setOpen(true) but 'open' wasn't fully defined/used for dialog in original snippet consistently.
         // We'll map it to searchDialogOpen for consistency with logic.
         if (isSubjectSearch) setSearchDialogOpen(true);
