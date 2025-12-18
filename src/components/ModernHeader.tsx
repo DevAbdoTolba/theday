@@ -93,7 +93,25 @@ export default function ModernHeader({
             )}
 
             {!isHome && (
-              <IconButton edge="start" color="inherit" onClick={() => router.back()} sx={{ mr: 1 }}>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={async () => {
+                  const storedClassName = localStorage.getItem("className");
+                  if (!storedClassName) {
+                    router.push("/");
+                    return;
+                  }
+                  const storedClasses = JSON.parse(localStorage.getItem("classes") as string) || [];
+                  const foundClass = storedClasses.find((c: any) => c.class === storedClassName);
+                  if (foundClass && foundClass.id) {
+                    router.push(`/theday/q/${foundClass.id}`);
+                  } else {
+                    router.push("/");
+                  }
+                }}
+                sx={{ mr: 1 }}
+              >
                 <ArrowBack />
               </IconButton>
             )}
