@@ -247,7 +247,7 @@ export default function FileBrowser({
             viewMode === "grid" ? (
               <Grid container spacing={2}>
                 {filteredFiles.map((file) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+                  <Grid item xs={6} sm={6} md={4} lg={3} key={file.id}>
                     <FileCard
                       file={file}
                       onClick={() => handleFileClick(file)}
