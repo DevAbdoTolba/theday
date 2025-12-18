@@ -109,26 +109,7 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
 
   return (
     <>
-      {isMobile && (
-        <Button
-          variant="outlined"
-          startIcon={<SearchIcon />}
-          sx={{
-            
-            zIndex: 1200,
-            // borderRadius: "50%",
-            // minWidth: 56,
-            // minHeight: 56,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 3,
-            background: theme.palette.background.paper,
-            
-          }}
-          onClick={() => setOpen(true)}
-        >&nbsp;👀&nbsp;</Button>
-      )}
+     
       <Dialog
           open={open}
           TransitionComponent={Transition}
