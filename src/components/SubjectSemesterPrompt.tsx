@@ -35,35 +35,42 @@ export default function SubjectSemesterPrompt({ subjectAbbr, semesterIndex, onAd
 
   // Ultra-slim pill design using THEME colors
   const SlimToast = ({ children }: { children: React.ReactNode }) => (
-    <Slide direction="up" in={true} mountOnEnter unmountOnExit>
-      <Paper
-        elevation={4}
-        sx={{
-          position: 'fixed',
-          bottom: 30,
-          left: '50%',
-          transform: 'translateX(-50%)', // Perfectly centered
-          zIndex: 2000,
-          borderRadius: 50, // Pill shape
-          px: 2.5,
-          py: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 3,
-          // Adaptive Background (Glassmorphism)
-          bgcolor: alpha(theme.palette.background.paper, 0.9),
-          backdropFilter: 'blur(8px)',
-          color: theme.palette.text.primary,
-          whiteSpace: 'nowrap',
-          maxWidth: '90vw',
-          // Adaptive Border
-          border: `1px solid ${theme.palette.divider}`,
-          boxShadow: theme.shadows[6]
-        }}
-      >
-        {children}
-      </Paper>
-    </Slide>
+    <Box
+      sx={{
+        position: 'fixed',
+        left: '50%',
+        bottom: 30,
+        transform: 'translateX(-50%)',
+        zIndex: 2000,
+        width: 'auto',
+        maxWidth: '90vw',
+        pointerEvents: 'none', // allow clicks to pass through except on the toast
+      }}
+    >
+      <Slide direction="up" in={true} mountOnEnter unmountOnExit>
+        <Paper
+          elevation={4}
+          sx={{
+            borderRadius: 50, // Pill shape
+            px: 2.5,
+            py: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+            bgcolor: alpha(theme.palette.background.paper, 0.9),
+            backdropFilter: 'blur(8px)',
+            color: theme.palette.text.primary,
+            whiteSpace: 'nowrap',
+            maxWidth: '100%',
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: theme.shadows[6],
+            pointerEvents: 'auto', // allow interaction with the toast
+          }}
+        >
+          {children}
+        </Paper>
+      </Slide>
+    </Box>
   );
 
   const ActionBtn = ({ label, onClick, variant = 'text' }: any) => (
