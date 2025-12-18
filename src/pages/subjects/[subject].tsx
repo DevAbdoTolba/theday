@@ -109,18 +109,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
-
   if (!subject) return { notFound: true };
 
-  // --- Point 6 Fix: Calculate Semester Index ---
-  let semesterIndex = 1; // Default fallback
+  let semesterIndex = 1;
   const foundSemester = coursesData.semesters.find(sem => 
     sem.subjects.some(subj => subj.abbreviation === subject)
   );
-  if (foundSemester) {
-    semesterIndex = foundSemester.index;
-  }
-  // ---------------------------------------------
+  if (foundSemester) semesterIndex = foundSemester.index;
 
   try {
     const auth = new google.auth.GoogleAuth({
@@ -133,9 +128,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     const drive = google.drive({ version: "v3", auth });
 
+    // Step 1: Find Subject Folder (Keep query simple)
     const subjectFolderRes = await drive.files.list({
-      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-      fields: "files(id, name)",
+      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
+      fields: "files(id)", // Only get ID
     });
 
     if (!subjectFolderRes.data.files?.length) {
@@ -144,32 +140,29 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     const subjectFolderId = subjectFolderRes.data.files[0].id;
 
+    // Step 2: Get Categories
     const categoriesRes = await drive.files.list({
-      q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
     });
 
     const categoryMap: Record<string, string> = {};
-    const categoryIds: string[] = [];
-
-    categoriesRes.data.files?.forEach((file) => {
-      if (file.id && file.name) {
-        categoryMap[file.id] = file.name;
-        categoryIds.push(file.id);
-      }
-    });
+    const categoryIds = categoriesRes.data.files?.map(f => {
+      categoryMap[f.id!] = f.name!;
+      return f.id;
+    }) || [];
 
     if (categoryIds.length === 0) {
       return { props: { subject, initialData: {}, semesterIndex }, revalidate: 3600 };
     }
 
-    const parentsQuery = categoryIds
-      .map((id) => `'${id}' in parents`)
-      .join(" OR ");
+    // Step 3: Fetch Files (CRITICAL: Removed webViewLink and trashed check)
+    const parentsQuery = categoryIds.map((id) => `'${id}' in parents`).join(" OR ");
 
     const filesRes = await drive.files.list({
-      q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder' and trashed = false`,
-      fields: "files(id, name, mimeType, parents, size, webViewLink)",
+      q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder'`,
+      // Only request essential metadata
+      fields: "files(id, name, mimeType, parents, size)", 
       pageSize: 1000,
     });
 
@@ -180,7 +173,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
       if (parentId && categoryMap[parentId]) {
         const categoryName = categoryMap[parentId];
         if (!organizedData[categoryName]) organizedData[categoryName] = [];
-
         organizedData[categoryName].push({
           id: file.id!,
           name: file.name!,
@@ -192,18 +184,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
     });
 
     return {
-      props: {
-        subject,
-        initialData: organizedData,
-        semesterIndex, // Pass to component
-      },
-      revalidate: 3600,
+      props: { subject, initialData: organizedData, semesterIndex },
     };
   } catch (error) {
-    console.error("Drive API Error:", error);
-    return {
-      props: { subject, initialData: {}, semesterIndex },
-      revalidate: 60,
-    };
+    return { props: { subject, initialData: {}, semesterIndex }, revalidate: 60 };
   }
 };
