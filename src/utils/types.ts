@@ -37,3 +37,11 @@ export interface ParsedFile {
   isExternalLink: boolean;
   youtubeId?: string | null
 }
+
+export interface UseSmartSubjectReturn {
+  data: SubjectMaterials | null;
+  loading: boolean;
+  fetching: boolean;
+  newItems: string[];
+  error: string | null;
+}

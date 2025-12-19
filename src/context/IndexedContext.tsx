@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 import Dexie, { type EntityTable } from "dexie";
-import LinearProgress from "@mui/material/LinearProgress";
 
-// Types
+// --- Types ---
 interface Data {
   id: string;
   mimeType: string;
@@ -27,7 +26,7 @@ interface SubjectType {
   folders: DataMap;
 }
 
-// Model
+// --- Model ---
 export class SubjectModel extends Dexie {
   subjects!: EntityTable<SubjectType, "id">;
 
@@ -40,8 +39,6 @@ export class SubjectModel extends Dexie {
 }
 
 export const db = new SubjectModel();
-
-// Create a Context
 const IndexedContext = createContext<any>(null);
 
 export function useIndexedContext() {
@@ -49,105 +46,154 @@ export function useIndexedContext() {
 }
 
 export default function IndexedProvider({
-  name,
-  folders,
   children,
 }: IndexedContextProps) {
   const [loading, setLoading] = useState(false);
   const [updatedItems, setUpdatedItems] = useState<string[]>([]);
 
+  // Internal logging helper
+  const traceFlow = (steps: any[]) => {
+    console.log("📊 Flow Debug Trace:");
+    console.table(steps);
+  };
+
   const getSubjectByName = async (name: string) => {
-    // --- FIX: Add Guard Clause Here ---
-    if (!name || typeof name !== 'string') return null; 
-    
-    const data = await db.subjects.where("name").equals(name).first();
-    console.log("Fetched data:", data);
-    return data;
+    const startTime = performance.now();
+    const steps: any[] = [];
+
+    steps.push({ 
+      step: "Validation", 
+      detail: `Checking name: "${name}"`, 
+      status: (!name || typeof name !== 'string') ? "❌ FAIL" : "✅ PASS",
+      timeMS: (performance.now() - startTime).toFixed(2)
+    });
+
+    if (!name || typeof name !== 'string') {
+      traceFlow(steps);
+      return null;
+    }
+
+    try {
+      const data = await db.subjects.where("name").equals(name).first();
+      steps.push({ 
+        step: "Dexie Query", 
+        detail: `Querying table 'subjects' for name: ${name}`, 
+        status: data ? "🎯 HIT" : "💨 MISS", 
+        timeMS: (performance.now() - startTime).toFixed(2)
+      });
+      traceFlow(steps);
+      return data;
+    } catch (err: any) {
+      steps.push({ step: "Dexie Query", detail: err.message, status: "🔥 ERROR", timeMS: (performance.now() - startTime).toFixed(2) });
+      traceFlow(steps);
+      return null;
+    }
   };
 
   const addOrUpdateSubject = async (name: string, folders: DataMap) => {
-    if (!name) return; // Safety check
+    const startTime = performance.now();
+    const steps: any[] = [];
+    setLoading(true);
+
+    steps.push({ 
+        step: "Entry Check", 
+        detail: `Incoming data for "${name}"`, 
+        status: "INFO", 
+        timeMS: "0.00" 
+    });
 
     const existingSubject = await getSubjectByName(name);
 
     if (existingSubject) {
-      // Compare the fetched data with the existing data
-      const updateResult = compareAndUpdate(
-        existingSubject.folders,
-        folders,
-        name
-      );
-      return updateResult;
+      steps.push({ 
+        step: "Decision", 
+        detail: "Subject exists. Proceeding to Diffing.", 
+        status: "🔄 UPDATE", 
+        timeMS: (performance.now() - startTime).toFixed(2) 
+      });
+      const result = await compareAndUpdate(existingSubject.folders, folders, name, steps, startTime);
+      setLoading(false);
+      return result;
     } else {
-      // Always save folders as an object
+      steps.push({ 
+        step: "Decision", 
+        detail: "Subject not found in DB. Creating new entry.", 
+        status: "➕ ADD", 
+        timeMS: (performance.now() - startTime).toFixed(2) 
+      });
+      
       await db.subjects.add({ name, folders: folders || {} });
-      return {
-        msg: "Subject added",
-        newItems: Object.keys(folders || {}).flatMap((key) =>
-          (folders?.[key] || []).map((item) => item.id)
-        ),
-      };
+      
+      const newIdsCount = Object.keys(folders || {}).flatMap((key) => (folders?.[key] || [])).length;
+      steps.push({ 
+        step: "DB Write", 
+        detail: `Added ${newIdsCount} items to new subject`, 
+        status: "✅ SUCCESS", 
+        timeMS: (performance.now() - startTime).toFixed(2) 
+      });
+      
+      traceFlow(steps);
+      setLoading(false);
+      return { msg: "Subject added", newItems: [] };
     }
   };
 
-  const compareAndUpdate = (
+  const compareAndUpdate = async (
     existingFolders: DataMap = {},
     newFolders: DataMap = {},
-    name: string
+    name: string,
+    steps: any[],
+    startTime: number
   ) => {
     let addedItems: string[] = [];
     let removedItems: string[] = [];
 
-    // Ensure we have valid objects to work with
-    const safeExistingFolders = existingFolders || {};
+    const safeExistingFolders = { ...existingFolders };
     const safeNewFolders = newFolders || {};
-
-    const allKeys = new Set([
-      ...Object.keys(safeExistingFolders),
-      ...Object.keys(safeNewFolders),
-    ]);
+    const allKeys = new Set([...Object.keys(safeExistingFolders), ...Object.keys(safeNewFolders)]);
 
     allKeys.forEach((key) => {
-      const existingItems = safeExistingFolders[key] || [];
-      const newItems = safeNewFolders[key] || [];
+      const existingIds = (safeExistingFolders[key] || []).map((item) => item.id);
+      const newIds = (safeNewFolders[key] || []).map((item) => item.id);
 
-      const existingIds = existingItems.map((item) => item.id);
-      const newIds = newItems.map((item) => item.id);
+      const removed = existingIds.filter((id) => !newIds.includes(id));
+      const added = newIds.filter((id) => !existingIds.includes(id));
 
-      removedItems = [
-        ...removedItems,
-        ...existingIds.filter((id) => !newIds.includes(id)),
-      ];
-      addedItems = [
-        ...addedItems,
-        ...newIds.filter((id) => !existingIds.includes(id)),
-      ];
+      removedItems.push(...removed);
+      addedItems.push(...added);
 
-      // Update the existing folder with new items
-      if (newItems.length > 0) {
-        safeExistingFolders[key] = newItems;
+      if (safeNewFolders[key] && safeNewFolders[key].length > 0) {
+        safeExistingFolders[key] = safeNewFolders[key];
       } else {
-        // If the new folder has 0 length, delete the key
         delete safeExistingFolders[key];
       }
     });
 
-    if (addedItems.length || removedItems.length) {
-      // @ts-ignore
-      const res = db.subjects
-        .where({ name: name })
-        .modify({ folders: safeExistingFolders });
+    const hasChanges = addedItems.length > 0 || removedItems.length > 0;
 
+    steps.push({ 
+      step: "Diffing", 
+      detail: `Found ${addedItems.length} new, ${removedItems.length} removed items.`, 
+      status: hasChanges ? "⚠️ CHANGES" : "⚖️ STABLE", 
+      timeMS: (performance.now() - startTime).toFixed(2) 
+    });
+
+    if (hasChanges) {
+      await db.subjects.where({ name: name }).modify({ folders: safeExistingFolders });
       setUpdatedItems(addedItems);
-      return {
-        msg: `${
-          addedItems.length > 0 ? `${addedItems.length} new items, ` : ""
-        }${removedItems.length > 0 ? `${removedItems.length} removed` : ""}`,
-        newItems: addedItems,
-      };
+      steps.push({ 
+        step: "DB Sync", 
+        detail: "DB updated with merged folders.", 
+        status: "✅ DONE", 
+        timeMS: (performance.now() - startTime).toFixed(2) 
+      });
     }
 
-    return { msg: "No changes", newItems: [] };
+    traceFlow(steps);
+    return { 
+        msg: hasChanges ? "Updated" : "No changes", 
+        newItems: addedItems 
+    };
   };
 
   return (
