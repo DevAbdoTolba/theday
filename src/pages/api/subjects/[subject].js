@@ -103,7 +103,7 @@ export default async function handler(req, res) {
     const data = await GetDataOfSubject(subject, auth);
 
     const end = Date.now();
-    console.log(`Execution time: ${end - start} ms`);
+    console.log(`${subject} -==> Execution time: ${end - start} ms`);
 
     res.status(200).json(data);
   } catch (error) {

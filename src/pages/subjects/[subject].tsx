@@ -109,15 +109,25 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
-  if (!subject) return { notFound: true };
+  
+  console.log(`\n🚀 [getStaticProps] START: Fetching data for subject: "${subject}"`);
+
+  if (!subject) {
+    console.error("❌ [getStaticProps] ERROR: No subject parameter found in context.");
+    return { notFound: true };
+  }
 
   let semesterIndex = 1;
   const foundSemester = coursesData.semesters.find(sem => 
     sem.subjects.some(subj => subj.abbreviation === subject)
   );
-  if (foundSemester) semesterIndex = foundSemester.index;
+  if (foundSemester) {
+    semesterIndex = foundSemester.index;
+    console.log(`ℹ️ [getStaticProps] Found subject in local coursesData. Semester Index: ${semesterIndex}`);
+  }
 
   try {
+    console.log("🔑 [getStaticProps] Authenticating with Google Drive API...");
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.CLIENT_EMAIL,
@@ -128,19 +138,23 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     const drive = google.drive({ version: "v3", auth });
 
-    // Step 1: Find Subject Folder (Keep query simple)
+    // Step 1: Find Subject Folder
+    console.log(`📂 [Step 1] Searching for folder with name: "${subject}"`);
     const subjectFolderRes = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
-      fields: "files(id)", // Only get ID
+      fields: "files(id)",
     });
 
     if (!subjectFolderRes.data.files?.length) {
+      console.warn(`⚠️ [Step 1] NOT FOUND: No folder matches name "${subject}" on Google Drive.`);
       return { props: { subject, initialData: {}, semesterIndex }, revalidate: 3600 };
     }
 
     const subjectFolderId = subjectFolderRes.data.files[0].id;
+    console.log(`✅ [Step 1] SUCCESS: Found Folder ID: ${subjectFolderId}`);
 
     // Step 2: Get Categories
+    console.log(`🔍 [Step 2] Fetching category folders inside Subject Folder...`);
     const categoriesRes = await drive.files.list({
       q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
@@ -152,19 +166,25 @@ export const getStaticProps: GetStaticProps = async (context) => {
       return f.id;
     }) || [];
 
+    console.log(`✅ [Step 2] SUCCESS: Found ${categoryIds.length} categories: [${Object.values(categoryMap).join(", ")}]`);
+
     if (categoryIds.length === 0) {
+      console.warn("⚠️ [Step 2] EMPTY: Subject folder exists but contains no category sub-folders.");
       return { props: { subject, initialData: {}, semesterIndex }, revalidate: 3600 };
     }
 
-    // Step 3: Fetch Files (CRITICAL: Removed webViewLink and trashed check)
+    // Step 3: Fetch Files
+    console.log(`📄 [Step 3] Fetching all files within these categories...`);
     const parentsQuery = categoryIds.map((id) => `'${id}' in parents`).join(" OR ");
 
     const filesRes = await drive.files.list({
       q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder'`,
-      // Only request essential metadata
       fields: "files(id, name, mimeType, parents, size)", 
       pageSize: 1000,
     });
+
+    const fileCount = filesRes.data.files?.length || 0;
+    console.log(`✅ [Step 3] SUCCESS: Retrieved ${fileCount} files total.`);
 
     const organizedData: SubjectMaterials = {};
 
@@ -183,10 +203,15 @@ export const getStaticProps: GetStaticProps = async (context) => {
       }
     });
 
+    console.log(`✨ [getStaticProps] COMPLETED: Data organized. Returning props for "${subject}".\n`);
     return {
       props: { subject, initialData: organizedData, semesterIndex },
     };
-  } catch (error) {
+  } catch (error: any) {
+    console.error(`🔥 [getStaticProps] CRITICAL ERROR:`, error.message);
+    if (error.code === 403) console.error("🛑 Check your Google Service Account permissions!");
+    if (!process.env.CLIENT_EMAIL) console.error("🛑 CLIENT_EMAIL is missing from .env");
+    
     return { props: { subject, initialData: {}, semesterIndex }, revalidate: 60 };
   }
 };
