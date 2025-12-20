@@ -11,6 +11,9 @@ import {
 } from '@mui/icons-material';
 import SemesterCard from './SemesterCard';
 
+import { useRouter } from "next/router";
+
+
 interface Subject {
   name: string;
   abbreviation: string;
@@ -106,6 +109,23 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
   }, [allSemesters, searchQuery]);
 
 
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // Global navigation handler
+  const handleNavigate = async (abbreviation: string) => {
+    setIsNavigating(true);
+    
+    try {
+      await router.push(`/subjects/${abbreviation}`);
+      // Navigation successful - state will reset on unmount
+    } catch (error) {
+      console.error("Navigation failed:", error);
+      setIsNavigating(false);
+    }
+  };
+
+
   // Determine active data for display
   const activeData = (() => {
     if (currentSemesterIndex === -2) {
@@ -173,6 +193,8 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
           subjects={activeData.subjects} 
           isCurrent={true} 
           customTitle={activeData.displayName}
+          isNavigating={isNavigating}
+          onNavigate={handleNavigate}
         />
       ) : (
         <Alert 
