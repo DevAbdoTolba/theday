@@ -160,17 +160,28 @@ export default function SubjectPage({
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  // Pre-generate popular subjects for instant loads
-  const popularSubjects = ["CSS", "DLD", "DS", "Math101"]; // Your most accessed subjects
-  
-  const paths = popularSubjects.map((subject) => ({
-    params: { subject },
-  }));
+export const getStaticPaths = async () => {
+  // Get ALL subjects from your data
+  interface Semester {
+    index: number;
+    subjects: Subject[];
+  }
+
+  interface Subject {
+    abbreviation: string;
+    [key: string]: any;
+  }
+
+  const allSubjects: string[] = [];
+  coursesData.semesters.forEach((semester) => {
+    semester.subjects.forEach((subject) => {
+      allSubjects.push(subject.abbreviation);
+    });
+  });
 
   return {
-    paths,
-    fallback: true, // Generate others on demand
+    paths: allSubjects.map(s => ({ params: { subject: s } })),
+    fallback: 'blocking',
   };
 };
 
@@ -210,7 +221,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     if (!SubjectFolders.files?.length) {
       return {
         props: { subject, initialData: {}, semesterIndex },
-        revalidate: 3600,
       };
     }
 
@@ -238,7 +248,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     if (!Parents) {
       return {
         props: { subject, initialData: {}, semesterIndex },
-        revalidate: 3600,
       };
     }
 
@@ -268,7 +277,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     return {
       props: { subject, initialData: organizedData, semesterIndex },
-      revalidate: 3600, // ISR: Update every hour in background
     };
   } catch (error: any) {
     console.error("Error fetching subject data:", error.message);
