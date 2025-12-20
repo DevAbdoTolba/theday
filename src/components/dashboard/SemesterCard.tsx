@@ -9,6 +9,7 @@ import {
   Collapse,
   useTheme,
   alpha,
+  CircularProgress,
 } from "@mui/material";
 import {
   School,
@@ -17,6 +18,7 @@ import {
 } from "@mui/icons-material";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/router";
 
 interface Subject {
   name: string;
@@ -37,13 +39,12 @@ export default function SemesterCard({
   customTitle,
 }: SemesterCardProps) {
   const theme = useTheme();
+  const router = useRouter();
   const [expanded, setExpanded] = React.useState(true);
+  const [loadingSubject, setLoadingSubject] = React.useState<string | null>(null);
   const isDark = theme.palette.mode === "dark";
 
   // --- Dynamic Color Logic ---
-  // If current, use Primary color. If not, use standard background.
-  // In Dark mode, we use lower opacity for backgrounds to avoid glare.
-
   const cardBorder = isCurrent
     ? `2px solid ${
         isDark ? theme.palette.primary.dark : theme.palette.primary.main
@@ -51,7 +52,7 @@ export default function SemesterCard({
     : `1px solid ${theme.palette.divider}`;
 
   const headerBg = isCurrent
-    ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1) // Darker in dark mode
+    ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1)
     : alpha(theme.palette.background.paper, 1);
 
   const iconBg = isCurrent
@@ -61,6 +62,19 @@ export default function SemesterCard({
     : theme.palette.action.selected;
 
   const iconColor = isCurrent ? "#fff" : theme.palette.text.secondary;
+
+  // Handle subject click with loading state
+  const handleSubjectClick = async (abbreviation: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setLoadingSubject(abbreviation);
+    
+    // Navigate to the subject page
+    await router.push(`/subjects/${abbreviation}`);
+    
+    // Reset loading state after navigation
+    // Note: This will only run if navigation fails or is cancelled
+    setLoadingSubject(null);
+  };
 
   // Animation variants
   const cardVariants = {
@@ -76,7 +90,7 @@ export default function SemesterCard({
       transition={{ duration: 0.3 }}
     >
       <Paper
-        elevation={isCurrent ? 0 : 0} // Flat design is cleaner, use border for emphasis
+        elevation={isCurrent ? 0 : 0}
         sx={{
           borderRadius: 4,
           overflow: "hidden",
@@ -155,50 +169,62 @@ export default function SemesterCard({
             <Grid container spacing={1}>
               {subjects.map((subj) => (
                 <Grid item xs={6} sm={12} md={6} key={subj.abbreviation}>
-                  <Link
-                    href={`/subjects/${subj.abbreviation}`}
-                    passHref
-                    style={{ textDecoration: "none" }}
+                  <Box
+                    onClick={(e) => handleSubjectClick(subj.abbreviation, e)}
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 3,
+                      bgcolor: alpha(theme.palette.text.primary, 0.03),
+                      border: "1px solid transparent",
+                      cursor: loadingSubject === subj.abbreviation ? "wait" : "pointer",
+                      transition: "all 0.2s",
+                      position: "relative",
+                      opacity: loadingSubject === subj.abbreviation ? 0.6 : 1,
+                      pointerEvents: loadingSubject ? "none" : "auto",
+                      "&:hover": {
+                        bgcolor: alpha(theme.palette.primary.main, 0.08),
+                        borderColor: alpha(theme.palette.primary.main, 0.2),
+                        transform: loadingSubject ? "none" : "scale(1.02)",
+                      },
+                    }}
                   >
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 3,
-                        // Subtle background for items
-                        bgcolor: alpha(theme.palette.text.primary, 0.03),
-                        border: "1px solid transparent",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          bgcolor: alpha(theme.palette.primary.main, 0.08),
-                          borderColor: alpha(theme.palette.primary.main, 0.2),
-                          transform: "scale(1.02)",
-                        },
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        fontWeight={800}
-                        color={isDark ? "primary.light" : "primary.main"}
-                        noWrap
-                      >
-                        {subj.abbreviation}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
+                    {/* Loading Spinner Overlay */}
+                    {loadingSubject === subj.abbreviation && (
+                      <Box
                         sx={{
-                          display: "-webkit-box",
-                          overflow: "hidden",
-                          WebkitBoxOrient: "vertical",
-                          WebkitLineClamp: 1,
-                          lineHeight: 1.2,
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          zIndex: 2,
                         }}
                       >
-                        {subj.name}
-                      </Typography>
-                    </Box>
-                  </Link>
+                        <CircularProgress size={20} thickness={4} />
+                      </Box>
+                    )}
+
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight={800}
+                      color={isDark ? "primary.light" : "primary.main"}
+                      noWrap
+                    >
+                      {subj.abbreviation}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 1,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {subj.name}
+                    </Typography>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
