@@ -192,7 +192,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     return { notFound: true };
   }
 
-  // Find semester index
   let semesterIndex = 1;
   const foundSemester = coursesData.semesters.find((sem) =>
     sem.subjects.some((subj) => subj.abbreviation === subject)
@@ -212,7 +211,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     const drive = google.drive({ version: "v3", auth });
 
-    // Optimized: Use same logic as API endpoints
     const { data: SubjectFolders } = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
@@ -220,68 +218,50 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
     if (!SubjectFolders.files?.length) {
       return {
-        props: { subject, initialData: {}, semesterIndex },
+        props: { 
+          subject, 
+          folderStructure: {}, 
+          semesterIndex 
+        },
       };
     }
 
     const SubjectFolderIds = SubjectFolders.files.map((f) => f.id);
-    let dic: Record<string, string> = {};
-    let Parents = "";
+    const folderStructure: Record<string, string> = {};
 
-    for (const folderId of SubjectFolderIds) {
-      const { data: SubjectSubFolders } = await drive.files.list({
-        q: `mimeType = 'application/vnd.google-apps.folder' and '${folderId}' in parents`,
-        fields: "files(id, name)",
-        pageSize: 1000,
-      });
-
-      if (SubjectSubFolders.files) {
-        SubjectSubFolders.files.forEach((subFolder) => {
-          dic[subFolder.id!] = subFolder.name!;
-          Parents += `'${subFolder.id}' in parents OR `;
+    await Promise.all(
+      SubjectFolderIds.map(async (folderId) => {
+        const { data: SubjectSubFolders } = await drive.files.list({
+          q: `mimeType = 'application/vnd.google-apps.folder' and '${folderId}' in parents`,
+          fields: "files(id, name)",
+          pageSize: 1000,
         });
-      }
-    }
 
-    Parents = Parents.slice(0, -4);
-
-    if (!Parents) {
-      return {
-        props: { subject, initialData: {}, semesterIndex },
-      };
-    }
-
-    const { data: Files } = await drive.files.list({
-      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
-      fields: "files(id, name, mimeType, parents, size)",
-      pageSize: 1000,
-    });
-
-    const organizedData: SubjectMaterials = {};
-
-    Files.files?.forEach((file) => {
-      const parentName = dic[file.parents?.[0] || ""];
-      if (parentName) {
-        if (!organizedData[parentName]) {
-          organizedData[parentName] = [];
+        if (SubjectSubFolders.files) {
+          SubjectSubFolders.files.forEach((subFolder) => {
+            folderStructure[subFolder.id!] = subFolder.name!;
+          });
         }
-        organizedData[parentName].push({
-          id: file.id!,
-          name: file.name!,
-          mimeType: file.mimeType!,
-          parents: file.parents || [],
-          size: parseInt(file.size || "0"),
-        });
-      }
-    });
+      })
+    );
 
     return {
-      props: { subject, initialData: organizedData, semesterIndex },
+      props: { 
+        subject, 
+        folderStructure, 
+        semesterIndex 
+      },
+      revalidate: 3600,
     };
+
   } catch (error: any) {
-    console.error("Error fetching subject data:", error.message);
+    console.error(error.message);
     return {
-      props: { subject, initialData: {}, semesterIndex },
+      props: { 
+        subject, 
+        folderStructure: {}, 
+        semesterIndex 
+      },
       revalidate: 60,
     };
   }
