@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, Box, IconButton, Fade, Typography, Tooltip, Button } from '@mui/material';
 import { Close, OpenInNew, Download } from '@mui/icons-material';
 import { ParsedFile } from '../utils/types';
+import Image from 'next/image';
 
 interface Props {
   open: boolean;
@@ -24,7 +25,7 @@ export default function FilePreviewModal({ open, onClose, file }: Props) {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
-      );
+      );  
     }
 
     // 2. Images (Use high-res thumbnail for speed/cleanliness)
@@ -32,7 +33,7 @@ export default function FilePreviewModal({ open, onClose, file }: Props) {
       // Request a large image (w1920)
       const highResUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`;
       return (
-        <img 
+        <Image 
           src={highResUrl} 
           alt={file.name} 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
