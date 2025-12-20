@@ -235,57 +235,66 @@ export const getStaticProps: GetStaticProps = async (context) => {
   }
 
   try {
+    const SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
+
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.CLIENT_EMAIL,
         private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
       },
-      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+      scopes: SCOPES,
     });
 
     const drive = google.drive({ version: "v3", auth });
 
-    // Find subject folder
-    const subjectFolderRes = await drive.files.list({
+    // ===== OPTIMIZED: 3 API CALLS INSTEAD OF 4 =====
+    
+    // CALL 1: Find ALL subject folders (like old code)
+    const { data: SubjectFolders } = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
-      fields: "files(id)",
-    });
-
-    if (!subjectFolderRes.data.files?.length) {
-      return {
-        props: { subject, initialData: {}, semesterIndex },
-        revalidate: 3600,
-      };
-    }
-
-    const subjectFolderId = subjectFolderRes.data.files[0].id;
-
-    // Get category folders
-    const categoriesRes = await drive.files.list({
-      q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
     });
 
-    const categoryMap: Record<string, string> = {};
-    const categoryIds =
-      categoriesRes.data.files?.map((f) => {
-        categoryMap[f.id!] = f.name!;
-        return f.id;
-      }) || [];
-
-    if (categoryIds.length === 0) {
+    if (!SubjectFolders.files || SubjectFolders.files.length === 0) {
       return {
         props: { subject, initialData: {}, semesterIndex },
         revalidate: 3600,
       };
     }
 
-    // Fetch all files
-    const parentsQuery = categoryIds
-      .map((id) => `'${id}' in parents`)
-      .join(" OR ");
+    // Process ALL subject folders (like old code)
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
+    const categoryMap: Record<string, string> = {};
+    let parentsQuery = "";
 
-    const filesRes = await drive.files.list({
+    // CALL 2: Get ALL category folders from ALL subject folders
+    for (const SubjectFolderId of SubjectFolderIds) {
+      const { data: SubjectSubFolders } = await drive.files.list({
+        q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
+        fields: "files(id, name)",
+        pageSize: 1000,
+      });
+
+      if (SubjectSubFolders.files) {
+        for (const subFolder of SubjectSubFolders.files) {
+          categoryMap[subFolder.id!] = subFolder.name!;
+          parentsQuery += `'${subFolder.id}' in parents OR `;
+        }
+      }
+    }
+
+    // Remove trailing " OR "
+    parentsQuery = parentsQuery.slice(0, -4);
+
+    if (parentsQuery.length === 0) {
+      return {
+        props: { subject, initialData: {}, semesterIndex },
+        revalidate: 3600,
+      };
+    }
+
+    // CALL 3: Get ALL files in one query
+    const { data: Files } = await drive.files.list({
       q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder'`,
       fields: "files(id, name, mimeType, parents, size)",
       pageSize: 1000,
@@ -294,20 +303,23 @@ export const getStaticProps: GetStaticProps = async (context) => {
     // Organize data by category
     const organizedData: SubjectMaterials = {};
 
-    filesRes.data.files?.forEach((file) => {
-      const parentId = file.parents?.[0];
-      if (parentId && categoryMap[parentId]) {
-        const categoryName = categoryMap[parentId];
-        if (!organizedData[categoryName]) organizedData[categoryName] = [];
-        organizedData[categoryName].push({
-          id: file.id!,
-          name: file.name!,
-          mimeType: file.mimeType!,
-          parents: file.parents || [],
-          size: parseInt(file.size || "0"),
-        });
+    if (Files.files) {
+      for (const file of Files.files) {
+        const parentName = categoryMap[file.parents?.[0] || ""];
+        if (parentName) {
+          if (!organizedData[parentName]) {
+            organizedData[parentName] = [];
+          }
+          organizedData[parentName].push({
+            id: file.id!,
+            name: file.name!,
+            mimeType: file.mimeType!,
+            parents: file.parents || [],
+            size: parseInt(file.size || "0"),
+          });
+        }
       }
-    });
+    }
 
     return {
       props: { subject, initialData: organizedData, semesterIndex },

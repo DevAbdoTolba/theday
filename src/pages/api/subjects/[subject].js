@@ -1,11 +1,14 @@
-import { unstable_cache } from "next/cache";
 const { google } = require("googleapis");
 
 export default async function handler(req, res) {
   const start = Date.now();
-  const { subject, cache } = req.query;
+  const { subject } = req.query;
 
-  const SCOPES = ["https://www.googleapis.com/auth/drive"];
+  if (!subject) {
+    return res.status(400).json({ error: "Subject parameter required" });
+  }
+
+  const SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
 
   const auth = new google.auth.GoogleAuth({
     credentials: {
@@ -23,91 +26,78 @@ export default async function handler(req, res) {
     scopes: SCOPES,
   });
 
-  const GetDataOfSubject = async (subject, auth) => {
+  try {
     let FilesData = {};
     const drive = google.drive({ version: "v3", auth });
 
-    // Step 1: Find subject folders
+    // CALL 1: Find ALL subject folders
     const { data: SubjectFolders } = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
     });
 
     if (!SubjectFolders.files || SubjectFolders.files.length === 0) {
-      return FilesData;
+      const end = Date.now();
+      console.log(`${subject} => No folders found (${end - start}ms)`);
+      return res.status(200).json(FilesData);
     }
 
-    // Use only the first subject folder (matching old logic)
-    const SubjectFolderId = SubjectFolders.files[0].id;
-    
-    // Step 2: Get subfolders from the first subject folder
-    const { data: SubjectSubFolders } = await drive.files.list({
-      q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
-      fields: "files(id, name)",
-      pageSize: 1000,
-    });
+    // Process ALL subject folders
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
+    let Parents = "";
+    let dic = {};
 
-    if (!SubjectSubFolders.files || SubjectSubFolders.files.length === 0) {
-      return FilesData;
+    // CALL 2: Get subfolders from ALL subject folders
+    for (const SubjectFolderId of SubjectFolderIds) {
+      const { data: SubjectSubFolders } = await drive.files.list({
+        q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
+        fields: "files(id, name)",
+        pageSize: 1000,
+      });
+
+      if (SubjectSubFolders.files) {
+        for (const subFolder of SubjectSubFolders.files) {
+          dic[subFolder.id] = subFolder.name;
+          Parents += `'${subFolder.id}' in parents OR `;
+        }
+      }
     }
 
-    // Build the dictionary and parent query
-    const dic = {};
-    const parentIds = [];
-    for (const subFolder of SubjectSubFolders.files) {
-      dic[subFolder.id] = subFolder.name;
-      parentIds.push(subFolder.id);
+    Parents = Parents.slice(0, -4); // Remove trailing " OR "
+
+    if (Parents.length <= 0) {
+      const end = Date.now();
+      console.log(`${subject} => No subfolders found (${end - start}ms)`);
+      return res.status(200).json(FilesData);
     }
 
-    // Step 3: Get all files in a single query
-    const parentsQuery = parentIds
-      .map((id) => `'${id}' in parents`)
-      .join(" OR ");
-
+    // CALL 3: Get ALL files in one query
     const { data: Files } = await drive.files.list({
-      q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder'`,
+      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
       fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
       pageSize: 1000,
     });
 
-    if (!Files.files) {
-      return FilesData;
-    }
-
-    // Organize files by parent folder
-    for (const file of Files.files) {
-      const parentName = dic[file.parents[0]];
-      if (parentName) {
-        if (!FilesData[parentName]) {
-          FilesData[parentName] = [];
+    if (Files.files) {
+      for (const file of Files.files) {
+        const parentName = dic[file.parents[0]];
+        if (parentName) {
+          if (!FilesData[parentName]) {
+            FilesData[parentName] = [];
+          }
+          FilesData[parentName].push(file);
         }
-        FilesData[parentName].push(file);
       }
     }
 
-    return FilesData;
-  };
-
-  const getCachedSubjectData = unstable_cache(
-    async (subject, auth) => {
-      return await GetDataOfSubject(subject, auth);
-    },
-    [subject], // Cache key based on subject
-    {
-      tags: [subject], // Tag the cache with subject for easier invalidation
-    }
-  );
-
-  try {
-    // const data = await getCachedSubjectData(subject, auth);
-    const data = await GetDataOfSubject(subject, auth);
-
     const end = Date.now();
-    console.log(`${subject} -==> Execution time: ${end - start} ms`);
+    console.log(`${subject} => Success (${end - start}ms) - ${Files.files?.length || 0} files`);
 
-    res.status(200).json(data);
+    res.status(200).json(FilesData);
   } catch (error) {
     console.error("Error fetching data:", error);
+    const end = Date.now();
+    console.log(`${subject} => Error (${end - start}ms)`);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
