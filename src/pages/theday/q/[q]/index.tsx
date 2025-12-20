@@ -1,36 +1,58 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Box, Container, Typography, Grid, Fade, Skeleton } from '@mui/material';
-import { useRouter } from 'next/router';
+import React, { useContext, useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Fade,
+  Skeleton,
+} from "@mui/material";
+import { useRouter } from "next/router";
 
 // Components
-import Header from '../../../../components/Header';
-import Footer from '../../../../components/Footer';
-import GoogleDriveSearch from '../../../../components/GoogleDriveSearch';
-import DashboardHeader from '../../../../components/dashboard/DashboardHeader';
-import SemesterCard from '../../../../components/dashboard/SemesterCard';
-import ModernHeader from '../../../../components/ModernHeader';
+import Header from "../../../../components/Header";
+import Footer from "../../../../components/Footer";
+import GoogleDriveSearch from "../../../../components/GoogleDriveSearch";
+import DashboardHeader from "../../../../components/dashboard/DashboardHeader";
+import SemesterCard from "../../../../components/dashboard/SemesterCard";
+import ModernHeader from "../../../../components/ModernHeader";
 
 // Context
-import { SearchProvider } from '../../../../context/SearchContext';
-import { DataContext } from '../../../../context/TranscriptContext';
-import { offlineContext } from '../../../_app';
-import Offline from '../../../../components/Offline';
+import { SearchProvider } from "../../../../context/SearchContext";
+import { DataContext } from "../../../../context/TranscriptContext";
+import { offlineContext } from "../../../_app";
+import Offline from "../../../../components/Offline";
 
 export default function TheDayPage() {
   const router = useRouter();
   const { transcript, loadingTranscript } = useContext(DataContext);
   const [offline] = useContext(offlineContext);
-  
+
   // State for layout
   const [currentSemesterIndex, setCurrentSemesterIndex] = useState<number>(-1);
   const [isReady, setIsReady] = useState(false);
 
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // Global navigation handler
+  const handleNavigate = async (abbreviation: string) => {
+    setIsNavigating(true);
+
+    try {
+      await router.push(`/subjects/${abbreviation}`);
+      // Navigation successful - state will reset on unmount
+    } catch (error) {
+      console.error("Navigation failed:", error);
+      setIsNavigating(false);
+    }
+  };
+
   // Initialize Semester State from LocalStorage
   useEffect(() => {
     if (!loadingTranscript && transcript) {
-      const savedSem = localStorage.getItem('semester');
-      const savedCustom = localStorage.getItem('customSemesterSubjects');
-      
+      const savedSem = localStorage.getItem("semester");
+      const savedCustom = localStorage.getItem("customSemesterSubjects");
+
       if (savedSem) {
         setCurrentSemesterIndex(parseInt(savedSem));
       } else {
@@ -43,8 +65,8 @@ export default function TheDayPage() {
 
   const handleUpdateFocus = (index: number, customSubjects?: string[]) => {
     setCurrentSemesterIndex(index);
-    if(index !== -2) {
-       localStorage.setItem('semester', index.toString());
+    if (index !== -2) {
+      localStorage.setItem("semester", index.toString());
     }
     // Force re-render/update
     router.replace(router.asPath);
@@ -54,11 +76,19 @@ export default function TheDayPage() {
     return (
       <Container maxWidth="lg" sx={{ pt: 10 }}>
         <Skeleton variant="text" height={60} width="60%" />
-        <Skeleton variant="rectangular" height={200} sx={{ my: 2, borderRadius: 4 }} />
+        <Skeleton
+          variant="rectangular"
+          height={200}
+          sx={{ my: 2, borderRadius: 4 }}
+        />
         <Grid container spacing={3}>
-          {[1,2,3].map(i => (
+          {[1, 2, 3].map((i) => (
             <Grid item xs={12} md={4} key={i}>
-              <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 4 }} />
+              <Skeleton
+                variant="rectangular"
+                height={150}
+                sx={{ borderRadius: 4 }}
+              />
             </Grid>
           ))}
         </Grid>
@@ -73,27 +103,22 @@ export default function TheDayPage() {
 
   return (
     <SearchProvider>
-      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 8 }}>
-       <ModernHeader 
-          title="Dashboard" 
-          isSearch={false} 
-          isHome={true} 
-        />
-        
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
+        <ModernHeader title="Dashboard" isSearch={false} isHome={true} />
+
         <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 } }}>
-          
           {/* Global Search Bar - Always visible and centered */}
-          <Box mb={6} sx={{ position: 'relative', zIndex: 2 }}>
-            <GoogleDriveSearch 
-              transcript={transcript as any} 
-              currentSemester={currentSemesterIndex} 
+          <Box mb={6} sx={{ position: "relative", zIndex: 2 }}>
+            <GoogleDriveSearch
+              transcript={transcript as any}
+              currentSemester={currentSemesterIndex}
             />
           </Box>
 
           <Fade in={true} timeout={800}>
             <Box>
               {/* 1. Hero / Current Focus Section */}
-              <DashboardHeader 
+              <DashboardHeader
                 allSemesters={allSemesters}
                 currentSemesterIndex={currentSemesterIndex}
                 onUpdateFocus={handleUpdateFocus}
@@ -101,10 +126,15 @@ export default function TheDayPage() {
 
               {/* 2. All Semesters Grid */}
               <Box mt={8}>
-                <Typography variant="h5" fontWeight={800} mb={3} color="text.secondary">
+                <Typography
+                  variant="h5"
+                  fontWeight={800}
+                  mb={3}
+                  color="text.secondary"
+                >
                   Explore Curriculum
                 </Typography>
-                
+
                 <Grid container spacing={3}>
                   {allSemesters.map((semester: any) => {
                     // Don't show the current semester again in the grid if it's a standard semester
@@ -112,9 +142,11 @@ export default function TheDayPage() {
 
                     return (
                       <Grid item xs={12} sm={6} md={4} key={semester.index}>
-                        <SemesterCard 
-                          semesterIndex={semester.index} 
-                          subjects={semester.subjects} 
+                        <SemesterCard
+                          semesterIndex={semester.index}
+                          subjects={semester.subjects}
+                          isNavigating={isNavigating}
+                          onNavigate={handleNavigate}
                         />
                       </Grid>
                     );
