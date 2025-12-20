@@ -50,6 +50,7 @@ export default function FileBrowser({
     id: string;
     title: string;
   } | null>(null);
+  
 
   // Categories
   const categories = useMemo(() => ["All", ...Object.keys(data)], [data]);
@@ -147,7 +148,7 @@ export default function FileBrowser({
       >
 
 
-        {/* Right Side Controls Group */}
+        {/* Left Side Controls Group */}
         <Box
           sx={{
             display: "flex",

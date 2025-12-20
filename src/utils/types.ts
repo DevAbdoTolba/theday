@@ -28,6 +28,14 @@ export interface SubjectMaterials {
   [category: string]: DriveFile[];
 }
 
+export interface UseSmartSubjectReturn {
+  data: SubjectMaterials | null;
+  loading: boolean;
+  fetching: boolean;
+  newItems: string[];
+  error: string | null;
+}
+
 export interface ParsedFile {
   id: string;
   name: string;
@@ -38,10 +46,3 @@ export interface ParsedFile {
   youtubeId?: string | null
 }
 
-export interface UseSmartSubjectReturn {
-  data: SubjectMaterials | null;
-  loading: boolean;
-  fetching: boolean;
-  newItems: string[];
-  error: string | null;
-}
