@@ -1,16 +1,25 @@
-'use client'
+
 import React from 'react';
 import { 
   Card, CardActionArea, CardContent, CardMedia, 
   Typography, Box, Chip, Tooltip, useTheme 
 } from '@mui/material';
-import { 
-  PictureAsPdf, Folder, Image as ImageIcon, YouTube, 
-  Article, Slideshow, TableChart, InsertDriveFile, 
-  OpenInNew 
-} from '@mui/icons-material';
+ import dynamic from 'next/dynamic';
+
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
+
+
+// Dynamic import with no SSR
+const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
+const Folder = dynamic(() => import('@mui/icons-material/Folder'), { ssr: false });
+const ImageIcon = dynamic(() => import('@mui/icons-material/Image'), { ssr: false });
+const YouTube = dynamic(() => import('@mui/icons-material/YouTube'), { ssr: false });
+const Article = dynamic(() => import('@mui/icons-material/Article'), { ssr: false });
+const Slideshow = dynamic(() => import('@mui/icons-material/Slideshow'), { ssr: false });
+const TableChart = dynamic(() => import('@mui/icons-material/TableChart'), { ssr: false });
+const InsertDriveFile = dynamic(() => import('@mui/icons-material/InsertDriveFile'), { ssr: false });
+const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
 
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
   switch (type) {
@@ -25,6 +34,7 @@ const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
     default: return <InsertDriveFile color="disabled" />;
   }
 };
+
 
 export const FileCard = ({ file }: { file: ParsedFile }) => {
   const theme = useTheme();
