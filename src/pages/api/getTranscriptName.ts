@@ -36,14 +36,20 @@ async function getTranscriptName(className: string) {
   const connection = await mongoose.connect(URI, options);
 
   // get the model
-  let TranscriptModel: mongoose.Model<any>;
+  interface ITranscript {
+    class?: string;
+    [key: string]: any;
+  }
+  let TranscriptModel: mongoose.Model<ITranscript>;
+
+  const transcriptSchema = new mongoose.Schema<ITranscript>({}, { strict: false });
 
   try {
     // Trying to get the existing model to prevent OverwriteModelError
-    TranscriptModel = connection.model("classes");
+    TranscriptModel = connection.model<ITranscript>("classes");
   } catch (error) {
     // If the model does not exist, then define it
-    TranscriptModel = connection.model("classes", new mongoose.Schema({}));
+    TranscriptModel = connection.model<ITranscript>("classes", transcriptSchema);
   }
   console.log("Connected to the database", mongoose.connection.readyState);
 
