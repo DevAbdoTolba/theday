@@ -16,7 +16,9 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
   if (match) {
     const extractedUrl = decodeURIComponent(match[0]);
     // Remove the URL from the name
-    name = name.replace(match[0], '').trim().replace(/%20/g, ' ');
+    name = name.split(match[0]).filter(Boolean).join(' ').trim().replace(/%20/g, ' ');
+
+
     
     // Determine if it's a YouTube link
     if (extractedUrl.includes('youtube.com') || extractedUrl.includes('youtu.be')) {
