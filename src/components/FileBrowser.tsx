@@ -18,13 +18,6 @@ export default function FileBrowser({ data, subjectName }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
 
- 
-
- 
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
 
   if (!data || Object.keys(data).length === 0) {
     return (
