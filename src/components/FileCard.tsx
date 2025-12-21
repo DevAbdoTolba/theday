@@ -59,7 +59,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
         rel="noopener noreferrer"
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', height: '100%' }}
       >
-        {thumbnail ? (
+        {/* {thumbnail ? (
           <CardMedia
             component="img"
             height="140"
@@ -67,7 +67,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
             alt={file.name}
             sx={{ objectFit: 'cover', bgcolor: theme.palette.grey[100] }}
           />
-        ) : (
+        ) : ( */}
           <Box 
             sx={{ 
               height: 140, 
@@ -81,7 +81,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
               <FileIcon type={file.type} />
             </Box>
           </Box>
-        )}
+        {/* )} */}
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
           {/* <Box display="flex" gap={1} mb={1}>
