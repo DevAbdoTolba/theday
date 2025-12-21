@@ -11,29 +11,29 @@ import {
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
 
-const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
-  switch (type) {
-    case 'pdf': return <PictureAsPdf color="error" />;
-    case 'folder': return <Folder color="primary" />;
-    case 'image': return <ImageIcon color="secondary" />;
-    case 'youtube': return <YouTube color="error" />;
-    case 'video': return <YouTube color="action" />;
-    case 'doc': return <Article color="primary" />;
-    case 'slide': return <Slideshow color="warning" />;
-    case 'sheet': return <TableChart color="success" />;
-    default: return <InsertDriveFile color="disabled" />;
-  }
-};
+// const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
+//   switch (type) {
+//     case 'pdf': return <PictureAsPdf color="error" />;
+//     case 'folder': return <Folder color="primary" />;
+//     case 'image': return <ImageIcon color="secondary" />;
+//     case 'youtube': return <YouTube color="error" />;
+//     case 'video': return <YouTube color="action" />;
+//     case 'doc': return <Article color="primary" />;
+//     case 'slide': return <Slideshow color="warning" />;
+//     case 'sheet': return <TableChart color="success" />;
+//     default: return <InsertDriveFile color="disabled" />;
+//   }
+// };
 
 export const FileCard = ({ file }: { file: ParsedFile }) => {
   const theme = useTheme();
   
   // Determine thumbnail source
-  // let thumbnail = file.thumbnailUrl;
-  // if (file.type === 'youtube') {
-  //   const ytThumb = getYoutubeThumbnail(file.url);
-  //   if (ytThumb) thumbnail = ytThumb;
-  // }
+  let thumbnail = file.thumbnailUrl;
+  if (file.type === 'youtube') {
+    const ytThumb = getYoutubeThumbnail(file.url);
+    if (ytThumb) thumbnail = ytThumb;
+  }
 
   return (
     <Card 
@@ -59,7 +59,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
         rel="noopener noreferrer"
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', height: '100%' }}
       >
-        {/* {thumbnail ? (
+        {thumbnail ? (
           <CardMedia
             component="img"
             height="140"
@@ -67,7 +67,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
             alt={file.name}
             sx={{ objectFit: 'cover', bgcolor: theme.palette.grey[100] }}
           />
-        ) : ( */}
+        ) : (
           <Box 
             sx={{ 
               height: 140, 
@@ -78,13 +78,13 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
             }}
           >
             <Box sx={{ transform: 'scale(2.5)', opacity: 0.5 }}>
-              <FileIcon type={file.type} />
+               {file.type}  
             </Box>
           </Box>
-        {/* )} */}
+        )} 
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
-          {/* <Box display="flex" gap={1} mb={1}>
+          <Box display="flex" gap={1} mb={1}>
             <Chip 
               size="small" 
               label={file.type.toUpperCase()} 
@@ -100,7 +100,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
                 sx={{ fontSize: '0.65rem', height: 20 }}
               />
             )}
-          </Box> */}
+          </Box>
           
           <Tooltip title={file.name} enterDelay={500}>
             <Typography 
