@@ -137,7 +137,15 @@ export default function FileBrowser({
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box 
+      sx={{ width: "100%" }}
+      onClick={() => {
+        // Collapse any expanded mobile card when clicking away
+        if (mobileExpandedCardId) {
+          setMobileExpandedCardId(null);
+        }
+      }}
+    >
       {/* Header / Controls */}
       <Box
         sx={{
