@@ -5,7 +5,6 @@ import {
 } from '@mui/material';
 import { Search, SentimentDissatisfied } from '@mui/icons-material';
 import { SubjectMaterials } from '../utils/types';
-import { parseGoogleFile } from '../utils/helpers';
 import { FileCard } from './FileCard';
 
 interface Props {
@@ -36,12 +35,10 @@ export default function FileBrowser({ data, subjectName }: Props) {
       files = data[currentCategory] || [];
     }
 
-    // Parse them first
-    const parsed = files.map(parseGoogleFile);
-
+    // Use files directly without parsing
     // Apply text filter
-    if (!filter) return parsed;
-    return parsed.filter(f  => f.name.toLowerCase().includes(filter.toLowerCase()));
+    if (!filter) return files;
+    return files.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
   }, [data, activeTab, filter, categories]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -50,7 +47,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
   if (!data || Object.keys(data).length === 0) {
     return (
-      <Box >
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
         <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h6">No materials found for this subject yet.</Typography>
       </Box>
