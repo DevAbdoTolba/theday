@@ -1,10 +1,8 @@
-const { google } = require("googleapis");
-
-
 import React from 'react';
 import Head from 'next/head';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { useRouter } from 'next/router';
+import { google } from 'googleapis';
 import { Box, Container, CircularProgress, Alert } from '@mui/material';
 
 import Header from '../../components/Header';
@@ -37,14 +35,8 @@ export default function SubjectPage({ subject, initialData }: Props) {
       <Header title={subject} isSearch={false} />
 
       <Container maxWidth="xl" sx={{ py: 4, minHeight: '85vh' }}>
-        {!initialData ? (
           <Alert severity="error">Failed to load data. Please try again later.</Alert>
-        ) : (
-          <FileBrowser 
-            data={initialData} 
-            subjectName={subject} // You might want to map Abbr -> Full Name here via context
-          />
-        )}
+
       </Container>
     </>
   );
@@ -97,7 +89,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const categoryMap: Record<string, string> = {}; // ID -> Name
     const categoryIds: string[] = [];
 
-    // @ts-ignore
     categoriesRes.data.files?.forEach(file => {
       if(file.id && file.name) {
         categoryMap[file.id] = file.name;
@@ -122,7 +113,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     // 4. Organize Data
     const organizedData: SubjectMaterials = {};
 
-    // @ts-ignore
     filesRes.data.files?.forEach(file => {
       const parentId = file.parents?.[0];
       if (parentId && categoryMap[parentId]) {
