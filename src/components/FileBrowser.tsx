@@ -19,14 +19,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
   const [filter, setFilter] = useState('');
 
 
-  if (!data || Object.keys(data).length === 0) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
-        <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
-        <Typography variant="h6">No materials found for this subject yet.</Typography>
-      </Box>
-    );
-  }
+ 
 
   return (
     <Box sx={{ width: '100%' }}>
