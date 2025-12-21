@@ -91,7 +91,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
               color={file.type === 'folder' ? 'primary' : 'default'}
               variant="outlined"
               sx={{ fontSize: '0.65rem', height: 20 }}
-            /> */}
+            />
             {file.isExternalLink && (
               <Chip 
                 size="small" 
@@ -99,7 +99,7 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
                 label="LINK" 
                 sx={{ fontSize: '0.65rem', height: 20 }}
               />
-            )}
+            )} */}
           </Box>
           
           <Tooltip title={file.name} enterDelay={500}>
