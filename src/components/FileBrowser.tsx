@@ -115,7 +115,21 @@ export default function FileBrowser({ data, subjectName }: Props) {
       {/* Grid Content */}
       <Fade in={true} key={activeTab}>
         <Box>
-         Filtred files is the problem :D
+          {filteredFiles.length > 0 ? (
+            <Grid container spacing={3}>
+              {filteredFiles.map((file) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+                  hello card :D
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box textAlign="center" py={8}>
+              <Typography variant="body1" color="text.secondary">
+                No files found matching your criteria.
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Fade>
     </Box>
