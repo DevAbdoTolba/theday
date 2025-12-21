@@ -11,20 +11,19 @@ import {
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
 
-// @ts-ignore
-const FileIcon = ({ type }: any) => {
-  switch (type) {
-    case 'pdf': return <PictureAsPdf color="error" />;
-    case 'folder': return <Folder color="primary" />;
-    case 'image': return <ImageIcon color="secondary" />;
-    case 'youtube': return <YouTube color="error" />;
-    case 'video': return <YouTube color="action" />;
-    case 'doc': return <Article color="primary" />;
-    case 'slide': return <Slideshow color="warning" />;
-    case 'sheet': return <TableChart color="success" />;
-    default: return <InsertDriveFile color="disabled" />;
-  }
-};
+// const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
+//   switch (type) {
+//     case 'pdf': return <PictureAsPdf color="error" />;
+//     case 'folder': return <Folder color="primary" />;
+//     case 'image': return <ImageIcon color="secondary" />;
+//     case 'youtube': return <YouTube color="error" />;
+//     case 'video': return <YouTube color="action" />;
+//     case 'doc': return <Article color="primary" />;
+//     case 'slide': return <Slideshow color="warning" />;
+//     case 'sheet': return <TableChart color="success" />;
+//     default: return <InsertDriveFile color="disabled" />;
+//   }
+// };
 
 export const FileCard = ({ file }: { file: ParsedFile }) => {
   const theme = useTheme();
@@ -79,7 +78,8 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
             }}
           >
             <Box sx={{ transform: 'scale(2.5)', opacity: 0.5 }}>
-              <FileIcon type={file.type} />
+              {/* <FileIcon type={file.type} /> */}
+              {file.type}
             </Box>
           </Box>
         )}
@@ -93,14 +93,14 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
               variant="outlined"
               sx={{ fontSize: '0.65rem', height: 20 }}
             />
-            {/* {file.isExternalLink && (
+            {file.isExternalLink && (
               <Chip 
                 size="small" 
-                icon={<OpenInNew sx={{ fontSize: '0.8rem !important' }} />}
+                // icon={<OpenInNew sx={{ fontSize: '0.8rem !important' }} />}
                 label="LINK" 
                 sx={{ fontSize: '0.65rem', height: 20 }}
               />
-            )} */}
+            )}
           </Box>
           
           <Tooltip title={file.name} enterDelay={500}>
