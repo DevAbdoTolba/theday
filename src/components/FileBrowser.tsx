@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Box, Tabs, Tab, Grid, Typography, Fade, 
-  TextField, InputAdornment, useMediaQuery, useTheme 
+  TextField, InputAdornment, useTheme 
 } from '@mui/material';
 import { Search, SentimentDissatisfied } from '@mui/icons-material';
 import { SubjectMaterials } from '../utils/types';
@@ -14,7 +14,7 @@ interface Props {
 
 export default function FileBrowser({ data, subjectName }: Props) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
 
