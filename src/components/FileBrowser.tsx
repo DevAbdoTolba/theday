@@ -15,6 +15,7 @@ import {
   ToggleButton,
   Chip,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import {
   Search,
@@ -22,6 +23,7 @@ import {
   GridView,
   ViewList,
   AutoAwesome,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import { SubjectMaterials, ParsedFile } from "../utils/types";
 import { parseGoogleFile } from "../utils/helpers";
@@ -46,6 +48,8 @@ export default function FileBrowser({
   const [filter, setFilter] = useState("");
   const [showOnlyNew, setShowOnlyNew] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [peekMode, setPeekMode] = useState(false);
+  const [mobileExpandedCardId, setMobileExpandedCardId] = useState<string | null>(null);
   const [playingVideo, setPlayingVideo] = useState<{
     id: string;
     title: string;
@@ -157,7 +161,7 @@ export default function FileBrowser({
             justifyContent: { xs: "space-between", md: "flex-end" },
           }}
         >
-          {/* New Items Filter - Positioned next to View Toggle */}
+          {/* View Mode Toggle - Grid/List */}
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -179,6 +183,31 @@ export default function FileBrowser({
               <ViewList fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
+
+          {/* Peek Mode Toggle - Only show in grid mode on desktop */}
+          {viewMode === "grid" && (
+            <Tooltip title={peekMode ? "Peek Mode ON: Click to preview" : "Enable Peek Mode for quick preview"}>
+              <ToggleButton
+                value="peek"
+                selected={peekMode}
+                onChange={() => setPeekMode(!peekMode)}
+                size="small"
+                sx={{
+                  height: 40,
+                  px: 2,
+                  borderRadius: 2,
+                  border: `1px solid ${peekMode ? theme.palette.primary.main : theme.palette.divider}`,
+                  bgcolor: peekMode ? `${theme.palette.primary.main}15` : "transparent",
+                  display: { xs: "none", md: "flex" },
+                  "&:hover": {
+                    bgcolor: peekMode ? `${theme.palette.primary.main}25` : "rgba(0,0,0,0.04)",
+                  },
+                }}
+              >
+                <VisibilityOutlined fontSize="small" color={peekMode ? "primary" : "action"} />
+              </ToggleButton>
+            </Tooltip>
+          )}
           <Divider
             orientation="vertical"
             flexItem
@@ -247,12 +276,16 @@ export default function FileBrowser({
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
               <Grid container spacing={2}>
-                {filteredFiles.map((file) => (
+                {filteredFiles.map((file, index) => (
                   <Grid item xs={6} sm={6} md={4} lg={3} key={file.id}>
                     <FileCard
                       file={file}
                       onClick={() => handleFileClick(file)}
                       isNew={newItems.includes(file.id)}
+                      peekMode={peekMode}
+                      mobileExpandedId={mobileExpandedCardId}
+                      onMobileExpand={setMobileExpandedCardId}
+                      gridPosition={index % 2 === 0 ? 'left' : 'right'}
                     />
                   </Grid>
                 ))}

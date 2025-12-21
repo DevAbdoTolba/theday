@@ -37,7 +37,6 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
   const getActionIcon = () => {
     if (file.type === 'folder') return <FolderOpen fontSize="small" />;
     if (file.type === 'youtube' || file.type === 'video') return <PlayCircle fontSize="small" />;
-    // Default for docs, pdfs, images:
     return <Visibility fontSize="small" />;
   };
 
@@ -45,7 +44,6 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
     <Paper
       component="a"
       href={file.url}
-      // Intercept click to open Modal or New Tab based on logic passed from parent
       onClick={(e) => {
         e.preventDefault();
         onClick();
@@ -69,24 +67,19 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
         }
       }}
     >
-      {/* 1. File Type Icon */}
+      {/* File Type Icon */}
       <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
         <FileIcon type={file.type} />
       </Box>
 
-      {/* 2. File Name */}
+      {/* File Name */}
       <Box sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>
-        <Typography 
-          variant="body2" 
-          fontWeight={600} 
-          color="text.primary"
-          noWrap
-        >
+        <Typography variant="body2" fontWeight={600} color="text.primary" noWrap>
           {file.name}
         </Typography>
       </Box>
 
-      {/* 3. Type Chip (Hidden on mobile) */}
+      {/* Type Chip (Hidden on mobile) */}
       <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, mr: 2, alignItems: 'center' }}>
         <Chip 
           label={file.type.toUpperCase()} 
@@ -104,18 +97,13 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
               fontSize: '0.65rem', 
               height: 20,
               fontWeight: 700,
-              animation: 'blink 1.5s ease-in-out infinite',
-              '@keyframes blink': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              }
             }}
           />
         )}
       </Box>
 
-      {/* 4. Action Icon (The Update) */}
-      <Tooltip title="Preview here">
+      {/* Action Icon */}
+      <Tooltip title="Open">
         <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', opacity: 0.7 }}>
           {getActionIcon()}
         </Box>
