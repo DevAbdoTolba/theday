@@ -58,97 +58,95 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
+// Fetch data at build time
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
-  
-  if (!subject) return { notFound: true };
+  let initialData = null;
 
-  try {
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.CLIENT_EMAIL,
-        private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      },
-      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
-    });
+  const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.CLIENT_EMAIL,
+      private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    },
+    scopes: SCOPES,
+  });
+  // @ts-ignore
+  const GetDataOfSubject = async (subject, auth) => {
+    let FilesData = {};
     const drive = google.drive({ version: "v3", auth });
-    
-    // 1. Find the Subject Folder
-    const subjectFolderRes = await drive.files.list({
-      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+
+    const { data: SubjectFolders } = await drive.files.list({
+      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
       fields: "files(id, name)",
     });
 
-    if (!subjectFolderRes.data.files?.length) {
-      return { props: { subject, initialData: {} }, revalidate: 3600 };
+    if (!SubjectFolders.files || SubjectFolders.files.length === 0) {
+      return FilesData;
     }
+    // @ts-ignore
+    const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
+    let Parents = "";
+    let dic = {};
 
-    const subjectFolderId = subjectFolderRes.data.files[0].id;
+    for (const SubjectFolderId of SubjectFolderIds) {
+      const { data: SubjectSubFolders } = await drive.files.list({
+        q: `mimeType = 'application/vnd.google-apps.folder' and '${SubjectFolderId}' in parents`,
+        fields: "files(id, name)",
+      });
 
-    // 2. Find Category Folders (Lectures, Exams, etc.)
-    const categoriesRes = await drive.files.list({
-      q: `'${subjectFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-      fields: "files(id, name)",
-    });
-
-    const categoryMap: Record<string, string> = {}; // ID -> Name
-    const categoryIds: string[] = [];
-
-    categoriesRes.data.files?.forEach(file => {
-      if(file.id && file.name) {
-        categoryMap[file.id] = file.name;
-        categoryIds.push(file.id);
+      // @ts-ignore
+      for (const subFolder of SubjectSubFolders.files) {
+        // @ts-ignore
+        dic[subFolder.id] = subFolder.name;
+        Parents += `'${subFolder.id}' in parents OR `;
       }
-    });
-
-    if (categoryIds.length === 0) {
-       return { props: { subject, initialData: {} }, revalidate: 3600 };
     }
 
-    // 3. Fetch Files inside Categories
-    // Batch query for efficiency
-    const parentsQuery = categoryIds.map(id => `'${id}' in parents`).join(' OR ');
-    
-    const filesRes = await drive.files.list({
-      q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder' and trashed = false`,
-      fields: "files(id, name, mimeType, parents, size, webViewLink)",
+    Parents = Parents.slice(0, -4); // Remove the trailing " OR "
+
+    if (Parents.length <= 0) return FilesData;
+
+    const { data: Files } = await drive.files.list({
+      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
+      fields: "files(mimeType,name,size,id,parents,owners(emailAddress))",
       pageSize: 1000,
     });
 
-    // 4. Organize Data
-    const organizedData: SubjectMaterials = {};
+    // @ts-ignore
+    for (const file of Files.files) {
+      // @ts-ignore
 
-    filesRes.data.files?.forEach(file => {
-      const parentId = file.parents?.[0];
-      if (parentId && categoryMap[parentId]) {
-        const categoryName = categoryMap[parentId];
-        if (!organizedData[categoryName]) organizedData[categoryName] = [];
-        
-        // @ts-ignore - Google Types are slightly loose, we cast strictly
-        organizedData[categoryName].push({
-          id: file.id!,
-          name: file.name!,
-          mimeType: file.mimeType!,
-          parents: file.parents || [],
-          size: parseInt(file.size || '0'),
-        });
+      const parentName = dic[file.parents[0]];
+      // @ts-ignore
+
+      if (!FilesData[parentName]) {
+        // @ts-ignore
+
+        FilesData[parentName] = [];
       }
-    });
+      // @ts-ignore
 
-    return {
-      props: {
-        subject,
-        initialData: organizedData,
-      },
-      revalidate: 3600, // Revalidate every hour
-    };
+      FilesData[parentName].push(file);
+    }
 
+    return FilesData;
+  };
+
+  try {
+    const res = await GetDataOfSubject(subject, auth);
+
+    // @ts-ignore
+    initialData = res;
   } catch (error) {
-    console.error("Drive API Error:", error);
-    return { 
-      props: { subject, initialData: {} }, 
-      revalidate: 60 // Retry sooner if error
-    };
+    console.error("Failed to fetch initial data:", error);
   }
+
+  return {
+    props: {
+      subject,
+      initialData,
+    },
+  };
 };
