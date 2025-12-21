@@ -28,6 +28,12 @@ import { getYoutubeThumbnail } from '../utils/helpers';
 export const FileCard = ({ file }: { file: ParsedFile }) => {
   const theme = useTheme();
   
+  // Determine thumbnail source
+  let thumbnail = file.thumbnailUrl;
+  if (file.type === 'youtube') {
+    const ytThumb = getYoutubeThumbnail(file.url);
+    if (ytThumb) thumbnail = ytThumb;
+  }
 
   return (
     <Card 
@@ -53,7 +59,15 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
         rel="noopener noreferrer"
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', height: '100%' }}
       >
-
+        {thumbnail ? (
+          <CardMedia
+            component="img"
+            height="140"
+            image={thumbnail}
+            alt={file.name}
+            sx={{ objectFit: 'cover', bgcolor: theme.palette.grey[100] }}
+          />
+        ) : (
           <Box 
             sx={{ 
               height: 140, 
@@ -64,10 +78,11 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
             }}
           >
             <Box sx={{ transform: 'scale(2.5)', opacity: 0.5 }}>
-               {file.type}  
+              {/* <FileIcon type={file.type} /> */}
+              {file.type}
             </Box>
           </Box>
-
+        )}
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
           <Box display="flex" gap={1} mb={1}>
