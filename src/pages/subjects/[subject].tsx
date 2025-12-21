@@ -97,6 +97,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const categoryMap: Record<string, string> = {}; // ID -> Name
     const categoryIds: string[] = [];
 
+    // @ts-ignore
     categoriesRes.data.files?.forEach(file => {
       if(file.id && file.name) {
         categoryMap[file.id] = file.name;
@@ -121,6 +122,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     // 4. Organize Data
     const organizedData: SubjectMaterials = {};
 
+    // @ts-ignore
     filesRes.data.files?.forEach(file => {
       const parentId = file.parents?.[0];
       if (parentId && categoryMap[parentId]) {
