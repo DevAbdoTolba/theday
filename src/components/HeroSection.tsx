@@ -6,10 +6,6 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 
-interface HeroSectionProps {
-  customSemesterName?: string;
-  hasCustomSubjects?: boolean;
-}
 
 // Get greeting based on time of day
 const getGreeting = () => {
@@ -31,10 +27,7 @@ const taglines = [
   "You've got this!",
 ];
 
-export default function HeroSection({ 
-  customSemesterName,
-  hasCustomSubjects = false,
-}: HeroSectionProps) {
+export default function HeroSection() {
   const theme = useTheme();
   const router = useRouter();
   const greeting = getGreeting();
@@ -187,27 +180,10 @@ export default function HeroSection({
                     Continue
                   </Typography>
                   <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                    {lastSubject.abbr}
+                    {lastSubject.name}
                   </Typography>
                 </Box>
               </Button>
-            )}
-
-            {/* Custom semester indicator */}
-            {hasCustomSubjects && customSemesterName && (
-              <Chip
-                icon={<Bookmark sx={{ fontSize: '1rem !important' }} />}
-                label={customSemesterName}
-                color="secondary"
-                variant="outlined"
-                sx={{
-                  height: 36,
-                  borderRadius: 3,
-                  fontWeight: 600,
-                  bgcolor: alpha(theme.palette.background.paper, 0.8),
-                  backdropFilter: 'blur(8px)',
-                }}
-              />
             )}
           </Box>
         </Box>

@@ -108,10 +108,7 @@ export default function TheDayPage() {
         <ModernHeader title="Dashboard" isSearch={false} isHome={true} />
 
         {/* Hero Section */}
-        <HeroSection 
-          customSemesterName={currentSemesterIndex === -2 ? localStorage.getItem('customSemesterName') || 'My Shortcuts' : undefined}
-          hasCustomSubjects={currentSemesterIndex === -2}
-        />
+        <HeroSection />
 
         <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 } }}>
           {/* Global Search Bar - Always visible and centered */}
