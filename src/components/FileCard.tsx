@@ -1,19 +1,27 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { 
   Card, CardActionArea, CardContent, CardMedia, 
   Typography, Box, Chip, Tooltip, useTheme 
 } from '@mui/material';
-import { 
-  PictureAsPdf, Folder, Image as ImageIcon, YouTube, 
-  Article, Slideshow, TableChart, InsertDriveFile, 
-  OpenInNew, PlayCircle
-} from '@mui/icons-material';
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
 
+// Dynamic imports for MUI icons
+const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
+const Folder = dynamic(() => import('@mui/icons-material/Folder'), { ssr: false });
+const ImageIcon = dynamic(() => import('@mui/icons-material/Image'), { ssr: false });
+const YouTube = dynamic(() => import('@mui/icons-material/YouTube'), { ssr: false });
+const Article = dynamic(() => import('@mui/icons-material/Article'), { ssr: false });
+const Slideshow = dynamic(() => import('@mui/icons-material/Slideshow'), { ssr: false });
+const TableChart = dynamic(() => import('@mui/icons-material/TableChart'), { ssr: false });
+const InsertDriveFile = dynamic(() => import('@mui/icons-material/InsertDriveFile'), { ssr: false });
+const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
+const PlayCircle = dynamic(() => import('@mui/icons-material/PlayCircle'), { ssr: false });
+
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
   switch (type) {
-    case 'youtube': return <PlayCircle color="error" />; 
+    case 'youtube': return <PlayCircle color="error" />;
     case 'pdf': return <PictureAsPdf color="error" />;
     case 'folder': return <Folder color="primary" />;
     case 'image': return <ImageIcon color="secondary" />;

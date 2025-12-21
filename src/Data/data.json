@@ -1,385 +1,489 @@
 {
-  "semesters": [
-    {
-      "index": 0,
-      "subjects": [
+
+    "semesters": [
+
         {
-          "name": "Mathematics 0",
-          "abbreviation": "CALC0"
+
+            "index": 0,
+
+            "subjects": [
+
+                {
+
+                    "name": "Mathematics 0",
+
+                    "abbreviation": "CALC0"
+
+                },
+
+                {
+
+                    "name": "ESP 0",
+
+                    "abbreviation": "ESP0"
+
+                }
+
+            ]
+
         },
+
         {
-          "name": "ESP 0",
-          "abbreviation": "ESP0"
+
+            "index": 1,
+
+            "subjects": [
+
+                {
+
+                    "name": "Calculas 1",
+
+                    "abbreviation": "CALC1"
+
+                },
+
+                {
+
+                    "name": "Introduction to Information Systems",
+
+                    "abbreviation": "IS"
+
+                },
+
+                {
+
+                    "name": "Introduction to computers",
+
+                    "abbreviation": "IC"
+
+                },
+
+                {
+
+                    "name": "ESP 1",
+
+                    "abbreviation": "ESP1"
+
+                },
+
+                {
+
+                    "name": "Fundmentals of business",
+
+                    "abbreviation": "BUS"
+
+                },
+
+                {
+
+                    "name": "Physics",
+
+                    "abbreviation": "PHY"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 2,
+
+            "subjects": [
+
+                {
+
+                    "name": "Calculus II",
+
+                    "abbreviation": "CALC2"
+
+                },
+
+                {
+
+                    "name": "ESP 2",
+
+                    "abbreviation": "ESP2"
+
+                },
+
+                {
+
+                    "name": "Introduction to problem solving & programming",
+
+                    "abbreviation": "PS"
+
+                },
+
+                {
+
+                    "name": "Fundamentals of electronics",
+
+                    "abbreviation": "ELC"
+
+                },
+
+                {
+
+                    "name": "Communication skills",
+
+                    "abbreviation": "CSK"
+
+                },
+
+                {
+
+                    "name": "Introduction to multimedia",
+
+                    "abbreviation": "MM"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 3,
+
+            "subjects": [
+
+                {
+
+                    "name": "Calculus III",
+
+                    "abbreviation": "CALC3"
+
+                },
+
+                {
+
+                    "name": "Object- oriented programming",
+
+                    "abbreviation": "OOP"
+
+                },
+
+                {
+
+                    "name": "Discrete Structures",
+
+                    "abbreviation": "DIS"
+
+                },
+
+                {
+
+                    "name": "Probability & statistics",
+
+                    "abbreviation": "PR"
+
+                },
+
+                {
+
+                    "name": "Digital logic design",
+
+                    "abbreviation": "DLD"
+
+                },
+
+                {
+
+                    "name": "Advanced physics",
+
+                    "abbreviation": "APHY"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 4,
+
+            "subjects": [
+
+                {
+
+                    "name": "Data structures and algorithms",
+
+                    "abbreviation": "DAS"
+
+                },
+
+                {
+
+                    "name": "Introduction to Networks",
+
+                    "abbreviation": "NETs"
+
+                },
+
+                {
+
+                    "name": "Introduction to software engineering",
+
+                    "abbreviation": "SE"
+
+                },
+
+                {
+
+                    "name": "Advanced Programming Applications",
+
+                    "abbreviation": "APA"
+
+                },
+
+                {
+
+                    "name": "Introduction to computer architecture",
+
+                    "abbreviation": "CAR"
+
+                },
+
+                {
+
+                    "name": "Database systems",
+
+                    "abbreviation": "DBS"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 5,
+
+            "subjects": [
+
+                {
+
+                    "name": "Systems programming",
+
+                    "abbreviation": "SP"
+
+                },
+
+                {
+
+                    "name": "Theory of computation",
+
+                    "abbreviation": "TC"
+
+                },
+
+                {
+
+                    "name": "Linear algebra",
+
+                    "abbreviation": "LG"
+
+                },
+
+                {
+
+                    "name": "Web programming",
+
+                    "abbreviation": "WEB"
+
+                },
+
+                {
+
+                    "name": "Computer graphics",
+
+                    "abbreviation": "CG"
+
+                },
+
+                {
+
+                    "name": "Advanced statistics",
+
+                    "abbreviation": "AS"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 6,
+
+            "subjects": [
+
+                {
+
+                    "name": "Computing algorithms",
+
+                    "abbreviation": "CA"
+
+                },
+
+                {
+
+                    "name": "System Modelling and Simulation",
+
+                    "abbreviation": "SMS"
+
+                },
+
+                {
+
+                    "name": "Numerical Methods",
+
+                    "abbreviation": "NM"
+
+                },
+
+                {
+
+                    "name": "Operating Systems",
+
+                    "abbreviation": "OS"
+
+                },
+
+                {
+
+                    "name": "Introduction to Artificial Intelligence",
+
+                    "abbreviation": "AI"
+
+                },
+
+                {
+
+                    "name": "Advanced Database Systems",
+
+                    "abbreviation": "ADB"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 7,
+
+            "subjects": [
+
+                {
+
+                    "name": "Deep Learning",
+
+                    "abbreviation": "DL"
+
+                },
+
+                {
+
+                    "name": "System Analysis & Design",
+
+                    "abbreviation": "SAD"
+
+                },
+
+                {
+
+                    "name": "Computers & Society",
+
+                    "abbreviation": "C&S"
+
+                },
+
+                {
+
+                    "name": "Embedded Systems Programming",
+
+                    "abbreviation": "EMB"
+
+                },
+
+                {
+
+                    "name": "Struture of Programming Languages",
+
+                    "abbreviation": "STPL"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "index": 8,
+
+            "subjects": [
+
+                {
+
+                    "name": "Human Computer Interaction",
+
+                    "abbreviation": "HCI"
+
+                },
+
+                {
+
+                    "name": "Computer Systems Security",
+
+                    "abbreviation": "CSS"
+
+                },
+
+                {
+
+                    "name": "Decision Support Systems",
+
+                    "abbreviation": "DSS"
+
+                },
+
+                {
+
+                    "name": "Soft computing",
+
+                    "abbreviation": "SCO"
+
+                },
+
+                {
+
+                    "name": "Robotics Applications",
+
+                    "abbreviation": "ROB"
+
+                },
+
+                {
+
+                    "name": "Digital Image Processing",
+
+                    "abbreviation": "DIP"
+
+                }
+
+            ]
+
         }
-      ]
-    },
-    {
-      "index": 1,
-      "subjects": [
-        {
-          "name": "Calculas 1",
-          "abbreviation": "CALC1"
-        },
-        {
-          "name": "Introduction to Information Systems",
-          "abbreviation": "IS"
-        },
-        {
-          "name": "Introduction to computers",
-          "abbreviation": "IC"
-        },
-        {
-          "name": "ESP 1",
-          "abbreviation": "ESP1"
-        },
-        {
-          "name": "Fundmentals of business",
-          "abbreviation": "BUS"
-        },
-        {
-          "name": "Physics",
-          "abbreviation": "PHY"
-        },
-        {
-          "name": "Music and Civilization",
-          "abbreviation": "MUS"
-        },
-        {
-          "name": "Spanish Language",
-          "abbreviation": "SPAN"
-        },
-        {
-          "name": "Sustainable Development",
-          "abbreviation": "SD"
-        },
-        {
-          "name": "Climate Change and Water Management",
-          "abbreviation": "CCWM"
-        },
-        {
-          "name": "History of Egyptian Art",
-          "abbreviation": "HEA"
-        },
-        {
-          "name": "ICT Skills",
-          "abbreviation": "ICT"
-        },
-        {
-          "name": "Creativity and Innovation",
-          "abbreviation": "CI"
-        }
-      ]
-    },
-    {
-      "index": 2,
-      "subjects": [
-        {
-          "name": "Calculus II",
-          "abbreviation": "CALC2"
-        },
-        {
-          "name": "ESP 2",
-          "abbreviation": "ESP2"
-        },
-        {
-          "name": "Introduction to problem solving & programming",
-          "abbreviation": "PS"
-        },
-        {
-          "name": "Fundamentals of electronics",
-          "abbreviation": "ELC"
-        },
-        {
-          "name": "Communication skills",
-          "abbreviation": "CSK"
-        },
-        {
-          "name": "Introduction to multimedia",
-          "abbreviation": "MM"
-        },
-        {
-          "name": "Biochemistry",
-          "abbreviation": "BCH"
-        },
-        {
-          "name": "Entrepreneurship Skills",
-          "abbreviation": "ES"
-        },
-        {
-          "name": "Quantum Physics",
-          "abbreviation": "QPHY"
-        },
-        {
-          "name": "Advanced Physics",
-          "abbreviation": "APHY"
-        },
-        {
-          "name": "Discrete Structures",
-          "abbreviation": "DIS"
-        },
-        {
-          "name": "Academic Writing",
-          "abbreviation": "ACW"
-        }
-      ]
-    },
-    {
-      "index": 3,
-      "subjects": [
-        {
-          "name": "Calculus III",
-          "abbreviation": "CALC3"
-        },
-        {
-          "name": "Object- oriented programming",
-          "abbreviation": "OOP"
-        },
-        {
-          "name": "Discrete Structures",
-          "abbreviation": "DIS"
-        },
-        {
-          "name": "Probability & statistics",
-          "abbreviation": "PR"
-        },
-        {
-          "name": "Digital logic design",
-          "abbreviation": "DLD"
-        },
-        {
-          "name": "Advanced physics",
-          "abbreviation": "APHY"
-        },
-        {
-          "name": "Introduction to Networks",
-          "abbreviation": "NETs"
-        },
-        {
-          "name": "Database Systems",
-          "abbreviation": "DBS"
-        },
-        {
-          "name": "Linear Algebra",
-          "abbreviation": "LG"
-        }
-      ]
-    },
-    {
-      "index": 4,
-      "subjects": [
-        {
-          "name": "Data structures and algorithms",
-          "abbreviation": "DAS"
-        },
-        {
-          "name": "Introduction to Networks",
-          "abbreviation": "NETs"
-        },
-        {
-          "name": "Introduction to software engineering",
-          "abbreviation": "SE"
-        },
-        {
-          "name": "Advanced Programming Applications",
-          "abbreviation": "APA"
-        },
-        {
-          "name": "Introduction to computer architecture",
-          "abbreviation": "CAR"
-        },
-        {
-          "name": "Database systems",
-          "abbreviation": "DBS"
-        },
-        {
-          "name": "Web Programming",
-          "abbreviation": "WEB"
-        },
-        {
-          "name": "Introduction to Cybersecurity",
-          "abbreviation": "CYS"
-        }
-      ]
-    },
-    {
-      "index": 5,
-      "subjects": [
-        {
-          "name": "Systems programming",
-          "abbreviation": "SP"
-        },
-        {
-          "name": "Theory of computation",
-          "abbreviation": "TC"
-        },
-        {
-          "name": "Linear algebra",
-          "abbreviation": "LG"
-        },
-        {
-          "name": "Web programming",
-          "abbreviation": "WEB"
-        },
-        {
-          "name": "Computer graphics",
-          "abbreviation": "CG"
-        },
-        {
-          "name": "Advanced statistics",
-          "abbreviation": "AS"
-        },
-        {
-          "name": "Differential Equations",
-          "abbreviation": "DE"
-        },
-        {
-          "name": "Introduction to Artificial Intelligence",
-          "abbreviation": "AI"
-        },
-        {
-          "name": "Operating Systems",
-          "abbreviation": "OS"
-        }
-      ]
-    },
-    {
-      "index": 6,
-      "subjects": [
-        {
-          "name": "Computing algorithms",
-          "abbreviation": "CA"
-        },
-        {
-          "name": "System Modelling and Simulation",
-          "abbreviation": "SMS"
-        },
-        {
-          "name": "Numerical Methods",
-          "abbreviation": "NM"
-        },
-        {
-          "name": "Operating Systems",
-          "abbreviation": "OS"
-        },
-        {
-          "name": "Introduction to Artificial Intelligence",
-          "abbreviation": "AI"
-        },
-        {
-          "name": "Advanced Database Systems",
-          "abbreviation": "ADB"
-        },
-        {
-          "name": "Advanced Artificial Intelligence",
-          "abbreviation": "AAI"
-        },
-        {
-          "name": "Deep Learning",
-          "abbreviation": "DL"
-        },
-        {
-          "name": "Advanced Statistics",
-          "abbreviation": "AS"
-        },
-        {
-          "name": "Computer Graphics",
-          "abbreviation": "CG"
-        }
-      ]
-    },
-    {
-      "index": 7,
-      "subjects": [
-        {
-          "name": "Deep Learning",
-          "abbreviation": "DL"
-        },
-        {
-          "name": "System Analysis & Design",
-          "abbreviation": "SAD"
-        },
-        {
-          "name": "Computers & Society",
-          "abbreviation": "C&S"
-        },
-        {
-          "name": "Embedded Systems Programming",
-          "abbreviation": "EMB"
-        },
-        {
-          "name": "Struture of Programming Languages",
-          "abbreviation": "STPL"
-        },
-        {
-          "name": "Project I",
-          "abbreviation": "GP1"
-        },
-        {
-          "name": "Virtual Environments",
-          "abbreviation": "VE"
-        },
-        {
-          "name": "High Performance Computing",
-          "abbreviation": "HPC"
-        },
-        {
-          "name": "Distributed Systems",
-          "abbreviation": "DIST"
-        },
-        {
-          "name": "Introduction to Bioinformatics",
-          "abbreviation": "BIOI"
-        },
-        {
-          "name": "Cloud Computing",
-          "abbreviation": "CLD"
-        },
-        {
-          "name": "Digital Image Processing",
-          "abbreviation": "DIP"
-        }
-      ]
-    },
-    {
-      "index": 8,
-      "subjects": [
-        {
-          "name": "Human Computer Interaction",
-          "abbreviation": "HCI"
-        },
-        {
-          "name": "Computer Systems Security",
-          "abbreviation": "CSS"
-        },
-        {
-          "name": "Decision Support Systems",
-          "abbreviation": "DSS"
-        },
-        {
-          "name": "Soft computing",
-          "abbreviation": "SCO"
-        },
-        {
-          "name": "Robotics Applications",
-          "abbreviation": "ROB"
-        },
-        {
-          "name": "Digital Image Processing",
-          "abbreviation": "DIP"
-        },
-        {
-          "name": "Functional Programming",
-          "abbreviation": "FP"
-        },
-        {
-          "name": "Project II",
-          "abbreviation": "GP2"
-        },
-        {
-          "name": "Compilers",
-          "abbreviation": "CMP"
-        }
-      ]
-    }
-  ]
+
+    ]
+
 }
