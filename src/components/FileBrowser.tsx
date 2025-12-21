@@ -3,7 +3,10 @@ import {
   Box, Tabs, Tab, Grid, Typography, Fade, 
   TextField, InputAdornment, useMediaQuery, useTheme 
 } from '@mui/material';
+import { Search, SentimentDissatisfied } from '@mui/icons-material';
 import { SubjectMaterials } from '../utils/types';
+import { parseGoogleFile } from '../utils/helpers';
+import { FileCard } from './FileCard';
 
 interface Props {
   data: SubjectMaterials;
@@ -16,12 +19,15 @@ export default function FileBrowser({ data, subjectName }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
 
-  // 1. Get Categories (Tabs)
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   if (!data || Object.keys(data).length === 0) {
     return (
       <Box >
+        <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
         <Typography variant="h6">No materials found for this subject yet.</Typography>
       </Box>
     );
