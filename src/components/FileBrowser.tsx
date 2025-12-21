@@ -18,28 +18,9 @@ export default function FileBrowser({ data, subjectName }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const [filter, setFilter] = useState('');
 
-  // 1. Get Categories (Tabs)
-  const categories = useMemo(() => {
-    return ['All', ...Object.keys(data)];
-  }, [data]);
+ 
 
-  // 2. Flatten and Filter Data
-  const filteredFiles = useMemo(() => {
-    const currentCategory = categories[activeTab];
-    let files = [];
-
-    if (currentCategory === 'All') {
-      // Combine all files from all categories
-      files = Object.values(data).flat();
-    } else {
-      files = data[currentCategory] || [];
-    }
-
-    // Use files directly without parsing
-    // Apply text filter
-    if (!filter) return files;
-    return files.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
-  }, [data, activeTab, filter, categories]);
+ 
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
