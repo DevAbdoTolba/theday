@@ -16,6 +16,7 @@ import GoogleDriveSearch from "../../../../components/GoogleDriveSearch";
 import DashboardHeader from "../../../../components/dashboard/DashboardHeader";
 import SemesterCard from "../../../../components/dashboard/SemesterCard";
 import ModernHeader from "../../../../components/ModernHeader";
+import HeroSection from "../../../../components/HeroSection";
 
 // Context
 import { SearchProvider } from "../../../../context/SearchContext";
@@ -105,6 +106,12 @@ export default function TheDayPage() {
     <SearchProvider>
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 8 }}>
         <ModernHeader title="Dashboard" isSearch={false} isHome={true} />
+
+        {/* Hero Section */}
+        <HeroSection 
+          customSemesterName={currentSemesterIndex === -2 ? localStorage.getItem('customSemesterName') || 'My Shortcuts' : undefined}
+          hasCustomSubjects={currentSemesterIndex === -2}
+        />
 
         <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 } }}>
           {/* Global Search Bar - Always visible and centered */}

@@ -68,6 +68,17 @@ export default function SubjectPage({
     }
   }, [newItems]);
 
+  // Track last visited subject for "Continue studying" feature
+  React.useEffect(() => {
+    if (subject) {
+      localStorage.setItem('lastVisitedSubject', JSON.stringify({ 
+        name: subject, 
+        abbr: subject,
+        timestamp: Date.now()
+      }));
+    }
+  }, [subject]);
+
   // Fallback state
   if (router.isFallback) {
     return (
