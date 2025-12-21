@@ -48,13 +48,13 @@ export default function FileBrowser({ data, subjectName }: Props) {
     setActiveTab(newValue);
   };
 
-  if (!data || Object.keys(data).length === 0) {
-    return (
-      <Box display="flex" flexDirection="column" alignItems="center" py={10} >
-        <Typography variant="h6">No materials found for this subject yet.</Typography>
-      </Box>
-    );
-  }
+  // if (!data || Object.keys(data).length === 0) {
+  //   return (
+  //     <Box display="flex" flexDirection="column" alignItems="center" py={10} >
+  //       <Typography variant="h6">No materials found for this subject yet.</Typography>
+  //     </Box>
+  //   );
+  // }
 
   return (
     <Box sx={{ width: '100%' }}>

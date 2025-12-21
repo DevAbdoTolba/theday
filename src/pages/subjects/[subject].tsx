@@ -44,12 +44,17 @@ export default function SubjectPage({ subject, initialData }: Props) {
           <Alert severity="error">
             Failed to load data. Please try again later.
           </Alert>
-        ) : (
-          initialData &&
-          <FileBrowser
+        ) : ( initialData &&
+          (()=>
+        { 
+          console.log("BIG DATA HERE DOWN THERE");
+          
+          console.log(initialData);
+          
+          return  <FileBrowser
             data={initialData}
             subjectName={subject} // You might want to map Abbr -> Full Name here via context
-          />
+          />})()
         )}
       </Container>
     </>
