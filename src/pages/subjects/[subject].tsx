@@ -1,14 +1,14 @@
-import React from 'react';
-import Head from 'next/head';
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { useRouter } from 'next/router';
-import { google } from 'googleapis';
-import { Box, Container, CircularProgress, Alert } from '@mui/material';
+import React from "react";
+import Head from "next/head";
+import { GetStaticProps, GetStaticPaths } from "next";
+import { useRouter } from "next/router";
+import { google } from "googleapis";
+import { Box, Container, CircularProgress, Alert } from "@mui/material";
 
-import Header from '../../components/Header';
-import FileBrowser from '../../components/FileBrowser';
-import { SubjectMaterials } from '../../utils/types';
-import { unstable_cache } from 'next/cache';
+import Header from "../../components/Header";
+import FileBrowser from "../../components/FileBrowser";
+import { SubjectMaterials } from "../../utils/types";
+import { unstable_cache } from "next/cache";
 
 interface Props {
   subject: string;
@@ -20,7 +20,12 @@ export default function SubjectPage({ subject, initialData }: Props) {
 
   if (router.isFallback) {
     return (
-      <Box height="100vh" display="flex" justifyContent="center" alignItems="center">
+      <Box
+        height="100vh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
         <CircularProgress size={60} />
       </Box>
     );
@@ -34,9 +39,17 @@ export default function SubjectPage({ subject, initialData }: Props) {
 
       <Header title={subject} isSearch={false} />
 
-      <Container maxWidth="xl" sx={{ py: 4, minHeight: '85vh' }}>
-          <Alert severity="error">Failed to load data. Please try again later.</Alert>
-
+      <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
+        {!initialData ? (
+          <Alert severity="error">
+            Failed to load data. Please try again later.
+          </Alert>
+        ) : (
+          <FileBrowser
+            data={initialData}
+            subjectName={subject} // You might want to map Abbr -> Full Name here via context
+          />
+        )}
       </Container>
     </>
   );
@@ -54,7 +67,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
-  
+
   if (!subject) return { notFound: true };
 
   try {
@@ -67,7 +80,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     });
 
     const drive = google.drive({ version: "v3", auth });
-    
+
     // 1. Find the Subject Folder
     const subjectFolderRes = await drive.files.list({
       q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
@@ -89,21 +102,23 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const categoryMap: Record<string, string> = {}; // ID -> Name
     const categoryIds: string[] = [];
 
-    categoriesRes.data.files?.forEach(file => {
-      if(file.id && file.name) {
+    categoriesRes.data.files?.forEach((file) => {
+      if (file.id && file.name) {
         categoryMap[file.id] = file.name;
         categoryIds.push(file.id);
       }
     });
 
     if (categoryIds.length === 0) {
-       return { props: { subject, initialData: {} }, revalidate: 3600 };
+      return { props: { subject, initialData: {} }, revalidate: 3600 };
     }
 
     // 3. Fetch Files inside Categories
     // Batch query for efficiency
-    const parentsQuery = categoryIds.map(id => `'${id}' in parents`).join(' OR ');
-    
+    const parentsQuery = categoryIds
+      .map((id) => `'${id}' in parents`)
+      .join(" OR ");
+
     const filesRes = await drive.files.list({
       q: `(${parentsQuery}) and mimeType != 'application/vnd.google-apps.folder' and trashed = false`,
       fields: "files(id, name, mimeType, parents, size, webViewLink)",
@@ -113,19 +128,19 @@ export const getStaticProps: GetStaticProps = async (context) => {
     // 4. Organize Data
     const organizedData: SubjectMaterials = {};
 
-    filesRes.data.files?.forEach(file => {
+    filesRes.data.files?.forEach((file) => {
       const parentId = file.parents?.[0];
       if (parentId && categoryMap[parentId]) {
         const categoryName = categoryMap[parentId];
         if (!organizedData[categoryName]) organizedData[categoryName] = [];
-        
+
         // @ts-ignore - Google Types are slightly loose, we cast strictly
         organizedData[categoryName].push({
           id: file.id!,
           name: file.name!,
           mimeType: file.mimeType!,
           parents: file.parents || [],
-          size: parseInt(file.size || '0'),
+          size: parseInt(file.size || "0"),
         });
       }
     });
@@ -137,12 +152,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
       },
       revalidate: 3600, // Revalidate every hour
     };
-
   } catch (error) {
     console.error("Drive API Error:", error);
-    return { 
-      props: { subject, initialData: {} }, 
-      revalidate: 60 // Retry sooner if error
+    return {
+      props: { subject, initialData: {} },
+      revalidate: 60, // Retry sooner if error
     };
   }
 };
