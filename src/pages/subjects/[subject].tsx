@@ -51,6 +51,9 @@ export default function SubjectPage({
   initialData,
 }: SubjectPageProps) {
   const [data, setData] = useState<DataMap | null>(initialData);
+  // const [subjectLoading, setSubjectLoading] = useState(!initialData);
+  // const [materialLoading, setMaterialLoading] = useState(false);
+  // const [newFetchLoading, setNewFetchLoading] = useState(false);
   const [newItemsMsg, setNewItemsMsg] = useState("");  const [newItems, setNewItems] = useState([]);  
   const [showSemesterPrompt, setShowSemesterPrompt] = useState(false);
   const [currentSemesterValue, setCurrentSemesterValue] = useState<number>(0);
@@ -70,15 +73,20 @@ export default function SubjectPage({
   });
 
   const theme = useTheme();  useEffect(() => {
+    // Check if the user has already set a semester
     const semesterInStorage = localStorage.getItem("semester");
     const currentSemester = localStorage.getItem("currentSemester");
     
+    // If we have a current semester value but the user hasn't chosen if this is their semester yet
     if (currentSemester && (!semesterInStorage || semesterInStorage === "-1" || semesterInStorage === "-2")) {
       setCurrentSemesterValue(parseInt(currentSemester));
+      // Show the semester prompt
       setShowSemesterPrompt(true);
     }
 
+    // Find the full subject name from the transcript data
     if (transcript && "semesters" in transcript) {
+      // Look through all semesters and find the subject with matching abbreviation
       const allSubjects = transcript.semesters.flatMap(sem => sem.subjects);
       const foundSubject = allSubjects.find(sub => sub.abbreviation === subject);
       
@@ -87,12 +95,17 @@ export default function SubjectPage({
       }
     }
     
+    // If initialData is not available, fetch it on the client side
     const loadData = async () => {
+      // setSubjectLoading(true);
       const cachedSubject = await getSubjectByName(subject);
 
       if (cachedSubject) {
+        // setMaterialLoading(false);
         setData(cachedSubject.folders);
 
+        // Fetch new data
+        // setNewFetchLoading(true);
 
         const result = await addOrUpdateSubject(subject, initialData);
 
@@ -104,13 +117,20 @@ export default function SubjectPage({
         if (result.msg !== "No changes") {
           setData(initialData);
         }
+        // setNewFetchLoading(false);
+        // setMaterialLoading(false);
 
+        // setNewFetchLoading(false);
+        // setMaterialLoading(false);
       } else {
+        // If no cached data, fetch from API
 
         setData(initialData);
         await addOrUpdateSubject(subject, initialData);
+        // setMaterialLoading(false);
       }
 
+      // setSubjectLoading(false);
     };
 
     loadData();
@@ -131,15 +151,21 @@ export default function SubjectPage({
     };
   }, [subject, transcript, initialData, getSubjectByName, addOrUpdateSubject]);
 
+  // if (subjectLoading || materialLoading) {
+  //   return <Loading />;
+  // }
 
+  // Handle fallback state when the page is being generated
   if (router.isFallback) {
     return <Loading />;
   }
 
+  // If offline or no data, handle it gracefully
   if (offline) {
     return <Offline />;
   }
 
+  // Show NoData component if no data is available after fetching
   if (!data || Object.keys(data).length === 0) {
     return <NoData />;
   }
@@ -160,6 +186,7 @@ export default function SubjectPage({
         />
         <TabsPC
           showDrawer={showDrawer}
+          // subjectLoading={subjectLoading}
           data={data}
           newItems={newItems}
         />
@@ -200,10 +227,12 @@ export default function SubjectPage({
   );
 }
 
+// Fetch data at build time
 export const getStaticProps: GetStaticProps = async (context) => {
   const subject = context.params?.subject as string;
   let initialData = null;
 
+  // const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
   const auth = new google.auth.GoogleAuth({
     credentials: {
@@ -218,8 +247,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
       auth_provider_x509_cert_url: process?.env?.AUTH_PROVIDER_X509_CERT_URL,
       client_x509_cert_url: process?.env?.CLIENT_X509_CERT_URL,
     },
-    scopes: SCOPES,
+    scopes: ["https://www.googleapis.com/auth/drive"],
   });
+  // @ts-ignore
   const GetDataOfSubject = async (subject, auth) => {
     let FilesData = {};
     const drive = google.drive({ version: "v3", auth });
@@ -232,6 +262,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     if (!SubjectFolders.files || SubjectFolders.files.length === 0) {
       return FilesData;
     }
+    // @ts-ignore
     const SubjectFolderIds = SubjectFolders.files.map((folder) => folder.id);
     let Parents = "";
     let dic = {};
@@ -243,11 +274,13 @@ export const getStaticProps: GetStaticProps = async (context) => {
       });
 
       for (const subFolder of SubjectSubFolders.files) {
+        // @ts-ignore
         dic[subFolder.id] = subFolder.name;
         Parents += `'${subFolder.id}' in parents OR `;
       }
     }
 
+    Parents = Parents.slice(0, -4); // Remove the trailing " OR "
 
     if (Parents.length <= 0) return FilesData;
 
@@ -257,14 +290,19 @@ export const getStaticProps: GetStaticProps = async (context) => {
       pageSize: 1000,
     });
 
+    // @ts-ignore
     for (const file of Files.files) {
+      // @ts-ignore
 
       const parentName = dic[file.parents[0]];
+      // @ts-ignore
 
       if (!FilesData[parentName]) {
+        // @ts-ignore
 
         FilesData[parentName] = [];
       }
+      // @ts-ignore
 
       FilesData[parentName].push(file);
     }
@@ -275,6 +313,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   try {
     const res = await GetDataOfSubject(subject, auth);
 
+    // @ts-ignore
     initialData = res;
   } catch (error) {
     console.error("Failed to fetch initial data:", error);
@@ -288,11 +327,15 @@ export const getStaticProps: GetStaticProps = async (context) => {
   };
 };
 
+// Define static paths if necessary
 export const getStaticPaths: GetStaticPaths = async () => {
+  // Pre-generate some subject paths at build time
 
+  const subjects = ["CSS", "DLD"]; // Example subjects // TODO code to fetch all materials
 
   const paths = subjects.map((subject) => ({
     params: { subject },
   }));
 
+  return { paths, fallback: "blocking" }; // Fallback blocking to generate at request time, TODO we need to be true in the feature
 };
