@@ -22,6 +22,15 @@ import { useRouter } from "next/router";
 import useSearchShortcut from "../hooks/useSearchShortcut";
 import { useSearch } from "../context/SearchContext";
 
+// Friendly placeholder suggestions that rotate
+const placeholderSuggestions = [
+  "Search by subject name...",
+  "Try 'calculus' or any subject name",
+  "Type part of any subject name...",
+  "Search 'programming' or 'physics'...",
+  "Find subjects by name or code...",
+];
+
 interface Subject {
   name: string;
   abbreviation: string;
@@ -57,17 +66,71 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   maxWidth: 650,
   margin: "0 auto",
   borderRadius: theme.shape.borderRadius * 3,
-  padding: "8px 16px",
-  boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-  border: `1px solid ${theme.palette.divider}`,
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  padding: "12px 20px",
+  background: theme.palette.background.paper,
+  border: "2px solid transparent",
+  transition: "all 0.3s ease",
+  // Rotating gradient border that travels around corners
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    inset: -2,
+    borderRadius: theme.shape.borderRadius * 3 + 2,
+    padding: 2,
+    background: `conic-gradient(
+      from var(--angle, 0deg),
+      transparent 0deg,
+      transparent 300deg,
+      ${theme.palette.primary.main} 330deg,
+      ${theme.palette.secondary.main} 360deg
+    )`,
+    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+    WebkitMaskComposite: "xor",
+    maskComposite: "exclude",
+    animation: "rotateBorder 3s linear infinite",
   },
+  // Fallback border for when animation is disabled
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    inset: -2,
+    borderRadius: theme.shape.borderRadius * 3 + 2,
+    border: `2px solid ${theme.palette.divider}`,
+    pointerEvents: "none",
+  },
+  "@keyframes rotateBorder": {
+    "0%": { "--angle": "0deg" } as any,
+    "100%": { "--angle": "360deg" } as any,
+  },
+  "@property --angle": {
+    syntax: '"<angle>"',
+    initialValue: "0deg",
+    inherits: "false",
+  },
+  "&:hover": {
+    transform: "scale(1.01)",
+    "&::before": {
+      background: `conic-gradient(
+        from var(--angle, 0deg),
+        transparent 0deg,
+        transparent 270deg,
+        ${theme.palette.primary.main} 300deg,
+        ${theme.palette.secondary.main} 330deg,
+        ${theme.palette.primary.light} 360deg
+      )`,
+    },
+  },
+  // When focused, show solid border
   "&:focus-within": {
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    borderColor: theme.palette.primary.main,
+    "&::before": {
+      animation: "none",
+      background: theme.palette.primary.main,
+      opacity: 0.8,
+    },
+    "&::after": {
+      borderColor: theme.palette.primary.main,
+    },
+    boxShadow: `0 0 0 3px ${theme.palette.primary.main}20`,
   },
 }));
 
@@ -122,6 +185,19 @@ export default function GoogleDriveSearch({
   const theme = useTheme();
   const router = useRouter();
   const [keyboardShortcut, setKeyboardShortcut] = useState<string>("Ctrl+K");
+  const [isFocused, setIsFocused] = useState(false);
+  
+  // Rotating placeholder for variety
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  
+  // Change placeholder periodically when not focused
+  useEffect(() => {
+    if (isFocused) return;
+    const interval = setInterval(() => {
+      setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isFocused]);
 
   // Detect OS for appropriate shortcut display
   useEffect(() => {
@@ -286,6 +362,11 @@ export default function GoogleDriveSearch({
 
   const handleFocus = () => {
     setIsOpen(true);
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
   };
 
   const handleItemClick = (abbreviation: string, semesterIndex: number) => {
@@ -313,22 +394,42 @@ export default function GoogleDriveSearch({
           my: 2,
         }}
       >
-        <SearchBar ref={searchBarRef} elevation={0}>
+        <SearchBar 
+          ref={searchBarRef} 
+          elevation={0}
+          onClick={() => inputRef.current?.focus()}
+          sx={{ cursor: 'text' }}
+        >
           <SearchIcon
+            onClick={() => inputRef.current?.focus()}
             sx={{
-              color: theme.palette.text.secondary,
+              color: isFocused ? theme.palette.primary.main : theme.palette.text.secondary,
               mr: 1.5,
               fontSize: 22,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              animation: !isFocused && !searchQuery ? 'pulse 2s ease-in-out infinite' : 'none',
+              '@keyframes pulse': {
+                '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
+                '50%': { transform: 'scale(1.1)', opacity: 1 },
+              },
             }}
           />
           <StyledInputBase
-            placeholder="Search"
+            placeholder={placeholderSuggestions[placeholderIndex]}
             inputProps={{ "aria-label": "search" }}
             value={searchQuery}
             onChange={handleChange}
             onFocus={handleFocus}
+            onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             inputRef={inputRef}
+            sx={{
+              '& input::placeholder': {
+                transition: 'opacity 0.3s ease',
+                opacity: 0.8,
+              },
+            }}
           />
           {searchQuery ? (
             <IconButton
@@ -367,6 +468,29 @@ export default function GoogleDriveSearch({
             </Box>
           )}
         </SearchBar>
+
+        {/* Helper hint - always takes space but fades in/out */}
+        <Box
+          sx={{
+            textAlign: 'center',
+            mt: 1.5,
+            height: 20,
+            opacity: !isFocused && !searchQuery ? 1 : 0,
+            transition: 'opacity 0.2s ease',
+            pointerEvents: !isFocused && !searchQuery ? 'auto' : 'none',
+          }}
+        >
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 500 }}
+          >
+            💡 Tip: Search by full name like <span 
+              onClick={() => { setSearchQuery('Programming'); inputRef.current?.focus(); }}
+              style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            >"Programming"</span> - no abbreviations needed!
+          </Typography>
+        </Box>
 
         <Popper
           open={isOpen && searchQuery.length > 0}
