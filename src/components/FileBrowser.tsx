@@ -7,7 +7,6 @@ import {
   Tab,
   Grid,
   Typography,
-  Fade,
   TextField,
   InputAdornment,
   useTheme,
@@ -270,9 +269,20 @@ export default function FileBrowser({
         </Tabs>
       </Box>
 
-      {/* Content */}
-      <Fade in={true} key={`${activeTab}-${viewMode}`}>
-        <Box>
+      {/* Content with simple GPU-accelerated transition */}
+      <Box 
+        key={activeTab}
+        sx={{ 
+          minHeight: 200,
+          opacity: 1,
+          willChange: 'opacity',
+          animation: 'simpleAppear 0.2s ease-out',
+          '@keyframes simpleAppear': {
+            '0%': { opacity: 0 },
+            '100%': { opacity: 1 },
+          },
+        }}
+      >
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
               <Grid container spacing={2}>
@@ -305,8 +315,7 @@ export default function FileBrowser({
           ) : (
             <VisualState type="empty" message="No materials found." />
           )}
-        </Box>
-      </Fade>
+      </Box>
 
       {/* RENDER THE PLAYER */}
       <YoutubePlayer
