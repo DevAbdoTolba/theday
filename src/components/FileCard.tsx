@@ -85,21 +85,21 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
           <Box display="flex" gap={1} mb={1}>
-            <Chip 
+            {/* <Chip 
               size="small" 
               label={file.type.toUpperCase()} 
               color={file.type === 'folder' ? 'primary' : 'default'}
               variant="outlined"
               sx={{ fontSize: '0.65rem', height: 20 }}
-            />
-            {/* {file.isExternalLink && (
+            /> */}
+            {file.isExternalLink && (
               <Chip 
                 size="small" 
                 icon={<OpenInNew sx={{ fontSize: '0.8rem !important' }} />}
                 label="LINK" 
                 sx={{ fontSize: '0.65rem', height: 20 }}
               />
-            )} */}
+            )}
           </Box>
           
           <Tooltip title={file.name} enterDelay={500}>
