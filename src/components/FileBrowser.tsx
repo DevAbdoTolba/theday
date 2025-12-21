@@ -48,13 +48,13 @@ export default function FileBrowser({ data, subjectName }: Props) {
     setActiveTab(newValue);
   };
 
-  // if (!data || Object.keys(data).length === 0) {
-  //   return (
-  //     <Box display="flex" flexDirection="column" alignItems="center" py={10} >
-  //       <Typography variant="h6">No materials found for this subject yet.</Typography>
-  //     </Box>
-  //   );
-  // }
+  if (!data || Object.keys(data).length === 0) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" py={10} >
+        <Typography variant="h6">No materials found for this subject yet.</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -119,7 +119,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
             <Grid container spacing={3}>
               {filteredFiles.map((file) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-                  hello card :D
+                  <FileCard file={file} />
                 </Grid>
               ))}
             </Grid>
