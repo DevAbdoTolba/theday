@@ -84,8 +84,8 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
         )}
 
         <CardContent sx={{ flexGrow: 1, p: 2 }}>
-          <Box display="flex" gap={1} mb={1}>
-            {/* <Chip 
+          {/* <Box display="flex" gap={1} mb={1}>
+            <Chip 
               size="small" 
               label={file.type.toUpperCase()} 
               color={file.type === 'folder' ? 'primary' : 'default'}
@@ -99,8 +99,8 @@ export const FileCard = ({ file }: { file: ParsedFile }) => {
                 label="LINK" 
                 sx={{ fontSize: '0.65rem', height: 20 }}
               />
-            )} */}
-          </Box>
+            )}
+          </Box> */}
           
           <Tooltip title={file.name} enterDelay={500}>
             <Typography 
