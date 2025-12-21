@@ -4,6 +4,7 @@ import {
   InputBase,
   Paper,
   Popper,
+  Portal,
   List,
   ListItem,
   ListItemText,
@@ -11,8 +12,10 @@ import {
   Divider,
   ClickAwayListener,
   useTheme,
+  useMediaQuery,
   Chip,
   IconButton,
+  alpha,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -108,7 +111,6 @@ const SearchBar = styled(Paper)(({ theme }) => ({
     inherits: "false",
   },
   "&:hover": {
-    transform: "scale(1.01)",
     "&::before": {
       background: `conic-gradient(
         from var(--angle, 0deg),
@@ -181,11 +183,52 @@ export default function GoogleDriveSearch({
   const searchBarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const originalPositionRef = useRef<HTMLDivElement>(null);
   const [popperWidth, setPopperWidth] = useState<number | null>(null);
   const theme = useTheme();
   const router = useRouter();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [keyboardShortcut, setKeyboardShortcut] = useState<string>("Ctrl+K");
   const [isFocused, setIsFocused] = useState(false);
+  
+  // Sticky search bar states
+  const [isScrolledPast, setIsScrolledPast] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const lastChangeTime = useRef(0);
+  
+  // Intersection Observer with minimal hysteresis
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const newValue = !entry.isIntersecting;
+        const now = Date.now();
+        
+        // Minimal lockout of 50ms just to batch rapid events
+        if (now - lastChangeTime.current < 50) {
+          return;
+        }
+        
+        if (isScrolledPast !== newValue) {
+          lastChangeTime.current = now;
+          setIsScrolledPast(newValue);
+          if (!newValue) {
+            setIsExpanded(false);
+          }
+        }
+      },
+      { 
+        threshold: 0, 
+        // Use a larger buffer zone to avoid edge triggering
+        rootMargin: '-100px 0px 0px 0px'
+      }
+    );
+    
+    if (originalPositionRef.current) {
+      observer.observe(originalPositionRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [isScrolledPast]);
   
   // Rotating placeholder for variety
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -363,10 +406,18 @@ export default function GoogleDriveSearch({
   const handleFocus = () => {
     setIsOpen(true);
     setIsFocused(true);
+    // When docked and focused, expand
+    if (isScrolledPast) {
+      setIsExpanded(true);
+    }
   };
 
   const handleBlur = () => {
     setIsFocused(false);
+    // When scrolled past and no query, collapse back to docked
+    if (isScrolledPast && !searchQuery) {
+      setIsExpanded(false);
+    }
   };
 
   const handleItemClick = (abbreviation: string, semesterIndex: number) => {
@@ -384,90 +435,249 @@ export default function GoogleDriveSearch({
     inputRef.current?.focus();
   };
 
+  // Determine visual state
+  const isDocked = isScrolledPast && !isExpanded;
+  const isExpandedState = isScrolledPast && isExpanded;
+
   return (
-    <ClickAwayListener onClickAway={() => setIsOpen(false)}>
+    <ClickAwayListener onClickAway={() => {
+      setIsOpen(false);
+      // Collapse when clicking away while expanded
+      if (isScrolledPast && !searchQuery) {
+        setIsExpanded(false);
+      }
+    }}>
       <Box
+        ref={originalPositionRef}
         sx={{
           position: "relative",
           width: { xs: "100%", sm: 650 },
           mx: "auto",
           my: 2,
+          zIndex: isDocked || isExpandedState ? 1400 : 2,
+          // Fixed height prevents layout shift (search bar ~60px + tip ~20px)
+          height: 80,
         }}
       >
-        <SearchBar 
-          ref={searchBarRef} 
-          elevation={0}
-          onClick={() => inputRef.current?.focus()}
-          sx={{ cursor: 'text' }}
-        >
-          <SearchIcon
-            onClick={() => inputRef.current?.focus()}
-            sx={{
-              color: isFocused ? theme.palette.primary.main : theme.palette.text.secondary,
-              mr: 1.5,
-              fontSize: 22,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              animation: !isFocused && !searchQuery ? 'pulse 2s ease-in-out infinite' : 'none',
-              '@keyframes pulse': {
-                '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
-                '50%': { transform: 'scale(1.1)', opacity: 1 },
-              },
-            }}
-          />
-          <StyledInputBase
-            placeholder={placeholderSuggestions[placeholderIndex]}
-            inputProps={{ "aria-label": "search" }}
-            value={searchQuery}
-            onChange={handleChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            inputRef={inputRef}
-            sx={{
-              '& input::placeholder': {
-                transition: 'opacity 0.3s ease',
-                opacity: 0.8,
-              },
-            }}
-          />
-          {searchQuery ? (
-            <IconButton
-              size="small"
-              onClick={handleClearSearch}
-              sx={{ p: 0.5 }}
-              aria-label="clear search"
-            >
-              <CloseIcon
-                sx={{
-                  fontSize: 18,
-                  color: theme.palette.text.secondary,
-                }}
-              />
-            </IconButton>
-          ) : (
+        {/* Backdrop when expanded - via Portal */}
+        {isExpandedState && (
+          <Portal>
             <Box
+              onClick={() => {
+                if (!searchQuery) setIsExpanded(false);
+                inputRef.current?.blur();
+              }}
               sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.08)"
-                    : "rgba(0, 0, 0, 0.05)",
-                borderRadius: 1,
-                px: 1,
-                py: 0.5,
-                fontSize: { xs: "0.5rem", sm: "0.75rem" },
-                color: theme.palette.text.secondary,
-                display: { sm: "flex", xs: "none" },
-                alignItems: "center",
-                justifyContent: "center",
+                position: 'fixed',
+                inset: 0,
+                bgcolor: alpha(theme.palette.background.default, 0.8),
+                backdropFilter: 'blur(4px)',
+                zIndex: 9998,
+                animation: 'fadeIn 0.2s ease',
+                '@keyframes fadeIn': {
+                  '0%': { opacity: 0 },
+                  '100%': { opacity: 1 },
+                },
+              }}
+            />
+          </Portal>
+        )}
+
+        {/* SearchBar - wrapped in Portal when docked/expanded */}
+        {(isDocked || isExpandedState) ? (
+          <Portal>
+            <SearchBar 
+              ref={searchBarRef} 
+              elevation={isExpandedState ? 8 : 0}
+              onClick={() => {
+                inputRef.current?.focus();
+                if (isDocked) {
+                  setIsExpanded(true);
+                }
+              }}
+              sx={{ 
+                cursor: 'text',
+                // Docked state: blend with navbar
+                ...(isDocked && {
+                  position: 'fixed',
+                  top: isMobile ? 8 : 10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: isMobile ? 140 : 400,
+                  height: isMobile ? 40 : 44,
+                  zIndex: 9999,
+                  padding: isMobile ? '4px 10px' : '6px 12px',
+                  // Match navbar background
+                  bgcolor: alpha(theme.palette.background.default, 0.6),
+                  backdropFilter: 'blur(8px)',
+                  // Slide up + shrink from wider size (width shrinks faster)
+                  animation: 'slideUpShrink 0.4s ease-out, breathingGlow 4s ease-in-out infinite 3.5s',
+                  '@keyframes slideUpShrink': {
+                    '0%': { 
+                      opacity: 0, 
+                      transform: 'translateX(-50%) translateY(15px) scaleX(1.6)' 
+                    },
+                    '50%': { 
+                      opacity: 0.7, 
+                      transform: 'translateX(-50%) translateY(6px) scaleX(1)' 
+                    },
+                    '100%': { 
+                      opacity: 1, 
+                      transform: 'translateX(-50%) translateY(0) scaleX(1)' 
+                    },
+                  },
+                  '@keyframes breathingGlow': {
+                    '0%, 100%': { boxShadow: 'none' },
+                    '50%': { boxShadow: `0 0 15px 4px ${alpha(theme.palette.secondary.main, 0.35)}` },
+                  },
+                  // Subtle border
+                  border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+                  borderRadius: 2.5,
+                  overflow: 'hidden',
+                  '&::before, &::after': {
+                    display: 'none !important',
+                  },
+                  '&:hover': {
+                    borderColor: alpha(theme.palette.primary.main, 0.4),
+                  },
+                }),
+                // Expanded state: fixed, full size, centered
+                ...(isExpandedState && {
+                  position: 'fixed',
+                  top: 80,
+                  left: '50%',
+                  transform: 'translateX(-50%) scale(1)',
+                  width: isMobile ? '90vw' : 650,
+                  zIndex: 9999,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }),
               }}
             >
-              <Typography variant="caption" fontWeight={500}>
-                {keyboardShortcut}
-              </Typography>
-            </Box>
-          )}
-        </SearchBar>
+              <SearchIcon
+                onClick={() => inputRef.current?.focus()}
+                sx={{
+                  color: isFocused ? theme.palette.primary.main : theme.palette.text.secondary,
+                  mr: 1.5,
+                  fontSize: isDocked ? 18 : 22,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+              <StyledInputBase
+                placeholder={isDocked ? "Search..." : placeholderSuggestions[placeholderIndex]}
+                inputProps={{ "aria-label": "search" }}
+                value={searchQuery}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                inputRef={inputRef}
+                sx={{
+                  '& input::placeholder': {
+                    transition: 'opacity 0.3s ease',
+                    opacity: 0.8,
+                  },
+                  '& input': {
+                    fontSize: isDocked ? '0.85rem' : '1rem',
+                  },
+                }}
+              />
+              {searchQuery && (
+                <IconButton
+                  size="small"
+                  onClick={handleClearSearch}
+                  sx={{ p: 0.5 }}
+                  aria-label="clear search"
+                >
+                  <CloseIcon
+                    sx={{
+                      fontSize: 18,
+                      color: theme.palette.text.secondary,
+                    }}
+                  />
+                </IconButton>
+              )}
+            </SearchBar>
+          </Portal>
+        ) : (
+          <SearchBar 
+            ref={searchBarRef} 
+            elevation={0}
+            onClick={() => inputRef.current?.focus()}
+            sx={{ 
+              cursor: 'text',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <SearchIcon
+              onClick={() => inputRef.current?.focus()}
+              sx={{
+                color: isFocused ? theme.palette.primary.main : theme.palette.text.secondary,
+                mr: 1.5,
+                fontSize: 22,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                animation: !isFocused && !searchQuery ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
+                  '50%': { transform: 'scale(1.1)', opacity: 1 },
+                },
+              }}
+            />
+            <StyledInputBase
+              placeholder={placeholderSuggestions[placeholderIndex]}
+              inputProps={{ "aria-label": "search" }}
+              value={searchQuery}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              inputRef={inputRef}
+              sx={{
+                '& input::placeholder': {
+                  transition: 'opacity 0.3s ease',
+                  opacity: 0.8,
+                },
+              }}
+            />
+            {searchQuery ? (
+              <IconButton
+                size="small"
+                onClick={handleClearSearch}
+                sx={{ p: 0.5 }}
+                aria-label="clear search"
+              >
+                <CloseIcon
+                  sx={{
+                    fontSize: 18,
+                    color: theme.palette.text.secondary,
+                  }}
+                />
+              </IconButton>
+            ) : (
+              <Box
+                sx={{
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.08)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  borderRadius: 1,
+                  px: 1,
+                  py: 0.5,
+                  fontSize: { xs: "0.5rem", sm: "0.75rem" },
+                  color: theme.palette.text.secondary,
+                  display: { sm: "flex", xs: "none" },
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography variant="caption" fontWeight={500}>
+                  {keyboardShortcut}
+                </Typography>
+              </Box>
+            )}
+          </SearchBar>
+        )}
 
         {/* Helper hint - always takes space but fades in/out */}
         <Box
@@ -497,20 +707,33 @@ export default function GoogleDriveSearch({
           anchorEl={searchBarRef.current}
           placement="bottom-start"
           style={{
-            width: popperWidth || undefined,
-            zIndex: 1400,
+            width: isExpandedState ? (isMobile ? '90vw' : 650) : (popperWidth || undefined),
+            zIndex: 10000, // Above backdrop (9998) and search bar (9999)
+            // When expanded, position fixed below the expanded search bar
+            ...(isExpandedState && {
+              position: 'fixed',
+              top: 140,
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }),
           }}
+          modifiers={[
+            {
+              name: 'offset',
+              options: { offset: [0, 8] },
+            },
+          ]}
         >
           <Paper
-            elevation={4}
+            elevation={8}
             sx={{
-              mt: 0.5,
               width: "100%",
               borderRadius: 2,
               overflow: "hidden",
               border: `1px solid ${theme.palette.divider}`,
               maxHeight: 450,
               overflowY: "auto",
+              bgcolor: theme.palette.background.paper,
             }}
           >
             {searchResults.length > 0 ? (
