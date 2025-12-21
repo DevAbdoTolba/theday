@@ -3,9 +3,9 @@ import {
   Box, Tabs, Tab, Grid, Typography, Fade, 
   TextField, InputAdornment, useMediaQuery, useTheme 
 } from '@mui/material';
-import { Search, SentimentDissatisfied } from '@mui/icons-material';
+// import { Search, SentimentDissatisfied } from '@mui/icons-material';
 import { SubjectMaterials } from '../utils/types';
-// import { parseGoogleFile } from '../utils/helpers';
+import { parseGoogleFile } from '../utils/helpers';
 import { FileCard } from './FileCard';
 
 interface Props {
@@ -26,25 +26,22 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
   // 2. Flatten and Filter Data
   const filteredFiles = useMemo(() => {
-    let files: any[] = []; 
-    if (activeTab === 0) {
-      // All categories
-      Object.values(data).forEach(categoryFiles => {
-        files = files.concat(categoryFiles);
-      });
+    const currentCategory = categories[activeTab];
+    let files = [];
+
+    if (currentCategory === 'All') {
+      // Combine all files from all categories
+      files = Object.values(data).flat();
     } else {
-      // Specific category
-      const category = categories[activeTab];
-      files = data[category] || [];
+      files = data[currentCategory] || [];
     }
 
+    // Parse them first
+    const parsed = files.map(parseGoogleFile);
+
     // Apply text filter
-    if (filter.trim() !== '') {
-      const lowerFilter = filter.toLowerCase();
-      files = files.filter(file => 
-        file.name.toLowerCase().includes(lowerFilter)
-      );
-    }
+    if (!filter) return parsed;
+    return parsed.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
   }, [data, activeTab, filter, categories]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -53,8 +50,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
   if (!data || Object.keys(data).length === 0) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" py={10}>
-        <SentimentDissatisfied sx={{ fontSize: 60, mb: 2 }} />
+      <Box display="flex" flexDirection="column" alignItems="center" py={10} >
         <Typography variant="h6">No materials found for this subject yet.</Typography>
       </Box>
     );
@@ -85,7 +81,7 @@ export default function FileBrowser({ data, subjectName }: Props) {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search color="action" />
+                {/* <Search /> */}
               </InputAdornment>
             ),
           }}
@@ -118,9 +114,23 @@ export default function FileBrowser({ data, subjectName }: Props) {
 
       {/* Grid Content */}
       <Fade in={true} key={activeTab}>
-        <>
-          HAPPY :D
-        </>
+        <Box>
+          {filteredFiles.length > 0 ? (
+            <Grid container spacing={3}>
+              {filteredFiles.map((file) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+                  <FileCard file={file} />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box textAlign="center" py={8}>
+              <Typography variant="body1" color="text.secondary">
+                No files found matching your criteria.
+              </Typography>
+            </Box>
+          )}
+        </Box>
       </Fade>
     </Box>
   );
