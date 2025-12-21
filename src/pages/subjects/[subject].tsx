@@ -45,6 +45,7 @@ export default function SubjectPage({ subject, initialData }: Props) {
             Failed to load data. Please try again later.
           </Alert>
         ) : (
+          initialData &&
           <FileBrowser
             data={initialData}
             subjectName={subject} // You might want to map Abbr -> Full Name here via context
