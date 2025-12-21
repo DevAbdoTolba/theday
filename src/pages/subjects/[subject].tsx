@@ -71,8 +71,19 @@ export default function SubjectPage({
   // Track last visited subject for "Continue studying" feature
   React.useEffect(() => {
     if (subject) {
+      // Find full name from data
+      let fullName = subject;
+      
+      for (const semester of coursesData.semesters) {
+        const found = semester.subjects.find(s => s.abbreviation === subject);
+        if (found) {
+          fullName = found.name;
+          break;
+        }
+      }
+
       localStorage.setItem('lastVisitedSubject', JSON.stringify({ 
-        name: subject, 
+        name: fullName, 
         abbr: subject,
         timestamp: Date.now()
       }));
