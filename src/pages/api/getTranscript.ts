@@ -36,14 +36,45 @@ async function getTranscript(className: string) {
   const connection = await mongoose.connect(URI, options);
 
   // get the model
-  let TranscriptModel: mongoose.Model<any>;
+  interface Subject {
+    name: string;
+    abbreviation: string;
+  }
+
+  interface DataEntry {
+    index: number;
+    subjects: Subject[];
+  }
+
+  interface Transcript {
+    _id: mongoose.Types.ObjectId;
+    class: string;
+    data: DataEntry[];
+  }
+
+  const transcriptSchema = new mongoose.Schema<Transcript>({
+    class: String,
+    data: [
+      {
+        index: Number,
+        subjects: [
+          {
+            name: String,
+            abbreviation: String,
+          },
+        ],
+      },
+    ],
+  });
+
+  let TranscriptModel: mongoose.Model<Transcript>;
 
   try {
     // Trying to get the existing model to prevent OverwriteModelError
-    TranscriptModel = connection.model("classes");
+    TranscriptModel = connection.model<Transcript>("classes");
   } catch (error) {
     // If the model does not exist, then define it
-    TranscriptModel = connection.model("classes", new mongoose.Schema({}));
+    TranscriptModel = connection.model<Transcript>("classes", transcriptSchema);
   }
   console.log("Connected to the database", mongoose.connection.readyState);
 
