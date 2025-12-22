@@ -698,7 +698,7 @@ export default function GoogleDriveSearch({
             💡 Tip: Search by full name like <span 
               onClick={() => { setSearchQuery('Programming'); inputRef.current?.focus(); }}
               style={{ textDecoration: 'underline', cursor: 'pointer' }}
-            >"Programming"</span> - no abbreviations needed!
+            >&quot;Programming&quot;</span> - no abbreviations needed!
           </Typography>
         </Box>
 
