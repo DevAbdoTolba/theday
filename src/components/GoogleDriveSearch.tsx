@@ -869,46 +869,20 @@ export default function GoogleDriveSearch({
                       tabIndex={index === selectedIndex ? 0 : -1}
                     >
                       <Box sx={{ width: "100%", display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        {/* Subject info */}
+                        {/* Subject info - left side */}
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            gap={1}
+                          <Typography 
+                            variant="subtitle1" 
+                            fontWeight={600}
+                            sx={{
+                              color: index === selectedIndex 
+                                ? theme.palette.primary.main 
+                                : theme.palette.text.primary,
+                              transition: 'color 0.2s ease',
+                            }}
                           >
-                            <Typography 
-                              variant="subtitle1" 
-                              fontWeight={600}
-                              sx={{
-                                color: index === selectedIndex 
-                                  ? theme.palette.primary.main 
-                                  : theme.palette.text.primary,
-                                transition: 'color 0.2s ease',
-                              }}
-                            >
-                              {result.subject.abbreviation}
-                            </Typography>
-                            <Chip
-                              label={`Sem ${result.semester.index}`}
-                              size="small"
-                              sx={{
-                                fontWeight: 600,
-                                fontSize: "0.65rem",
-                                height: 22,
-                                minWidth: 55,
-                                bgcolor: alpha(
-                                  theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
-                                  0.15
-                                ),
-                                color: theme.palette.mode === "dark" ? '#a5b4fc' : '#4f46e5',
-                                border: `1px solid ${alpha(
-                                  theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
-                                  0.2
-                                )}`,
-                              }}
-                            />
-                          </Box>
+                            {result.subject.abbreviation}
+                          </Typography>
                           <Typography
                             variant="body2"
                             color="text.secondary"
@@ -923,24 +897,46 @@ export default function GoogleDriveSearch({
                           </Typography>
                         </Box>
                         
-                        {/* Selection indicator with enter icon */}
-                        {index === selectedIndex && (
-                          <Box
+                        {/* Right side - Semester chip and Enter icon grouped together */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                          <Chip
+                            label={`Sem ${result.semester.index}`}
+                            size="small"
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 28,
-                              height: 28,
-                              borderRadius: 1,
-                              bgcolor: alpha(theme.palette.primary.main, 0.15),
-                              color: theme.palette.primary.main,
-                              flexShrink: 0,
+                              fontWeight: 600,
+                              fontSize: "0.65rem",
+                              height: 22,
+                              minWidth: 55,
+                              bgcolor: alpha(
+                                theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
+                                0.15
+                              ),
+                              color: theme.palette.mode === "dark" ? '#a5b4fc' : '#4f46e5',
+                              border: `1px solid ${alpha(
+                                theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
+                                0.2
+                              )}`,
                             }}
-                          >
-                            <KeyboardReturnIcon sx={{ fontSize: 16 }} />
-                          </Box>
-                        )}
+                          />
+                          
+                          {/* Selection indicator with enter icon */}
+                          {index === selectedIndex && (
+                            <Box
+                              sx={{
+                                display: { xs: 'none', sm: 'flex' },
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 28,
+                                height: 28,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.primary.main, 0.15),
+                                color: theme.palette.primary.main,
+                              }}
+                            >
+                              <KeyboardReturnIcon sx={{ fontSize: 16 }} />
+                            </Box>
+                          )}
+                        </Box>
                       </Box>
                     </SearchResultItem>
                   </Link>
@@ -967,7 +963,7 @@ export default function GoogleDriveSearch({
               </Box>
             )}
             
-            {/* Keyboard navigation hints footer */}
+            {/* Keyboard navigation hints footer - hidden on mobile */}
             {searchResults.length > 0 && (
               <Box
                 sx={{
@@ -975,7 +971,7 @@ export default function GoogleDriveSearch({
                   py: 1,
                   borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
                   background: alpha(theme.palette.background.default, 0.5),
-                  display: 'flex',
+                  display: { xs: 'none', sm: 'flex' },
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 2,
