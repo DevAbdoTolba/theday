@@ -11,6 +11,8 @@ import Image from "next/image";
 import Head from "next/head";
 import { TranscriptContextProvider } from "../context/TranscriptContext";
 import IndexedProvider from "../context/IndexedContext";
+import { DevOptionsProvider } from "../context/DevOptionsContext";
+import DevDashboard from "../components/DevDashboard";
 
 import Script from 'next/script';
 
@@ -143,8 +145,9 @@ export default function App({
         {/* <meta name="description" content={description} /> */}
         <link rel="icon" href={"/main.png"} />
       </Head>
-      <IndexedProvider>
-        <TranscriptContextProvider>
+      <DevOptionsProvider>
+        <IndexedProvider>
+          <TranscriptContextProvider>
           <offlineContext.Provider value={[offline, setOffline]}>
             <ColorModeContext.Provider value={colorMode}>
               <ThemeProvider theme={theme}>
@@ -167,12 +170,14 @@ export default function App({
                   
 
                 <Component {...pageProps} />
+                <DevDashboard />
                 <Analytics />
               </ThemeProvider>
             </ColorModeContext.Provider>
           </offlineContext.Provider>
         </TranscriptContextProvider>
       </IndexedProvider>
+    </DevOptionsProvider>
     </>
   );
 }
