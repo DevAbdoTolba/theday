@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Box, Typography, Button, Dialog, DialogTitle, DialogContent, 
-  DialogActions, FormGroup, FormControlLabel, Checkbox, 
-  useTheme, Grid, Alert, IconButton, TextField, Tooltip, 
-  InputAdornment, Paper, Chip, Divider, alpha
+  Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  IconButton, TextField, Tooltip, InputAdornment, Paper, Chip, alpha, Grid, 
+  Checkbox, FormControlLabel, Collapse, CircularProgress
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { 
-  Tune, Check, Close, AutoAwesome, DashboardCustomize, Edit, 
-  Search, FilterList, DeleteSweep
+  Tune, Check, Close, AutoAwesome, Edit, Search, Add,
+  KeyboardArrowDown, KeyboardArrowUp, DeleteSweep
 } from '@mui/icons-material';
-import SemesterCard from './SemesterCard';
-
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from "next/router";
-
 
 interface Subject {
   name: string;
@@ -27,13 +25,17 @@ interface Props {
 
 export default function DashboardHeader({ allSemesters, currentSemesterIndex, onUpdateFocus }: Props) {
   const theme = useTheme();
+  const router = useRouter();
+  const isDark = theme.palette.mode === 'dark';
   
   // -- Main State --
   const [openCustomize, setOpenCustomize] = useState(false);
   const [selectedAbbrs, setSelectedAbbrs] = useState<string[]>([]);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   
   // -- Custom Name State --
-  const [customName, setCustomName] = useState("Shortcuts");
+  const [customName, setCustomName] = useState("My Shortcuts");
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
 
@@ -49,7 +51,6 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
   }, []);
 
   // -- Handlers --
-
   const handleSaveCustom = () => {
     localStorage.setItem('customSemesterSubjects', JSON.stringify(selectedAbbrs));
     localStorage.setItem('semester', '-2');
@@ -65,7 +66,6 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
     setIsEditingName(false);
   };
 
-  // Toggle Single Subject
   const handleToggleSubject = (abbr: string) => {
     if (selectedAbbrs.includes(abbr)) {
       setSelectedAbbrs(prev => prev.filter(s => s !== abbr));
@@ -74,163 +74,273 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
     }
   };
 
-  // Toggle Entire Semester (Select All / Deselect All)
   const handleToggleSemester = (subjects: Subject[]) => {
     const subjectAbbrs = subjects.map(s => s.abbreviation);
     const allSelected = subjectAbbrs.every(abbr => selectedAbbrs.includes(abbr));
 
     if (allSelected) {
-      // Deselect all from this semester
       setSelectedAbbrs(prev => prev.filter(abbr => !subjectAbbrs.includes(abbr)));
     } else {
-      // Select all (merge unique)
       const newSelection = new Set([...selectedAbbrs, ...subjectAbbrs]);
       setSelectedAbbrs(Array.from(newSelection));
     }
   };
 
-  // Clear All Selections
   const handleClearAll = () => {
     setSelectedAbbrs([]);
   };
 
-  // -- Search Filtering Logic --
+  // -- Search Filtering --
   const filteredSemesters = useMemo(() => {
     if (!searchQuery.trim()) return allSemesters;
-
     return allSemesters.map(sem => {
       const matchingSubjects = sem.subjects.filter(
         s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
              s.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      // Return semester structure but only with matching subjects
       return { ...sem, subjects: matchingSubjects };
-    }).filter(sem => sem.subjects.length > 0); // Remove empty semesters
+    }).filter(sem => sem.subjects.length > 0);
   }, [allSemesters, searchQuery]);
 
-
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
-
-  // Global navigation handler
+  // Navigation handler
   const handleNavigate = async (abbreviation: string) => {
     setIsNavigating(true);
-    
     try {
       await router.push(`/subjects/${abbreviation}`);
-      // Navigation successful - state will reset on unmount
     } catch (error) {
       console.error("Navigation failed:", error);
       setIsNavigating(false);
     }
   };
 
-
-  // Determine active data for display
-  const activeData = (() => {
+  // Get active shortcuts data
+  const activeSubjects = useMemo(() => {
     if (currentSemesterIndex === -2) {
       const allSubjectsFlat = allSemesters.flatMap(s => s.subjects);
-      const mySubjects = allSubjectsFlat.filter(s => selectedAbbrs.includes(s.abbreviation));
-      return { index: -2, displayName: customName, subjects: mySubjects };
+      return allSubjectsFlat.filter(s => selectedAbbrs.includes(s.abbreviation));
     }
     const found = allSemesters.find(s => s.index === currentSemesterIndex);
-    return found ? { ...found, displayName: `Semester ${found.index}` } : null;
-  })();
+    return found?.subjects || [];
+  }, [allSemesters, currentSemesterIndex, selectedAbbrs]);
+
+  // Dynamic display name
+  const displayName = currentSemesterIndex === -2 ? customName : `Semester ${currentSemesterIndex}`;
+  const hasShortcuts = activeSubjects.length > 0;
 
   return (
     <Box mb={4}>
-      {/* --- DASHBOARD HEADER TOOLBAR --- */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Box display="flex" alignItems="center" gap={1}>
-          {isEditingName ? (
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <TextField 
-                variant="standard"
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                autoFocus
-                placeholder="Name..."
-                InputProps={{ sx: { fontSize: '1.5rem', fontWeight: 800 } }}
-              />
-              <IconButton size="small" color="success" onClick={saveName}><Check /></IconButton>
-              <IconButton size="small" color="error" onClick={() => setIsEditingName(false)}><Close /></IconButton>
-            </Box>
-          ) : (
-            <>
-              <Typography variant="h5" fontWeight={800} color="text.primary">
-                {activeData ? activeData.displayName : "Dashboard"}
-              </Typography>
-              {currentSemesterIndex === -2 && (
-                <Tooltip title="Rename">
-                  <IconButton size="small" onClick={() => { setTempName(customName); setIsEditingName(true); }}>
-                    <Edit fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </>
-          )}
-        </Box>
-
-        <Tooltip title="Customize Dashboard">
-          <IconButton 
-            onClick={() => setOpenCustomize(true)}
+      {/* --- SHORTCUTS CARD --- */}
+      {!hasShortcuts ? (
+        /* Empty State - Dashed Border Card */
+        <Box
+          sx={{
+            borderRadius: 3,
+            border: `2px dashed ${alpha(theme.palette.text.secondary, 0.3)}`,
+            bgcolor: isDark ? alpha('#0f172a', 0.6) : alpha(theme.palette.background.paper, 0.8),
+            py: 5,
+            px: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+          }}
+        >
+          <AutoAwesome 
             sx={{ 
-              bgcolor: theme.palette.primary.main, 
-              color: '#fff',
-              '&:hover': { bgcolor: theme.palette.primary.dark },
-              boxShadow: theme.shadows[2]
+              fontSize: 48, 
+              color: alpha(theme.palette.primary.main, 0.6),
+              mb: 2,
+            }} 
+          />
+          <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 0.5 }}>
+            Create Your Shortcuts
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Pin your favorite subjects for quick access
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<Add />}
+            onClick={() => setOpenCustomize(true)}
+            sx={{
+              borderRadius: 3,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontWeight: 600,
+              borderColor: alpha(theme.palette.primary.main, 0.5),
+              color: theme.palette.primary.main,
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                bgcolor: alpha(theme.palette.primary.main, 0.08),
+              },
             }}
           >
-            <Tune />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      {/* --- ACTIVE SEMESTER CARD --- */}
-      {activeData ? (
-        <SemesterCard 
-          semesterIndex={activeData.index} 
-          subjects={activeData.subjects} 
-          isCurrent={true} 
-          customTitle={activeData.displayName}
-          isNavigating={isNavigating}
-          onNavigate={handleNavigate}
-        />
+            Add Shortcuts
+          </Button>
+        </Box>
       ) : (
-        <Alert 
-          severity="info" 
-          icon={<AutoAwesome fontSize="inherit" />}
-          action={
-            <Button color="inherit" size="small" onClick={() => setOpenCustomize(true)}>
-              Setup
-            </Button>
-          }
+        /* Filled State - With Shortcuts */
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            overflow: 'hidden',
+            border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+            bgcolor: isDark ? alpha('#0f172a', 0.6) : theme.palette.background.paper,
+          }}
         >
-          Select a semester to focus on.
-        </Alert>
+          {/* Header */}
+          <Box
+            sx={{
+              p: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: expanded ? `1px solid ${alpha(theme.palette.divider, 0.3)}` : 'none',
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <AutoAwesome sx={{ fontSize: 24, color: theme.palette.primary.main }} />
+              
+              {isEditingName ? (
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <TextField 
+                    variant="standard"
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    autoFocus
+                    placeholder="Name..."
+                    onKeyDown={(e) => e.key === 'Enter' && saveName()}
+                    InputProps={{ sx: { fontSize: '1.1rem', fontWeight: 700 } }}
+                  />
+                  <IconButton size="small" color="success" onClick={saveName}><Check /></IconButton>
+                  <IconButton size="small" color="error" onClick={() => setIsEditingName(false)}><Close /></IconButton>
+                </Box>
+              ) : (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                    {displayName}
+                  </Typography>
+                  {currentSemesterIndex === -2 && (
+                    <Tooltip title="Rename">
+                      <IconButton 
+                        size="small" 
+                        onClick={() => { setTempName(customName); setIsEditingName(true); }}
+                        sx={{ opacity: 0.5, '&:hover': { opacity: 1 } }}
+                      >
+                        <Edit sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              )}
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Tooltip title="Edit shortcuts">
+                <IconButton 
+                  onClick={() => setOpenCustomize(true)}
+                  size="small"
+                  sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.primary.main } }}
+                >
+                  <Tune fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <IconButton 
+                onClick={() => setExpanded(!expanded)} 
+                size="small"
+                sx={{ color: theme.palette.text.secondary }}
+              >
+                {expanded ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Subjects Grid */}
+          <Collapse in={expanded}>
+            <Box sx={{ p: 2 }}>
+              <Grid container spacing={1.5}>
+                <AnimatePresence mode="popLayout">
+                  {activeSubjects.map((subj, index) => (
+                    <Grid item xs={6} sm={4} md={3} key={subj.abbreviation}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2, delay: index * 0.03 }}
+                      >
+                        <Box
+                          onClick={() => !isNavigating && handleNavigate(subj.abbreviation)}
+                          sx={{
+                            p: 1.5,
+                            borderRadius: 2,
+                            bgcolor: isDark ? alpha('#1e293b', 0.8) : alpha(theme.palette.grey[100], 0.8),
+                            border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                            cursor: isNavigating ? 'wait' : 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              bgcolor: isDark ? alpha('#334155', 0.8) : alpha(theme.palette.grey[200], 0.8),
+                              transform: 'translateY(-1px)',
+                            },
+                          }}
+                        >
+                          {isNavigating && (
+                            <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+                              <CircularProgress size={14} thickness={4} />
+                            </Box>
+                          )}
+                          <Typography variant="subtitle2" fontWeight={700} color={isDark ? 'primary.light' : 'primary.main'}>
+                            {subj.abbreviation}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              display: '-webkit-box',
+                              overflow: 'hidden',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 1,
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {subj.name}
+                          </Typography>
+                        </Box>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </AnimatePresence>
+              </Grid>
+            </Box>
+          </Collapse>
+        </Paper>
       )}
 
-      {/* --- CUSTOMIZATION DIALOG --- */}
+      {/* --- CUSTOMIZATION DIALOG (Smaller) --- */}
       <Dialog 
         open={openCustomize} 
         onClose={() => setOpenCustomize(false)} 
-        maxWidth="md" 
+        maxWidth="sm" 
         fullWidth
         PaperProps={{ 
           sx: { 
             borderRadius: 3, 
-            height: '80vh', 
-            display: 'flex', 
-            flexDirection: 'column',
-            bgcolor: theme.palette.background.default
+            maxHeight: '70vh',
+            bgcolor: isDark ? '#0f172a' : theme.palette.background.default,
           } 
         }}
       >
-        {/* Modal Header */}
-        <DialogTitle sx={{ pb: 1 }}>
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <DashboardCustomize color="primary" />
-            <Typography variant="h6" fontWeight={700}>Build Your Dashboard</Typography>
+        <DialogTitle sx={{ pb: 1.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.3)}` }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box display="flex" alignItems="center" gap={1}>
+              <AutoAwesome sx={{ color: theme.palette.primary.main }} />
+              <Typography variant="h6" fontWeight={700}>Edit Shortcuts</Typography>
+            </Box>
+            <IconButton onClick={() => setOpenCustomize(false)} size="small">
+              <Close />
+            </IconButton>
           </Box>
           
           {/* Search Bar */}
@@ -240,31 +350,32 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
             size="small"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ mt: 2 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
                   <Search color="action" />
                 </InputAdornment>
               ),
-              sx: { borderRadius: 3, bgcolor: theme.palette.background.paper }
+              sx: { 
+                borderRadius: 2, 
+                bgcolor: isDark ? alpha('#1e293b', 0.6) : theme.palette.background.paper 
+              }
             }}
           />
         </DialogTitle>
 
-        {/* Modal Content */}
-        <DialogContent sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : '#f8fafc' }}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            {filteredSemesters.length === 0 ? (
-              <Box py={4} textAlign="center" color="text.secondary">
-                <Typography>{`No subjects found matching "${searchQuery}"`}</Typography>
-              </Box>
-            ) : (
-              filteredSemesters.map((sem) => {
-                // Tri-state Logic Calculations
+        <DialogContent sx={{ p: 2, bgcolor: isDark ? alpha('#0f172a', 0.4) : alpha(theme.palette.grey[50], 0.5) }}>
+          {filteredSemesters.length === 0 ? (
+            <Box py={3} textAlign="center" color="text.secondary">
+              <Typography variant="body2">{`No subjects found matching "${searchQuery}"`}</Typography>
+            </Box>
+          ) : (
+            <Box display="flex" flexDirection="column" gap={1.5}>
+              {filteredSemesters.map((sem) => {
                 const semAbbrs = sem.subjects.map(s => s.abbreviation);
                 const selectedCount = semAbbrs.filter(abbr => selectedAbbrs.includes(abbr)).length;
                 const totalCount = semAbbrs.length;
-                
                 const isAllSelected = selectedCount === totalCount && totalCount > 0;
                 const isIndeterminate = selectedCount > 0 && selectedCount < totalCount;
 
@@ -272,22 +383,22 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
                   <Paper 
                     key={sem.index} 
                     elevation={0}
-                    variant="outlined"
                     sx={{ 
                       borderRadius: 2, 
-                      overflow: 'hidden',
-                      border: `1px solid ${theme.palette.divider}`,
-                      bgcolor: theme.palette.background.paper
+                      overflow: 'hidden', 
+                      bgcolor: isDark ? alpha('#1e293b', 0.5) : theme.palette.background.paper,
+                      border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
                     }}
                   >
-                    {/* Semester Header Row */}
+                    {/* Semester Header */}
                     <Box 
                       sx={{ 
-                        p: 1.5, 
+                        px: 1.5, 
+                        py: 1,
                         display: 'flex', 
                         alignItems: 'center',
-                        bgcolor: alpha(theme.palette.primary.main, 0.08),
-                        borderBottom: `1px solid ${theme.palette.divider}`
+                        bgcolor: alpha(theme.palette.primary.main, isDark ? 0.1 : 0.04),
+                        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.2)}`
                       }}
                     >
                       <FormControlLabel
@@ -297,11 +408,12 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
                             indeterminate={isIndeterminate}
                             onChange={() => handleToggleSemester(sem.subjects)}
                             color="primary"
+                            size="small"
                           />
                         }
                         label={
                           <Box display="flex" alignItems="center" gap={1}>
-                            <Typography variant="subtitle1" fontWeight={700}>
+                            <Typography variant="body2" fontWeight={700}>
                               Semester {sem.index}
                             </Typography>
                             <Chip 
@@ -309,48 +421,42 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
                               size="small" 
                               color={selectedCount > 0 ? "primary" : "default"}
                               variant={selectedCount > 0 ? "filled" : "outlined"}
-                              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
+                              sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700 }}
                             />
                           </Box>
                         }
-                        sx={{ m: 0, width: '100%' }}
+                        sx={{ m: 0 }}
                       />
                     </Box>
 
-                    {/* Subjects Grid */}
-                    <Box sx={{ p: 2 }}>
-                      <Grid container spacing={1}>
+                    {/* Subjects */}
+                    <Box sx={{ p: 1 }}>
+                      <Grid container spacing={0.5}>
                         {sem.subjects.map(subj => {
                           const isSelected = selectedAbbrs.includes(subj.abbreviation);
                           return (
-                            <Grid item xs={12} sm={6} key={subj.abbreviation}>
+                            <Grid item xs={6} key={subj.abbreviation}>
                               <Box 
                                 onClick={() => handleToggleSubject(subj.abbreviation)}
                                 sx={{
                                   display: 'flex',
                                   alignItems: 'center',
-                                  p: 1,
-                                  borderRadius: 2,
+                                  p: 0.75,
+                                  borderRadius: 1.5,
                                   cursor: 'pointer',
                                   border: '1px solid',
                                   borderColor: isSelected ? 'primary.main' : 'transparent',
-                                  bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
-                                  transition: 'all 0.2s',
-                                  '&:hover': {
-                                    bgcolor: alpha(theme.palette.primary.main, 0.1)
-                                  }
+                                  bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                                  transition: 'all 0.15s',
+                                  '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.15) }
                                 }}
                               >
-                                <Checkbox 
-                                  checked={isSelected}
-                                  size="small"
-                                  sx={{ p: 0.5, mr: 1 }}
-                                />
-                                <Box sx={{ overflow: 'hidden' }}>
-                                  <Typography variant="body2" fontWeight={700} noWrap>
+                                <Checkbox checked={isSelected} size="small" sx={{ p: 0.25, mr: 0.5 }} />
+                                <Box sx={{ overflow: 'hidden', minWidth: 0 }}>
+                                  <Typography variant="caption" fontWeight={700} noWrap display="block">
                                     {subj.abbreviation}
                                   </Typography>
-                                  <Typography variant="caption" color="text.secondary" noWrap display="block">
+                                  <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: '0.65rem', lineHeight: 1.2 }}>
                                     {subj.name}
                                   </Typography>
                                 </Box>
@@ -362,32 +468,33 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
                     </Box>
                   </Paper>
                 );
-              })
-            )}
-          </Box>
+              })}
+            </Box>
+          )}
         </DialogContent>
 
-        {/* Modal Footer */}
-        <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+        <DialogActions sx={{ p: 1.5, borderTop: `1px solid ${alpha(theme.palette.divider, 0.3)}`, justifyContent: 'space-between' }}>
           <Button 
             onClick={handleClearAll} 
             color="error" 
-            startIcon={<DeleteSweep />}
+            size="small"
+            startIcon={<DeleteSweep fontSize="small" />}
             disabled={selectedAbbrs.length === 0}
           >
-            Clear Selection
+            Clear
           </Button>
           <Box display="flex" gap={1}>
-            <Button onClick={() => setOpenCustomize(false)} color="inherit">
+            <Button onClick={() => setOpenCustomize(false)} color="inherit" size="small">
               Cancel
             </Button>
             <Button 
               variant="contained" 
               onClick={handleSaveCustom} 
-              startIcon={<Check />}
-              disabled={selectedAbbrs.length === 0}
+              size="small"
+              startIcon={<Check fontSize="small" />}
+              sx={{ borderRadius: 2, px: 2 }}
             >
-              Save Dashboard
+              Save
             </Button>
           </Box>
         </DialogActions>
