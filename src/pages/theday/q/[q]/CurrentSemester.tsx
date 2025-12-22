@@ -32,6 +32,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CheckIcon from "@mui/icons-material/Check";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import Link from "next/link";
 
 import { DataContext } from "../../../../context/TranscriptContext";
 
@@ -697,83 +698,85 @@ export default function CurrentSemester({
                       },
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        background: pillBg,
-                        borderRadius: 1,
-                        px: 2,
-                        py: 1.2,
-                        boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
-                        mb: 1,
-                        fontWeight: 600,
-                        fontSize: 15,
-                        color: textColor,
-                        minHeight: 56,
-                        transition: "all 0.18s",
-                        cursor: "pointer",
-                        "&:hover": {
-                          background: pillHoverBg,
-                          color:
-                            theme.palette.mode === "dark" ? "#fff" : textColor,
-                          boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
-                          "& .MuiSvgIcon-root": {
-                            color:
-                              theme.palette.mode === "dark"
-                                ? "#fff"
-                                : iconColor,
-                          },
-                        },
-                        textDecoration: "none",
-                      }}
-                      component="a"
+                    <Link
                       href={`/subjects/${subject.abbreviation}`}
+                      style={{ textDecoration: 'none', display: 'block' }}
                     >
-                      <SchoolIcon
-                        sx={{
-                          fontSize: 20,
-                          color: iconColor,
-                          mr: 1.5,
-                          transition: "color 0.18s",
-                        }}
-                      />
                       <Box
                         sx={{
                           display: "flex",
-                          flexDirection: "column",
-                          flexGrow: 1,
-                          minWidth: 0,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          background: pillBg,
+                          borderRadius: 1,
+                          px: 2,
+                          py: 1.2,
+                          boxShadow: "0 1px 4px 0 rgba(59,130,246,0.08)",
+                          mb: 1,
+                          fontWeight: 600,
+                          fontSize: 15,
+                          color: textColor,
+                          minHeight: 56,
+                          transition: "all 0.18s",
+                          cursor: "pointer",
+                          "&:hover": {
+                            background: pillHoverBg,
+                            color:
+                              theme.palette.mode === "dark" ? "#fff" : textColor,
+                            boxShadow: "0 4px 16px 0 rgba(59,130,246,0.13)",
+                            "& .MuiSvgIcon-root": {
+                              color:
+                                theme.palette.mode === "dark"
+                                  ? "#fff"
+                                  : iconColor,
+                            },
+                          },
                         }}
                       >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <b
+                        <SchoolIcon
+                          sx={{
+                            fontSize: 20,
+                            color: iconColor,
+                            mr: 1.5,
+                            transition: "color 0.18s",
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flexGrow: 1,
+                            minWidth: 0,
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <b
+                              style={{
+                                fontSize: 16,
+                                marginRight: 6,
+                                textDecoration: "none",
+                              }}
+                            >
+                              {subject.abbreviation}
+                            </b>
+                          </Box>
+
+                          <span
                             style={{
-                              fontSize: 16,
-                              marginRight: 6,
+                              fontWeight: 400,
+                              fontSize: 14,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              color: "inherit",
                               textDecoration: "none",
                             }}
                           >
-                            {subject.abbreviation}
-                          </b>
+                            {subject.name}
+                          </span>
                         </Box>
-
-                        <span
-                          style={{
-                            fontWeight: 400,
-                            fontSize: 14,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            color: "inherit",
-                            textDecoration: "none",
-                          }}
-                        >
-                          {subject.name}
-                        </span>
                       </Box>
-                    </Box>
+                    </Link>
                   </Tooltip>
                 </Grid>
               ))}

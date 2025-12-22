@@ -9,7 +9,6 @@ import {
   Collapse,
   useTheme,
   alpha,
-  CircularProgress,
 } from "@mui/material";
 import {
   School,
@@ -17,7 +16,7 @@ import {
   KeyboardArrowUp,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 interface Subject {
   name: string;
@@ -29,8 +28,6 @@ interface SemesterCardProps {
   subjects: Subject[];
   isCurrent?: boolean;
   customTitle?: string;
-  isNavigating: boolean;
-  onNavigate: (abbreviation: string) => void;
 }
 
 export default function SemesterCard({
@@ -38,16 +35,10 @@ export default function SemesterCard({
   subjects,
   isCurrent = false,
   customTitle,
-  isNavigating,
-  onNavigate,
 }: SemesterCardProps) {
   const theme = useTheme();
-  const router = useRouter();
   const [expanded, setExpanded] = React.useState(true);
   const isDark = theme.palette.mode === "dark";
-
-  // Track which subject is being loaded (from URL)
-  const loadingSubject = isNavigating ? router.query.subject : null;
 
   // --- Dynamic Color Logic ---
   const cardBorder = isCurrent
@@ -68,12 +59,7 @@ export default function SemesterCard({
 
   const iconColor = isCurrent ? "#fff" : theme.palette.text.secondary;
 
-  // Handle subject click
-  const handleSubjectClick = (abbreviation: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isNavigating) return; // Prevent clicks during navigation
-    onNavigate(abbreviation);
-  };
+
 
   // Animation variants
   const cardVariants = {
@@ -97,29 +83,26 @@ export default function SemesterCard({
           border: cardBorder,
           bgcolor: theme.palette.background.paper,
           transition: "all 0.2s",
-          opacity: isNavigating ? 0.5 : 1, // Dim entire card during navigation
           "&:hover": {
-            transform: isNavigating ? "none" : "translateY(-2px)",
-            boxShadow: isNavigating
-              ? "none"
-              : `0 8px 24px ${alpha(
-                  theme.palette.common.black,
-                  isDark ? 0.3 : 0.08
-                )}`,
+            transform: "translateY(-2px)",
+            boxShadow: `0 8px 24px ${alpha(
+              theme.palette.common.black,
+              isDark ? 0.3 : 0.08
+            )}`,
             borderColor: isCurrent ? undefined : theme.palette.primary.light,
           },
         }}
       >
         {/* Header */}
         <Box
-          onClick={() => !isNavigating && setExpanded(!expanded)}
+          onClick={() => setExpanded(!expanded)}
           sx={{
             p: 2,
             bgcolor: headerBg,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            cursor: isNavigating ? "wait" : "pointer",
+            cursor: "pointer",
             borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >
@@ -160,7 +143,7 @@ export default function SemesterCard({
               />
             )}
           </Box>
-          <IconButton size="small" disabled={isNavigating}>
+          <IconButton size="small">
             {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </Box>
@@ -226,15 +209,14 @@ export default function SemesterCard({
                           WebkitBoxOrient: "vertical",
                           WebkitLineClamp: 1,
                           lineHeight: 1.2,
-                          opacity: isThisSubjectLoading ? 0.3 : 1,
                         }}
                       >
                         {subj.name}
                       </Typography>
                     </Box>
-                  </Grid>
-                );
-              })}
+                  </Link>
+                </Grid>
+              ))}
             </Grid>
           </Box>
         </Collapse>

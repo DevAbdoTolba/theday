@@ -33,21 +33,6 @@ export default function TheDayPage() {
   const [currentSemesterIndex, setCurrentSemesterIndex] = useState<number>(-1);
   const [isReady, setIsReady] = useState(false);
 
-  const [isNavigating, setIsNavigating] = useState(false);
-
-  // Global navigation handler
-  const handleNavigate = async (abbreviation: string) => {
-    setIsNavigating(true);
-
-    try {
-      await router.push(`/subjects/${abbreviation}`);
-      // Navigation successful - state will reset on unmount
-    } catch (error) {
-      console.error("Navigation failed:", error);
-      setIsNavigating(false);
-    }
-  };
-
   // Initialize Semester State from LocalStorage
   useEffect(() => {
     if (!loadingTranscript && transcript) {
@@ -149,8 +134,6 @@ export default function TheDayPage() {
                         <SemesterCard
                           semesterIndex={semester.index}
                           subjects={semester.subjects}
-                          isNavigating={isNavigating}
-                          onNavigate={handleNavigate}
                         />
                       </Grid>
                     );
