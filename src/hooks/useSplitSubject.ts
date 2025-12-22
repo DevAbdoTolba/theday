@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useIndexedContext } from "../context/IndexedContext";
 import { SubjectMaterials } from "../utils/types";
+import { useDevOptions } from "../context/DevOptionsContext";
 
 interface UseSplitSubjectReturn {
   data: SubjectMaterials | null;
@@ -15,6 +16,9 @@ interface UseSplitSubjectReturn {
  * Hook that uses split API endpoints for better performance:
  * 1. First loads folder structure (fast ~2s) - Shows UI skeleton
  * 2. Then loads files in background (slow ~5-8s) - Populates data
+ * 
+ * NOTE: This feature is controlled by the 'progressiveLoading' dev option.
+ * When disabled, only static/cached data is used.
  */
 export function useSplitSubject(
   subject: string | undefined,
@@ -28,9 +32,17 @@ export function useSplitSubject(
   const [error, setError] = useState<string | null>(null);
 
   const { getSubjectByName, addOrUpdateSubject } = useIndexedContext();
+  const { options: devOptions } = useDevOptions();
+  const progressiveEnabled = devOptions.progressiveLoading;
 
   useEffect(() => {
     if (!subject || typeof subject !== "string") return;
+    
+    // If progressive loading is disabled, just use static data
+    if (!progressiveEnabled) {
+      console.log("⚡ [useSplitSubject] Progressive loading disabled - using static data only");
+      return;
+    }
 
     let isMounted = true;
 
@@ -177,7 +189,7 @@ export function useSplitSubject(
     return () => {
       isMounted = false;
     };
-  }, [subject]);
+  }, [subject, progressiveEnabled]);
 
   return {
     data,

@@ -17,6 +17,7 @@ import {
   Downloading as DownloadIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { useDevOptions } from "../context/DevOptionsContext";
 
 interface ProgressiveLoadingUIProps {
   subject: string;
@@ -33,6 +34,13 @@ export default function ProgressiveLoadingUI({
   loadingFiles,
   data,
 }: ProgressiveLoadingUIProps) {
+  const { options: devOptions } = useDevOptions();
+  
+  // Hide entirely when progressive loading is disabled
+  if (!devOptions.progressiveLoading) {
+    return null;
+  }
+
   // Calculate loading progress
   const getProgress = () => {
     if (data && !loadingFiles) return 0;

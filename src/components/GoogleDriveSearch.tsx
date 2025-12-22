@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import useSearchShortcut from "../hooks/useSearchShortcut";
 import { useSearch } from "../context/SearchContext";
+import { useDevOptions } from "../context/DevOptionsContext";
 
 // Friendly placeholder suggestions that rotate
 const placeholderSuggestions = [
@@ -191,13 +192,24 @@ export default function GoogleDriveSearch({
   const [keyboardShortcut, setKeyboardShortcut] = useState<string>("Ctrl+K");
   const [isFocused, setIsFocused] = useState(false);
   
-  // Sticky search bar states
+  // Dev options - sticky search bar is off by default
+  const { options: devOptions } = useDevOptions();
+  const stickyEnabled = devOptions.stickySearchBar;
+  
+  // Sticky search bar states (only used when dev option is enabled)
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const lastChangeTime = useRef(0);
   
-  // Intersection Observer with minimal hysteresis
+  // Intersection Observer - only active when sticky feature is enabled
   useEffect(() => {
+    // Skip if sticky feature is disabled
+    if (!stickyEnabled) {
+      setIsScrolledPast(false);
+      setIsExpanded(false);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         const newValue = !entry.isIntersecting;
@@ -228,7 +240,7 @@ export default function GoogleDriveSearch({
     }
     
     return () => observer.disconnect();
-  }, [isScrolledPast]);
+  }, [isScrolledPast, stickyEnabled]);
   
   // Rotating placeholder for variety
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
