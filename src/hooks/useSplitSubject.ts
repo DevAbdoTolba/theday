@@ -35,6 +35,19 @@ export function useSplitSubject(
   const { options: devOptions } = useDevOptions();
   const progressiveEnabled = devOptions.progressiveLoading;
 
+  // CRITICAL: Reset state when subject or initialStaticData changes
+  // This ensures proper updates during Next.js client-side navigation
+  // Without this, useState's initial value only applies on first mount
+  useEffect(() => {
+    console.log("🔄 [useSplitSubject] Subject changed, resetting state:", subject);
+    setData(initialStaticData);
+    setFolderStructure(null);
+    setNewItems([]);
+    setError(null);
+    setLoadingFolders(false);
+    setLoadingFiles(false);
+  }, [subject, initialStaticData]);
+
   useEffect(() => {
     if (!subject || typeof subject !== "string") return;
     
