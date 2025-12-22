@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions,
   IconButton, TextField, Tooltip, InputAdornment, Paper, Chip, alpha, Grid, 
-  Checkbox, FormControlLabel, Collapse, CircularProgress
+  Checkbox, FormControlLabel, Collapse
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { 
@@ -10,7 +10,7 @@ import {
   KeyboardArrowDown, KeyboardArrowUp, DeleteSweep
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from "next/router";
+import Link from 'next/link';
 
 interface Subject {
   name: string;
@@ -25,13 +25,11 @@ interface Props {
 
 export default function DashboardHeader({ allSemesters, currentSemesterIndex, onUpdateFocus }: Props) {
   const theme = useTheme();
-  const router = useRouter();
   const isDark = theme.palette.mode === 'dark';
   
   // -- Main State --
   const [openCustomize, setOpenCustomize] = useState(false);
   const [selectedAbbrs, setSelectedAbbrs] = useState<string[]>([]);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [expanded, setExpanded] = useState(true);
   
   // -- Custom Name State --
@@ -101,17 +99,6 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
       return { ...sem, subjects: matchingSubjects };
     }).filter(sem => sem.subjects.length > 0);
   }, [allSemesters, searchQuery]);
-
-  // Navigation handler
-  const handleNavigate = async (abbreviation: string) => {
-    setIsNavigating(true);
-    try {
-      await router.push(`/subjects/${abbreviation}`);
-    } catch (error) {
-      console.error("Navigation failed:", error);
-      setIsNavigating(false);
-    }
-  };
 
   // Get active shortcuts data
   const activeSubjects = useMemo(() => {
@@ -271,43 +258,42 @@ export default function DashboardHeader({ allSemesters, currentSemesterIndex, on
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.2, delay: index * 0.03 }}
                       >
-                        <Box
-                          onClick={() => !isNavigating && handleNavigate(subj.abbreviation)}
-                          sx={{
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: isDark ? alpha('#1e293b', 0.8) : alpha(theme.palette.grey[100], 0.8),
-                            border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                            cursor: isNavigating ? 'wait' : 'pointer',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              bgcolor: isDark ? alpha('#334155', 0.8) : alpha(theme.palette.grey[200], 0.8),
-                              transform: 'translateY(-1px)',
-                            },
-                          }}
+                        <Link
+                          href={`/subjects/${subj.abbreviation}`}
+                          style={{ textDecoration: 'none', display: 'block' }}
                         >
-                          {isNavigating && (
-                            <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-                              <CircularProgress size={14} thickness={4} />
-                            </Box>
-                          )}
-                          <Typography variant="subtitle2" fontWeight={700} color={isDark ? 'primary.light' : 'primary.main'}>
-                            {subj.abbreviation}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
+                          <Box
                             sx={{
-                              display: '-webkit-box',
-                              overflow: 'hidden',
-                              WebkitBoxOrient: 'vertical',
-                              WebkitLineClamp: 1,
-                              lineHeight: 1.4,
+                              p: 1.5,
+                              borderRadius: 2,
+                              bgcolor: isDark ? alpha('#1e293b', 0.8) : alpha(theme.palette.grey[100], 0.8),
+                              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                bgcolor: isDark ? alpha('#334155', 0.8) : alpha(theme.palette.grey[200], 0.8),
+                                transform: 'translateY(-1px)',
+                              },
                             }}
                           >
-                            {subj.name}
-                          </Typography>
-                        </Box>
+                            <Typography variant="subtitle2" fontWeight={700} color={isDark ? 'primary.light' : 'primary.main'}>
+                              {subj.abbreviation}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{
+                                display: '-webkit-box',
+                                overflow: 'hidden',
+                                WebkitBoxOrient: 'vertical',
+                                WebkitLineClamp: 1,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {subj.name}
+                            </Typography>
+                          </Box>
+                        </Link>
                       </motion.div>
                     </Grid>
                   ))}
