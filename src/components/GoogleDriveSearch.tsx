@@ -19,6 +19,9 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { styled } from "@mui/material/styles";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -153,20 +156,46 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const SearchResultItem = styled(ListItem)<{ selected?: boolean }>(
   ({ theme, selected }) => ({
-    padding: "8px 16px",
+    padding: "12px 16px",
     cursor: "pointer",
+    position: "relative",
     backgroundColor: selected
       ? theme.palette.mode === "dark"
-        ? "rgba(255, 255, 255, 0.08)"
-        : "rgba(0, 0, 0, 0.04)"
+        ? alpha(theme.palette.primary.main, 0.15)
+        : alpha(theme.palette.primary.main, 0.08)
       : "transparent",
-    borderRadius: theme.shape.borderRadius,
-    transition: "background-color 0.2s ease-in-out",
+    borderRadius: theme.shape.borderRadius * 1.5,
+    margin: "4px 8px",
+    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    border: selected 
+      ? `1px solid ${alpha(theme.palette.primary.main, 0.3)}`
+      : "1px solid transparent",
+    // Left accent bar for selected item
+    "&::before": selected ? {
+      content: '""',
+      position: "absolute",
+      left: 0,
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: 3,
+      height: "60%",
+      borderRadius: 2,
+      backgroundColor: theme.palette.primary.main,
+    } : {},
     "&:hover": {
       backgroundColor:
         theme.palette.mode === "dark"
-          ? "rgba(255, 255, 255, 0.05)"
-          : "rgba(0, 0, 0, 0.02)",
+          ? alpha(theme.palette.primary.main, 0.1)
+          : alpha(theme.palette.primary.main, 0.05),
+      transform: "translateX(4px)",
+      border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+    },
+    "&:focus": {
+      outline: "none",
+      backgroundColor:
+        theme.palette.mode === "dark"
+          ? alpha(theme.palette.primary.main, 0.15)
+          : alpha(theme.palette.primary.main, 0.08),
     },
   })
 );
@@ -366,15 +395,17 @@ export default function GoogleDriveSearch({
     switch (e.key) {
       case KeyMap.ARROW_DOWN:
         e.preventDefault();
+        // Stop at the last item, don't loop
         setSelectedIndex((prev) =>
-          prev < searchResults.length - 1 ? prev + 1 : 0
+          prev < searchResults.length - 1 ? prev + 1 : prev
         );
         break;
 
       case KeyMap.ARROW_UP:
         e.preventDefault();
+        // Stop at the first item, don't loop
         setSelectedIndex((prev) =>
-          prev > 0 ? prev - 1 : searchResults.length - 1
+          prev > 0 ? prev - 1 : prev
         );
         break;
 
@@ -737,57 +768,144 @@ export default function GoogleDriveSearch({
           ]}
         >
           <Paper
-            elevation={8}
+            elevation={12}
+            role="listbox"
+            aria-label="Search results"
+            aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : undefined}
             sx={{
               width: "100%",
-              borderRadius: 2,
+              borderRadius: 3,
               overflow: "hidden",
-              border: `1px solid ${theme.palette.divider}`,
-              maxHeight: 450,
-              overflowY: "auto",
-              bgcolor: theme.palette.background.paper,
+              border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+              maxHeight: 400,
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: alpha(theme.palette.background.paper, 0.95),
+              backdropFilter: "blur(20px)",
+              boxShadow: theme.palette.mode === "dark" 
+                ? `0 8px 32px ${alpha('#000', 0.4)}, 0 0 0 1px ${alpha(theme.palette.primary.main, 0.1)}`
+                : `0 8px 32px ${alpha('#000', 0.1)}, 0 0 0 1px ${alpha(theme.palette.primary.main, 0.05)}`,
+              // Custom scrollbar
+              '& ::-webkit-scrollbar': {
+                width: 6,
+              },
+              '& ::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '& ::-webkit-scrollbar-thumb': {
+                background: alpha(theme.palette.text.secondary, 0.2),
+                borderRadius: 3,
+                '&:hover': {
+                  background: alpha(theme.palette.text.secondary, 0.3),
+                },
+              },
             }}
           >
+            {/* Results header with count */}
+            {searchResults.length > 0 && (
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1.5,
+                  borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                  background: alpha(theme.palette.background.default, 0.5),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary"
+                  sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}
+                >
+                  {searchResults.length} {searchResults.length === 1 ? 'Result' : 'Results'}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={searchQuery}
+                  onDelete={handleClearSearch}
+                  sx={{
+                    height: 22,
+                    fontSize: '0.7rem',
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    '& .MuiChip-deleteIcon': {
+                      fontSize: 14,
+                      color: theme.palette.text.secondary,
+                      '&:hover': {
+                        color: theme.palette.error.main,
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+            
             {searchResults.length > 0 ? (
-              <List ref={listRef} sx={{ py: 0.5 }}>
+              <List 
+                ref={listRef} 
+                role="listbox"
+                sx={{ 
+                  py: 1,
+                  px: 0.5,
+                  overflowY: "auto",
+                  flex: 1,
+                }}
+              >
                 {searchResults.map((result, index) => (
-                  <React.Fragment
+                  <Link 
                     key={`${result.semester.index}-${result.subject.abbreviation}`}
+                    href={`/subjects/${result.subject.abbreviation}`}
+                    passHref 
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    onClick={() => handleItemClick(result.subject.abbreviation, result.semester.index)}
                   >
-                    <Link 
-                      href={`/subjects/${result.subject.abbreviation}`}
-                      passHref 
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                      onClick={() => handleItemClick(result.subject.abbreviation, result.semester.index)}
+                    <SearchResultItem
+                      id={`search-result-${index}`}
+                      role="option"
+                      aria-selected={index === selectedIndex}
+                      selected={index === selectedIndex}
+                      slots={{ root: 'div' }}
+                      tabIndex={index === selectedIndex ? 0 : -1}
                     >
-                      <SearchResultItem
-                        selected={index === selectedIndex}
-                        slots={{ root: 'div' }} // Using slots API instead of deprecated component prop
-                      >
-                        <Box sx={{ width: "100%" }}>
+                      <Box sx={{ width: "100%", display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        {/* Subject info */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Box
                             display="flex"
                             alignItems="center"
                             justifyContent="space-between"
+                            gap={1}
                           >
-                            <Typography variant="subtitle1" fontWeight={500}>
+                            <Typography 
+                              variant="subtitle1" 
+                              fontWeight={600}
+                              sx={{
+                                color: index === selectedIndex 
+                                  ? theme.palette.primary.main 
+                                  : theme.palette.text.primary,
+                                transition: 'color 0.2s ease',
+                              }}
+                            >
                               {result.subject.abbreviation}
                             </Typography>
                             <Chip
-                              label={`Semester ${result.semester.index}`}
+                              label={`Sem ${result.semester.index}`}
                               size="small"
                               sx={{
-                                fontWeight: 500,
-                                fontSize: "0.7rem",
-                                height: 24,
-                                bgcolor:
-                                  theme.palette.mode === "dark"
-                                    ? "#232f55"
-                                    : "#e3e8f7",
-                                color:
-                                  theme.palette.mode === "dark"
-                                    ? "#fff"
-                                    : theme.palette.text.primary,
+                                fontWeight: 600,
+                                fontSize: "0.65rem",
+                                height: 22,
+                                minWidth: 55,
+                                bgcolor: alpha(
+                                  theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
+                                  0.15
+                                ),
+                                color: theme.palette.mode === "dark" ? '#a5b4fc' : '#4f46e5',
+                                border: `1px solid ${alpha(
+                                  theme.palette.mode === "dark" ? '#6366f1' : '#4f46e5',
+                                  0.2
+                                )}`,
                               }}
                             />
                           </Box>
@@ -795,23 +913,155 @@ export default function GoogleDriveSearch({
                             variant="body2"
                             color="text.secondary"
                             noWrap
+                            sx={{ 
+                              mt: 0.25,
+                              fontSize: '0.85rem',
+                              opacity: 0.85,
+                            }}
                           >
                             {result.subject.name}
                           </Typography>
                         </Box>
-                      </SearchResultItem>
-                    </Link>
-                    {index < searchResults.length - 1 && (
-                      <Divider sx={{ my: 0.5, opacity: 0.6 }} />
-                    )}
-                  </React.Fragment>
+                        
+                        {/* Selection indicator with enter icon */}
+                        {index === selectedIndex && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: alpha(theme.palette.primary.main, 0.15),
+                              color: theme.palette.primary.main,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <KeyboardReturnIcon sx={{ fontSize: 16 }} />
+                          </Box>
+                        )}
+                      </Box>
+                    </SearchResultItem>
+                  </Link>
                 ))}
               </List>
             ) : (
-              <Box sx={{ p: 3, textAlign: "center" }}>
-                <Typography color="text.secondary">
-                  No results found for &quot;{searchQuery}&quot;
+              <Box 
+                sx={{ 
+                  p: 4, 
+                  textAlign: "center",
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <SearchIcon sx={{ fontSize: 40, color: alpha(theme.palette.text.secondary, 0.3) }} />
+                <Typography color="text.secondary" fontWeight={500}>
+                  No results found
                 </Typography>
+                <Typography variant="caption" color="text.disabled">
+                  Try searching for &quot;{searchQuery}&quot; with different keywords
+                </Typography>
+              </Box>
+            )}
+            
+            {/* Keyboard navigation hints footer */}
+            {searchResults.length > 0 && (
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1,
+                  borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                  background: alpha(theme.palette.background.default, 0.5),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 20,
+                      height: 20,
+                      borderRadius: 0.5,
+                      bgcolor: alpha(theme.palette.text.secondary, 0.1),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                    }}
+                  >
+                    <KeyboardArrowUpIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 20,
+                      height: 20,
+                      borderRadius: 0.5,
+                      bgcolor: alpha(theme.palette.text.secondary, 0.1),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                    }}
+                  >
+                    <KeyboardArrowDownIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                    Navigate
+                  </Typography>
+                </Box>
+                
+                <Divider orientation="vertical" flexItem sx={{ opacity: 0.5 }} />
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      px: 0.75,
+                      height: 20,
+                      borderRadius: 0.5,
+                      bgcolor: alpha(theme.palette.text.secondary, 0.1),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, color: 'text.secondary' }}>
+                      Enter
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                    Select
+                  </Typography>
+                </Box>
+                
+                <Divider orientation="vertical" flexItem sx={{ opacity: 0.5 }} />
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      px: 0.75,
+                      height: 20,
+                      borderRadius: 0.5,
+                      bgcolor: alpha(theme.palette.text.secondary, 0.1),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, color: 'text.secondary' }}>
+                      Esc
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                    Close
+                  </Typography>
+                </Box>
               </Box>
             )}
           </Paper>
