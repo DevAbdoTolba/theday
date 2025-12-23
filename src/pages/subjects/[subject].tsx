@@ -1,12 +1,14 @@
+import { google } from "googleapis";
 import React  from "react";
+import { GetStaticProps,   } from "next";
  
  
- 
- 
+import { SubjectMaterials } from "../../utils/types";
+import coursesData from "../../Data/data.json";
 
 interface Props {
   subject: string;
-  initialData: any;
+  initialData: SubjectMaterials;
   semesterIndex: number;
 }
 
@@ -24,4 +26,165 @@ export default function SubjectPage({
   );
 }
 
- 
+export const getStaticPaths = async () => {
+  // Get ALL subjects from your data
+  interface Semester {
+    index: number;
+    subjects: Subject[];
+  }
+
+  interface Subject {
+    abbreviation: string;
+    [key: string]: any;
+  }
+
+  const allSubjects: string[] = [];
+  coursesData.semesters.forEach((semester) => {
+    semester.subjects.forEach((subject) => {
+      allSubjects.push(subject.abbreviation);
+    });
+  });
+
+  return {
+    // paths: allSubjects.map(s => ({ params: { subject: s } })),
+    paths: [],
+    fallback: 'blocking',
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const subject = context.params?.subject as string;
+  const startTime = Date.now();
+  
+  console.log(`🔨 [getStaticProps] Building: ${subject}`);
+
+  if (!subject) {
+    return { notFound: true };
+  }
+
+  // Find semester index
+  let semesterIndex = 1;
+  const foundSemester = coursesData.semesters.find((sem) =>
+    sem.subjects.some((subj) => subj.abbreviation === subject)
+  );
+  if (foundSemester) {
+    semesterIndex = foundSemester.index;
+  }
+
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.CLIENT_EMAIL,
+        private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      },
+      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+    });
+
+    const drive = google.drive({ version: "v3", auth });
+
+    // STEP 1: Find subject folders
+    console.log(`  [${Date.now() - startTime}ms] Finding folders...`);
+    const { data: SubjectFolders } = await drive.files.list({
+      q: `name = '${subject}' and mimeType = 'application/vnd.google-apps.folder'`,
+      fields: "files(id, name)",
+    });
+    console.log(`  [${Date.now() - startTime}ms] Found ${SubjectFolders.files?.length || 0} folders`);
+
+    if (!SubjectFolders.files?.length) {
+      console.log(`  [${Date.now() - startTime}ms] No folders - returning empty`);
+      return {
+        props: { subject, initialData: {}, semesterIndex },
+      };
+    }
+
+    const SubjectFolderIds = SubjectFolders.files.map((f) => f.id);
+    
+    // STEP 2: Get subfolders IN PARALLEL (KEY FIX!)
+    console.log(`  [${Date.now() - startTime}ms] Fetching ${SubjectFolderIds.length} parent folders IN PARALLEL...`);
+    
+    const subfolderPromises = SubjectFolderIds.map((folderId) =>
+      drive.files.list({
+        q: `mimeType = 'application/vnd.google-apps.folder' and '${folderId}' in parents`,
+        fields: "files(id, name)",
+        pageSize: 1000,
+      })
+    );
+
+    const subfolderResults = await Promise.all(subfolderPromises);
+    console.log(`  [${Date.now() - startTime}ms] Parallel fetch complete!`);
+
+    let dic: Record<string, string> = {};
+    let Parents = "";
+
+    subfolderResults.forEach(({ data }) => {
+      if (data.files) {
+        data.files.forEach((subFolder) => {
+          if (subFolder.id && subFolder.name) {
+            dic[subFolder.id] = subFolder.name;
+            Parents += `'${subFolder.id}' in parents OR `;
+          }
+        });
+      }
+    });
+
+    Parents = Parents.slice(0, -4);
+    console.log(`  [${Date.now() - startTime}ms] Found ${Object.keys(dic).length} categories`);
+
+    if (!Parents) {
+      console.log(`  [${Date.now() - startTime}ms] No categories - returning empty`);
+      return {
+        props: { subject, initialData: {}, semesterIndex },
+      };
+    }
+
+    // STEP 3: Get all files
+    console.log(`  [${Date.now() - startTime}ms] Fetching files...`);
+    const { data: Files } = await drive.files.list({
+      q: `${Parents} and mimeType != 'application/vnd.google-apps.folder'`,
+      fields: "files(id, name, mimeType, parents, size)",
+      pageSize: 1000,
+    });
+    console.log(`  [${Date.now() - startTime}ms] Found ${Files.files?.length || 0} files`);
+
+    const organizedData: SubjectMaterials = {};
+
+    Files.files?.forEach((file) => {
+      const parentName = dic[file.parents?.[0] || ""];
+      if (parentName) {
+        if (!organizedData[parentName]) {
+          organizedData[parentName] = [];
+        }
+        organizedData[parentName].push({
+          id: file.id!,
+          name: file.name!,
+          mimeType: file.mimeType!,
+          parents: file.parents || [],
+          size: parseInt(file.size || "0"),
+        });
+      }
+    });
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ [getStaticProps] Built ${subject} in ${duration}ms`);
+
+    return {
+      props: { 
+        subject, 
+        initialData: organizedData, 
+        semesterIndex,
+        buildTime: duration,
+      },
+    };
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    console.error(`❌ [getStaticProps] Error after ${duration}ms:`, error.message);
+    return {
+      props: { 
+        subject, 
+        initialData: {}, 
+        semesterIndex,
+        error: true,
+      },
+    };
+  }
+};
