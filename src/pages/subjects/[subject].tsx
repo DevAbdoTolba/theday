@@ -32,77 +32,7 @@ export default function SubjectPage({
   initialData,
   semesterIndex,
 }: Props) {
-  const router = useRouter();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [newItemsMsg, setNewItemsMsg] = useState("");
-
-  // Use split subject hook for progressive loading
-  const {
-    data,
-    folderStructure,
-    loadingFolders,
-    loadingFiles,
-    newItems,
-    error,
-  } = useSplitSubject(subject, initialData);
-
-  const handleAddToCustom = (abbr: string) => {
-    const current = JSON.parse(
-      localStorage.getItem("customSemesterSubjects") || "[]"
-    );
-    if (!current.includes(abbr)) {
-      const updated = [...current, abbr];
-      localStorage.setItem("customSemesterSubjects", JSON.stringify(updated));
-      localStorage.setItem("semester", "-2");
-    }
-  };
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  // Show new items notification
-  React.useEffect(() => {
-    if (newItems.length > 0) {
-      setNewItemsMsg(`${newItems.length} new item(s) found!`);
-    }
-  }, [newItems]);
-
-  // Track last visited subject for "Continue studying" feature
-  React.useEffect(() => {
-    if (subject) {
-      // Find full name from data
-      let fullName = subject;
-      
-      for (const semester of coursesData.semesters) {
-        const found = semester.subjects.find(s => s.abbreviation === subject);
-        if (found) {
-          fullName = found.name;
-          break;
-        }
-      }
-
-      localStorage.setItem('lastVisitedSubject', JSON.stringify({ 
-        name: fullName, 
-        abbr: subject,
-        timestamp: Date.now()
-      }));
-    }
-  }, [subject]);
-
-  // Fallback state
-  if (router.isFallback) {
-    return (
-      <Box
-        height="100vh"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Loading />
-      </Box>
-    );
-  }
+ 
 
   return (
     <>
