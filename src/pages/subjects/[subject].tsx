@@ -1,8 +1,4 @@
-export default function SubjectPage({
-  subject,
-  initialData,
-  semesterIndex,
-}: any) {
+export default function SubjectPage() {
   return (
     <>
       hello
@@ -18,13 +14,5 @@ export const getStaticPaths = async () => {
 };
 export const getStaticProps: any = async (context: any) => {
  
-    return {
-      props: { 
-        subject: "", 
-        initialData: {}, 
-        semesterIndex: 1,
-        buildTime: 0,
-      },
-    };
-
+    return;
 };
