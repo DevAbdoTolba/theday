@@ -68,27 +68,27 @@ export default function SubjectPage({
     }
   }, [newItems]);
 
-  // Track last visited subject for "Continue studying" feature
-  React.useEffect(() => {
-    if (subject) {
-      // Find full name from data
-      let fullName = subject;
+  // // Track last visited subject for "Continue studying" feature
+  // React.useEffect(() => {
+  //   if (subject) {
+  //     // Find full name from data
+  //     let fullName = subject;
       
-      for (const semester of coursesData.semesters) {
-        const found = semester.subjects.find(s => s.abbreviation === subject);
-        if (found) {
-          fullName = found.name;
-          break;
-        }
-      }
+  //     for (const semester of coursesData.semesters) {
+  //       const found = semester.subjects.find(s => s.abbreviation === subject);
+  //       if (found) {
+  //         fullName = found.name;
+  //         break;
+  //       }
+  //     }
 
-      localStorage.setItem('lastVisitedSubject', JSON.stringify({ 
-        name: fullName, 
-        abbr: subject,
-        timestamp: Date.now()
-      }));
-    }
-  }, [subject]);
+  //     localStorage.setItem('lastVisitedSubject', JSON.stringify({ 
+  //       name: fullName, 
+  //       abbr: subject,
+  //       timestamp: Date.now()
+  //     }));
+  //   }
+  // }, [subject]);
 
   // Fallback state
   if (router.isFallback) {
