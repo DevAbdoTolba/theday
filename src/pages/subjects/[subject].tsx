@@ -1,17 +1,8 @@
-import React from "react";
-import { GetStaticProps } from "next"; 
- 
-interface Props {
-  subject: string;
-  initialData: any;
-  semesterIndex: number;
-}
-
 export default function SubjectPage({
   subject,
   initialData,
   semesterIndex,
-}: Props) {
+}: any) {
  
 
   return (
@@ -28,8 +19,7 @@ export const getStaticPaths = async () => {
     fallback: true,  
   };
 };
-
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: any = async (context: any) => {
  
     return {
       props: { 
