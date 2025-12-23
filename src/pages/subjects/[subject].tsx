@@ -16,7 +16,7 @@ export const getStaticPaths = async () => {
   
   return {
     paths: [{params:{subject: 'CSS'}}],
-    fallback: false,  
+    fallback: true,  
   };
 };
 export const getStaticProps: any = async (context: any) => {
