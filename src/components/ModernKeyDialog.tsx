@@ -1,12 +1,18 @@
 import React, { useState, useContext } from 'react';
+import dynamic from 'next/dynamic';
 import { 
   Dialog, DialogTitle, DialogContent, DialogContentText, 
   DialogActions, Button, TextField, CircularProgress, 
   Alert, Box, Typography, useTheme, IconButton
 } from '@mui/material';
-import { VpnKey, Check, Close, Translate } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { DataContext } from '../context/TranscriptContext';
+
+// Dynamic imports for MUI icons
+const VpnKey = dynamic(() => import('@mui/icons-material/VpnKey'), { ssr: false });
+const Check = dynamic(() => import('@mui/icons-material/Check'), { ssr: false });
+const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false });
+const Translate = dynamic(() => import('@mui/icons-material/Translate'), { ssr: false });
 
 interface Props {
   open: boolean;

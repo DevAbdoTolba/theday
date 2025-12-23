@@ -1,6 +1,9 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Dialog, Box, IconButton, useTheme, Fade } from '@mui/material';
-import { Close } from '@mui/icons-material';
+
+// Dynamic import for MUI icon
+const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false });
 
 interface Props {
   open: boolean;
