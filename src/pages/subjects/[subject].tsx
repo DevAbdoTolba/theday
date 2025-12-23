@@ -1,4 +1,4 @@
-export default function SubjectPage() {
+export default function SubjectPage(props: {}) {
   return (
     <>
       hello
