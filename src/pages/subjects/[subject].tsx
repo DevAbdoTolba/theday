@@ -14,5 +14,5 @@ export const getStaticPaths = async () => {
 };
 export const getStaticProps: any = async (context: any) => {
  
-    return{}
+    return {props:{}}
 };
