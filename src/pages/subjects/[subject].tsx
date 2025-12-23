@@ -1,33 +1,13 @@
-export default function SubjectPage({
-  subject,
-  initialData,
-  semesterIndex,
-}: any) {
- 
+import { useRouter } from 'next/router';
+
+export default function SubjectPage() {
+  const router = useRouter();
+  const { subject } = router.query;
 
   return (
     <>
-      hello
+      <h1>Subject: {subject}</h1>
+      <p>This is a client-side only page - no getStaticProps, no getStaticPaths</p>
     </>
   );
 }
-
-export const getStaticPaths = async () => {
-  
-  return {
-    paths: [],
-    fallback: false,  
-  };
-};
-export const getStaticProps: any = async (context: any) => {
- 
-    return {
-      props: { 
-        subject: "", 
-        initialData: {}, 
-        semesterIndex: 1,
-        buildTime: 0,
-      },
-    };
-
-};
