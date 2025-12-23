@@ -182,30 +182,6 @@ export default function SubjectPage({
   );
 }
 
-export const getStaticPaths = async () => {
-  // Get ALL subjects from your data
-  interface Semester {
-    index: number;
-    subjects: Subject[];
-  }
-
-  interface Subject {
-    abbreviation: string;
-    [key: string]: any;
-  }
-
-  const allSubjects: string[] = [];
-  coursesData.semesters.forEach((semester) => {
-    semester.subjects.forEach((subject) => {
-      allSubjects.push(subject.abbreviation);
-    });
-  });
-
-  return {
-    paths: allSubjects.map(s => ({ params: { subject: s } })),
-    fallback: 'blocking',
-  };
-};
 
 export const getStaticProps: GetStaticProps = async (context) => {
  
