@@ -1,6 +1,5 @@
 import React from "react";
-import { GetStaticProps } from "next";
-import { useRouter } from "next/router";
+import { GetStaticProps } from "next"; 
  
 interface Props {
   subject: string;
@@ -13,14 +12,7 @@ export default function SubjectPage({
   initialData,
   semesterIndex,
 }: Props) {
-  const router = useRouter();
  
-  // Fallback state
-  if (router.isFallback) {
-    return (
-      <>Loading...</>
-    );
-  }
 
   return (
     <>
