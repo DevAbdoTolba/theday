@@ -1,14 +1,21 @@
 import React, { useContext, useEffect, useState, useMemo, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Box, Typography, useTheme, Snackbar, Alert,
   alpha, Drawer, List, ListItemButton, ListItemText, IconButton, Collapse, CircularProgress
 } from '@mui/material';
-import { 
-  School, InfoOutlined, KeyboardArrowRight, Close, 
-  ExpandLess, ExpandMore, Book, SentimentDissatisfied
-} from '@mui/icons-material';
 import Link from 'next/link';
 import { DataContext } from '../context/TranscriptContext';
+
+// Dynamic imports for MUI icons
+const School = dynamic(() => import('@mui/icons-material/School'), { ssr: false });
+const InfoOutlined = dynamic(() => import('@mui/icons-material/InfoOutlined'), { ssr: false });
+const KeyboardArrowRight = dynamic(() => import('@mui/icons-material/KeyboardArrowRight'), { ssr: false });
+const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false });
+const ExpandLess = dynamic(() => import('@mui/icons-material/ExpandLess'), { ssr: false });
+const ExpandMore = dynamic(() => import('@mui/icons-material/ExpandMore'), { ssr: false });
+const Book = dynamic(() => import('@mui/icons-material/Book'), { ssr: false });
+const SentimentDissatisfied = dynamic(() => import('@mui/icons-material/SentimentDissatisfied'), { ssr: false });
 
 interface Props {
   currentSubject: string;

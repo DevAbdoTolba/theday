@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Button,
   useTheme, Tooltip, useMediaQuery, alpha, Menu, MenuItem,
   ListItemIcon, Divider
 } from "@mui/material";
-import {
-  Search, Brightness4, Brightness7, ArrowBack, WifiOff,
-  Menu as MenuIcon, VpnKey, ExpandMore, Check, School
-} from "@mui/icons-material";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import SearchDialog from "../components/SearchDialog";
 import { ColorModeContext, offlineContext } from "../pages/_app";
 import ModernKeyDialog from "./ModernKeyDialog";
 import { DataContext } from "../context/TranscriptContext";
+
+// Dynamic imports for MUI icons
+const Search = dynamic(() => import("@mui/icons-material/Search"), { ssr: false });
+const Brightness4 = dynamic(() => import("@mui/icons-material/Brightness4"), { ssr: false });
+const Brightness7 = dynamic(() => import("@mui/icons-material/Brightness7"), { ssr: false });
+const ArrowBack = dynamic(() => import("@mui/icons-material/ArrowBack"), { ssr: false });
+const WifiOff = dynamic(() => import("@mui/icons-material/WifiOff"), { ssr: false });
+const MenuIcon = dynamic(() => import("@mui/icons-material/Menu"), { ssr: false });
+const VpnKey = dynamic(() => import("@mui/icons-material/VpnKey"), { ssr: false });
+const ExpandMore = dynamic(() => import("@mui/icons-material/ExpandMore"), { ssr: false });
+const Check = dynamic(() => import("@mui/icons-material/Check"), { ssr: false });
+const School = dynamic(() => import("@mui/icons-material/School"), { ssr: false });
 
 interface Props {
   title: string;

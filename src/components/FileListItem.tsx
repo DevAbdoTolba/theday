@@ -1,13 +1,23 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { 
   Box, Typography, Chip, useTheme, Paper, Tooltip 
 } from '@mui/material';
-import { 
-  PictureAsPdf, Folder, Image as ImageIcon, YouTube, 
-  Article, Slideshow, TableChart, InsertDriveFile, 
-  OpenInNew, Visibility, PlayCircle, FolderOpen 
-} from '@mui/icons-material';
 import { ParsedFile } from '../utils/types';
+
+// Dynamic imports for MUI icons
+const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
+const Folder = dynamic(() => import('@mui/icons-material/Folder'), { ssr: false });
+const ImageIcon = dynamic(() => import('@mui/icons-material/Image'), { ssr: false });
+const YouTube = dynamic(() => import('@mui/icons-material/YouTube'), { ssr: false });
+const Article = dynamic(() => import('@mui/icons-material/Article'), { ssr: false });
+const Slideshow = dynamic(() => import('@mui/icons-material/Slideshow'), { ssr: false });
+const TableChart = dynamic(() => import('@mui/icons-material/TableChart'), { ssr: false });
+const InsertDriveFile = dynamic(() => import('@mui/icons-material/InsertDriveFile'), { ssr: false });
+const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
+const Visibility = dynamic(() => import('@mui/icons-material/Visibility'), { ssr: false });
+const PlayCircle = dynamic(() => import('@mui/icons-material/PlayCircle'), { ssr: false });
+const FolderOpen = dynamic(() => import('@mui/icons-material/FolderOpen'), { ssr: false });
 
 // Left-side File Type Icon
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {

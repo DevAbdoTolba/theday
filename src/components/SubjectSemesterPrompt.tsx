@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Box, Typography, Button, Paper, Slide, useTheme, alpha, IconButton } from '@mui/material';
-import { Close, Add, School } from '@mui/icons-material';
+
+// Dynamic imports for MUI icons
+const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false });
+const Add = dynamic(() => import('@mui/icons-material/Add'), { ssr: false });
+const School = dynamic(() => import('@mui/icons-material/School'), { ssr: false });
 
 interface Props {
   subjectAbbr: string;

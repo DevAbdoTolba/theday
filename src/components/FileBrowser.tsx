@@ -1,6 +1,7 @@
 import YoutubePlayer from "./YoutubePlayer";
 import VisualState from "./feedback/VisualState";
 import React, { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import {
   Box,
   Tabs,
@@ -16,18 +17,18 @@ import {
   Divider,
   Tooltip,
 } from "@mui/material";
-import {
-  Search,
-  SentimentDissatisfied,
-  GridView,
-  ViewList,
-  AutoAwesome,
-  VisibilityOutlined,
-} from "@mui/icons-material";
 import { SubjectMaterials, ParsedFile } from "../utils/types";
 import { parseGoogleFile } from "../utils/helpers";
 import { FileCard } from "./FileCard";
 import { FileListItem } from "./FileListItem";
+
+// Dynamic imports for MUI icons
+const Search = dynamic(() => import("@mui/icons-material/Search"), { ssr: false });
+const SentimentDissatisfied = dynamic(() => import("@mui/icons-material/SentimentDissatisfied"), { ssr: false });
+const GridView = dynamic(() => import("@mui/icons-material/GridView"), { ssr: false });
+const ViewList = dynamic(() => import("@mui/icons-material/ViewList"), { ssr: false });
+const AutoAwesome = dynamic(() => import("@mui/icons-material/AutoAwesome"), { ssr: false });
+const VisibilityOutlined = dynamic(() => import("@mui/icons-material/VisibilityOutlined"), { ssr: false });
 
 interface Props {
   data: SubjectMaterials;

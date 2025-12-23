@@ -1,10 +1,10 @@
 import * as React from "react";
+import dynamic from "next/dynamic";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Chip,
@@ -15,11 +15,14 @@ import {
   Badge,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
-import AddIcon from "@mui/icons-material/Add";
-import ClearIcon from "@mui/icons-material/Clear";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIndexedContext } from "../context/IndexedContext";
 import useMediaQuery from "@mui/material/useMediaQuery";
+
+// Dynamic imports for MUI icons
+const SearchIcon = dynamic(() => import("@mui/icons-material/Search"), { ssr: false });
+const AddIcon = dynamic(() => import("@mui/icons-material/Add"), { ssr: false });
+const ClearIcon = dynamic(() => import("@mui/icons-material/Clear"), { ssr: false });
 
 interface Data {
   id: string;

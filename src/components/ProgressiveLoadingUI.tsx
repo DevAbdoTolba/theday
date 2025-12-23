@@ -1,4 +1,5 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import {
   Box,
   Container,
@@ -11,13 +12,13 @@ import {
   Chip,
   alpha,
 } from "@mui/material";
-import {
-  Folder as FolderIcon,
-  CheckCircle as CheckIcon,
-  Downloading as DownloadIcon,
-} from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDevOptions } from "../context/DevOptionsContext";
+
+// Dynamic imports for MUI icons
+const FolderIcon = dynamic(() => import("@mui/icons-material/Folder"), { ssr: false });
+const CheckIcon = dynamic(() => import("@mui/icons-material/CheckCircle"), { ssr: false });
+const DownloadIcon = dynamic(() => import("@mui/icons-material/Downloading"), { ssr: false });
 
 interface ProgressiveLoadingUIProps {
   subject: string;
