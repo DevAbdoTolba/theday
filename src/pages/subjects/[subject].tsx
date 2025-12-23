@@ -182,6 +182,12 @@ export default function SubjectPage({
   );
 }
 
+export const getStaticPaths = async () => {
+  
+  return {
+    paths: [],
+  };
+};
 
 export const getStaticProps: GetStaticProps = async (context) => {
  
