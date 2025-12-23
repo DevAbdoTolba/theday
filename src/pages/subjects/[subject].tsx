@@ -3,15 +3,12 @@ export default function SubjectPage({
   initialData,
   semesterIndex,
 }: any) {
- 
-
   return (
     <>
       hello
     </>
   );
 }
-
 export const getStaticPaths = async () => {
   
   return {
