@@ -15,7 +15,7 @@ export default function SubjectPage({
 export const getStaticPaths = async () => {
   
   return {
-    paths: ['CSS'],
+    paths: [{params:{subject: 'CSS'}}],
     fallback: false,  
   };
 };
