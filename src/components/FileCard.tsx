@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { 
   Card, CardActionArea, CardContent, CardMedia, 
@@ -39,11 +39,10 @@ interface FileCardProps {
   onClick?: () => void;
   isNew?: boolean;
   peekMode?: boolean;
-  // Mobile expansion control - only one card can be expanded at a time
   mobileExpandedId?: string | null;
   onMobileExpand?: (id: string | null) => void;
-  // Position in grid (0 = left, 1 = right on 2-column mobile grid)
   gridPosition?: 'left' | 'right';
+  onHoverChange?: (isHovered: boolean) => void;
 }
 
 export const FileCard = ({ 
@@ -53,10 +52,22 @@ export const FileCard = ({
   peekMode = false,
   mobileExpandedId,
   onMobileExpand,
-  gridPosition = 'left'
+  gridPosition = 'left',
+  onHoverChange
 }: FileCardProps) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    onHoverChange?.(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    onHoverChange?.(false);
+  };
   
   // Mobile expansion - controlled by parent for single expansion
   const isMobileExpanded = !isDesktop && mobileExpandedId === file.id;
@@ -88,25 +99,31 @@ export const FileCard = ({
       sx={{
         position: 'relative',
         height: '100%',
+        zIndex: 1,
+        // Parent wrapper z-index on hover - THIS IS THE FIX
+        '&:hover': isDesktop && !peekMode ? {
+          zIndex: 1000,
+        } : {},
         // Desktop hover expansion
         '&:hover .file-card-inner': isDesktop && !peekMode ? {
           transform: 'scale(1.12)',
-          zIndex: 100,
           boxShadow: theme.shadows[20],
-          transitionDelay: '0.4s',
+          transitionDelay: '0.1s',
         } : {},
         '&:hover .file-card-inner .thumbnail': isDesktop && !peekMode ? {
           height: 200,
-          transitionDelay: '0.4s',
+          transitionDelay: '0.1s',
         } : {},
         '&:hover .file-card-inner .file-title': isDesktop && !peekMode ? {
           WebkitLineClamp: 5,
-          transitionDelay: '0.4s',
+          transitionDelay: '0.1s',
         } : {},
         // Mobile expansion (controlled by parent)
+        ...(isMobileExpanded && {
+          zIndex: 1000,
+        }),
         '& .file-card-inner': isMobileExpanded ? {
           transform: mobileTransform,
-          zIndex: 100,
           boxShadow: theme.shadows[16],
         } : {},
         '& .file-card-inner .thumbnail': isMobileExpanded ? {
@@ -116,6 +133,9 @@ export const FileCard = ({
           WebkitLineClamp: 6,
         } : {},
       }}
+      style={{ zIndex: isHovered || isMobileExpanded ? 9999 : 'auto' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={isMobileExpanded ? () => onMobileExpand?.(null) : undefined}
     >
       {/* Invisible placeholder that maintains grid space */}
@@ -151,13 +171,10 @@ export const FileCard = ({
           borderRadius: 3,
           border: `1px solid ${isNew ? theme.palette.primary.main : theme.palette.divider}`,
           bgcolor: theme.palette.background.paper,
-          // Smooth transitions with easing
           transition: `
-            transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-            box-shadow 0.35s ease,
-            z-index 0s
+            transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+            box-shadow 0.25s ease
           `,
-          transformOrigin: 'center top',
           zIndex: 1,
           '&:hover': {
             borderColor: theme.palette.primary.main,

@@ -29,6 +29,7 @@
     "styled-jsx": "5.1.7"
   },
   "devDependencies": {
+    "@types/minimatch": "^6.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "19.2.7",
     "typescript": "5.2.2"

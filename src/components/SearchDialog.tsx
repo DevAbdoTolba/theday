@@ -152,6 +152,9 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
             placeholder="Search..."
             variant="standard"
             fullWidth
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
             InputProps={{
               disableUnderline: true,
               style: {
@@ -167,6 +170,24 @@ export default function AlertDialogSlide({ open, setOpen, data }: Props) {
               background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[100],
               borderRadius: 2,
               boxShadow: theme.shadows[0],
+              transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease',
+              cursor: 'text',
+              '&:hover': {
+                transform: 'scale(1.01)',
+              },
+              '&:focus-within': {
+                transform: 'scale(1.04)',
+                boxShadow: `0 0 0 3px ${theme.palette.primary.main}50`,
+              },
+              '&:active': {
+                animation: 'inputBounce 0.3s ease',
+              },
+              '@keyframes inputBounce': {
+                '0%': { transform: 'scale(1)' },
+                '30%': { transform: 'scale(0.97)' },
+                '60%': { transform: 'scale(1.03)' },
+                '100%': { transform: 'scale(1.04)' },
+              },
             }}
           />
           <Button

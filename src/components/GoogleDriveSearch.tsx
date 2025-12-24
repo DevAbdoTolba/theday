@@ -76,7 +76,7 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   padding: "12px 20px",
   background: theme.palette.background.paper,
   border: "2px solid transparent",
-  transition: "all 0.3s ease",
+  transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
   // Rotating gradient border that travels around corners
   "&::before": {
     content: '""',
@@ -114,7 +114,9 @@ const SearchBar = styled(Paper)(({ theme }) => ({
     initialValue: "0deg",
     inherits: "false",
   },
+  // Hover effect - slight scale up
   "&:hover": {
+    transform: "scale(1.01)",
     "&::before": {
       background: `conic-gradient(
         from var(--angle, 0deg),
@@ -126,8 +128,19 @@ const SearchBar = styled(Paper)(({ theme }) => ({
       )`,
     },
   },
-  // When focused, show solid border
+  // Active/Click effect - bouncy
+  "&:active": {
+    animation: "searchBounce 0.3s ease",
+  },
+  "@keyframes searchBounce": {
+    "0%": { transform: "scale(1)" },
+    "30%": { transform: "scale(0.98)" },
+    "60%": { transform: "scale(1.02)" },
+    "100%": { transform: "scale(1)" },
+  },
+  // When focused, show solid border with glow
   "&:focus-within": {
+    transform: "scale(1.02)",
     "&::before": {
       animation: "none",
       background: theme.palette.primary.main,
@@ -136,7 +149,7 @@ const SearchBar = styled(Paper)(({ theme }) => ({
     "&::after": {
       borderColor: theme.palette.primary.main,
     },
-    boxShadow: `0 0 0 3px ${theme.palette.primary.main}20`,
+    boxShadow: `0 0 0 4px ${theme.palette.primary.main}30, 0 8px 25px ${alpha(theme.palette.primary.main, 0.25)}`,
   },
 }));
 

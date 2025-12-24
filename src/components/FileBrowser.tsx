@@ -54,6 +54,7 @@ export default function FileBrowser({
     id: string;
     title: string;
   } | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   
 
   // Categories
@@ -251,6 +252,9 @@ export default function FileBrowser({
           size="small"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -259,7 +263,28 @@ export default function FileBrowser({
             ),
             sx: { borderRadius: 2 },
           }}
-          sx={{ flexGrow: 1, maxWidth: { md: 400 } }}
+          sx={{ 
+            flexGrow: 1, 
+            maxWidth: { md: 400 },
+            transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease',
+            cursor: 'text',
+            '&:hover': {
+              transform: 'scale(1.01)',
+            },
+            '&:focus-within': {
+              transform: 'scale(1.04)',
+              boxShadow: (theme) => `0 0 0 3px ${theme.palette.primary.main}50`,
+            },
+            '&:active': {
+              animation: 'inputBounce 0.3s ease',
+            },
+            '@keyframes inputBounce': {
+              '0%': { transform: 'scale(1)' },
+              '30%': { transform: 'scale(0.97)' },
+              '60%': { transform: 'scale(1.03)' },
+              '100%': { transform: 'scale(1.04)' },
+            },
+          }}
         />
       </Box>
 
@@ -285,7 +310,7 @@ export default function FileBrowser({
           minHeight: 200,
           opacity: 1,
           willChange: 'opacity',
-          animation: 'simpleAppear 0.2s ease-out',
+          animation: 'simpleAppear 0.5s ease-out',
           '@keyframes simpleAppear': {
             '0%': { opacity: 0 },
             '100%': { opacity: 1 },
@@ -294,9 +319,18 @@ export default function FileBrowser({
       >
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
-              <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ isolation: 'isolate' }}>
                 {filteredFiles.map((file, index) => (
-                  <Grid item xs={6} sm={6} md={4} lg={3} key={file.id}>
+                  <Grid 
+                    item 
+                    xs={6} sm={6} md={4} lg={3} 
+                    key={file.id} 
+                    className="material-card"
+                    style={{ 
+                      position: 'relative',
+                      zIndex: hoveredCardId === file.id || mobileExpandedCardId === file.id ? 9999 : 'auto',
+                    }}
+                  >
                     <FileCard
                       file={file}
                       onClick={() => handleFileClick(file)}
@@ -305,6 +339,7 @@ export default function FileBrowser({
                       mobileExpandedId={mobileExpandedCardId}
                       onMobileExpand={setMobileExpandedCardId}
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
+                      onHoverChange={(isHovered) => setHoveredCardId(isHovered ? file.id : null)}
                     />
                   </Grid>
                 ))}

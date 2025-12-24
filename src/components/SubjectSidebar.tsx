@@ -153,7 +153,7 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
                 const isExpanded = expandedSemesters.has(sem.index);
                 const hasActiveItem = sem.subjects.some((s:any) => s.abbreviation === currentSubject);
                 return (
-                <Box key={sem.index} sx={{ mb: 1 }}>
+                <Box key={sem.index} sx={{ mb: 1 }} className="sidebar-item">
                     <ListItemButton 
                     onClick={() => handleToggleSemester(sem.index)}
                     sx={{
@@ -224,31 +224,35 @@ export default function SubjectSidebar({ currentSubject, mobileOpen, onMobileClo
       </Drawer>
 
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-        {/* Floating Trigger Button - FIXED WIDTH & CENTER */}
+        {/* Floating Trigger Button - LARGER & SMOOTHER */}
         <Box
           onClick={() => setIsOpen(true)}
+          className="sidebar-trigger-btn"
           sx={{
             position: 'fixed', 
             left: 0, 
-            top: '50%', // Perfectly centered vertically
-            marginTop: '-40px', // Offset by half height
-            height: 80, 
-            width: 24, // Narrower button
+            top: '50%',
+            marginTop: '-60px',
+            height: 120, 
+            width: 36,
             zIndex: 1250,
             display: isOpen ? 'none' : 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
             cursor: 'pointer',
             bgcolor: 'primary.main',
-            borderRadius: '0 12px 12px 0',
+            borderRadius: '0 16px 16px 0',
             color: '#fff',
-            boxShadow: 3,
+            boxShadow: '0 4px 20px rgba(25,118,210,0.4)',
             transform: `translateX(${btnTransform}%)`,
-            transition: 'transform 0.1s linear', 
-            '&:hover': { transform: 'translateX(0%) !important' } 
+            transition: 'transform 0.15s ease-out, box-shadow 0.3s ease', 
+            '&:hover': { 
+              transform: 'translateX(0%) !important',
+              boxShadow: '0 6px 30px rgba(25,118,210,0.6)',
+            } 
           }}
         >
-          <KeyboardArrowRight fontSize="small" />
+          <KeyboardArrowRight fontSize="medium" />
         </Box>
 
         {/* Trigger Zone (Invisible) - Narrowed */}

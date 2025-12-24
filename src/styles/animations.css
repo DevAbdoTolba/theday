@@ -1,0 +1,176 @@
+/* ============================================
+   COMMERCIAL DEMO ANIMATIONS
+   ============================================ */
+
+/* 1. Splash Screen Animations */
+@keyframes splash-logo-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes splash-fade-out {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes splash-slide-up {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes app-reveal {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #151a2c 0%, #1e2746 100%);
+}
+
+.splash-screen.exiting {
+  animation: splash-fade-out 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.splash-logo {
+  animation: splash-logo-pulse 2s ease-in-out infinite;
+}
+
+.app-content.entering {
+  animation: app-reveal 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+/* 2. Input Field Animations - Ripple/Water Drop Effect */
+@keyframes input-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-input-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-input-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(33, 150, 243, 0.3);
+  width: 20px;
+  height: 20px;
+  transform: scale(0);
+  pointer-events: none;
+}
+
+.ripple-input-container.rippling::after {
+  animation: input-ripple 0.5s ease-out forwards;
+}
+
+/* 3. Sidebar Button Animations */
+@keyframes sidebar-btn-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(25, 118, 210, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(25, 118, 210, 0.6); }
+}
+
+.sidebar-trigger-btn {
+  animation: sidebar-btn-glow 2s ease-in-out infinite;
+}
+
+/* 4. Sidebar Items Stagger Animation */
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar-item {
+  opacity: 0;
+  animation: slide-in-left 0.3s ease-out forwards;
+}
+
+.sidebar-item:nth-child(1) { animation-delay: 0.05s; }
+.sidebar-item:nth-child(2) { animation-delay: 0.1s; }
+.sidebar-item:nth-child(3) { animation-delay: 0.15s; }
+.sidebar-item:nth-child(4) { animation-delay: 0.2s; }
+.sidebar-item:nth-child(5) { animation-delay: 0.25s; }
+.sidebar-item:nth-child(6) { animation-delay: 0.3s; }
+.sidebar-item:nth-child(7) { animation-delay: 0.35s; }
+.sidebar-item:nth-child(8) { animation-delay: 0.4s; }
+.sidebar-item:nth-child(9) { animation-delay: 0.45s; }
+.sidebar-item:nth-child(10) { animation-delay: 0.5s; }
+
+/* 5. Material Cards Apple-Style Animation */
+@keyframes material-card-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.material-card {
+  opacity: 0;
+  animation: material-card-appear 0.8s ease-out forwards;
+}
+
+.material-card:nth-child(1) { animation-delay: 0s; }
+.material-card:nth-child(2) { animation-delay: 0.12s; }
+.material-card:nth-child(3) { animation-delay: 0.24s; }
+.material-card:nth-child(4) { animation-delay: 0.36s; }
+.material-card:nth-child(5) { animation-delay: 0.48s; }
+.material-card:nth-child(6) { animation-delay: 0.6s; }
+.material-card:nth-child(7) { animation-delay: 0.72s; }
+.material-card:nth-child(8) { animation-delay: 0.84s; }
+.material-card:nth-child(9) { animation-delay: 0.96s; }
+.material-card:nth-child(10) { animation-delay: 1.08s; }
+.material-card:nth-child(11) { animation-delay: 1.2s; }
+.material-card:nth-child(12) { animation-delay: 1.32s; }
+.material-card:nth-child(n+13) { animation-delay: 1.4s; }
+
+/* Disable autocorrect visual styling for inputs */
+.no-autocorrect {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.no-autocorrect input,
+.no-autocorrect textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  text-decoration: none !important;
+}
+
+/* Remove red underlines from spellcheck */
+.no-autocorrect input::-webkit-textfield-decoration-container,
+.no-autocorrect input::-webkit-inner-spin-button,
+.no-autocorrect input::-webkit-clear-button {
+  display: none;
+}

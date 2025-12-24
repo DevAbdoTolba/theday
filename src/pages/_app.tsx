@@ -1,6 +1,7 @@
 import "../styles/Material.css";
 import "../styles/DribbleButton.css";
 import "../styles/RainbowBorder.css";
+import "../styles/animations.css";
 
 import React, { useContext, useMemo, useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -13,6 +14,7 @@ import { TranscriptContextProvider } from "../context/TranscriptContext";
 import IndexedProvider from "../context/IndexedContext";
 import { DevOptionsProvider } from "../context/DevOptionsContext";
 import DevDashboard from "../components/DevDashboard";
+import SplashScreen from "../components/SplashScreen";
 
 import Script from 'next/script';
 
@@ -61,6 +63,14 @@ export default function App({
   };
 
   const [offline, setOffline] = React.useState(false);
+  const [showSplash, setShowSplash] = React.useState(true);
+  const [appReady, setAppReady] = React.useState(false);
+
+  const handleSplashComplete = React.useCallback(() => {
+    setShowSplash(false);
+    setTimeout(() => setAppReady(true), 100);
+  }, []);
+
   console.log(
     "%cAbdoTolba was here!! :D",
     "color: red; font-family: sans-serif; font-size: 4.5rem; font-weight: bolder; text-shadow: #000 1px 1px;"
@@ -167,9 +177,11 @@ export default function App({
                   }}
                 />
 
-                  
+                {showSplash && <SplashScreen onComplete={handleSplashComplete} duration={2500} />}
 
-                <Component {...pageProps} />
+                <div className={appReady ? '' : 'app-content entering'}>
+                  <Component {...pageProps} />
+                </div>
                 <DevDashboard />
                 <Analytics />
               </ThemeProvider>
