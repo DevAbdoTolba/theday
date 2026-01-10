@@ -16,7 +16,7 @@
 <p align="center">
   <a href="https://theday.vercel.app"><img src="https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge" alt="Live Demo"></a>
   <a href="#features"><img src="https://img.shields.io/badge/Features-Explore-green?style=for-the-badge" alt="Features"></a>
-  <a href="./RELEASE.md"><img src="https://img.shields.io/badge/Release-Notes-orange?style=for-the-badge" alt="Release Notes"></a>
+  <a href="https://github.com/DevAbdoTolba/theday/releases/tag/v2"><img src="https://img.shields.io/badge/Release-Notes-orange?style=for-the-badge" alt="Release Notes"></a>
 </p>
 
 ---
