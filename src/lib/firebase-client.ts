@@ -7,8 +7,7 @@ const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 };
 
-const app: FirebaseApp =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const app: FirebaseApp = getApps()[0] ?? initializeApp(firebaseConfig);
 
 export const auth: Auth = getAuth(app);
 export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
