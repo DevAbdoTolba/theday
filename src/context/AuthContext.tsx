@@ -1,4 +1,3 @@
-"use client";
 import React, { createContext, useEffect, useState } from "react";
 import {
   onAuthStateChanged,
@@ -9,12 +8,12 @@ import {
 import { auth, googleProvider } from "../lib/firebase-client";
 
 interface MongoUser {
-  _id: string;
+  firebaseUid: string;
   email: string;
-  name?: string;
+  displayName: string;
+  photoURL?: string | null;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  [key: string]: unknown;
 }
 
 interface AuthContextType {
@@ -53,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             if (!response.ok) {
               throw new Error(`Login API returned ${response.status}`);
             }
-            const mongoUser: MongoUser = await response.json();
+            const { user: mongoUser }: { user: MongoUser } = await response.json();
             setUser(mongoUser);
           } catch (err) {
             console.error("Failed to fetch user from /api/auth/login:", err);
@@ -71,12 +70,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const signInWithGoogle = async (): Promise<void> => {
-    await signInWithPopup(auth, googleProvider);
+    setError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+    }
   };
 
   const signOut = async (): Promise<void> => {
     await firebaseSignOut(auth);
     setUser(null);
+    setError(null);
   };
 
   const getIdToken = async (): Promise<string | null> => {
