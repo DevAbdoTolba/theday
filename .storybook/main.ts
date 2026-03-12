@@ -30,6 +30,13 @@ const config: StorybookConfig = {
   async viteFinal(config) {
     const { mergeConfig } = await import("vite");
     return mergeConfig(config, {
+      define: {
+        // Provide process global and process.env for Next.js/Node.js compatibility
+        "global.process": JSON.stringify({
+          env: process.env,
+        }),
+        "process.env": JSON.stringify(process.env),
+      },
       resolve: {
         alias: [
           // Resolve @/ to src/ (Next.js auto-maps @/* → src/* when src/ dir exists)
@@ -38,6 +45,8 @@ const config: StorybookConfig = {
           { find: /^next\/router$/, replacement: path.resolve(__dirname, "./mocks/next-router.ts") },
           // Mock Next.js link so <Link href="..."> renders as a plain anchor
           { find: /^next\/link$/, replacement: path.resolve(__dirname, "./mocks/next-link.tsx") },
+          // Mock Next.js image to avoid process global error
+          { find: /^next\/image$/, replacement: path.resolve(__dirname, "./mocks/next-image.tsx") },
           // Mock pages/_app so ColorModeContext and offlineContext are available without page setup
           {
             find: path.resolve(__dirname, "../src/pages/_app"),
