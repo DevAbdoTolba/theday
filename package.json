@@ -20,6 +20,8 @@
     "dexie": "^4.0.8",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.5.9",
+    "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
     "framer-motion": "^11.3.28",
     "googleapis": "^118.0.0",
     "mongoose": "^8.4.3",
