@@ -7,12 +7,15 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { CircularProgress, Snackbar, Alert, Typography } from "@mui/material";
+import { CircularProgress, Snackbar, Alert, Typography, IconButton, Tooltip, Box } from "@mui/material";
 import TranslateRoundedIcon from "@mui/icons-material/TranslateRounded";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import { useAuth } from "../hooks/useAuth";
 import NextLink from "next/link";
 
 import { useRouter } from "next/router";
 import { DataContext } from "./TranscriptContext";
+import KeyIcon from "@mui/icons-material/Key";
 
 type FormDialogProps = {
   open: boolean;
@@ -64,6 +67,7 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
   const [keyClass, setKeyClass] = React.useState({ _id: "", class: "" });
   const { className, setClassName } = React.useContext(DataContext);
   const [key, setKey] = React.useState("");
+  const { user, signInWithGoogle } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -180,9 +184,35 @@ export default function FormDialog({ open, setOpen }: FormDialogProps) {
             display: "flex",
             flexDirection: language === "en" ? "row" : "row-reverse",
             alignItems: "center",
+            gap: 1
           }}
         >
-          <Typography>{translations[language].dialogTitle}</Typography>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              cursor: 'pointer',
+              '&:hover .shield-icon': { display: 'inline-flex' },
+              '&:hover .key-icon': { display: 'none' }
+            }}
+            onClick={() => {
+              if (user?.isAdmin) {
+                router.push("/admin");
+              } else if (!user) {
+                void signInWithGoogle();
+              }
+            }}
+          >
+            <Tooltip title={user?.isAdmin ? "Admin Dashboard" : (user ? "Access Key" : "Admin Login")}>
+              <Box display="flex" alignItems="center">
+                <TranslateRoundedIcon className="key-icon" sx={{ display: 'none' }} /> {/* Just a placeholder to maintain structure if needed, but we use actual icons below */}
+                <KeyIcon className="key-icon" color="warning" />
+                <AdminPanelSettingsIcon className="shield-icon" color="success" sx={{ display: 'none' }} />
+              </Box>
+            </Tooltip>
+            <Typography>{translations[language].dialogTitle}</Typography>
+          </Box>
           <Button
             onClick={toggleLanguage}
             startIcon={<TranslateRoundedIcon />}

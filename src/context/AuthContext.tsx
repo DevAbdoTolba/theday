@@ -13,6 +13,7 @@ interface MongoUser {
   displayName: string;
   photoURL?: string | null;
   isAdmin: boolean;
+  assignedClassId?: string | null;
   isSuperAdmin: boolean;
 }
 

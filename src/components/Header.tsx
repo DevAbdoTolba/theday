@@ -10,7 +10,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import Tooltip from "@mui/material/Tooltip";
 import SearchDialog from "./SearchDialog";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Button, IconButton, Menu, MenuItem, Avatar, ListItemIcon, Divider } from "@mui/material"; // Updated imports
+import { Button, IconButton, Menu, MenuItem, Avatar, ListItemIcon, Divider } from "@mui/material"; 
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings"; 
 import NextLink from "next/link";
 import { DataContext } from "../context/TranscriptContext";
 import KeyIcon from "@mui/icons-material/Key";
@@ -21,7 +22,8 @@ import { ColorModeContext } from "../pages/_app";
 import KeyDialog from "../context/KeyDialog";
 import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { ExpandMore, School, Check } from "@mui/icons-material"; // New icons
+import { ExpandMore, School, Check, Logout, AdminPanelSettings } from "@mui/icons-material"; // New icons
+import { useAuth } from "../hooks/useAuth";
 
 // ... (Keep Data interfaces and Search styled components as they were) ...
 interface Data {
@@ -120,6 +122,8 @@ export default function Header({
   const colorMode = React.useContext(ColorModeContext);
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   // -- Point 1: Modern Class Navigation State --
   const [classMenuAnchor, setClassMenuAnchor] = useState<null | HTMLElement>(null);
@@ -236,6 +240,22 @@ export default function Header({
                 <KeyIcon color="warning" fontSize="large" />
               </IconButton>
             </Tooltip>
+
+            {(user?.isAdmin || user?.isSuperAdmin) && (
+              <Tooltip title="Admin Dashboard">
+                <IconButton
+                  color="inherit"
+                  onClick={() => router.push("/admin")}
+                  sx={{ 
+                    mr: 2,
+                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.2) }
+                  }}
+                >
+                  <AdminPanelSettingsIcon color="success" fontSize="large" />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
 
           {/* -- Point 1: Modern Class Switcher -- */}
@@ -350,6 +370,73 @@ export default function Header({
               {theme.palette.mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
           </Tooltip>
+
+          {user && (
+            <>
+              <Tooltip title="Account settings">
+                <IconButton
+                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                  size="small"
+                  sx={{ ml: 2 }}
+                >
+                  <Avatar 
+                    src={user.photoURL || ""} 
+                    sx={{ width: 32, height: 32, border: "2px solid white" }}
+                  >
+                    {user.displayName?.charAt(0)}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+              <Menu
+                anchorEl={userMenuAnchor}
+                open={Boolean(userMenuAnchor)}
+                onClose={() => setUserMenuAnchor(null)}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    overflow: 'visible',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                    '&:before': {
+                      content: '""',
+                      display: 'block',
+                      position: 'absolute',
+                      top: 0,
+                      right: 14,
+                      width: 100,
+                      height: 10,
+                      bgcolor: 'background.paper',
+                      transform: 'translateY(-50%) rotate(45deg)',
+                      zIndex: 0,
+                    },
+                  },
+                }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              >
+                <Box sx={{ px: 2, py: 1 }}>
+                  <Typography variant="subtitle2" noWrap>{user.displayName}</Typography>
+                  <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.75rem' }}>
+                    {user.email}
+                  </Typography>
+                </Box>
+                <Divider />
+                {user.isSuperAdmin && (
+                  <MenuItem onClick={() => { setUserMenuAnchor(null); router.push("/sudo-1337"); }}>
+                    <ListItemIcon>
+                      <AdminPanelSettings fontSize="small" color="error" />
+                    </ListItemIcon>
+                    Sudo Panel
+                  </MenuItem>
+                )}
+                <MenuItem onClick={() => { setUserMenuAnchor(null); void signOut(); }}>
+                  <ListItemIcon>
+                    <Logout fontSize="small" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Toolbar>
         <KeyDialog open={openKeyDialog} setOpen={setOpenKeyDialog} />
       </AppBar>

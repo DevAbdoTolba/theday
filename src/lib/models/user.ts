@@ -7,6 +7,7 @@ export interface IUser {
   displayName: string;
   photoURL: string | null;
   isAdmin: boolean;
+  assignedClassId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +19,7 @@ const userSchema = new mongoose.Schema<IUser>(
     displayName: { type: String, required: true },
     photoURL: { type: String, default: null },
     isAdmin: { type: Boolean, required: true, default: false },
+    assignedClassId: { type: String, default: null },
   },
   { timestamps: true }
 );

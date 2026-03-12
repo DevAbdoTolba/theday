@@ -22,6 +22,7 @@
     "eslint-config-next": "^15.5.9",
     "firebase": "^12.10.0",
     "firebase-admin": "^13.7.0",
+    "firebase-tools": "^15.9.1",
     "framer-motion": "^11.3.28",
     "googleapis": "^118.0.0",
     "mongoose": "^8.4.3",

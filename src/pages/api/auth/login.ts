@@ -20,6 +20,7 @@ export default async function handler(
         displayName: user.displayName,
         photoURL: user.photoURL,
         isAdmin: user.isAdmin,
+        assignedClassId: user.assignedClassId,
         isSuperAdmin,
       },
     });
