@@ -22,6 +22,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   loading: boolean;
+  error: Error | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
@@ -34,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<MongoUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
@@ -53,9 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             const mongoUser: MongoUser = await response.json();
             setUser(mongoUser);
-          } catch (error) {
-            console.error("Failed to fetch user from /api/auth/login:", error);
+          } catch (err) {
+            console.error("Failed to fetch user from /api/auth/login:", err);
             setUser(null);
+            setError(err instanceof Error ? err : new Error(String(err)));
           }
         } else {
           setUser(null);
@@ -85,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isAdmin: user?.isAdmin ?? false,
     isSuperAdmin: user?.isSuperAdmin ?? false,
     loading,
+    error,
     signInWithGoogle,
     signOut,
     getIdToken,
