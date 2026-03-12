@@ -24,12 +24,11 @@ export default async function handler(
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unauthorized";
-
-    if (message === "Forbidden") {
-      sendError(res, 403, message);
-    } else {
-      sendError(res, 401, "Unauthorized");
+    const message = error instanceof Error ? error.message : "";
+    if (message === "Unauthorized") {
+      return res.status(401).json({ error: "Unauthorized" });
     }
+    console.error("[auth/login] unexpected error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }

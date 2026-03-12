@@ -1,3 +1,4 @@
+import "server-only";
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { adminAuth } from "./firebase-admin";
@@ -15,7 +16,7 @@ export function sendError(
 
 export async function verifyAuth(
   req: NextApiRequest
-): Promise<{ user: IUser & { _id: mongoose.Types.ObjectId }; isSuperAdmin: boolean }> {
+): Promise<{ user: mongoose.HydratedDocument<IUser>; isSuperAdmin: boolean }> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -31,8 +32,13 @@ export async function verifyAuth(
     throw new Error("Unauthorized");
   }
 
-  const URI = process.env.MONGODB_URI as string;
-  await mongoose.connect(URI, {});
+  if (!decodedToken.email) {
+    throw new Error("Unauthorized");
+  }
+
+  const URI = process.env.MONGODB_URI;
+  if (!URI) throw new Error("MONGODB_URI env var is not configured");
+  await mongoose.connect(URI);
 
   const user = await UserModel.findOneAndUpdate(
     { firebaseUid: decodedToken.uid },
@@ -54,7 +60,7 @@ export async function verifyAuth(
 
 export async function requireAdmin(
   req: NextApiRequest
-): Promise<{ user: IUser & { _id: mongoose.Types.ObjectId } }> {
+): Promise<{ user: mongoose.HydratedDocument<IUser> }> {
   const { user } = await verifyAuth(req);
 
   if (!user.isAdmin) {
@@ -66,7 +72,7 @@ export async function requireAdmin(
 
 export async function requireSuperAdmin(
   req: NextApiRequest
-): Promise<{ user: IUser & { _id: mongoose.Types.ObjectId } }> {
+): Promise<{ user: mongoose.HydratedDocument<IUser> }> {
   const { user } = await verifyAuth(req);
 
   if (user.email !== SUPER_ADMIN_EMAIL) {
