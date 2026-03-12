@@ -13,6 +13,7 @@ import { TranscriptContextProvider } from "../context/TranscriptContext";
 import IndexedProvider from "../context/IndexedContext";
 import { DevOptionsProvider } from "../context/DevOptionsContext";
 import DevDashboard from "../components/DevDashboard";
+import { AuthProvider } from "../context/AuthContext";
 
 import Script from 'next/script';
 
@@ -151,6 +152,7 @@ export default function App({
           <offlineContext.Provider value={[offline, setOffline]}>
             <ColorModeContext.Provider value={colorMode}>
               <ThemeProvider theme={theme}>
+                <AuthProvider>
                 <CssBaseline />
                 <Image
                   src={"/icon-512x512.png"}
@@ -172,6 +174,7 @@ export default function App({
                 <Component {...pageProps} />
                 <DevDashboard />
                 <Analytics />
+                </AuthProvider>
               </ThemeProvider>
             </ColorModeContext.Provider>
           </offlineContext.Provider>
