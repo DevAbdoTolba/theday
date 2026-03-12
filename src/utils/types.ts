@@ -46,3 +46,16 @@ export interface ParsedFile {
   youtubeId?: string | null
 }
 
+export interface AiCartItem {
+  id: string;
+  name: string;
+  url: string;
+  type: ParsedFile['type'];
+  className: string;
+  subjectName: string;
+  subjectAbbr: string;
+  category: string;
+  thumbnailUrl?: string;
+  addedAt: number;
+}
+

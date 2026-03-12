@@ -23,6 +23,7 @@ const VpnKey = dynamic(() => import("@mui/icons-material/VpnKey"), { ssr: false 
 const ExpandMore = dynamic(() => import("@mui/icons-material/ExpandMore"), { ssr: false });
 const Check = dynamic(() => import("@mui/icons-material/Check"), { ssr: false });
 const School = dynamic(() => import("@mui/icons-material/School"), { ssr: false });
+const AiModeToggle = dynamic(() => import("./ai-cart/AiModeToggle"), { ssr: false });
 
 interface Props {
   title: string;
@@ -194,6 +195,8 @@ export default function ModernHeader({
                 </Menu>
               </>
             )}
+
+            <AiModeToggle />
 
             <Tooltip title="Transcript Key">
               <IconButton onClick={() => setKeyDialogOpen(true)} color="inherit">

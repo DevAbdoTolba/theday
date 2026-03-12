@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
@@ -17,8 +17,9 @@ import SubjectSemesterPrompt from "../../components/SubjectSemesterPrompt";
 import SubjectSidebar from "../../components/SubjectSidebar";
 import Loading from "@/src/components/Loading";
 import ProgressiveLoadingUI from "../../components/ProgressiveLoadingUI";
-import { SubjectMaterials } from "../../utils/types";
+import { SubjectMaterials, ParsedFile, AiCartItem } from "../../utils/types";
 import { useSplitSubject } from "../../hooks/useSplitSubject";
+import { useAiCart } from "../../hooks/useAiCart";
 import coursesData from "../../Data/data.json";
 
 interface Props {
@@ -45,6 +46,38 @@ export default function SubjectPage({
     newItems,
     error,
   } = useSplitSubject(subject, initialData);
+
+  // AI Cart integration
+  const { aiModeActive, toggleItem, isSelected } = useAiCart();
+
+  // Derive subject full name from data.json
+  const subjectFullName = useMemo(() => {
+    for (const semester of coursesData.semesters) {
+      const found = semester.subjects.find((s) => s.abbreviation === subject);
+      if (found) return found.name;
+    }
+    return subject;
+  }, [subject]);
+
+  const handleAiSelect = useCallback(
+    (file: ParsedFile, category: string) => {
+      const className = localStorage.getItem("className") || "";
+      const item: AiCartItem = {
+        id: file.id,
+        name: file.name,
+        url: file.url,
+        type: file.type,
+        className,
+        subjectName: subjectFullName,
+        subjectAbbr: subject,
+        category,
+        thumbnailUrl: file.thumbnailUrl,
+        addedAt: Date.now(),
+      };
+      toggleItem(item);
+    },
+    [subject, subjectFullName, toggleItem]
+  );
 
   const handleAddToCustom = (abbr: string) => {
     const current = JSON.parse(
@@ -150,6 +183,9 @@ export default function SubjectPage({
             subjectName={subject}
             newItems={newItems}
             fetching={loadingFiles}
+            aiModeActive={aiModeActive}
+            onAiSelect={handleAiSelect}
+            isItemSelected={isSelected}
           />
         ) : !loadingFolders && !loadingFiles ? (
           <Alert severity="info">No data available for this subject.</Alert>
