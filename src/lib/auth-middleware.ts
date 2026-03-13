@@ -28,7 +28,8 @@ export async function verifyAuth(
   let decodedToken: Awaited<ReturnType<typeof adminAuth.verifyIdToken>>;
   try {
     decodedToken = await adminAuth.verifyIdToken(token);
-  } catch {
+  } catch (err) {
+    console.error("[verifyAuth] Firebase token verification failed:", err);
     throw new Error("Unauthorized");
   }
 

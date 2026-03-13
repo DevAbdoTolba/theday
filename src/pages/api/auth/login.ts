@@ -27,6 +27,7 @@ export default async function handler(
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message === "Unauthorized") {
+      console.error("[auth/login] Unauthorized — check Firebase Admin credentials and project ID match");
       return res.status(401).json({ error: "Unauthorized" });
     }
     console.error("[auth/login] unexpected error:", error);
