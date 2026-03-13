@@ -19,6 +19,7 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import { useAuth } from "../../hooks/useAuth";
 import { useSlowFeedback } from "../../hooks/useSlowFeedback";
+import { cacheGet, cacheSet } from "../../lib/session-cache";
 
 const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 
@@ -146,6 +147,20 @@ export default function AddContent({
         xhr.send(file);
       });
 
+      // Optimistic: add to cache so ContentList picks it up without re-fetching
+      const cacheKey = `content:${subject}:${category}`;
+      const cached = cacheGet<unknown[]>(cacheKey) ?? [];
+      cacheSet(cacheKey, [
+        ...cached,
+        {
+          source: "drive",
+          id: `temp-${Date.now()}`,
+          name: file.name,
+          size: String(file.size),
+          mimeType: file.type,
+        },
+      ]);
+
       setProgress(null);
       setProcessing(false);
       setSnackbar({ open: true, message: `"${file.name}" uploaded`, severity: "success" });
@@ -158,7 +173,6 @@ export default function AddContent({
         message: err instanceof Error ? err.message : "Upload failed",
         severity: "error",
       });
-      onContentAdded();
     }
   };
 
@@ -206,6 +220,22 @@ export default function AddContent({
       });
 
       if (res.ok) {
+        // Optimistic: add to cache so ContentList picks it up without re-fetching
+        const cacheKey = `content:${subject}:${category}`;
+        const cached = cacheGet<unknown[]>(cacheKey) ?? [];
+        cacheSet(cacheKey, [
+          ...cached,
+          {
+            source: "mongo",
+            _id: `temp-${Date.now()}`,
+            type: "link",
+            title: linkTitle.trim(),
+            url: linkUrl.trim(),
+            category,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+
         setLinkTitle("");
         setLinkUrl("");
         setSnackbar({ open: true, message: "Link added", severity: "success" });

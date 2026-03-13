@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Box, Button } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { AnimatePresence, motion } from "framer-motion";
-import ContentList from "./ContentList";
 import AddContent from "./AddContent";
+import ContentList from "./ContentList";
 
 interface ContentPanelProps {
   classId: string;
@@ -20,9 +20,11 @@ export default function ContentPanel({
   folderId,
   onSubjectMutated,
 }: ContentPanelProps) {
+  // AddContent updates the cache directly; refreshTrigger signals
+  // ContentList to re-read from cache (not re-fetch from API).
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const triggerRefresh = () => {
+  const triggerCacheReRead = () => {
     setRefreshTrigger((n) => n + 1);
     onSubjectMutated?.();
   };
@@ -55,6 +57,17 @@ export default function ContentPanel({
             </Button>
           </Box>
 
+          {/* Add content at the top — easier for admins to find */}
+          <Box sx={{ mb: 3 }}>
+            <AddContent
+              classId={classId}
+              folderId={folderId}
+              category={categoryName}
+              subject={subject}
+              onContentAdded={triggerCacheReRead}
+            />
+          </Box>
+
           {/* Content list */}
           <ContentList
             classId={classId}
@@ -63,17 +76,6 @@ export default function ContentPanel({
             refreshTrigger={refreshTrigger}
             onContentDeleted={onSubjectMutated}
           />
-
-          {/* Unified add content (file upload + link in one section) */}
-          <Box sx={{ mt: 3 }}>
-            <AddContent
-              classId={classId}
-              folderId={folderId}
-              category={categoryName}
-              subject={subject}
-              onContentAdded={triggerRefresh}
-            />
-          </Box>
         </Box>
       </motion.div>
     </AnimatePresence>

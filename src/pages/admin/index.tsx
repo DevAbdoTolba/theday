@@ -74,7 +74,6 @@ function AdminContent() {
   }>({ open: false, message: "", severity: "success" });
 
   const [publishing, setPublishing] = useState(false);
-  const [publishingAll, setPublishingAll] = useState(false);
 
   const scrollPositionRef = useRef(0);
 
@@ -111,27 +110,6 @@ function AdminContent() {
       showSnackbar("Failed to publish — try again", "error");
     } finally {
       setPublishing(false);
-    }
-  };
-
-  const handlePublishAll = async () => {
-    if (subjects.length === 0) return;
-    setPublishingAll(true);
-    try {
-      const results = await Promise.allSettled(
-        subjects.map((s) =>
-          fetch(`/api/revalidate/${encodeURIComponent(s.abbreviation)}`)
-        )
-      );
-      const succeeded = results.filter((r) => r.status === "fulfilled").length;
-      showSnackbar(
-        `Published ${succeeded}/${subjects.length} subjects to students`,
-        succeeded === subjects.length ? "success" : "info"
-      );
-    } catch {
-      showSnackbar("Failed to publish — try again", "error");
-    } finally {
-      setPublishingAll(false);
     }
   };
 
@@ -384,27 +362,15 @@ function AdminContent() {
           )}
         </Box>
         {!selectedSubject && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<RocketLaunchOutlinedIcon />}
-              onClick={() => void handlePublishAll()}
-              disabled={publishingAll || loading || subjects.length === 0}
-              sx={{ textTransform: "none" }}
+          <Tooltip title="Refresh subjects">
+            <IconButton
+              onClick={handleRefreshSubjects}
+              disabled={loading}
+              aria-label="Refresh subjects"
             >
-              {publishingAll ? "Publishing..." : "Publish All"}
-            </Button>
-            <Tooltip title="Refresh subjects">
-              <IconButton
-                onClick={handleRefreshSubjects}
-                disabled={loading}
-                aria-label="Refresh subjects"
-              >
-                <RefreshOutlinedIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+              <RefreshOutlinedIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </Box>
 
@@ -492,6 +458,21 @@ function AdminContent() {
                     </Tooltip>
                   </Box>
                 </Box>
+
+                <Alert
+                  severity="info"
+                  variant="outlined"
+                  sx={{
+                    mb: 2,
+                    py: 0,
+                    borderStyle: "dashed",
+                    "& .MuiAlert-message": { py: 0.75 },
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    {`psst... your changes go live automatically in ~2\u201310 min \u{FF9F}\u{25E1}\u{FF9F} no rush! hit Publish only if you\u2019re speed-running \u{1F3C3}\u{1F4A8}`}
+                  </Typography>
+                </Alert>
 
                 {categoriesLoading ? (
                   <Box sx={{ py: 2 }}>

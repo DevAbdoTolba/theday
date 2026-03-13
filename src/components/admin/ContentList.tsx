@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -23,7 +23,11 @@ import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useAuth } from "../../hooks/useAuth";
 import { useSlowFeedback } from "../../hooks/useSlowFeedback";
-import { cacheGet, cacheSet, cacheInvalidate } from "../../lib/session-cache";
+import {
+  cacheGet,
+  cacheSet,
+  cacheInvalidate,
+} from "../../lib/session-cache";
 
 interface DriveFile {
   id: string;
@@ -90,8 +94,17 @@ export default function ContentList({
   onContentDeleted,
 }: ContentListProps) {
   const { getIdToken } = useAuth();
-  const [items, setItems] = useState<ContentEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const contentCacheKey = `content:${subject}:${category}`;
+
+  // Initialize from cache synchronously — no loading flash on revisit
+  const initialCacheRef = useRef(
+    cacheGet<ContentEntry[]>(contentCacheKey)
+  );
+  const [items, setItems] = useState<ContentEntry[]>(
+    initialCacheRef.current ?? []
+  );
+  const [loading, setLoading] = useState(!initialCacheRef.current);
   const [deleteTarget, setDeleteTarget] = useState<ContentEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState<{
@@ -103,21 +116,9 @@ export default function ContentList({
   const loadSlowMsg = useSlowFeedback(loading);
   const deleteSlowMsg = useSlowFeedback(deleting);
 
-  const contentCacheKey = `content:${subject}:${category}`;
-
-  const fetchItems = useCallback(
-    async (force = false) => {
-      // Check session cache
-      if (!force) {
-        const cached = cacheGet<ContentEntry[]>(contentCacheKey);
-        if (cached) {
-          setItems(cached);
-          setLoading(false);
-          return;
-        }
-      }
-
-      setLoading(true);
+  const fetchFromApi = useCallback(async () => {
+    setLoading(true);
+    try {
       const token = await getIdToken();
 
       const [driveRes, mongoRes] = await Promise.all([
@@ -151,19 +152,30 @@ export default function ContentList({
 
       setItems(merged);
       cacheSet(contentCacheKey, merged);
+    } finally {
       setLoading(false);
-    },
-    [getIdToken, classId, category, subject, contentCacheKey]
-  );
+    }
+  }, [getIdToken, classId, category, subject, contentCacheKey]);
 
+  // Fetch from API only on mount when there was no cache hit
   useEffect(() => {
-    // refreshTrigger > 0 means a mutation happened — force bypass cache
-    void fetchItems(refreshTrigger > 0);
-  }, [fetchItems, refreshTrigger]);
+    if (initialCacheRef.current) return;
+    void fetchFromApi();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When content is added, AddContent updates the cache directly.
+  // refreshTrigger signals us to re-read from cache (not API).
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      const cached = cacheGet<ContentEntry[]>(contentCacheKey);
+      if (cached) setItems(cached);
+    }
+  }, [refreshTrigger, contentCacheKey]);
 
   const handleRefresh = () => {
     cacheInvalidate(contentCacheKey);
-    void fetchItems(true);
+    void fetchFromApi();
   };
 
   const handleDelete = async (item: ContentEntry) => {
@@ -195,13 +207,23 @@ export default function ContentList({
     setDeleting(false);
 
     if (res.ok) {
+      // Optimistic remove — no API re-fetch
+      setItems((prev) => {
+        const next = prev.filter((i) => {
+          if (i.source === "drive" && item.source === "drive")
+            return i.id !== item.id;
+          if (i.source === "mongo" && item.source === "mongo")
+            return i._id !== item._id;
+          return true;
+        });
+        cacheSet(contentCacheKey, next);
+        return next;
+      });
       setSnackbar({
         open: true,
         message: "Deleted successfully",
         severity: "success",
       });
-      cacheInvalidate(contentCacheKey);
-      void fetchItems(true);
       onContentDeleted?.();
     } else {
       const data = (await res.json()) as { error: string };
