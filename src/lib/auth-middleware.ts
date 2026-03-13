@@ -39,10 +39,16 @@ export async function verifyAuth(
 
   const URI = process.env.MONGODB_URI;
   if (!URI) throw new Error("MONGODB_URI env var is not configured");
-  await mongoose.connect(URI);
+
+  try {
+    await mongoose.connect(URI);
+  } catch (err) {
+    console.error("[verifyAuth] MongoDB connection failed:", err);
+    throw err;
+  }
 
   const user = await UserModel.findOneAndUpdate(
-    { firebaseUid: decodedToken.uid },
+    { $or: [{ firebaseUid: decodedToken.uid }, { email: decodedToken.email }] },
     {
       firebaseUid: decodedToken.uid,
       email: decodedToken.email ?? "",
