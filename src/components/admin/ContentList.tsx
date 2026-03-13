@@ -5,8 +5,9 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   IconButton,
+  LinearProgress,
+  Skeleton,
   Snackbar,
   Stack,
   Typography,
@@ -16,6 +17,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import LinkIcon from "@mui/icons-material/Link";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useAuth } from "../../hooks/useAuth";
+import { useSlowFeedback } from "../../hooks/useSlowFeedback";
 
 interface DriveFile {
   id: string;
@@ -30,8 +32,6 @@ interface MongoItem {
   title?: string;
   url?: string;
   name?: string;
-  triggerDescription?: string;
-  payload?: string;
   category: string;
   createdAt: string;
 }
@@ -48,6 +48,26 @@ interface ContentListProps {
   onUploadFirst?: () => void;
 }
 
+function ContentSkeleton() {
+  return (
+    <Box display="flex" flexDirection="column" gap={1}>
+      {[1, 2, 3].map((i) => (
+        <Card key={i} variant="outlined">
+          <CardContent
+            sx={{ display: "flex", alignItems: "center", gap: 1, py: 1, "&:last-child": { pb: 1 } }}
+          >
+            <Skeleton variant="circular" width={24} height={24} />
+            <Box flex={1}>
+              <Skeleton variant="text" width="60%" height={20} />
+              <Skeleton variant="text" width="30%" height={14} />
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
+}
+
 export default function ContentList({
   classId,
   category,
@@ -59,11 +79,15 @@ export default function ContentList({
   const [items, setItems] = useState<ContentEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<ContentEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
     severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
+
+  const loadSlowMsg = useSlowFeedback(loading);
+  const deleteSlowMsg = useSlowFeedback(deleting);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -107,6 +131,7 @@ export default function ContentList({
   }, [fetchItems, refreshTrigger]);
 
   const handleDelete = async (item: ContentEntry) => {
+    setDeleting(true);
     const token = await getIdToken();
     let res: Response;
 
@@ -131,6 +156,7 @@ export default function ContentList({
     }
 
     setDeleteTarget(null);
+    setDeleting(false);
 
     if (res.ok) {
       setSnackbar({ open: true, message: "Deleted successfully", severity: "success" });
@@ -153,13 +179,30 @@ export default function ContentList({
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" p={3}>
-        <CircularProgress size={24} />
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 1,
+          }}
+        >
+          <Typography variant="subtitle2" color="text.secondary">
+            Loading content...
+          </Typography>
+          {loadSlowMsg && (
+            <Typography variant="caption" color="warning.main">
+              {loadSlowMsg}
+            </Typography>
+          )}
+        </Box>
+        <LinearProgress sx={{ mb: 1.5, borderRadius: 1 }} />
+        <ContentSkeleton />
       </Box>
     );
   }
 
-  // Empty state (T031)
   if (items.length === 0) {
     return (
       <Box
@@ -224,11 +267,6 @@ export default function ContentList({
                       {item.url}
                     </Typography>
                   )}
-                  {item.source === "mongo" && item.type !== "link" && item.name && (
-                    <Typography variant="caption" color="text.secondary">
-                      {item.name}
-                    </Typography>
-                  )}
                 </Box>
               </Box>
               <IconButton
@@ -244,7 +282,7 @@ export default function ContentList({
         ))}
       </Box>
 
-      {/* Inline delete confirmation (FR-021) */}
+      {/* Inline delete confirmation */}
       {deleteTarget && (
         <Card variant="outlined" sx={{ mt: 2, p: 2, borderColor: "error.main" }}>
           <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
@@ -255,19 +293,31 @@ export default function ContentList({
               ? "This will remove the file from Google Drive. This cannot be undone."
               : "This cannot be undone."}
           </Typography>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
             <Button
               variant="contained"
               color="error"
               size="small"
+              disabled={deleting}
               onClick={() => void handleDelete(deleteTarget)}
             >
-              Delete
+              {deleting ? "Deleting..." : "Delete"}
             </Button>
-            <Button variant="outlined" size="small" onClick={() => setDeleteTarget(null)}>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={deleting}
+              onClick={() => setDeleteTarget(null)}
+            >
               Cancel
             </Button>
+            {deleteSlowMsg && (
+              <Typography variant="caption" color="warning.main">
+                {deleteSlowMsg}
+              </Typography>
+            )}
           </Stack>
+          {deleting && <LinearProgress sx={{ mt: 1, borderRadius: 1 }} />}
         </Card>
       )}
 

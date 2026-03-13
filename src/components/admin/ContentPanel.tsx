@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { AnimatePresence, motion } from "framer-motion";
 import ContentList from "./ContentList";
-import ContentUploader from "./ContentUploader";
-import LinkForm from "./LinkForm";
+import AddContent from "./AddContent";
 
 interface ContentPanelProps {
   classId: string;
@@ -59,28 +58,15 @@ export default function ContentPanel({
             refreshTrigger={refreshTrigger}
           />
 
-          {/* Add content section */}
+          {/* Unified add content (file upload + link in one section) */}
           <Box sx={{ mt: 3 }}>
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ mb: 2 }}
-            >
-              Add Content
-            </Typography>
-            <Stack spacing={3}>
-              <ContentUploader
-                folderId={folderId}
-                category={categoryName}
-                subject={subject}
-                onUploadComplete={triggerRefresh}
-              />
-              <LinkForm
-                classId={classId}
-                category={categoryName}
-                onSuccess={triggerRefresh}
-              />
-            </Stack>
+            <AddContent
+              classId={classId}
+              folderId={folderId}
+              category={categoryName}
+              subject={subject}
+              onContentAdded={triggerRefresh}
+            />
           </Box>
         </Box>
       </motion.div>

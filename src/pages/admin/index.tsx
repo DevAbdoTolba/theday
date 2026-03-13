@@ -3,7 +3,8 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
+  LinearProgress,
+  Skeleton,
   Snackbar,
   Typography,
 } from "@mui/material";
@@ -15,6 +16,7 @@ import CategoryTabs from "../../components/admin/CategoryTabs";
 import ContentPanel from "../../components/admin/ContentPanel";
 import { useAuth } from "../../hooks/useAuth";
 import { useSubjectChanges } from "../../hooks/useSubjectChanges";
+import { useSlowFeedback } from "../../hooks/useSlowFeedback";
 
 interface ActiveSubject {
   name: string;
@@ -56,18 +58,20 @@ function AdminContent() {
   const [selectedSubject, setSelectedSubject] = useState<ActiveSubject | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoryBusy, setCategoryBusy] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: "success" | "error";
+    severity: "success" | "error" | "info";
   }>({ open: false, message: "", severity: "success" });
 
-  // Save scroll position when entering detail view
   const scrollPositionRef = useRef(0);
 
+  const catLoadSlowMsg = useSlowFeedback(categoriesLoading);
+  const catBusySlowMsg = useSlowFeedback(categoryBusy);
+
   // Gracefully transition back to grid if the selected subject disappears
-  // (e.g. sudo-1337 approved a deletion while viewing the detail view)
   useEffect(() => {
     if (selectedSubject && subjects.length > 0) {
       const stillExists = subjects.some((s) => s.name === selectedSubject.name);
@@ -78,7 +82,10 @@ function AdminContent() {
     }
   }, [subjects, selectedSubject]);
 
-  const showSnackbar = (message: string, severity: "success" | "error" = "success") => {
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "info" = "success"
+  ) => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -92,15 +99,18 @@ function AdminContent() {
           classId,
           subject: subject.abbreviation,
         });
-        const res = await fetch(`/api/admin/categories?${params.toString()}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `/api/admin/categories?${params.toString()}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         if (res.ok) {
           const data = (await res.json()) as { categories: Category[] };
           setCategories(data.categories);
           if (data.categories.length > 0) {
             setActiveCategory(data.categories[0].folderId);
           }
+        } else {
+          showSnackbar("Failed to load categories", "error");
         }
       } catch {
         showSnackbar("Failed to load categories", "error");
@@ -121,7 +131,6 @@ function AdminContent() {
     setSelectedSubject(null);
     setCategories([]);
     setActiveCategory(null);
-    // Restore scroll position (FR-022)
     requestAnimationFrame(() => {
       window.scrollTo(0, scrollPositionRef.current);
     });
@@ -129,74 +138,102 @@ function AdminContent() {
 
   const handleAddCategory = async (name: string) => {
     if (!classId || !selectedSubject) return;
-    const token = await getIdToken();
-    const res = await fetch("/api/admin/categories", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        classId,
-        subjectAbbreviation: selectedSubject.abbreviation,
-        categoryName: name,
-      }),
-    });
-    if (res.ok) {
-      const created = (await res.json()) as Category;
-      setCategories((prev) => [...prev, created]);
-      setActiveCategory(created.folderId);
-      showSnackbar("Category created");
-    } else {
+    setCategoryBusy(true);
+    try {
+      const token = await getIdToken();
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classId,
+          subjectAbbreviation: selectedSubject.abbreviation,
+          categoryName: name,
+        }),
+      });
+      if (res.ok) {
+        const created = (await res.json()) as Category;
+        setCategories((prev) => [...prev, created]);
+        setActiveCategory(created.folderId);
+        showSnackbar("Category created");
+      } else {
+        showSnackbar("Failed to create category", "error");
+      }
+    } catch {
       showSnackbar("Failed to create category", "error");
+    } finally {
+      setCategoryBusy(false);
     }
   };
 
   const handleRenameCategory = async (folderId: string, newName: string) => {
-    const token = await getIdToken();
-    const res = await fetch("/api/admin/categories", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ folderId, newName }),
-    });
-    if (res.ok) {
-      const updated = (await res.json()) as Category;
-      setCategories((prev) =>
-        prev.map((c) => (c.folderId === folderId ? updated : c))
-      );
-      showSnackbar("Category renamed");
-    } else {
+    setCategoryBusy(true);
+    try {
+      const token = await getIdToken();
+      const res = await fetch("/api/admin/categories", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ folderId, newName }),
+      });
+      if (res.ok) {
+        const updated = (await res.json()) as Category;
+        setCategories((prev) =>
+          prev.map((c) => (c.folderId === folderId ? updated : c))
+        );
+        showSnackbar("Category renamed");
+      } else {
+        showSnackbar("Failed to rename category", "error");
+      }
+    } catch {
       showSnackbar("Failed to rename category", "error");
+    } finally {
+      setCategoryBusy(false);
     }
   };
 
   const handleDeleteCategory = async (folderId: string) => {
-    const token = await getIdToken();
-    const res = await fetch(`/api/admin/categories?folderId=${encodeURIComponent(folderId)}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      setCategories((prev) => {
-        const updated = prev.filter((c) => c.folderId !== folderId);
-        if (activeCategory === folderId) {
-          setActiveCategory(updated.length > 0 ? updated[0].folderId : null);
+    setCategoryBusy(true);
+    try {
+      const token = await getIdToken();
+      const res = await fetch(
+        `/api/admin/categories?folderId=${encodeURIComponent(folderId)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
         }
-        return updated;
-      });
-      showSnackbar("Category deleted");
-    } else {
+      );
+      if (res.ok) {
+        setCategories((prev) => {
+          const updated = prev.filter((c) => c.folderId !== folderId);
+          if (activeCategory === folderId) {
+            setActiveCategory(
+              updated.length > 0 ? updated[0].folderId : null
+            );
+          }
+          return updated;
+        });
+        showSnackbar("Category deleted");
+      } else {
+        showSnackbar("Failed to delete category", "error");
+      }
+    } catch {
       showSnackbar("Failed to delete category", "error");
+    } finally {
+      setCategoryBusy(false);
     }
   };
 
-  // No class assigned — empty state (FR-010)
+  // No class assigned — empty state
   if (!classId) {
     return (
-      <Box sx={{ maxWidth: 900, mx: "auto", p: 3, textAlign: "center", mt: 8 }}>
+      <Box
+        sx={{ maxWidth: 900, mx: "auto", p: 3, textAlign: "center", mt: 8 }}
+      >
         <Typography variant="h5" gutterBottom>
           No Class Assigned
         </Typography>
@@ -212,7 +249,7 @@ function AdminContent() {
 
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-      {/* Dashboard header with class name (FR-001) */}
+      {/* Dashboard header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight="bold">
           {className || "Admin Dashboard"}
@@ -232,98 +269,157 @@ function AdminContent() {
       )}
 
       <Box sx={{ overflow: "hidden" }}>
-      <AnimatePresence mode="wait">
-        {!selectedSubject ? (
-          /* Grid view */
-          <motion.div
-            key="grid"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <SubjectGrid
-              subjects={subjects}
-              pendingChanges={pendingChanges}
-              loading={loading}
-              classId={classId}
-              onCreateChange={createChange}
-              onUpdateChange={updateChange}
-              onCancelChange={cancelChange}
-              onDismissRejection={dismissRejection}
-              onSubjectClick={handleSubjectClick}
-            />
-          </motion.div>
-        ) : (
-          /* Subject detail view */
-          <motion.div
-            key="detail"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Box>
-              <Button
-                startIcon={<ArrowBackIcon />}
-                onClick={handleBackToGrid}
-                sx={{ mb: 2 }}
-              >
-                Back to subjects
-              </Button>
+        <AnimatePresence mode="wait">
+          {!selectedSubject ? (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SubjectGrid
+                subjects={subjects}
+                pendingChanges={pendingChanges}
+                loading={loading}
+                classId={classId}
+                onCreateChange={createChange}
+                onUpdateChange={updateChange}
+                onCancelChange={cancelChange}
+                onDismissRejection={dismissRejection}
+                onSubjectClick={handleSubjectClick}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="detail"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Box>
+                <Button
+                  startIcon={<ArrowBackIcon />}
+                  onClick={handleBackToGrid}
+                  sx={{ mb: 2 }}
+                >
+                  Back to subjects
+                </Button>
 
-              <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                {selectedSubject.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {selectedSubject.abbreviation} — Semester{" "}
-                {selectedSubject.semesterIndex}
-              </Typography>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+                  {selectedSubject.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 3 }}
+                >
+                  {selectedSubject.abbreviation} — Semester{" "}
+                  {selectedSubject.semesterIndex}
+                </Typography>
 
-              {categoriesLoading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-                  <CircularProgress size={32} />
-                </Box>
-              ) : (
-                <>
-                  <CategoryTabs
-                    categories={categories}
-                    activeCategory={activeCategory}
-                    onChange={setActiveCategory}
-                    onAdd={handleAddCategory}
-                    onRename={handleRenameCategory}
-                    onDelete={handleDeleteCategory}
-                  />
-
-                  {activeCat && (
-                    <ContentPanel
-                      classId={classId}
-                      subject={selectedSubject.abbreviation}
-                      categoryName={activeCat.name}
-                      folderId={activeCat.folderId}
-                    />
-                  )}
-
-                  {!activeCat && categories.length === 0 && (
+                {categoriesLoading ? (
+                  <Box sx={{ py: 2 }}>
                     <Box
                       sx={{
-                        textAlign: "center",
-                        py: 6,
-                        color: "text.secondary",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 1,
                       }}
                     >
-                      <Typography>
-                        No categories yet. Click the + button above to create
-                        one.
+                      <Typography variant="body2" color="text.secondary">
+                        Loading categories...
                       </Typography>
+                      {catLoadSlowMsg && (
+                        <Typography variant="caption" color="warning.main">
+                          {catLoadSlowMsg}
+                        </Typography>
+                      )}
                     </Box>
-                  )}
-                </>
-              )}
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                    <LinearProgress sx={{ mb: 2, borderRadius: 1 }} />
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton
+                          key={i}
+                          variant="rounded"
+                          width={90}
+                          height={36}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                ) : (
+                  <>
+                    {/* Category busy indicator */}
+                    {categoryBusy && (
+                      <Box sx={{ mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            Updating...
+                          </Typography>
+                          {catBusySlowMsg && (
+                            <Typography
+                              variant="caption"
+                              color="warning.main"
+                            >
+                              {catBusySlowMsg}
+                            </Typography>
+                          )}
+                        </Box>
+                        <LinearProgress sx={{ borderRadius: 1 }} />
+                      </Box>
+                    )}
+
+                    <CategoryTabs
+                      categories={categories}
+                      activeCategory={activeCategory}
+                      onChange={setActiveCategory}
+                      onAdd={handleAddCategory}
+                      onRename={handleRenameCategory}
+                      onDelete={handleDeleteCategory}
+                    />
+
+                    {activeCat && (
+                      <ContentPanel
+                        classId={classId}
+                        subject={selectedSubject.abbreviation}
+                        categoryName={activeCat.name}
+                        folderId={activeCat.folderId}
+                      />
+                    )}
+
+                    {!activeCat && categories.length === 0 && (
+                      <Box
+                        sx={{
+                          textAlign: "center",
+                          py: 6,
+                          color: "text.secondary",
+                        }}
+                      >
+                        <Typography>
+                          No categories yet. Click the + button above to create
+                          one.
+                        </Typography>
+                      </Box>
+                    )}
+                  </>
+                )}
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Box>
 
       <Snackbar
