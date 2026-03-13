@@ -74,11 +74,36 @@ function AdminContent() {
   }>({ open: false, message: "", severity: "success" });
 
   const [publishing, setPublishing] = useState(false);
+  const [publishHover, setPublishHover] = useState(false);
+  const [typedText, setTypedText] = useState("");
+  const [tipDismissed, setTipDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const ts = localStorage.getItem("publish-tip-dismissed");
+    if (!ts) return false;
+    return Date.now() - Number(ts) < 14 * 24 * 60 * 60 * 1000; // 2 weeks
+  });
 
   const scrollPositionRef = useRef(0);
 
   const catLoadSlowMsg = useSlowFeedback(categoriesLoading);
   const catBusySlowMsg = useSlowFeedback(categoryBusy);
+
+  const publishMsg =
+    "changes go live automatically in ~2\u201310 min (づ￣ ³￣)づ only hit Publish if u literally can\u2019t wait lol ┗(^o^ )┓";
+
+  useEffect(() => {
+    if (!publishing) {
+      setTypedText("");
+      return;
+    }
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setTypedText(publishMsg.slice(0, i));
+      if (i >= publishMsg.length) clearInterval(id);
+    }, 30);
+    return () => clearInterval(id);
+  }, [publishing]);
 
   const revalidateSubject = useCallback(
     async (abbreviation: string) => {
@@ -110,6 +135,8 @@ function AdminContent() {
       showSnackbar("Failed to publish — try again", "error");
     } finally {
       setPublishing(false);
+      localStorage.setItem("publish-tip-dismissed", String(Date.now()));
+      setTipDismissed(true);
     }
   };
 
@@ -440,12 +467,36 @@ function AdminContent() {
                     <Button
                       variant="contained"
                       size="small"
-                      startIcon={<RocketLaunchOutlinedIcon />}
                       onClick={() => void handlePublish()}
                       disabled={publishing}
-                      sx={{ textTransform: "none" }}
+                      onMouseEnter={() => setPublishHover(true)}
+                      onMouseLeave={() => setPublishHover(false)}
+                      aria-label="Publish to students"
+                      sx={{
+                        textTransform: "none",
+                        minWidth: 0,
+                        px: publishHover || publishing ? 1.5 : 1,
+                        transition: "all 0.25s ease",
+                        overflow: "hidden",
+                      }}
                     >
-                      {publishing ? "Publishing..." : "Publish to Students"}
+                      <RocketLaunchOutlinedIcon
+                        fontSize="small"
+                        sx={{ flexShrink: 0 }}
+                      />
+                      <Box
+                        component="span"
+                        sx={{
+                          maxWidth: publishHover || publishing ? 120 : 0,
+                          opacity: publishHover || publishing ? 1 : 0,
+                          ml: publishHover || publishing ? 0.75 : 0,
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          transition: "all 0.25s ease",
+                        }}
+                      >
+                        {publishing ? "Publishing..." : "Publish"}
+                      </Box>
                     </Button>
                     <Tooltip title="Refresh categories">
                       <IconButton
@@ -459,20 +510,57 @@ function AdminContent() {
                   </Box>
                 </Box>
 
-                <Alert
-                  severity="info"
-                  variant="outlined"
-                  sx={{
-                    mb: 2,
-                    py: 0,
-                    borderStyle: "dashed",
-                    "& .MuiAlert-message": { py: 0.75 },
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {"changes go live automatically in ~2\u201310 min (づ￣ ³￣)づ only hit Publish if u literally can\u2019t wait lol ┗(^o^ )┓"}
-                  </Typography>
-                </Alert>
+                {publishing && (
+                  <Box
+                    sx={{
+                      mb: 2,
+                      px: 1.5,
+                      py: 0.75,
+                      borderRadius: 1,
+                      bgcolor: "action.hover",
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ fontFamily: "monospace" }}
+                    >
+                      {typedText}
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "inline-block",
+                          width: "2px",
+                          height: "1em",
+                          bgcolor: "text.secondary",
+                          ml: 0.25,
+                          verticalAlign: "text-bottom",
+                          animation: "blink 0.7s step-end infinite",
+                          "@keyframes blink": {
+                            "50%": { opacity: 0 },
+                          },
+                        }}
+                      />
+                    </Typography>
+                  </Box>
+                )}
+
+                {!publishing && !tipDismissed && (
+                  <Alert
+                    severity="info"
+                    variant="outlined"
+                    sx={{
+                      mb: 2,
+                      py: 0,
+                      borderStyle: "dashed",
+                      "& .MuiAlert-message": { py: 0.75 },
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {publishMsg}
+                    </Typography>
+                  </Alert>
+                )}
 
                 {categoriesLoading ? (
                   <Box sx={{ py: 2 }}>
