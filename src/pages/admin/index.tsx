@@ -101,7 +101,6 @@ function AdminContent() {
 
   useEffect(() => {
     if (!publishing) return;
-    if (tipDismissed) return; // already seen it, respect the cooldown
     // Clear any previous animation
     if (typingRef.current) clearInterval(typingRef.current);
     setShowPublishMsg(true);
