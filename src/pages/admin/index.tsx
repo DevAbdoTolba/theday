@@ -3,12 +3,16 @@ import {
   Alert,
   Box,
   Button,
+  IconButton,
   LinearProgress,
   Skeleton,
   Snackbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import RocketLaunchOutlinedIcon from "@mui/icons-material/RocketLaunchOutlined";
 import { AnimatePresence, motion } from "framer-motion";
 import AdminGuard from "../../components/admin/AdminGuard";
 import SubjectGrid from "../../components/admin/SubjectGrid";
@@ -17,6 +21,7 @@ import ContentPanel from "../../components/admin/ContentPanel";
 import { useAuth } from "../../hooks/useAuth";
 import { useSubjectChanges } from "../../hooks/useSubjectChanges";
 import { useSlowFeedback } from "../../hooks/useSlowFeedback";
+import { cacheGet, cacheSet, cacheInvalidate } from "../../lib/session-cache";
 
 interface ActiveSubject {
   name: string;
@@ -52,10 +57,12 @@ function AdminContent() {
     updateChange,
     cancelChange,
     dismissRejection,
+    refetch: refetchSubjects,
   } = useSubjectChanges(classId);
 
-  // Subject detail view state
-  const [selectedSubject, setSelectedSubject] = useState<ActiveSubject | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<ActiveSubject | null>(
+    null
+  );
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoryBusy, setCategoryBusy] = useState(false);
@@ -66,15 +73,79 @@ function AdminContent() {
     severity: "success" | "error" | "info";
   }>({ open: false, message: "", severity: "success" });
 
+  const [publishing, setPublishing] = useState(false);
+  const [publishingAll, setPublishingAll] = useState(false);
+
   const scrollPositionRef = useRef(0);
 
   const catLoadSlowMsg = useSlowFeedback(categoriesLoading);
   const catBusySlowMsg = useSlowFeedback(categoryBusy);
 
-  // Gracefully transition back to grid if the selected subject disappears
+  const revalidateSubject = useCallback(
+    async (abbreviation: string) => {
+      try {
+        await fetch(`/api/revalidate/${encodeURIComponent(abbreviation)}`);
+      } catch {
+        // Silent — revalidation is best-effort
+      }
+    },
+    []
+  );
+
+  const handlePublish = async () => {
+    if (!selectedSubject) return;
+    setPublishing(true);
+    try {
+      const res = await fetch(
+        `/api/revalidate/${encodeURIComponent(selectedSubject.abbreviation)}`
+      );
+      if (res.ok) {
+        showSnackbar(
+          `Published! Students will see the latest ${selectedSubject.name} content`,
+          "success"
+        );
+      } else {
+        showSnackbar("Failed to publish — try again", "error");
+      }
+    } catch {
+      showSnackbar("Failed to publish — try again", "error");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handlePublishAll = async () => {
+    if (subjects.length === 0) return;
+    setPublishingAll(true);
+    try {
+      const results = await Promise.allSettled(
+        subjects.map((s) =>
+          fetch(`/api/revalidate/${encodeURIComponent(s.abbreviation)}`)
+        )
+      );
+      const succeeded = results.filter((r) => r.status === "fulfilled").length;
+      showSnackbar(
+        `Published ${succeeded}/${subjects.length} subjects to students`,
+        succeeded === subjects.length ? "success" : "info"
+      );
+    } catch {
+      showSnackbar("Failed to publish — try again", "error");
+    } finally {
+      setPublishingAll(false);
+    }
+  };
+
+  const handleSubjectMutated = useCallback(() => {
+    if (selectedSubject) {
+      void revalidateSubject(selectedSubject.abbreviation);
+    }
+  }, [selectedSubject, revalidateSubject]);
+
   useEffect(() => {
     if (selectedSubject && subjects.length > 0) {
-      const stillExists = subjects.some((s) => s.name === selectedSubject.name);
+      const stillExists = subjects.some(
+        (s) => s.name === selectedSubject.name
+      );
       if (!stillExists) {
         handleBackToGrid();
         showSnackbar("Subject no longer available", "error");
@@ -89,9 +160,25 @@ function AdminContent() {
     setSnackbar({ open: true, message, severity });
   };
 
+  const catCacheKey = (subjectAbbr: string) =>
+    `cat:${classId}:${subjectAbbr}`;
+
   const fetchCategories = useCallback(
-    async (subject: ActiveSubject) => {
+    async (subject: ActiveSubject, force = false) => {
       if (!classId) return;
+
+      // Check session cache first
+      if (!force) {
+        const cached = cacheGet<Category[]>(catCacheKey(subject.abbreviation));
+        if (cached) {
+          setCategories(cached);
+          if (cached.length > 0) {
+            setActiveCategory(cached[0].folderId);
+          }
+          return;
+        }
+      }
+
       setCategoriesLoading(true);
       try {
         const token = await getIdToken();
@@ -106,6 +193,7 @@ function AdminContent() {
         if (res.ok) {
           const data = (await res.json()) as { categories: Category[] };
           setCategories(data.categories);
+          cacheSet(catCacheKey(subject.abbreviation), data.categories);
           if (data.categories.length > 0) {
             setActiveCategory(data.categories[0].folderId);
           }
@@ -136,6 +224,16 @@ function AdminContent() {
     });
   };
 
+  const handleRefreshSubjects = () => {
+    void refetchSubjects();
+  };
+
+  const handleRefreshCategories = () => {
+    if (!selectedSubject) return;
+    cacheInvalidate(catCacheKey(selectedSubject.abbreviation));
+    void fetchCategories(selectedSubject, true);
+  };
+
   const handleAddCategory = async (name: string) => {
     if (!classId || !selectedSubject) return;
     setCategoryBusy(true);
@@ -155,9 +253,14 @@ function AdminContent() {
       });
       if (res.ok) {
         const created = (await res.json()) as Category;
-        setCategories((prev) => [...prev, created]);
+        setCategories((prev) => {
+          const updated = [...prev, created];
+          cacheSet(catCacheKey(selectedSubject.abbreviation), updated);
+          return updated;
+        });
         setActiveCategory(created.folderId);
         showSnackbar("Category created");
+        void revalidateSubject(selectedSubject.abbreviation);
       } else {
         showSnackbar("Failed to create category", "error");
       }
@@ -182,10 +285,17 @@ function AdminContent() {
       });
       if (res.ok) {
         const updated = (await res.json()) as Category;
-        setCategories((prev) =>
-          prev.map((c) => (c.folderId === folderId ? updated : c))
-        );
+        setCategories((prev) => {
+          const next = prev.map((c) =>
+            c.folderId === folderId ? updated : c
+          );
+          if (selectedSubject)
+            cacheSet(catCacheKey(selectedSubject.abbreviation), next);
+          return next;
+        });
         showSnackbar("Category renamed");
+        if (selectedSubject)
+          void revalidateSubject(selectedSubject.abbreviation);
       } else {
         showSnackbar("Failed to rename category", "error");
       }
@@ -209,15 +319,21 @@ function AdminContent() {
       );
       if (res.ok) {
         setCategories((prev) => {
-          const updated = prev.filter((c) => c.folderId !== folderId);
+          const next = prev.filter((c) => c.folderId !== folderId);
+          if (selectedSubject)
+            cacheSet(catCacheKey(selectedSubject.abbreviation), next);
           if (activeCategory === folderId) {
             setActiveCategory(
-              updated.length > 0 ? updated[0].folderId : null
+              next.length > 0 ? next[0].folderId : null
             );
           }
-          return updated;
+          return next;
         });
+        // Also invalidate content cache for this folder
+        cacheInvalidate(`content:${folderId}`);
         showSnackbar("Category deleted");
+        if (selectedSubject)
+          void revalidateSubject(selectedSubject.abbreviation);
       } else {
         showSnackbar("Failed to delete category", "error");
       }
@@ -228,7 +344,6 @@ function AdminContent() {
     }
   };
 
-  // No class assigned — empty state
   if (!classId) {
     return (
       <Box
@@ -250,18 +365,49 @@ function AdminContent() {
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
       {/* Dashboard header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="bold">
-          {className || "Admin Dashboard"}
-        </Typography>
-        {className && !selectedSubject && (
-          <Typography variant="body1" color="text.secondary">
-            Manage subjects for your class
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 4,
+        }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight="bold">
+            {className || "Admin Dashboard"}
           </Typography>
+          {className && !selectedSubject && (
+            <Typography variant="body1" color="text.secondary">
+              Manage subjects for your class
+            </Typography>
+          )}
+        </Box>
+        {!selectedSubject && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RocketLaunchOutlinedIcon />}
+              onClick={() => void handlePublishAll()}
+              disabled={publishingAll || loading || subjects.length === 0}
+              sx={{ textTransform: "none" }}
+            >
+              {publishingAll ? "Publishing..." : "Publish All"}
+            </Button>
+            <Tooltip title="Refresh subjects">
+              <IconButton
+                onClick={handleRefreshSubjects}
+                disabled={loading}
+                aria-label="Refresh subjects"
+              >
+                <RefreshOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         )}
       </Box>
 
-      {/* Error display */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
@@ -307,17 +453,45 @@ function AdminContent() {
                   Back to subjects
                 </Button>
 
-                <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                  {selectedSubject.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 3 }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    mb: 3,
+                  }}
                 >
-                  {selectedSubject.abbreviation} — Semester{" "}
-                  {selectedSubject.semesterIndex}
-                </Typography>
+                  <Box>
+                    <Typography variant="h5" fontWeight="bold" sx={{ mb: 0.5 }}>
+                      {selectedSubject.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {selectedSubject.abbreviation} — Semester{" "}
+                      {selectedSubject.semesterIndex}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<RocketLaunchOutlinedIcon />}
+                      onClick={() => void handlePublish()}
+                      disabled={publishing}
+                      sx={{ textTransform: "none" }}
+                    >
+                      {publishing ? "Publishing..." : "Publish to Students"}
+                    </Button>
+                    <Tooltip title="Refresh categories">
+                      <IconButton
+                        onClick={handleRefreshCategories}
+                        disabled={categoriesLoading}
+                        aria-label="Refresh categories"
+                      >
+                        <RefreshOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
 
                 {categoriesLoading ? (
                   <Box sx={{ py: 2 }}>
@@ -352,7 +526,6 @@ function AdminContent() {
                   </Box>
                 ) : (
                   <>
-                    {/* Category busy indicator */}
                     {categoryBusy && (
                       <Box sx={{ mb: 1 }}>
                         <Box
@@ -397,6 +570,7 @@ function AdminContent() {
                         subject={selectedSubject.abbreviation}
                         categoryName={activeCat.name}
                         folderId={activeCat.folderId}
+                        onSubjectMutated={handleSubjectMutated}
                       />
                     )}
 

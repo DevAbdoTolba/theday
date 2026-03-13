@@ -1,11 +1,17 @@
 import React, { useRef, useState } from "react";
 import {
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Tab,
   Tabs,
   TextField,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
@@ -37,7 +43,7 @@ export default function CategoryTabs({
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingTab, setEditingTab] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   const addInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,13 +94,15 @@ export default function CategoryTabs({
     }
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, folderId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, cat: Category) => {
     e.stopPropagation();
-    if (confirmDeleteId === folderId) {
-      setConfirmDeleteId(null);
-      void onDelete(folderId);
-    } else {
-      setConfirmDeleteId(folderId);
+    setDeleteTarget(cat);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteTarget) {
+      void onDelete(deleteTarget.folderId);
+      setDeleteTarget(null);
     }
   };
 
@@ -156,27 +164,17 @@ export default function CategoryTabs({
                     }}
                   >
                     {cat.name}
-                    <Tooltip
-                      title={
-                        confirmDeleteId === cat.folderId
-                          ? "Click again to delete"
-                          : "Delete category"
-                      }
-                    >
+                    <Tooltip title="Delete category">
                       <IconButton
                         className="category-delete-btn"
                         size="small"
                         aria-label={`Delete category ${cat.name}`}
-                        onClick={(e) => handleDeleteClick(e, cat.folderId)}
-                        onMouseLeave={() => setConfirmDeleteId(null)}
+                        onClick={(e) => handleDeleteClick(e, cat)}
                         sx={{
                           opacity: 0,
                           transition: "opacity 0.15s",
                           p: 0.25,
-                          color:
-                            confirmDeleteId === cat.folderId
-                              ? "error.main"
-                              : "action.active",
+                          color: "action.active",
                         }}
                       >
                         <CloseOutlinedIcon sx={{ fontSize: 16 }} />
@@ -239,6 +237,35 @@ export default function CategoryTabs({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete category</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Delete &quot;{deleteTarget?.name ?? ""}&quot;?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            This will permanently remove the folder from Google Drive and all
+            associated content. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteConfirm}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

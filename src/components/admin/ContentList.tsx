@@ -5,19 +5,25 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   LinearProgress,
   Skeleton,
   Snackbar,
-  Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import LinkIcon from "@mui/icons-material/Link";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useAuth } from "../../hooks/useAuth";
 import { useSlowFeedback } from "../../hooks/useSlowFeedback";
+import { cacheGet, cacheSet, cacheInvalidate } from "../../lib/session-cache";
 
 interface DriveFile {
   id: string;
@@ -46,6 +52,7 @@ interface ContentListProps {
   subject: string;
   refreshTrigger: number;
   onUploadFirst?: () => void;
+  onContentDeleted?: () => void;
 }
 
 function ContentSkeleton() {
@@ -54,7 +61,13 @@ function ContentSkeleton() {
       {[1, 2, 3].map((i) => (
         <Card key={i} variant="outlined">
           <CardContent
-            sx={{ display: "flex", alignItems: "center", gap: 1, py: 1, "&:last-child": { pb: 1 } }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              py: 1,
+              "&:last-child": { pb: 1 },
+            }}
           >
             <Skeleton variant="circular" width={24} height={24} />
             <Box flex={1}>
@@ -74,6 +87,7 @@ export default function ContentList({
   subject,
   refreshTrigger,
   onUploadFirst,
+  onContentDeleted,
 }: ContentListProps) {
   const { getIdToken } = useAuth();
   const [items, setItems] = useState<ContentEntry[]>([]);
@@ -89,46 +103,68 @@ export default function ContentList({
   const loadSlowMsg = useSlowFeedback(loading);
   const deleteSlowMsg = useSlowFeedback(deleting);
 
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    const token = await getIdToken();
+  const contentCacheKey = `content:${subject}:${category}`;
 
-    const [driveRes, mongoRes] = await Promise.all([
-      fetch(`/api/subjects/files/${encodeURIComponent(subject)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-      fetch(
-        `/api/admin/content?classId=${encodeURIComponent(classId)}&category=${encodeURIComponent(category)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      ),
-    ]);
-
-    const merged: ContentEntry[] = [];
-
-    if (driveRes.ok) {
-      const driveData = (await driveRes.json()) as {
-        filesData?: Record<string, DriveFile[]>;
-      };
-      const categoryFiles = driveData.filesData?.[category] ?? [];
-      for (const f of categoryFiles) {
-        merged.push({ source: "drive", ...f });
+  const fetchItems = useCallback(
+    async (force = false) => {
+      // Check session cache
+      if (!force) {
+        const cached = cacheGet<ContentEntry[]>(contentCacheKey);
+        if (cached) {
+          setItems(cached);
+          setLoading(false);
+          return;
+        }
       }
-    }
 
-    if (mongoRes.ok) {
-      const mongoData = (await mongoRes.json()) as { items: MongoItem[] };
-      for (const item of mongoData.items) {
-        merged.push({ source: "mongo", ...item });
+      setLoading(true);
+      const token = await getIdToken();
+
+      const [driveRes, mongoRes] = await Promise.all([
+        fetch(`/api/subjects/files/${encodeURIComponent(subject)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(
+          `/api/admin/content?classId=${encodeURIComponent(classId)}&category=${encodeURIComponent(category)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+      ]);
+
+      const merged: ContentEntry[] = [];
+
+      if (driveRes.ok) {
+        const driveData = (await driveRes.json()) as {
+          filesData?: Record<string, DriveFile[]>;
+        };
+        const categoryFiles = driveData.filesData?.[category] ?? [];
+        for (const f of categoryFiles) {
+          merged.push({ source: "drive", ...f });
+        }
       }
-    }
 
-    setItems(merged);
-    setLoading(false);
-  }, [getIdToken, classId, category, subject]);
+      if (mongoRes.ok) {
+        const mongoData = (await mongoRes.json()) as { items: MongoItem[] };
+        for (const item of mongoData.items) {
+          merged.push({ source: "mongo", ...item });
+        }
+      }
+
+      setItems(merged);
+      cacheSet(contentCacheKey, merged);
+      setLoading(false);
+    },
+    [getIdToken, classId, category, subject, contentCacheKey]
+  );
 
   useEffect(() => {
-    void fetchItems();
+    // refreshTrigger > 0 means a mutation happened — force bypass cache
+    void fetchItems(refreshTrigger > 0);
   }, [fetchItems, refreshTrigger]);
+
+  const handleRefresh = () => {
+    cacheInvalidate(contentCacheKey);
+    void fetchItems(true);
+  };
 
   const handleDelete = async (item: ContentEntry) => {
     setDeleting(true);
@@ -159,8 +195,14 @@ export default function ContentList({
     setDeleting(false);
 
     if (res.ok) {
-      setSnackbar({ open: true, message: "Deleted successfully", severity: "success" });
-      void fetchItems();
+      setSnackbar({
+        open: true,
+        message: "Deleted successfully",
+        severity: "success",
+      });
+      cacheInvalidate(contentCacheKey);
+      void fetchItems(true);
+      onContentDeleted?.();
     } else {
       const data = (await res.json()) as { error: string };
       setSnackbar({
@@ -205,35 +247,82 @@ export default function ContentList({
 
   if (items.length === 0) {
     return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        p={4}
-        sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}
-      >
-        <UploadFileIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          No content in this category yet
-        </Typography>
-        {onUploadFirst && (
-          <Button variant="outlined" size="small" onClick={onUploadFirst}>
-            Upload your first file
-          </Button>
-        )}
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            mb: 1,
+          }}
+        >
+          <Tooltip title="Refresh content">
+            <IconButton
+              size="small"
+              onClick={handleRefresh}
+              aria-label="Refresh content"
+            >
+              <RefreshOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          p={4}
+          sx={{
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+          }}
+        >
+          <UploadFileIcon
+            sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
+          />
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            No content in this category yet
+          </Typography>
+          {onUploadFirst && (
+            <Button variant="outlined" size="small" onClick={onUploadFirst}>
+              Upload your first file
+            </Button>
+          )}
+        </Box>
       </Box>
     );
   }
 
   return (
     <Box>
-      <Typography variant="subtitle2" gutterBottom>
-        Content ({items.length})
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 1,
+        }}
+      >
+        <Typography variant="subtitle2">
+          Content ({items.length})
+        </Typography>
+        <Tooltip title="Refresh content">
+          <IconButton
+            size="small"
+            onClick={handleRefresh}
+            aria-label="Refresh content"
+          >
+            <RefreshOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
       <Box display="flex" flexDirection="column" gap={1}>
         {items.map((item, idx) => (
-          <Card key={item.source === "drive" ? item.id : item._id ?? idx} variant="outlined">
+          <Card
+            key={item.source === "drive" ? item.id : item._id ?? idx}
+            variant="outlined"
+          >
             <CardContent
               sx={{
                 display: "flex",
@@ -243,15 +332,33 @@ export default function ContentList({
                 "&:last-child": { pb: 1 },
               }}
             >
-              <Box display="flex" alignItems="flex-start" gap={1} flex={1} minWidth={0}>
+              <Box
+                display="flex"
+                alignItems="flex-start"
+                gap={1}
+                flex={1}
+                minWidth={0}
+              >
                 {item.source === "drive" && (
-                  <InsertDriveFileIcon fontSize="small" color="primary" sx={{ mt: 0.2 }} />
+                  <InsertDriveFileIcon
+                    fontSize="small"
+                    color="primary"
+                    sx={{ mt: 0.2 }}
+                  />
                 )}
                 {item.source === "mongo" && item.type === "link" && (
-                  <LinkIcon fontSize="small" color="secondary" sx={{ mt: 0.2 }} />
+                  <LinkIcon
+                    fontSize="small"
+                    color="secondary"
+                    sx={{ mt: 0.2 }}
+                  />
                 )}
                 {item.source === "mongo" && item.type !== "link" && (
-                  <InsertDriveFileIcon fontSize="small" color="action" sx={{ mt: 0.2 }} />
+                  <InsertDriveFileIcon
+                    fontSize="small"
+                    color="action"
+                    sx={{ mt: 0.2 }}
+                  />
                 )}
                 <Box minWidth={0}>
                   <Typography variant="body2" noWrap>
@@ -262,11 +369,18 @@ export default function ContentList({
                       {(parseInt(item.size) / 1024).toFixed(1)} KB
                     </Typography>
                   )}
-                  {item.source === "mongo" && item.type === "link" && item.url && (
-                    <Typography variant="caption" color="text.secondary" noWrap display="block">
-                      {item.url}
-                    </Typography>
-                  )}
+                  {item.source === "mongo" &&
+                    item.type === "link" &&
+                    item.url && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        noWrap
+                        display="block"
+                      >
+                        {item.url}
+                      </Typography>
+                    )}
                 </Box>
               </Box>
               <IconButton
@@ -282,44 +396,44 @@ export default function ContentList({
         ))}
       </Box>
 
-      {/* Inline delete confirmation */}
-      {deleteTarget && (
-        <Card variant="outlined" sx={{ mt: 2, p: 2, borderColor: "error.main" }}>
-          <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
-            Delete &quot;{getItemLabel(deleteTarget)}&quot;?
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => !deleting && setDeleteTarget(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete content</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Delete &quot;{deleteTarget ? getItemLabel(deleteTarget) : ""}&quot;?
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            {deleteTarget.source === "drive"
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {deleteTarget?.source === "drive"
               ? "This will remove the file from Google Drive. This cannot be undone."
               : "This cannot be undone."}
           </Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button
-              variant="contained"
-              color="error"
-              size="small"
-              disabled={deleting}
-              onClick={() => void handleDelete(deleteTarget)}
-            >
-              {deleting ? "Deleting..." : "Delete"}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={deleting}
-              onClick={() => setDeleteTarget(null)}
-            >
-              Cancel
-            </Button>
-            {deleteSlowMsg && (
-              <Typography variant="caption" color="warning.main">
-                {deleteSlowMsg}
-              </Typography>
-            )}
-          </Stack>
-          {deleting && <LinearProgress sx={{ mt: 1, borderRadius: 1 }} />}
-        </Card>
-      )}
+          {deleting && <LinearProgress sx={{ mt: 2, borderRadius: 1 }} />}
+          {deleteSlowMsg && (
+            <Typography variant="caption" color="warning.main" sx={{ mt: 1 }}>
+              {deleteSlowMsg}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={deleting} onClick={() => setDeleteTarget(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={deleting}
+            onClick={() => deleteTarget && void handleDelete(deleteTarget)}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}

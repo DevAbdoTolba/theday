@@ -10,6 +10,7 @@ interface ContentPanelProps {
   subject: string; // abbreviation
   categoryName: string;
   folderId: string;
+  onSubjectMutated?: () => void;
 }
 
 export default function ContentPanel({
@@ -17,10 +18,14 @@ export default function ContentPanel({
   subject,
   categoryName,
   folderId,
+  onSubjectMutated,
 }: ContentPanelProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const triggerRefresh = () => setRefreshTrigger((n) => n + 1);
+  const triggerRefresh = () => {
+    setRefreshTrigger((n) => n + 1);
+    onSubjectMutated?.();
+  };
 
   const driveFolderUrl = `https://drive.google.com/drive/folders/${folderId}`;
 
@@ -56,6 +61,7 @@ export default function ContentPanel({
             category={categoryName}
             subject={subject}
             refreshTrigger={refreshTrigger}
+            onContentDeleted={onSubjectMutated}
           />
 
           {/* Unified add content (file upload + link in one section) */}

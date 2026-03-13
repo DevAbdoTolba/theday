@@ -3,6 +3,7 @@ import { google, drive_v3 } from "googleapis";
 import mongoose from "mongoose";
 import { requireAdmin, sendError } from "../../../lib/auth-middleware";
 import ContentItemModel from "../../../lib/models/content-item";
+import { serverGet, serverSet, serverInvalidate } from "../../../lib/server-cache";
 
 function escapeDriveQuery(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -80,6 +81,17 @@ async function handleGet(
     return sendError(res, 403, "You are not assigned to this class");
   }
 
+  // Server-side cache for Drive API calls
+  const cacheKey = `categories:${subject}`;
+  const cached = serverGet<{ name: string; folderId: string }[]>(cacheKey);
+  if (cached) {
+    res.setHeader(
+      "Cache-Control",
+      "public, max-age=60, stale-while-revalidate=300"
+    );
+    return res.status(200).json({ categories: cached });
+  }
+
   const drive = getReadonlyDrive();
   const subjectFolderId = await findSubjectFolder(drive, subject);
 
@@ -88,6 +100,7 @@ async function handleGet(
       "Cache-Control",
       "public, max-age=60, stale-while-revalidate=300"
     );
+    serverSet(cacheKey, []);
     return res.status(200).json({ categories: [] });
   }
 
@@ -107,6 +120,7 @@ async function handleGet(
     }
   }
 
+  serverSet(cacheKey, categories);
   res.setHeader(
     "Cache-Control",
     "public, max-age=60, stale-while-revalidate=300"
@@ -158,6 +172,7 @@ async function handlePost(
     return sendError(res, 500, "Failed to create category folder");
   }
 
+  serverInvalidate(`categories:${subjectAbbreviation}`);
   return res.status(201).json({ name: created.name, folderId: created.id });
 }
 
@@ -188,6 +203,7 @@ async function handlePut(
     return sendError(res, 500, "Failed to rename category folder");
   }
 
+  serverInvalidate("categories:");
   return res.status(200).json({ name: updated.name, folderId: updated.id });
 }
 
@@ -215,6 +231,8 @@ async function handleDelete(
 
   // Delete the folder from Google Drive (recursively deletes contents)
   await drive.files.delete({ fileId: folderId });
+
+  serverInvalidate("categories:");
 
   // Delete matching content_items from MongoDB
   if (folderName) {
