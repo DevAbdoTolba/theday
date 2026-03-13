@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import RocketLaunchOutlinedIcon from "@mui/icons-material/RocketLaunchOutlined";
 import { AnimatePresence, motion } from "framer-motion";
@@ -76,6 +77,7 @@ function AdminContent() {
   const [publishing, setPublishing] = useState(false);
   const [publishHover, setPublishHover] = useState(false);
   const [typedText, setTypedText] = useState("");
+  const [showPublishMsg, setShowPublishMsg] = useState(false);
   const [tipDismissed, setTipDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     const ts = localStorage.getItem("publish-tip-dismissed");
@@ -96,10 +98,9 @@ function AdminContent() {
     "changes go live automatically in ~2\u201310 min (づ￣ ³￣)づ only hit Publish if u literally can\u2019t wait lol ┗(^o^ )┓";
 
   useEffect(() => {
-    if (!publishing) {
-      setTypedText("");
-      return;
-    }
+    if (!publishing) return;
+    setShowPublishMsg(true);
+    setTypedText("");
     let i = 0;
     const id = setInterval(() => {
       i += 1;
@@ -516,7 +517,7 @@ function AdminContent() {
                   </Box>
                 </Box>
 
-                {publishing && (
+                {showPublishMsg && (
                   <Box
                     sx={{
                       mb: 2,
@@ -524,34 +525,50 @@ function AdminContent() {
                       py: 0.75,
                       borderRadius: 1,
                       bgcolor: "action.hover",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: 1,
                     }}
                   >
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ fontFamily: "monospace" }}
+                      sx={{ fontFamily: "monospace", flex: 1 }}
                     >
                       {typedText}
-                      <Box
-                        component="span"
-                        sx={{
-                          display: "inline-block",
-                          width: "2px",
-                          height: "1em",
-                          bgcolor: "text.secondary",
-                          ml: 0.25,
-                          verticalAlign: "text-bottom",
-                          animation: "blink 0.7s step-end infinite",
-                          "@keyframes blink": {
-                            "50%": { opacity: 0 },
-                          },
-                        }}
-                      />
+                      {publishing && (
+                        <Box
+                          component="span"
+                          sx={{
+                            display: "inline-block",
+                            width: "2px",
+                            height: "1em",
+                            bgcolor: "text.secondary",
+                            ml: 0.25,
+                            verticalAlign: "text-bottom",
+                            animation: "blink 0.7s step-end infinite",
+                            "@keyframes blink": {
+                              "50%": { opacity: 0 },
+                            },
+                          }}
+                        />
+                      )}
                     </Typography>
+                    {!publishing && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setShowPublishMsg(false)}
+                        aria-label="Dismiss message"
+                        sx={{ p: 0.25, mt: -0.25, flexShrink: 0 }}
+                      >
+                        <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    )}
                   </Box>
                 )}
 
-                {!publishing && !tipDismissed && (
+                {!showPublishMsg && !tipDismissed && (
                   <Alert
                     severity="info"
                     variant="outlined"

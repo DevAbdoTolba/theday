@@ -204,35 +204,34 @@ export default function AddContent({
     setLinkSubmitting(true);
     try {
       const token = await getIdToken();
-      const res = await fetch("/api/admin/content", {
+      // Create a Drive file named "{url} {title}" so the student-facing
+      // parser picks it up as a clickable link.
+      const res = await fetch("/api/admin/link", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          type: "link",
-          classId,
-          category,
-          title: linkTitle.trim(),
           url: linkUrl.trim(),
+          title: linkTitle.trim(),
+          folderId,
         }),
       });
 
       if (res.ok) {
-        // Optimistic: add to cache so ContentList picks it up without re-fetching
+        const created = (await res.json()) as { id: string; name: string };
+
+        // Optimistic: add as a Drive entry so ContentList shows it instantly
         const cacheKey = `content:${subject}:${category}`;
         const cached = cacheGet<unknown[]>(cacheKey) ?? [];
         cacheSet(cacheKey, [
           ...cached,
           {
-            source: "mongo",
-            _id: `temp-${Date.now()}`,
-            type: "link",
-            title: linkTitle.trim(),
-            url: linkUrl.trim(),
-            category,
-            createdAt: new Date().toISOString(),
+            source: "drive",
+            id: created.id,
+            name: created.name,
+            mimeType: "text/plain",
           },
         ]);
 
