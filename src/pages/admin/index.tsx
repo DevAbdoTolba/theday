@@ -470,7 +470,7 @@ function AdminContent() {
                   }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    {`psst... your changes go live automatically in ~2\u201310 min \u{FF9F}\u{25E1}\u{FF9F} no rush! hit Publish only if you\u2019re speed-running \u{1F3C3}\u{1F4A8}`}
+                    {"changes go live automatically in ~2\u201310 min, no cap (づ￣ ³￣)づ only hit Publish if u literally can\u2019t wait lol ┗(^o^ )┓"}
                   </Typography>
                 </Alert>
 
