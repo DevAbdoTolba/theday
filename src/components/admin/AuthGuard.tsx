@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useAuth } from "../../hooks/useAuth";
 
 interface AuthGuardProps {
@@ -18,8 +19,15 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, check }: AuthGuardProps) {
-  const { user, isAdmin, isSuperAdmin, loading, signInWithGoogle, signOut } =
-    useAuth();
+  const {
+    user,
+    isAdmin,
+    isSuperAdmin,
+    loading,
+    error,
+    signInWithGoogle,
+    signOut,
+  } = useAuth();
   const router = useRouter();
   const hasAccess = check({ isAdmin, isSuperAdmin });
 
@@ -32,6 +40,83 @@ export default function AuthGuard({ children, check }: AuthGuardProps) {
         minHeight="100vh"
       >
         <CircularProgress aria-label="Loading" />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        sx={{ bgcolor: "background.default", p: 2 }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            maxWidth: 440,
+            width: "100%",
+            p: 4,
+            textAlign: "center",
+            borderRadius: 3,
+          }}
+        >
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              bgcolor: "warning.light",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mx: "auto",
+              mb: 2,
+            }}
+          >
+            <ErrorOutlineIcon
+              sx={{ color: "warning.contrastText", fontSize: 28 }}
+            />
+          </Box>
+
+          <Typography variant="h5" fontWeight={700} gutterBottom>
+            Something Went Wrong
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+            We couldn&apos;t verify your account. This could be a temporary
+            issue — try signing out and back in.
+          </Typography>
+
+          <Typography
+            variant="caption"
+            color="text.disabled"
+            sx={{ display: "block", mb: 3, fontFamily: "monospace" }}
+          >
+            {error.message}
+          </Typography>
+
+          <Stack direction="row" spacing={1.5} justifyContent="center">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                void signOut();
+              }}
+            >
+              Sign Out &amp; Retry
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                void router.push("/");
+              }}
+            >
+              Go Home
+            </Button>
+          </Stack>
+        </Paper>
       </Box>
     );
   }
