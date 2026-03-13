@@ -539,9 +539,9 @@ function AdminContent() {
                     }}
                   >
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       color="text.secondary"
-                      sx={{ fontFamily: "monospace", flex: 1 }}
+                      sx={{ fontFamily: "monospace", fontWeight: 600, letterSpacing: "0.02em", flex: 1 }}
                     >
                       {typedText}
                       {typedText.length < publishMsg.length && (
