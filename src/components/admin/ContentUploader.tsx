@@ -280,8 +280,9 @@ export default function ContentUploader({
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

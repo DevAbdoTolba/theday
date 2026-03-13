@@ -5,6 +5,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-12
 ## Active Technologies
 - TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, googleapis 118 + NEW: firebase, firebase-admin (002-admin-dashboard)
 - MongoDB (users, classes, content_items), Google Drive (files), IndexedDB (client cache via Dexie) (002-admin-dashboard)
+- TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, Firebase 12.10.0, Firebase Admin 13.7.0, googleapis 118, Framer Motion, Dexie (IndexedDB) (004-admin-sudo-ux)
+- MongoDB (users, classes, content_items, subject_change_requests [new]), Google Drive (files), IndexedDB (client cache) (004-admin-sudo-ux)
 
 - TypeScript 5.x (strict mode) + Storybook v7.x, Next.js 15, React 19, MUI v5, Framer Motion (001-storybook-components)
 
@@ -24,6 +26,7 @@ npm test && npm run lint
 TypeScript 5.x (strict mode): Follow standard conventions
 
 ## Recent Changes
+- 004-admin-sudo-ux: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, Firebase 12.10.0, Firebase Admin 13.7.0, googleapis 118, Framer Motion, Dexie (IndexedDB)
 - 002-admin-dashboard: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, googleapis 118 + NEW: firebase, firebase-admin
 
 - 001-storybook-components: Added TypeScript 5.x (strict mode) + Storybook v7.x, Next.js 15, React 19, MUI v5, Framer Motion

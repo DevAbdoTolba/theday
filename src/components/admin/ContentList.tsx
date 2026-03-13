@@ -6,12 +6,9 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
   Snackbar,
+  Stack,
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -63,7 +60,6 @@ export default function ContentList({
   const [items, setItems] = useState<ContentEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<ContentEntry | null>(null);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -111,20 +107,18 @@ export default function ContentList({
     void fetchItems();
   }, [fetchItems, refreshTrigger]);
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-
+  const handleDelete = async (item: ContentEntry) => {
     const token = await getIdToken();
     let res: Response;
 
-    if (deleteTarget.source === "drive") {
+    if (item.source === "drive") {
       res = await fetch("/api/admin/drive-file", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ fileId: deleteTarget.id }),
+        body: JSON.stringify({ fileId: item.id }),
       });
     } else {
       res = await fetch("/api/admin/content", {
@@ -133,11 +127,10 @@ export default function ContentList({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ _id: deleteTarget._id }),
+        body: JSON.stringify({ _id: item._id }),
       });
     }
 
-    setDeleteOpen(false);
     setDeleteTarget(null);
 
     if (res.ok) {
@@ -242,10 +235,8 @@ export default function ContentList({
               <IconButton
                 size="small"
                 color="error"
-                onClick={() => {
-                  setDeleteTarget(item);
-                  setDeleteOpen(true);
-                }}
+                aria-label={`Delete ${getItemLabel(item)}`}
+                onClick={() => setDeleteTarget(item)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -254,27 +245,38 @@ export default function ContentList({
         ))}
       </Box>
 
-      {/* Delete confirmation */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Delete Content</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete &quot;{deleteTarget ? getItemLabel(deleteTarget) : ""}&quot;?
-            {deleteTarget?.source === "drive" && " This will remove it from Google Drive."}
+      {/* Inline delete confirmation (FR-021) */}
+      {deleteTarget && (
+        <Card variant="outlined" sx={{ mt: 2, p: 2, borderColor: "error.main" }}>
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
+            Delete &quot;{getItemLabel(deleteTarget)}&quot;?
           </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={() => void handleDelete()}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            {deleteTarget.source === "drive"
+              ? "This will remove the file from Google Drive. This cannot be undone."
+              : "This cannot be undone."}
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={() => void handleDelete(deleteTarget)}
+            >
+              Delete
+            </Button>
+            <Button variant="outlined" size="small" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+          </Stack>
+        </Card>
+      )}
 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}

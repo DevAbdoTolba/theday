@@ -1,0 +1,72 @@
+import React, { useState } from "react";
+import { Box, Stack, Typography } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
+import ContentList from "./ContentList";
+import ContentUploader from "./ContentUploader";
+import LinkForm from "./LinkForm";
+import EasterEggForm from "./EasterEggForm";
+
+interface ContentPanelProps {
+  classId: string;
+  subject: string; // abbreviation
+  categoryName: string;
+  folderId: string;
+}
+
+export default function ContentPanel({
+  classId,
+  subject,
+  categoryName,
+  folderId,
+}: ContentPanelProps) {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const triggerRefresh = () => setRefreshTrigger((n) => n + 1);
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={folderId}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Box sx={{ pt: 2 }}>
+          {/* Content list */}
+          <ContentList
+            classId={classId}
+            category={categoryName}
+            subject={subject}
+            refreshTrigger={refreshTrigger}
+          />
+
+          {/* Add content section */}
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+              Add Content
+            </Typography>
+            <Stack spacing={3}>
+              <ContentUploader
+                folderId={folderId}
+                category={categoryName}
+                subject={subject}
+                onUploadComplete={triggerRefresh}
+              />
+              <LinkForm
+                classId={classId}
+                category={categoryName}
+                onSuccess={triggerRefresh}
+              />
+              <EasterEggForm
+                classId={classId}
+                category={categoryName}
+                onSuccess={triggerRefresh}
+              />
+            </Stack>
+          </Box>
+        </Box>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
