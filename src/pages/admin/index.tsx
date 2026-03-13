@@ -79,8 +79,12 @@ function AdminContent() {
   const [tipDismissed, setTipDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     const ts = localStorage.getItem("publish-tip-dismissed");
+    const count = Number(localStorage.getItem("publish-tip-count") || "0");
     if (!ts) return false;
-    return Date.now() - Number(ts) < 14 * 24 * 60 * 60 * 1000; // 2 weeks
+    // Progressive: 3d → 5d → 7d → 9d → 14d (then stays at 14d)
+    const schedule = [3, 5, 7, 9, 14];
+    const days = schedule[Math.min(count - 1, schedule.length - 1)] ?? 3;
+    return Date.now() - Number(ts) < days * 24 * 60 * 60 * 1000;
   });
 
   const scrollPositionRef = useRef(0);
@@ -135,7 +139,9 @@ function AdminContent() {
       showSnackbar("Failed to publish — try again", "error");
     } finally {
       setPublishing(false);
+      const count = Number(localStorage.getItem("publish-tip-count") || "0") + 1;
       localStorage.setItem("publish-tip-dismissed", String(Date.now()));
+      localStorage.setItem("publish-tip-count", String(count));
       setTipDismissed(true);
     }
   };
