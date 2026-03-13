@@ -97,17 +97,24 @@ function AdminContent() {
   const publishMsg =
     "changes go live automatically in ~2\u201310 min (づ￣ ³￣)づ only hit Publish if u literally can\u2019t wait lol ┗(^o^ )┓";
 
+  const typingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     if (!publishing) return;
+    // Clear any previous animation
+    if (typingRef.current) clearInterval(typingRef.current);
     setShowPublishMsg(true);
     setTypedText("");
     let i = 0;
-    const id = setInterval(() => {
+    typingRef.current = setInterval(() => {
       i += 1;
       setTypedText(publishMsg.slice(0, i));
-      if (i >= publishMsg.length) clearInterval(id);
+      if (i >= publishMsg.length) {
+        clearInterval(typingRef.current!);
+        typingRef.current = null;
+      }
     }, 30);
-    return () => clearInterval(id);
+    // No cleanup — let the animation finish even after publishing completes
   }, [publishing]);
 
   const revalidateSubject = useCallback(
@@ -537,7 +544,7 @@ function AdminContent() {
                       sx={{ fontFamily: "monospace", flex: 1 }}
                     >
                       {typedText}
-                      {publishing && (
+                      {typedText.length < publishMsg.length && (
                         <Box
                           component="span"
                           sx={{
