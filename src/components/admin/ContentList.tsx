@@ -14,7 +14,6 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import LinkIcon from "@mui/icons-material/Link";
-import EggIcon from "@mui/icons-material/Egg";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -149,7 +148,7 @@ export default function ContentList({
   const getItemLabel = (item: ContentEntry): string => {
     if (item.source === "drive") return item.name;
     if (item.type === "link") return item.title ?? "Link";
-    return item.name ?? "Easter Egg";
+    return item.name ?? "Content";
   };
 
   if (loading) {
@@ -208,8 +207,8 @@ export default function ContentList({
                 {item.source === "mongo" && item.type === "link" && (
                   <LinkIcon fontSize="small" color="secondary" sx={{ mt: 0.2 }} />
                 )}
-                {item.source === "mongo" && item.type === "easter_egg" && (
-                  <EggIcon fontSize="small" color="warning" sx={{ mt: 0.2 }} />
+                {item.source === "mongo" && item.type !== "link" && (
+                  <InsertDriveFileIcon fontSize="small" color="action" sx={{ mt: 0.2 }} />
                 )}
                 <Box minWidth={0}>
                   <Typography variant="body2" noWrap>
@@ -225,9 +224,9 @@ export default function ContentList({
                       {item.url}
                     </Typography>
                   )}
-                  {item.source === "mongo" && item.type === "easter_egg" && item.triggerDescription && (
+                  {item.source === "mongo" && item.type !== "link" && item.name && (
                     <Typography variant="caption" color="text.secondary">
-                      Trigger: {item.triggerDescription}
+                      {item.name}
                     </Typography>
                   )}
                 </Box>

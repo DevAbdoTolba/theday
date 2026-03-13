@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
+  Box,
   Button,
   FormControlLabel,
-  Paper,
   Stack,
   Switch,
   TextField,
@@ -133,16 +133,12 @@ export default function SubjectForm({
   );
 
   return (
-    <Paper
-      elevation={0}
-      sx={{ border: 1, borderColor: "divider", p: 2 }}
+    <Box
       component="form"
       onSubmit={(e: React.FormEvent) => void handleSubmit(e)}
+      sx={{ pt: 1 }}
     >
       <Stack spacing={2}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {mode === "create" ? "Create Subject" : "Edit Subject"}
-        </Typography>
 
         <TextField
           label="Subject Name"
@@ -224,6 +220,6 @@ export default function SubjectForm({
           </Button>
         </Stack>
       </Stack>
-    </Paper>
+    </Box>
   );
 }

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { AnimatePresence, motion } from "framer-motion";
 import ContentList from "./ContentList";
 import ContentUploader from "./ContentUploader";
 import LinkForm from "./LinkForm";
-import EasterEggForm from "./EasterEggForm";
 
 interface ContentPanelProps {
   classId: string;
@@ -23,6 +23,8 @@ export default function ContentPanel({
 
   const triggerRefresh = () => setRefreshTrigger((n) => n + 1);
 
+  const driveFolderUrl = `https://drive.google.com/drive/folders/${folderId}`;
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -33,6 +35,22 @@ export default function ContentPanel({
         transition={{ duration: 0.2 }}
       >
         <Box sx={{ pt: 2 }}>
+          {/* Drive folder link for manual management */}
+          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              size="small"
+              variant="text"
+              endIcon={<OpenInNewIcon fontSize="small" />}
+              href={driveFolderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${categoryName} folder in Google Drive`}
+              sx={{ textTransform: "none" }}
+            >
+              Open in Drive
+            </Button>
+          </Box>
+
           {/* Content list */}
           <ContentList
             classId={classId}
@@ -43,7 +61,11 @@ export default function ContentPanel({
 
           {/* Add content section */}
           <Box sx={{ mt: 3 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              sx={{ mb: 2 }}
+            >
               Add Content
             </Typography>
             <Stack spacing={3}>
@@ -54,11 +76,6 @@ export default function ContentPanel({
                 onUploadComplete={triggerRefresh}
               />
               <LinkForm
-                classId={classId}
-                category={categoryName}
-                onSuccess={triggerRefresh}
-              />
-              <EasterEggForm
                 classId={classId}
                 category={categoryName}
                 onSuccess={triggerRefresh}

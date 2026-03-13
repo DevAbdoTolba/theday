@@ -32,6 +32,7 @@ export default function ContentUploader({
   const { getIdToken } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
+  const [processing, setProcessing] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -55,7 +56,7 @@ export default function ContentUploader({
     }
 
     try {
-      // Check for duplicates before uploading (T033)
+      // Check for duplicates before uploading
       if (!replaceFileId) {
         const token = await getIdToken();
         const checkRes = await fetch(
@@ -77,7 +78,7 @@ export default function ContentUploader({
         }
       }
 
-      // If replacing, delete old file first (T030)
+      // If replacing, delete old file first
       if (replaceFileId) {
         const delToken = await getIdToken();
         await fetch("/api/admin/drive-file", {
@@ -90,52 +91,24 @@ export default function ContentUploader({
         });
       }
 
-      // Get upload session
+      // Upload through our proxy endpoint (avoids CORS with Google Drive)
       const token = await getIdToken();
-      const sessionRes = await fetch("/api/admin/upload-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          mimeType: file.type || "application/octet-stream",
-          folderId,
-        }),
+      const params = new URLSearchParams({
+        fileName: file.name,
+        folderId,
+        mimeType: file.type || "application/octet-stream",
       });
 
-      if (!sessionRes.ok) {
-        const data = (await sessionRes.json()) as { error: string };
-        // Revoked admin handling (T032)
-        if (sessionRes.status === 403) {
-          setSnackbar({
-            open: true,
-            message: "Access revoked. Redirecting...",
-            severity: "error",
-          });
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2000);
-          return;
-        }
-        setSnackbar({
-          open: true,
-          message: data.error ?? "Failed to start upload",
-          severity: "error",
-        });
-        return;
-      }
-
-      const { sessionUri } = (await sessionRes.json()) as { sessionUri: string };
-
-      // Upload directly to Drive via XHR for progress tracking
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
-            setProgress(Math.round((e.loaded / e.total) * 100));
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setProgress(pct);
+            if (pct >= 100) {
+              setProcessing(true);
+            }
           }
         };
 
@@ -143,18 +116,30 @@ export default function ContentUploader({
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
+            let msg = `Upload failed (${xhr.status})`;
+            try {
+              const body = JSON.parse(xhr.responseText) as { error?: string };
+              if (body.error) msg = body.error;
+            } catch {
+              // ignore parse error
+            }
+            reject(new Error(msg));
           }
         };
 
-        xhr.onerror = () => reject(new Error("Upload network error"));
+        xhr.onerror = () => reject(new Error("Network error during upload"));
 
-        xhr.open("PUT", sessionUri);
-        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.open("POST", `/api/admin/upload?${params.toString()}`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        xhr.setRequestHeader(
+          "Content-Type",
+          file.type || "application/octet-stream"
+        );
         xhr.send(file);
       });
 
       setProgress(null);
+      setProcessing(false);
       setSnackbar({
         open: true,
         message: `${file.name} uploaded successfully`,
@@ -163,18 +148,22 @@ export default function ContentUploader({
       onUploadComplete();
     } catch (err) {
       setProgress(null);
+      setProcessing(false);
       setSnackbar({
         open: true,
         message: err instanceof Error ? err.message : "Upload failed",
         severity: "error",
       });
+      // Always refresh content list — the file may have been uploaded
+      // despite a late error (timeout, etc.)
+      onUploadComplete();
     }
   };
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     void uploadFile(files[0]);
-    // Reset input so re-selecting the same file triggers onChange (I-7)
+    // Reset input so re-selecting the same file triggers onChange
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -210,7 +199,9 @@ export default function ContentUploader({
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
       >
-        <UploadFileIcon sx={{ fontSize: 40, color: "text.secondary", mb: 1 }} />
+        <UploadFileIcon
+          sx={{ fontSize: 40, color: "text.secondary", mb: 1 }}
+        />
         <Typography variant="body2" color="text.secondary">
           Drag & drop a file here, or click to select
         </Typography>
@@ -228,8 +219,13 @@ export default function ContentUploader({
 
       {progress !== null && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="caption">{progress}%</Typography>
-          <LinearProgress variant="determinate" value={progress} />
+          <Typography variant="caption">
+            {processing ? "Processing..." : `${progress}%`}
+          </Typography>
+          <LinearProgress
+            variant={processing ? "indeterminate" : "determinate"}
+            value={processing ? undefined : progress}
+          />
         </Box>
       )}
 
@@ -247,8 +243,8 @@ export default function ContentUploader({
         <DialogTitle>Duplicate File</DialogTitle>
         <DialogContent>
           <Typography>
-            A file named &quot;{pendingFile?.name}&quot; already exists in this category. Do you
-            want to replace it?
+            A file named &quot;{pendingFile?.name}&quot; already exists in this
+            category. Do you want to replace it?
           </Typography>
         </DialogContent>
         <DialogActions>

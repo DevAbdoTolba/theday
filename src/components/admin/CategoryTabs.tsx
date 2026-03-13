@@ -40,7 +40,6 @@ export default function CategoryTabs({
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const addInputRef = useRef<HTMLInputElement>(null);
-  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddConfirm = async () => {
     const trimmed = newCategoryName.trim();
@@ -99,7 +98,9 @@ export default function CategoryTabs({
     }
   };
 
-  const activeIndex = categories.findIndex((c) => c.folderId === activeCategory);
+  const activeIndex = categories.findIndex(
+    (c) => c.folderId === activeCategory
+  );
   const tabValue = activeIndex >= 0 ? activeIndex : false;
 
   return (
@@ -118,87 +119,79 @@ export default function CategoryTabs({
           aria-label="Category tabs"
           sx={{ flex: 1, minHeight: 48 }}
         >
-          <AnimatePresence initial={false}>
-            {categories.map((cat) => (
-              <Tab
-                key={cat.folderId}
-                component={motion.div}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 12 }}
-                transition={{ duration: 0.2 }}
-                label={
-                  editingTab === cat.folderId ? (
-                    <TextField
-                      inputRef={renameInputRef}
-                      size="small"
-                      variant="standard"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      onKeyDown={handleRenameKeyDown}
-                      onBlur={() => void handleRenameConfirm()}
-                      autoFocus
-                      sx={{ minWidth: 80 }}
-                      slotProps={{
-                        input: {
-                          sx: { fontSize: "0.875rem" },
-                        },
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        "&:hover .category-delete-btn": {
-                          opacity: 1,
-                        },
-                      }}
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        startRename(cat.folderId, cat.name);
-                      }}
+          {categories.map((cat) => (
+            <Tab
+              key={cat.folderId}
+              label={
+                editingTab === cat.folderId ? (
+                  <TextField
+                    size="small"
+                    variant="standard"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={handleRenameKeyDown}
+                    onBlur={() => void handleRenameConfirm()}
+                    autoFocus
+                    sx={{ minWidth: 80 }}
+                    slotProps={{
+                      input: {
+                        sx: { fontSize: "0.875rem" },
+                      },
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      "&:hover .category-delete-btn": {
+                        opacity: 1,
+                      },
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      startRename(cat.folderId, cat.name);
+                    }}
+                  >
+                    {cat.name}
+                    <Tooltip
+                      title={
+                        confirmDeleteId === cat.folderId
+                          ? "Click again to delete"
+                          : "Delete category"
+                      }
                     >
-                      {cat.name}
-                      <Tooltip
-                        title={
-                          confirmDeleteId === cat.folderId
-                            ? "Click again to delete"
-                            : "Delete category"
-                        }
+                      <IconButton
+                        className="category-delete-btn"
+                        size="small"
+                        aria-label={`Delete category ${cat.name}`}
+                        onClick={(e) => handleDeleteClick(e, cat.folderId)}
+                        onMouseLeave={() => setConfirmDeleteId(null)}
+                        sx={{
+                          opacity: 0,
+                          transition: "opacity 0.15s",
+                          p: 0.25,
+                          color:
+                            confirmDeleteId === cat.folderId
+                              ? "error.main"
+                              : "action.active",
+                        }}
                       >
-                        <IconButton
-                          className="category-delete-btn"
-                          size="small"
-                          aria-label={`Delete category ${cat.name}`}
-                          onClick={(e) => handleDeleteClick(e, cat.folderId)}
-                          onMouseLeave={() => setConfirmDeleteId(null)}
-                          sx={{
-                            opacity: 0,
-                            transition: "opacity 0.15s",
-                            p: 0.25,
-                            color:
-                              confirmDeleteId === cat.folderId
-                                ? "error.main"
-                                : "action.active",
-                          }}
-                        >
-                          <CloseOutlinedIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  )
-                }
-                sx={{
-                  textTransform: "none",
-                  minHeight: 48,
-                  px: 2,
-                }}
-              />
-            ))}
-          </AnimatePresence>
+                        <CloseOutlinedIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                )
+              }
+              sx={{
+                textTransform: "none",
+                minHeight: 48,
+                px: 2,
+              }}
+            />
+          ))}
         </Tabs>
 
         <Tooltip title="Add category">
