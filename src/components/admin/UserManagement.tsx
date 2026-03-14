@@ -18,8 +18,7 @@ import {
   FormControl,
 } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
-
-const SUPER_ADMIN_EMAIL = "mtolba2004@gmail.com";
+import { SUPER_ADMIN_EMAIL } from "../../lib/constants";
 
 interface UserRow {
   _id: string;

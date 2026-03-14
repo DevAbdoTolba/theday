@@ -2,8 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { requireSuperAdmin, sendError } from "../../../lib/auth-middleware";
 import UserModel from "../../../lib/models/user";
 import { adminAuth } from "../../../lib/firebase-admin";
-
-const SUPER_ADMIN_EMAIL = "mtolba2004@gmail.com";
+import { SUPER_ADMIN_EMAIL } from "../../../lib/constants";
 
 export default async function handler(
   req: NextApiRequest,

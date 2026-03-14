@@ -3,8 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { adminAuth } from "./firebase-admin";
 import UserModel, { IUser } from "./models/user";
-
-const SUPER_ADMIN_EMAIL = "mtolba2004@gmail.com";
+import { SUPER_ADMIN_EMAIL } from "./constants";
 
 export function sendError(
   res: NextApiResponse,
