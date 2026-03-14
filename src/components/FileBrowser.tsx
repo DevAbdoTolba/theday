@@ -35,6 +35,9 @@ interface Props {
   subjectName: string;
   newItems?: string[];
   fetching?: boolean;
+  aiModeActive?: boolean;
+  onAiSelect?: (file: ParsedFile, category: string) => void;
+  isItemSelected?: (id: string) => boolean;
 }
 
 export default function FileBrowser({
@@ -42,6 +45,9 @@ export default function FileBrowser({
   subjectName,
   newItems = [],
   fetching = false,
+  aiModeActive = false,
+  onAiSelect,
+  isItemSelected,
 }: Props) {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
@@ -59,26 +65,32 @@ export default function FileBrowser({
   // Categories
   const categories = useMemo(() => ["All", ...Object.keys(data)], [data]);
 
-  // Flatten and Filter
+  // Flatten and Filter — also track category per file for AI cart
   const filteredFiles = useMemo(() => {
     const currentCategory = categories[activeTab];
-    let files =
-      currentCategory === "All"
-        ? Object.values(data).flat()
-        : data[currentCategory] || [];
-    const parsed = files.map(parseGoogleFile);
+    let files: { file: ParsedFile; category: string }[];
+    if (currentCategory === "All") {
+      files = Object.entries(data).flatMap(([cat, driveFiles]) =>
+        driveFiles.map(parseGoogleFile).map((f) => ({ file: f, category: cat }))
+      );
+    } else {
+      files = (data[currentCategory] || [])
+        .map(parseGoogleFile)
+        .map((f) => ({ file: f, category: currentCategory }));
+    }
 
     // Apply text filter
-    let filtered = parsed;
+    let filtered = files;
     if (filter) {
-      filtered = filtered.filter((f) =>
-        f.name.toLowerCase().includes(filter.toLowerCase())
+      const lf = filter.toLowerCase();
+      filtered = filtered.filter((entry) =>
+        entry.file.name.toLowerCase().includes(lf)
       );
     }
 
     // Apply "new items only" filter
     if (showOnlyNew) {
-      filtered = filtered.filter((f) => newItems.includes(f.id));
+      filtered = filtered.filter((entry) => newItems.includes(entry.file.id));
     }
 
     return filtered;
@@ -295,28 +307,34 @@ export default function FileBrowser({
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
               <Grid container spacing={2}>
-                {filteredFiles.map((file, index) => (
-                  <Grid item xs={6} sm={6} md={4} lg={3} key={file.id}>
+                {filteredFiles.map((entry, index) => (
+                  <Grid item xs={6} sm={6} md={4} lg={3} key={entry.file.id}>
                     <FileCard
-                      file={file}
-                      onClick={() => handleFileClick(file)}
-                      isNew={newItems.includes(file.id)}
+                      file={entry.file}
+                      onClick={() => handleFileClick(entry.file)}
+                      isNew={newItems.includes(entry.file.id)}
                       peekMode={peekMode}
                       mobileExpandedId={mobileExpandedCardId}
                       onMobileExpand={setMobileExpandedCardId}
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
+                      aiModeActive={aiModeActive}
+                      isSelected={isItemSelected?.(entry.file.id) ?? false}
+                      onAiSelect={onAiSelect ? (f) => onAiSelect(f, entry.category) : undefined}
                     />
                   </Grid>
                 ))}
               </Grid>
             ) : (
               <Box>
-                {filteredFiles.map((file) => (
+                {filteredFiles.map((entry) => (
                   <FileListItem
-                    key={file.id}
-                    file={file}
-                    onClick={() => handleFileClick(file)}
-                    isNew={newItems.includes(file.id)}
+                    key={entry.file.id}
+                    file={entry.file}
+                    onClick={() => handleFileClick(entry.file)}
+                    isNew={newItems.includes(entry.file.id)}
+                    aiModeActive={aiModeActive}
+                    isSelected={isItemSelected?.(entry.file.id) ?? false}
+                    onAiSelect={onAiSelect ? (f) => onAiSelect(f, entry.category) : undefined}
                   />
                 ))}
               </Box>
