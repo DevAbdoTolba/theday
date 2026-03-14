@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { requireSuperAdmin, sendError } from "../../../lib/auth-middleware";
 import ClassModel from "../../../lib/models/class";
 import ContentItemModel from "../../../lib/models/content-item";
+import SubjectChangeRequestModel from "../../../lib/models/subject-change-request";
 
 export default async function handler(
   req: NextApiRequest,
@@ -61,6 +62,11 @@ export default async function handler(
       if (contentCount > 0) {
         return sendError(res, 400, "Class has content — delete content first");
       }
+
+      // Clean up pending subject change requests for this class
+      await SubjectChangeRequestModel.deleteMany({
+        classId: new mongoose.Types.ObjectId(_id),
+      });
 
       await ClassModel.findByIdAndDelete(_id);
       return res.status(200).json({ success: true });

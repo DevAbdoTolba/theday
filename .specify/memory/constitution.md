@@ -83,7 +83,7 @@ The following technologies form the approved stack. Introducing any library outs
 this list requires a documented rationale in the relevant spec or plan document:
 
 - **Framework**: Next.js 15 (follow existing router conventions — do not mix)
-- **UI Library**: React 19 + MUI v5 (Material UI)
+- **UI Library**: React 19 + MUI v6 (Material UI)
 - **Animations**: Framer Motion (reuse existing motion patterns; no new animation libs)
 - **Language**: TypeScript (strict mode enforced)
 - **Database**: MongoDB (transcript and class-group features only)
@@ -121,4 +121,4 @@ repository. Amendments MUST follow this procedure:
 
 All PRs and code reviews MUST verify compliance with the five Core Principles above.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-03-12
+**Version**: 1.0.1 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-03-13

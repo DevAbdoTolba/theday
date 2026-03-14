@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 interface ISubject {
   name: string;
   abbreviation: string;
+  shared?: boolean;
 }
 
 interface IDataEntry {
@@ -26,6 +27,7 @@ const classSchema = new mongoose.Schema<IClass>({
         {
           name: String,
           abbreviation: String,
+          shared: { type: Boolean, default: false },
         },
       ],
     },

@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { requireAdmin, sendError } from "../../../lib/auth-middleware";
-import ContentItemModel from "../../../lib/models/content-item";
+import ClassModel, { IClass } from "../../../lib/models/class";
+import ContentItemModel, { IContentItem } from "../../../lib/models/content-item";
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,19 +11,57 @@ export default async function handler(
   try {
     if (req.method === "GET") {
       const { user } = await requireAdmin(req);
-      const { classId, category } = req.query as {
+      const { classId, category, shared, subjectName } = req.query as {
         classId: string;
         category: string;
+        shared?: string;
+        subjectName?: string;
       };
 
       if (!classId || !category) {
         return sendError(res, 400, "Missing required query params: classId, category");
       }
 
+      const localObjectId = new mongoose.Types.ObjectId(classId);
+
       const items = await ContentItemModel.find({
-        classId: new mongoose.Types.ObjectId(classId),
+        classId: localObjectId,
         category,
       }).sort({ createdAt: -1 });
+
+      if (shared === "true" && subjectName) {
+        // Find other classes that have a subject with the same name and shared: true
+        const otherClasses = await ClassModel.find({
+          _id: { $ne: localObjectId },
+          "data.subjects": {
+            $elemMatch: { name: subjectName, shared: true },
+          },
+        }).lean<IClass[]>();
+
+        if (otherClasses.length > 0) {
+          const otherClassIds = otherClasses.map((c) => c._id);
+
+          const sharedItems = await ContentItemModel.find({
+            classId: { $in: otherClassIds },
+            category,
+          })
+            .sort({ createdAt: -1 })
+            .lean<IContentItem[]>();
+
+          // Build a classId -> class name lookup
+          const classNameMap = new Map<string, string>(
+            otherClasses.map((c) => [c._id.toString(), c.class])
+          );
+
+          const sharedWithSource = sharedItems.map((item) => ({
+            ...item,
+            sharedFrom: classNameMap.get(item.classId.toString()) ?? "Unknown",
+          }));
+
+          void user;
+          return res.status(200).json({ items: [...items, ...sharedWithSource] });
+        }
+      }
 
       void user;
       return res.status(200).json({ items });
