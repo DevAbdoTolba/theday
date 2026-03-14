@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { 
   Dialog, DialogTitle, DialogContent, DialogContentText, 
   DialogActions, Button, TextField, CircularProgress, 
-  Alert, Box, Typography, useTheme, IconButton
+  Alert, Box, Typography, useTheme, IconButton, Tooltip
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { DataContext } from '../context/TranscriptContext';
@@ -13,6 +13,8 @@ const VpnKey = dynamic(() => import('@mui/icons-material/VpnKey'), { ssr: false 
 const Check = dynamic(() => import('@mui/icons-material/Check'), { ssr: false });
 const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false });
 const Translate = dynamic(() => import('@mui/icons-material/Translate'), { ssr: false });
+const Shield = dynamic(() => import('@mui/icons-material/AdminPanelSettings'), { ssr: false });
+import { useAuth } from '../hooks/useAuth';
 
 interface Props {
   open: boolean;
@@ -50,6 +52,7 @@ export default function ModernKeyDialog({ open, onClose }: Props) {
   const theme = useTheme();
   const router = useRouter();
   const { setClassName } = useContext(DataContext);
+  const { user, signInWithGoogle } = useAuth();
   
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
@@ -142,8 +145,29 @@ export default function ModernKeyDialog({ open, onClose }: Props) {
     >
       {/* Header */}
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <VpnKey color="primary" />
+        <Box 
+          display="flex" 
+          alignItems="center" 
+          gap={1}
+          sx={{ 
+            cursor: 'pointer',
+            '&:hover .shield-icon': { display: 'inline-flex' },
+            '&:hover .key-icon': { display: 'none' }
+          }}
+          onClick={() => {
+            if (user?.isAdmin) {
+              router.push("/admin");
+            } else if (!user) {
+              void signInWithGoogle();
+            }
+          }}
+        >
+          <Tooltip title={user?.isAdmin ? "Admin Dashboard" : (user ? "Access Key" : "Admin Login")}>
+            <Box display="flex" alignItems="center">
+              <VpnKey color="primary" className="key-icon" />
+              <Shield color="success" className="shield-icon" sx={{ display: 'none' }} />
+            </Box>
+          </Tooltip>
           <Typography fontWeight={700}>
             {foundClass 
               ? (isExisting ? t.existsTitle : t.confirmTitle)
