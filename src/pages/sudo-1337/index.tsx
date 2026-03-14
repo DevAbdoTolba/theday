@@ -22,8 +22,7 @@ import ApprovalList from "../../components/admin/ApprovalList";
 import ClassGrid from "../../components/admin/ClassGrid";
 import { useAuth } from "../../hooks/useAuth";
 import { useApprovals } from "../../hooks/useApprovals";
-
-const SUPER_ADMIN_EMAIL = "mtolba2004@gmail.com";
+import { SUPER_ADMIN_EMAIL } from "../../lib/constants";
 
 interface ClassData {
   _id: string;

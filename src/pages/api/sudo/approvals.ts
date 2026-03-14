@@ -176,9 +176,13 @@ export default async function handler(
         }
         await classDoc.save();
 
-        // Delete associated content items
+        // Delete associated content items for this subject only
+        const deletedAbbr =
+          changeRequest.originalSubjectAbbreviation ??
+          changeRequest.subjectAbbreviation;
         await ContentItemModel.deleteMany({
           classId: changeRequest.classId,
+          category: deletedAbbr,
         });
       }
 

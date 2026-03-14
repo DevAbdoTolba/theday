@@ -125,11 +125,17 @@ export default async function handler(
     }
 
     if (req.method === "DELETE") {
-      await requireAdmin(req);
+      const { user } = await requireAdmin(req);
       const { _id } = req.body as { _id: string };
       if (!_id) return sendError(res, 400, "Missing required field: _id");
 
-      await ContentItemModel.findByIdAndDelete(_id);
+      const item = await ContentItemModel.findById(_id);
+      if (!item) return sendError(res, 404, "Content item not found");
+      if (item.classId.toString() !== user.assignedClassId?.toString()) {
+        return sendError(res, 403, "Cannot delete content from another class");
+      }
+
+      await item.deleteOne();
       return res.status(200).json({ success: true });
     }
 

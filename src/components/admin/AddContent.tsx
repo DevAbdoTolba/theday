@@ -100,7 +100,7 @@ export default function AddContent({
 
       if (replaceFileId) {
         const delToken = await getIdToken();
-        await fetch("/api/admin/drive-file", {
+        const delRes = await fetch("/api/admin/drive-file", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -108,6 +108,9 @@ export default function AddContent({
           },
           body: JSON.stringify({ fileId: replaceFileId }),
         });
+        if (!delRes.ok) {
+          throw new Error("Failed to delete existing file before replacement");
+        }
       }
 
       const token = await getIdToken();
