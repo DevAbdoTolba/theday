@@ -3,8 +3,7 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,6 +18,14 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import LinkIcon from "@mui/icons-material/Link";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import VideoFileIcon from "@mui/icons-material/VideoFile";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
+import DescriptionIcon from "@mui/icons-material/Description";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useAuth } from "../../hooks/useAuth";
@@ -28,6 +35,7 @@ import {
   cacheSet,
   cacheInvalidate,
 } from "../../lib/session-cache";
+import { parseGoogleFile, getYoutubeId } from "../../utils/helpers";
 
 interface DriveFile {
   id: string;
@@ -59,31 +67,146 @@ interface ContentListProps {
   onContentDeleted?: () => void;
 }
 
+// ── Helpers ──────────────────────────────────────────────────
+
+function formatFileSize(sizeStr: string | undefined): string | null {
+  if (!sizeStr) return null;
+  const bytes = parseInt(sizeStr, 10);
+  if (isNaN(bytes)) return null;
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function getDomain(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+type FileType = "pdf" | "image" | "video" | "youtube" | "slide" | "doc" | "sheet" | "link" | "unknown";
+
+function detectFileType(item: ContentEntry): FileType {
+  if (item.source === "mongo") {
+    if (item.type === "link" && item.url) {
+      const ytId = getYoutubeId(item.url);
+      if (ytId) return "youtube";
+      return "link";
+    }
+    return "unknown";
+  }
+
+  // Drive file — use parseGoogleFile for accurate detection
+  const parsed = parseGoogleFile({
+    id: item.id,
+    name: item.name,
+    mimeType: item.mimeType ?? "application/octet-stream",
+    parents: [],
+  });
+  if (parsed.type === "youtube") return "youtube";
+  if (parsed.type === "pdf") return "pdf";
+  if (parsed.type === "image") return "image";
+  if (parsed.type === "video") return "video";
+  if (parsed.type === "slide") return "slide";
+  if (parsed.type === "doc") return "doc";
+  if (parsed.type === "sheet") return "sheet";
+  return "unknown";
+}
+
+function getFileTypeIcon(type: FileType) {
+  const sx = { fontSize: 20 };
+  switch (type) {
+    case "pdf":      return <PictureAsPdfIcon sx={sx} color="error" />;
+    case "image":    return <ImageIcon sx={sx} color="success" />;
+    case "video":    return <VideoFileIcon sx={sx} color="warning" />;
+    case "youtube":  return <PlayCircleOutlineIcon sx={{ ...sx, color: "#FF0000" }} />;
+    case "slide":    return <SlideshowIcon sx={sx} color="warning" />;
+    case "doc":      return <DescriptionIcon sx={sx} color="primary" />;
+    case "sheet":    return <TableChartIcon sx={sx} color="success" />;
+    case "link":     return <LinkIcon sx={sx} color="secondary" />;
+    default:         return <InsertDriveFileIcon sx={sx} color="action" />;
+  }
+}
+
+function getFileTypeLabel(type: FileType): { label: string; color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } {
+  switch (type) {
+    case "pdf":      return { label: "PDF", color: "error" };
+    case "image":    return { label: "Image", color: "success" };
+    case "video":    return { label: "Video", color: "warning" };
+    case "youtube":  return { label: "YouTube", color: "error" };
+    case "slide":    return { label: "Slides", color: "warning" };
+    case "doc":      return { label: "Doc", color: "primary" };
+    case "sheet":    return { label: "Sheet", color: "success" };
+    case "link":     return { label: "Link", color: "secondary" };
+    default:         return { label: "File", color: "default" };
+  }
+}
+
+function getItemUrl(item: ContentEntry, fileType: FileType): string | null {
+  if (item.source === "mongo" && item.url) return item.url;
+  if (item.source === "drive") {
+    const parsed = parseGoogleFile({
+      id: item.id,
+      name: item.name,
+      mimeType: item.mimeType ?? "application/octet-stream",
+      parents: [],
+    });
+    return parsed.url;
+  }
+  return null;
+}
+
+function getDisplayName(item: ContentEntry, fileType: FileType): string {
+  if (item.source === "mongo") {
+    if (item.type === "link") return item.title ?? "Link";
+    return item.name ?? "Content";
+  }
+
+  // Drive file — use parseGoogleFile for clean display name
+  const parsed = parseGoogleFile({
+    id: item.id,
+    name: item.name,
+    mimeType: item.mimeType ?? "application/octet-stream",
+    parents: [],
+  });
+  return parsed.name;
+}
+
+// ── Skeleton ─────────────────────────────────────────────────
+
 function ContentSkeleton() {
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       {[1, 2, 3].map((i) => (
-        <Card key={i} variant="outlined">
-          <CardContent
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              py: 1,
-              "&:last-child": { pb: 1 },
-            }}
-          >
-            <Skeleton variant="circular" width={24} height={24} />
-            <Box flex={1}>
-              <Skeleton variant="text" width="60%" height={20} />
-              <Skeleton variant="text" width="30%" height={14} />
-            </Box>
-          </CardContent>
-        </Card>
+        <Box
+          key={i}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            p: 1.5,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+          }}
+        >
+          <Skeleton variant="circular" width={28} height={28} />
+          <Box flex={1}>
+            <Skeleton variant="text" width="60%" height={20} />
+            <Skeleton variant="text" width="30%" height={14} />
+          </Box>
+          <Skeleton variant="rounded" width={48} height={22} />
+        </Box>
       ))}
     </Box>
   );
 }
+
+// ── Main component ───────────────────────────────────────────
 
 export default function ContentList({
   classId,
@@ -235,12 +358,6 @@ export default function ContentList({
     }
   };
 
-  const getItemLabel = (item: ContentEntry): string => {
-    if (item.source === "drive") return item.name;
-    if (item.type === "link") return item.title ?? "Link";
-    return item.name ?? "Content";
-  };
-
   if (loading) {
     return (
       <Box>
@@ -340,82 +457,104 @@ export default function ContentList({
         </Tooltip>
       </Box>
       <Box display="flex" flexDirection="column" gap={1}>
-        {items.map((item, idx) => (
-          <Card
-            key={item.source === "drive" ? item.id : item._id ?? idx}
-            variant="outlined"
-          >
-            <CardContent
+        {items.map((item, idx) => {
+          const fileType = detectFileType(item);
+          const typeLabel = getFileTypeLabel(fileType);
+          const url = getItemUrl(item, fileType);
+          const displayName = getDisplayName(item, fileType);
+
+          return (
+            <Box
+              key={item.source === "drive" ? item.id : item._id ?? idx}
               sx={{
                 display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "space-between",
-                py: 1,
-                "&:last-child": { pb: 1 },
+                alignItems: "center",
+                gap: 1.5,
+                p: 1.5,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+                transition: "background-color 0.15s, border-color 0.15s",
+                "&:hover": {
+                  bgcolor: "action.hover",
+                  borderColor: "primary.light",
+                },
               }}
             >
-              <Box
-                display="flex"
-                alignItems="flex-start"
-                gap={1}
-                flex={1}
-                minWidth={0}
-              >
-                {item.source === "drive" && (
-                  <InsertDriveFileIcon
-                    fontSize="small"
-                    color="primary"
-                    sx={{ mt: 0.2 }}
-                  />
-                )}
-                {item.source === "mongo" && item.type === "link" && (
-                  <LinkIcon
-                    fontSize="small"
-                    color="secondary"
-                    sx={{ mt: 0.2 }}
-                  />
-                )}
-                {item.source === "mongo" && item.type !== "link" && (
-                  <InsertDriveFileIcon
-                    fontSize="small"
-                    color="action"
-                    sx={{ mt: 0.2 }}
-                  />
-                )}
-                <Box minWidth={0}>
-                  <Typography variant="body2" noWrap>
-                    {getItemLabel(item)}
-                  </Typography>
+              {/* Type icon */}
+              <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                {getFileTypeIcon(fileType)}
+              </Box>
+
+              {/* Name + meta */}
+              <Box flex={1} minWidth={0}>
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  noWrap
+                  title={displayName}
+                >
+                  {displayName}
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
                   {item.source === "drive" && item.size && (
                     <Typography variant="caption" color="text.secondary">
-                      {(parseInt(item.size) / 1024).toFixed(1)} KB
+                      {formatFileSize(item.size)}
                     </Typography>
                   )}
-                  {item.source === "mongo" &&
-                    item.type === "link" &&
-                    item.url && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        noWrap
-                        display="block"
-                      >
-                        {item.url}
-                      </Typography>
-                    )}
+                  {item.source === "mongo" && item.type === "link" && item.url && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      noWrap
+                      title={item.url}
+                    >
+                      {getDomain(item.url)}
+                    </Typography>
+                  )}
                 </Box>
               </Box>
-              <IconButton
+
+              {/* Type chip */}
+              <Chip
+                label={typeLabel.label}
+                color={typeLabel.color}
                 size="small"
-                color="error"
-                aria-label={`Delete ${getItemLabel(item)}`}
-                onClick={() => setDeleteTarget(item)}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </CardContent>
-          </Card>
-        ))}
+                variant="outlined"
+                sx={{ fontWeight: 500, fontSize: "0.7rem", height: 22, flexShrink: 0 }}
+              />
+
+              {/* Open button */}
+              {url && (
+                <Tooltip title="Open">
+                  <IconButton
+                    size="small"
+                    component="a"
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${displayName}`}
+                    sx={{ color: "primary.main" }}
+                  >
+                    <OpenInNewIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* Delete button */}
+              <Tooltip title="Delete">
+                <IconButton
+                  size="small"
+                  color="error"
+                  aria-label={`Delete ${displayName}`}
+                  onClick={() => setDeleteTarget(item)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          );
+        })}
       </Box>
 
       {/* Delete confirmation dialog */}
@@ -428,7 +567,7 @@ export default function ContentList({
         <DialogTitle>Delete content</DialogTitle>
         <DialogContent>
           <Typography>
-            Delete &quot;{deleteTarget ? getItemLabel(deleteTarget) : ""}&quot;?
+            Delete &quot;{deleteTarget ? getDisplayName(deleteTarget, detectFileType(deleteTarget)) : ""}&quot;?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {deleteTarget?.source === "drive"
