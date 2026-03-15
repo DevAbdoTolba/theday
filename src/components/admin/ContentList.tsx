@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -8,10 +8,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   IconButton,
   LinearProgress,
   Skeleton,
   Snackbar,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -28,6 +31,8 @@ import TableChartIcon from "@mui/icons-material/TableChart";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useAuth } from "../../hooks/useAuth";
 import { useSlowFeedback } from "../../hooks/useSlowFeedback";
 import {
@@ -36,6 +41,10 @@ import {
   cacheInvalidate,
 } from "../../lib/session-cache";
 import { parseGoogleFile, getYoutubeId } from "../../utils/helpers";
+import { ParsedFile } from "../../utils/types";
+import { FileCard } from "../FileCard";
+import { FileListItem } from "../FileListItem";
+import YoutubePlayer from "../YoutubePlayer";
 
 interface DriveFile {
   id: string;
@@ -79,34 +88,39 @@ function formatFileSize(sizeStr: string | undefined): string | null {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
-function getDomain(url: string): string {
-  try {
-    const u = new URL(url);
-    return u.hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
+/** Trim https:// and www., truncate long URLs with ellipsis */
+function trimUrl(url: string, maxLen = 40): string {
+  const clean = url.replace(/^https?:\/\//, "").replace(/^www\./, "");
+  if (clean.length <= maxLen) return clean;
+  return clean.slice(0, maxLen) + "...";
 }
 
 type FileType = "pdf" | "image" | "video" | "youtube" | "slide" | "doc" | "sheet" | "link" | "unknown";
 
+/** Parse a ContentEntry into its display metadata via parseGoogleFile */
+function parseItem(item: ContentEntry) {
+  if (item.source === "drive") {
+    const parsed = parseGoogleFile({
+      id: item.id,
+      name: item.name,
+      mimeType: item.mimeType ?? "application/octet-stream",
+      parents: [],
+    });
+    return parsed;
+  }
+  return null;
+}
+
 function detectFileType(item: ContentEntry): FileType {
   if (item.source === "mongo") {
     if (item.type === "link" && item.url) {
-      const ytId = getYoutubeId(item.url);
-      if (ytId) return "youtube";
+      if (getYoutubeId(item.url)) return "youtube";
       return "link";
     }
     return "unknown";
   }
-
-  // Drive file — use parseGoogleFile for accurate detection
-  const parsed = parseGoogleFile({
-    id: item.id,
-    name: item.name,
-    mimeType: item.mimeType ?? "application/octet-stream",
-    parents: [],
-  });
+  const parsed = parseItem(item);
+  if (!parsed) return "unknown";
   if (parsed.type === "youtube") return "youtube";
   if (parsed.type === "pdf") return "pdf";
   if (parsed.type === "image") return "image";
@@ -114,6 +128,7 @@ function detectFileType(item: ContentEntry): FileType {
   if (parsed.type === "slide") return "slide";
   if (parsed.type === "doc") return "doc";
   if (parsed.type === "sheet") return "sheet";
+  if (parsed.isExternalLink) return "link";
   return "unknown";
 }
 
@@ -146,34 +161,34 @@ function getFileTypeLabel(type: FileType): { label: string; color: "default" | "
   }
 }
 
-function getItemUrl(item: ContentEntry, fileType: FileType): string | null {
+function getItemUrl(item: ContentEntry): string | null {
   if (item.source === "mongo" && item.url) return item.url;
   if (item.source === "drive") {
-    const parsed = parseGoogleFile({
-      id: item.id,
-      name: item.name,
-      mimeType: item.mimeType ?? "application/octet-stream",
-      parents: [],
-    });
-    return parsed.url;
+    const parsed = parseItem(item);
+    return parsed?.url ?? null;
   }
   return null;
 }
 
-function getDisplayName(item: ContentEntry, fileType: FileType): string {
+function getDisplayName(item: ContentEntry): string {
   if (item.source === "mongo") {
     if (item.type === "link") return item.title ?? "Link";
     return item.name ?? "Content";
   }
+  const parsed = parseItem(item);
+  return parsed?.name ?? item.name;
+}
 
-  // Drive file — use parseGoogleFile for clean display name
-  const parsed = parseGoogleFile({
-    id: item.id,
-    name: item.name,
-    mimeType: item.mimeType ?? "application/octet-stream",
-    parents: [],
-  });
-  return parsed.name;
+/** Get the raw URL to show beneath the display name (for link-type items) */
+function getSubtitleUrl(item: ContentEntry): string | null {
+  if (item.source === "mongo" && item.type === "link" && item.url) {
+    return item.url;
+  }
+  if (item.source === "drive") {
+    const parsed = parseItem(item);
+    if (parsed?.isExternalLink) return parsed.url;
+  }
+  return null;
 }
 
 // ── Skeleton ─────────────────────────────────────────────────
@@ -197,7 +212,7 @@ function ContentSkeleton() {
           <Skeleton variant="circular" width={28} height={28} />
           <Box flex={1}>
             <Skeleton variant="text" width="60%" height={20} />
-            <Skeleton variant="text" width="30%" height={14} />
+            <Skeleton variant="text" width="40%" height={14} />
           </Box>
           <Skeleton variant="rounded" width={48} height={22} />
         </Box>
@@ -220,7 +235,6 @@ export default function ContentList({
 
   const contentCacheKey = `content:${subject}:${category}`;
 
-  // Initialize from cache synchronously — no loading flash on revisit
   const initialCacheRef = useRef(
     cacheGet<ContentEntry[]>(contentCacheKey)
   );
@@ -230,6 +244,8 @@ export default function ContentList({
   const [loading, setLoading] = useState(!initialCacheRef.current);
   const [deleteTarget, setDeleteTarget] = useState<ContentEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [viewMode, setViewMode] = useState<"admin" | "preview">("admin");
+  const [playingVideo, setPlayingVideo] = useState<{ id: string; title: string } | null>(null);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -238,6 +254,18 @@ export default function ContentList({
 
   const loadSlowMsg = useSlowFeedback(loading);
   const deleteSlowMsg = useSlowFeedback(deleting);
+
+  // Convert Drive items to ParsedFile[] for the student preview
+  const parsedFiles = useMemo<ParsedFile[]>(() => {
+    return items
+      .filter((item): item is { source: "drive" } & DriveFile => item.source === "drive")
+      .map((item) => parseGoogleFile({
+        id: item.id,
+        name: item.name,
+        mimeType: item.mimeType ?? "application/octet-stream",
+        parents: [],
+      }));
+  }, [items]);
 
   const fetchFromApi = useCallback(async () => {
     setLoading(true);
@@ -280,15 +308,12 @@ export default function ContentList({
     }
   }, [getIdToken, classId, category, subject, contentCacheKey]);
 
-  // Fetch from API only on mount when there was no cache hit
   useEffect(() => {
     if (initialCacheRef.current) return;
     void fetchFromApi();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When content is added, AddContent updates the cache directly.
-  // refreshTrigger signals us to re-read from cache (not API).
   useEffect(() => {
     if (refreshTrigger > 0) {
       const cached = cacheGet<ContentEntry[]>(contentCacheKey);
@@ -330,7 +355,6 @@ export default function ContentList({
     setDeleting(false);
 
     if (res.ok) {
-      // Optimistic remove — no API re-fetch
       setItems((prev) => {
         const next = prev.filter((i) => {
           if (i.source === "drive" && item.source === "drive")
@@ -342,40 +366,33 @@ export default function ContentList({
         cacheSet(contentCacheKey, next);
         return next;
       });
-      setSnackbar({
-        open: true,
-        message: "Deleted successfully",
-        severity: "success",
-      });
+      setSnackbar({ open: true, message: "Deleted successfully", severity: "success" });
       onContentDeleted?.();
     } else {
       const data = (await res.json()) as { error: string };
-      setSnackbar({
-        open: true,
-        message: data.error ?? "Failed to delete",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: data.error ?? "Failed to delete", severity: "error" });
     }
   };
+
+  const handlePreviewClick = (file: ParsedFile) => {
+    if (file.type === "youtube" && file.youtubeId) {
+      setPlayingVideo({ id: file.youtubeId, title: file.name });
+    } else {
+      window.open(file.url, "_blank");
+    }
+  };
+
+  // ── Loading state ──────────────────────────────────────────
 
   if (loading) {
     return (
       <Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 1,
-          }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
           <Typography variant="subtitle2" color="text.secondary">
             Loading content...
           </Typography>
           {loadSlowMsg && (
-            <Typography variant="caption" color="warning.main">
-              {loadSlowMsg}
-            </Typography>
+            <Typography variant="caption" color="warning.main">{loadSlowMsg}</Typography>
           )}
         </Box>
         <LinearProgress sx={{ mb: 1.5, borderRadius: 1 }} />
@@ -384,23 +401,14 @@ export default function ContentList({
     );
   }
 
+  // ── Empty state ────────────────────────────────────────────
+
   if (items.length === 0) {
     return (
       <Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            mb: 1,
-          }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mb: 1 }}>
           <Tooltip title="Refresh content">
-            <IconButton
-              size="small"
-              onClick={handleRefresh}
-              aria-label="Refresh content"
-            >
+            <IconButton size="small" onClick={handleRefresh} aria-label="Refresh content">
               <RefreshOutlinedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -411,15 +419,9 @@ export default function ContentList({
           alignItems="center"
           justifyContent="center"
           p={4}
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-          }}
+          sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}
         >
-          <UploadFileIcon
-            sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
-          />
+          <UploadFileIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
           <Typography variant="body2" color="text.secondary" gutterBottom>
             No content in this category yet
           </Typography>
@@ -433,129 +435,161 @@ export default function ContentList({
     );
   }
 
+  // ── Content ────────────────────────────────────────────────
+
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 1,
-        }}
-      >
+      {/* Header: count + view toggle + refresh */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
         <Typography variant="subtitle2">
           Content ({items.length})
         </Typography>
-        <Tooltip title="Refresh content">
-          <IconButton
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(_, v: "admin" | "preview" | null) => { if (v) setViewMode(v); }}
             size="small"
-            onClick={handleRefresh}
-            aria-label="Refresh content"
           >
-            <RefreshOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+            <ToggleButton value="admin" aria-label="Admin view" sx={{ px: 1.5, py: 0.5 }}>
+              <EditOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
+              <Typography variant="caption" fontWeight={600}>Manage</Typography>
+            </ToggleButton>
+            <ToggleButton value="preview" aria-label="Student preview" sx={{ px: 1.5, py: 0.5 }}>
+              <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
+              <Typography variant="caption" fontWeight={600}>Preview</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Tooltip title="Refresh content">
+            <IconButton size="small" onClick={handleRefresh} aria-label="Refresh content">
+              <RefreshOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
-      <Box display="flex" flexDirection="column" gap={1}>
-        {items.map((item, idx) => {
-          const fileType = detectFileType(item);
-          const typeLabel = getFileTypeLabel(fileType);
-          const url = getItemUrl(item, fileType);
-          const displayName = getDisplayName(item, fileType);
 
-          return (
-            <Box
-              key={item.source === "drive" ? item.id : item._id ?? idx}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                p: 1.5,
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: 2,
-                transition: "background-color 0.15s, border-color 0.15s",
-                "&:hover": {
-                  bgcolor: "action.hover",
-                  borderColor: "primary.light",
-                },
-              }}
-            >
-              {/* Type icon */}
-              <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-                {getFileTypeIcon(fileType)}
-              </Box>
+      {/* ── Student Preview mode ── */}
+      {viewMode === "preview" && (
+        <Box>
+          {parsedFiles.length > 0 ? (
+            <Grid container spacing={2}>
+              {parsedFiles.map((file) => (
+                <Grid item xs={6} sm={6} md={4} key={file.id}>
+                  <FileCard
+                    file={file}
+                    onClick={() => handlePreviewClick(file)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 3 }}>
+              No Drive files to preview (Mongo-only items are not shown in student view)
+            </Typography>
+          )}
+        </Box>
+      )}
 
-              {/* Name + meta */}
-              <Box flex={1} minWidth={0}>
-                <Typography
-                  variant="body2"
-                  fontWeight={500}
-                  noWrap
-                  title={displayName}
-                >
-                  {displayName}
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
-                  {item.source === "drive" && item.size && (
-                    <Typography variant="caption" color="text.secondary">
-                      {formatFileSize(item.size)}
-                    </Typography>
-                  )}
-                  {item.source === "mongo" && item.type === "link" && item.url && (
+      {/* ── Admin Manage mode ── */}
+      {viewMode === "admin" && (
+        <Box display="flex" flexDirection="column" gap={1}>
+          {items.map((item, idx) => {
+            const fileType = detectFileType(item);
+            const typeLabel = getFileTypeLabel(fileType);
+            const url = getItemUrl(item);
+            const displayName = getDisplayName(item);
+            const subtitleUrl = getSubtitleUrl(item);
+
+            return (
+              <Box
+                key={item.source === "drive" ? item.id : item._id ?? idx}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  p: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  transition: "background-color 0.15s, border-color 0.15s",
+                  "&:hover": { bgcolor: "action.hover", borderColor: "primary.light" },
+                }}
+              >
+                {/* Type icon */}
+                <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                  {getFileTypeIcon(fileType)}
+                </Box>
+
+                {/* Name + URL subtitle */}
+                <Box flex={1} minWidth={0}>
+                  <Typography variant="body2" fontWeight={500} noWrap title={displayName}>
+                    {displayName}
+                  </Typography>
+
+                  {/* URL subtitle for links/youtube — trimmed and truncated */}
+                  {subtitleUrl && (
                     <Typography
                       variant="caption"
                       color="text.secondary"
                       noWrap
-                      title={item.url}
+                      component="div"
+                      title={subtitleUrl}
+                      sx={{ mt: 0.15 }}
                     >
-                      {getDomain(item.url)}
+                      {trimUrl(subtitleUrl)}
+                    </Typography>
+                  )}
+
+                  {/* File size for non-link Drive files */}
+                  {!subtitleUrl && item.source === "drive" && item.size && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.15 }}>
+                      {formatFileSize(item.size)}
                     </Typography>
                   )}
                 </Box>
-              </Box>
 
-              {/* Type chip */}
-              <Chip
-                label={typeLabel.label}
-                color={typeLabel.color}
-                size="small"
-                variant="outlined"
-                sx={{ fontWeight: 500, fontSize: "0.7rem", height: 22, flexShrink: 0 }}
-              />
+                {/* Type chip */}
+                <Chip
+                  label={typeLabel.label}
+                  color={typeLabel.color}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontWeight: 500, fontSize: "0.7rem", height: 22, flexShrink: 0 }}
+                />
 
-              {/* Open button */}
-              {url && (
-                <Tooltip title="Open">
+                {/* Open button */}
+                {url && (
+                  <Tooltip title="Open">
+                    <IconButton
+                      size="small"
+                      component="a"
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open ${displayName}`}
+                      sx={{ color: "primary.main" }}
+                    >
+                      <OpenInNewIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+
+                {/* Delete button */}
+                <Tooltip title="Delete">
                   <IconButton
                     size="small"
-                    component="a"
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Open ${displayName}`}
-                    sx={{ color: "primary.main" }}
+                    color="error"
+                    aria-label={`Delete ${displayName}`}
+                    onClick={() => setDeleteTarget(item)}
                   >
-                    <OpenInNewIcon fontSize="small" />
+                    <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-              )}
-
-              {/* Delete button */}
-              <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  color="error"
-                  aria-label={`Delete ${displayName}`}
-                  onClick={() => setDeleteTarget(item)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          );
-        })}
-      </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
 
       {/* Delete confirmation dialog */}
       <Dialog
@@ -567,7 +601,7 @@ export default function ContentList({
         <DialogTitle>Delete content</DialogTitle>
         <DialogContent>
           <Typography>
-            Delete &quot;{deleteTarget ? getDisplayName(deleteTarget, detectFileType(deleteTarget)) : ""}&quot;?
+            Delete &quot;{deleteTarget ? getDisplayName(deleteTarget) : ""}&quot;?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {deleteTarget?.source === "drive"
@@ -595,6 +629,14 @@ export default function ContentList({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* YouTube player for preview mode */}
+      <YoutubePlayer
+        open={!!playingVideo}
+        onClose={() => setPlayingVideo(null)}
+        videoId={playingVideo?.id ?? null}
+        title={playingVideo?.title ?? ""}
+      />
 
       <Snackbar
         open={snackbar.open}
