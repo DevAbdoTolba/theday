@@ -20,15 +20,20 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
     const remainingName = match[2].trim(); // The Name part
     
     url = extractedUrl;
-    name = remainingName || "Untitled Link";
     isExternalLink = true;
 
     // 3. Determine if it's YouTube or Generic URL
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       type = 'youtube';
       youtubeId = getYoutubeId(url);
+      // Strip pipeline routing suffix: "{title}__{category}__{subject}" → "{title}"
+      // This suffix is added by the admin when uploading video files to the staging
+      // folder so the Colab pipeline knows where to place the resulting YouTube link.
+      const rawTitle = remainingName || "Untitled Link";
+      name = rawTitle.includes('__') ? rawTitle.split('__')[0].trim() || "Untitled Link" : rawTitle;
     } else {
       type = 'unknown';
+      name = remainingName || "Untitled Link";
     }
   } else {
     // Standard File Logic

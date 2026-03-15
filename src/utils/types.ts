@@ -60,6 +60,18 @@ export interface AiCartItem {
   addedAt: number;
 }
 
+// --- Upload types ---
+
+export interface UploadOptions {
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+}
+
+export interface UploadResult {
+  id: string;
+  name: string;
+}
+
 // --- Subject Change Request types ---
 
 export type ChangeType = "create" | "edit" | "delete";
