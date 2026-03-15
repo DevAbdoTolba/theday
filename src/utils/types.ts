@@ -62,8 +62,15 @@ export interface AiCartItem {
 
 // --- Upload types ---
 
+export interface UploadProgress {
+  percent: number;
+  speedBps: number; // bytes per second
+  loadedBytes: number;
+  totalBytes: number;
+}
+
 export interface UploadOptions {
-  onProgress?: (percent: number) => void;
+  onProgress?: (progress: UploadProgress) => void;
 }
 
 export interface UploadResult {

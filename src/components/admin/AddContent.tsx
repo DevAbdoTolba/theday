@@ -32,6 +32,7 @@ import {
 } from "../../lib/constants";
 import { uploadFileDirect, SessionExpiredError } from "../../utils/upload";
 import { getYoutubeId } from "../../utils/helpers";
+import { UploadProgress as UploadProgressInfo } from "../../utils/types";
 
 interface AddContentProps {
   classId: string;
@@ -42,6 +43,20 @@ interface AddContentProps {
 }
 
 type Mode = "file" | "link" | "video-youtube" | "video-upload";
+
+/** Strip file extension: "lecture.mp4" → "lecture" */
+function stripExtension(filename: string): string {
+  const lastDot = filename.lastIndexOf(".");
+  if (lastDot <= 0) return filename;
+  return filename.slice(0, lastDot);
+}
+
+/** Format bytes/sec as human-readable speed */
+function formatSpeed(bps: number): string {
+  if (bps < 1024) return `${bps} B/s`;
+  if (bps < 1024 * 1024) return `${(bps / 1024).toFixed(0)} KB/s`;
+  return `${(bps / (1024 * 1024)).toFixed(1)} MB/s`;
+}
 
 export default function AddContent({
   classId,
@@ -59,6 +74,7 @@ export default function AddContent({
 
   // File upload state
   const [progress, setProgress] = useState<number | null>(null);
+  const [uploadSpeed, setUploadSpeed] = useState<number>(0);
   const [processing, setProcessing] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -81,9 +97,12 @@ export default function AddContent({
   const [ytTitle, setYtTitle] = useState("");
   const [ytSubmitting, setYtSubmitting] = useState(false);
 
-  // Video upload state
+  // Video upload state — title appears AFTER file is selected
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDragging, setVideoDragging] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUploadedId, setVideoUploadedId] = useState<string | null>(null);
+  const [videoRenaming, setVideoRenaming] = useState(false);
 
   // Shared
   const [snackbar, setSnackbar] = useState<{
@@ -103,7 +122,6 @@ export default function AddContent({
   const showSuccess = (message: string) =>
     setSnackbar({ open: true, message, severity: "success" });
 
-  /** Push a file entry into the session cache for optimistic UI. */
   const addToCache = (entry: { id: string; name: string; size?: number; mimeType?: string }) => {
     const cacheKey = `content:${subject}:${category}`;
     const cached = cacheGet<unknown[]>(cacheKey) ?? [];
@@ -119,12 +137,14 @@ export default function AddContent({
     ]);
   };
 
+  const handleProgress = (p: UploadProgressInfo) => {
+    setProgress(p.percent);
+    setUploadSpeed(p.speedBps);
+    if (p.percent >= 99) setProcessing(true);
+  };
+
   // ── Direct upload via resumable session ───────────────────────
 
-  /**
-   * Obtain a session URI from the server, then upload the file directly to Drive.
-   * Handles session expiry by creating a new session and retrying once.
-   */
   const directUpload = async (
     file: File,
     targetFolderId: string,
@@ -156,34 +176,37 @@ export default function AddContent({
     let sessionUri = await createSession();
 
     try {
-      return await uploadFileDirect(file, sessionUri, {
-        onProgress: (pct) => {
-          setProgress(pct);
-          if (pct >= 99) setProcessing(true);
-        },
-      });
+      return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress });
     } catch (err) {
       if (err instanceof SessionExpiredError) {
-        // Session expired mid-upload — create a new session and restart
         sessionUri = await createSession();
-        return await uploadFileDirect(file, sessionUri, {
-          onProgress: (pct) => {
-            setProgress(pct);
-            if (pct >= 99) setProcessing(true);
-          },
-        });
+        return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress });
       }
       throw err;
     }
   };
 
+  // ── Rename a Drive file (used after video upload completes) ───
+
+  const renameDriveFile = async (fileId: string, newName: string) => {
+    const token = await getIdToken();
+    const res = await fetch("/api/admin/drive-file", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ fileId, classId, newName }),
+    });
+    if (!res.ok) {
+      const data = (await res.json()) as { error?: string };
+      throw new Error(data.error ?? "Failed to rename file");
+    }
+    return (await res.json()) as { id: string; name: string };
+  };
+
   // ── Size validation ───────────────────────────────────────────
 
-  /**
-   * Validate file size. Returns true if upload should proceed immediately,
-   * false if a confirmation dialog was opened (the dialog will resume the upload),
-   * or throws if the file is too large.
-   */
   const validateSizeAndProceed = (
     file: File,
     targetFolderId: string,
@@ -257,11 +280,13 @@ export default function AddContent({
       addToCache({ id: created.id, name: created.name, size: file.size, mimeType: file.type });
       setProgress(null);
       setProcessing(false);
+      setUploadSpeed(0);
       showSuccess(`"${file.name}" uploaded`);
       onContentAdded();
     } catch (err) {
       setProgress(null);
       setProcessing(false);
+      setUploadSpeed(0);
       showError(err instanceof Error ? err.message : "Upload failed");
     }
   };
@@ -370,16 +395,13 @@ export default function AddContent({
   };
 
   // ── Video file upload (staging) ───────────────────────────────
+  // New flow: file selected → upload starts immediately with original
+  // filename → title field appears pre-filled → after upload, rename
+  // to {title}__{category}__{subject}
 
-  const uploadVideoFile = async (file: File, skipSizeCheck?: boolean) => {
+  const startVideoUpload = async (file: File, skipSizeCheck?: boolean) => {
     if (!VIDEO_MIME_TYPES.includes(file.type as typeof VIDEO_MIME_TYPES[number])) {
       showError("Only video files are accepted (MP4, MOV, AVI, MKV, WebM)");
-      return;
-    }
-
-    const title = videoTitle.trim();
-    if (!title) {
-      showError("Please enter a title for the video");
       return;
     }
 
@@ -388,33 +410,61 @@ export default function AddContent({
       return;
     }
 
-    // Filename encodes routing info for the Colab pipeline
-    const stagingFileName = `${title}__${category}__${subject}`;
-
     if (!skipSizeCheck) {
-      const proceed = validateSizeAndProceed(file, VIDEO_STAGING_FOLDER_ID, stagingFileName);
+      const proceed = validateSizeAndProceed(file, VIDEO_STAGING_FOLDER_ID, file.name);
       if (!proceed) return;
     }
 
-    try {
-      const created = await directUpload(file, VIDEO_STAGING_FOLDER_ID, stagingFileName);
+    // Pre-fill title from filename and remember the file
+    const defaultTitle = stripExtension(file.name);
+    setVideoTitle(defaultTitle);
+    setVideoFile(file);
+    setVideoUploadedId(null);
 
-      addToCache({ id: created.id, name: created.name, size: file.size, mimeType: file.type });
-      setProgress(null);
+    try {
+      // Upload immediately with the original filename as temp name
+      const created = await directUpload(file, VIDEO_STAGING_FOLDER_ID, file.name);
+      // Store the uploaded file ID — rename happens when user confirms title
+      setVideoUploadedId(created.id);
       setProcessing(false);
-      setVideoTitle("");
-      showSuccess(`"${title}" uploaded — video will be processed within 24 hours`);
-      onContentAdded();
     } catch (err) {
       setProgress(null);
       setProcessing(false);
+      setUploadSpeed(0);
+      setVideoFile(null);
       showError(err instanceof Error ? err.message : "Upload failed");
+    }
+  };
+
+  /** Called when the user confirms the title after upload finishes */
+  const handleVideoTitleConfirm = async () => {
+    if (!videoUploadedId || !videoFile) return;
+
+    const title = videoTitle.trim() || stripExtension(videoFile.name);
+    const stagingName = `${title}__${category}__${subject}`;
+
+    setVideoRenaming(true);
+    try {
+      const renamed = await renameDriveFile(videoUploadedId, stagingName);
+      addToCache({ id: renamed.id, name: renamed.name, size: videoFile.size, mimeType: videoFile.type });
+      showSuccess(`"${title}" uploaded — video will be processed within 24 hours`);
+      onContentAdded();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Failed to set video title");
+    } finally {
+      // Reset all video upload state
+      setProgress(null);
+      setUploadSpeed(0);
+      setVideoFile(null);
+      setVideoUploadedId(null);
+      setVideoTitle("");
+      setVideoRenaming(false);
     }
   };
 
   const handleVideoFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    void uploadVideoFile(files[0]);
+    void startVideoUpload(files[0]);
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
@@ -438,7 +488,7 @@ export default function AddContent({
     if (!file || isHardLimitExceeded) return;
 
     if (mode === "video-upload") {
-      void uploadVideoFile(file, true);
+      void startVideoUpload(file, true);
     } else {
       void uploadFile(file, replaceId ?? undefined, true);
     }
@@ -454,6 +504,8 @@ export default function AddContent({
   // ── Render ───────────────────────────────────────────────────
 
   const isVideoMode = mode === "video-youtube" || mode === "video-upload";
+  const videoUploadDone = videoUploadedId !== null;
+  const videoInProgress = isUploading && videoFile !== null && !videoUploadDone;
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -539,7 +591,9 @@ export default function AddContent({
             onChange={(e) => handleFiles(e.target.files)}
           />
 
-          {progress !== null && <UploadProgress progress={progress} processing={processing} slowMsg={slowMsg} />}
+          {progress !== null && !videoFile && (
+            <UploadProgressBar progress={progress} speed={uploadSpeed} processing={processing} slowMsg={slowMsg} />
+          )}
         </Box>
       )}
 
@@ -653,57 +707,104 @@ export default function AddContent({
           {/* Upload Video File sub-option */}
           {mode === "video-upload" && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <TextField
-                label="Title"
-                fullWidth
-                size="small"
-                value={videoTitle}
-                onChange={(e) => setVideoTitle(e.target.value)}
-                placeholder="e.g. Lecture 5 — Newton's Laws"
-                required
-                disabled={isUploading}
-              />
-              <Box
-                sx={{
-                  border: "2px dashed",
-                  borderColor: videoDragging ? "primary.main" : "divider",
-                  borderRadius: 2,
-                  p: 3,
-                  textAlign: "center",
-                  cursor: isUploading ? "default" : "pointer",
-                  bgcolor: videoDragging ? "action.hover" : "background.paper",
-                  opacity: isUploading ? 0.6 : 1,
-                  pointerEvents: isUploading ? "none" : "auto",
-                  transition: "all 0.2s",
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setVideoDragging(true);
-                }}
-                onDragLeave={() => setVideoDragging(false)}
-                onDrop={handleVideoDrop}
-                onClick={() => videoInputRef.current?.click()}
-              >
-                <VideoLibraryOutlinedIcon
-                  sx={{ fontSize: 36, color: "text.secondary", mb: 0.5 }}
-                />
-                <Typography variant="body2" color="text.secondary">
-                  Drag & drop or click to select a video
-                </Typography>
-                <Typography variant="caption" color="text.disabled">
-                  MP4, MOV, AVI, MKV, WebM · Up to 2 GB (5 GB max)
-                </Typography>
-              </Box>
+              {/* Drop zone — hidden once a file is selected and uploading */}
+              {!videoFile && (
+                <>
+                  <Box
+                    sx={{
+                      border: "2px dashed",
+                      borderColor: videoDragging ? "primary.main" : "divider",
+                      borderRadius: 2,
+                      p: 3,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      bgcolor: videoDragging ? "action.hover" : "background.paper",
+                      transition: "all 0.2s",
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setVideoDragging(true);
+                    }}
+                    onDragLeave={() => setVideoDragging(false)}
+                    onDrop={handleVideoDrop}
+                    onClick={() => videoInputRef.current?.click()}
+                  >
+                    <VideoLibraryOutlinedIcon
+                      sx={{ fontSize: 36, color: "text.secondary", mb: 0.5 }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      Drag & drop or click to select a video
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled">
+                      MP4, MOV, AVI, MKV, WebM · Up to 2 GB (5 GB max)
+                    </Typography>
+                  </Box>
 
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept={VIDEO_MIME_TYPES.join(",")}
-                style={{ display: "none" }}
-                onChange={(e) => handleVideoFiles(e.target.files)}
-              />
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept={VIDEO_MIME_TYPES.join(",")}
+                    style={{ display: "none" }}
+                    onChange={(e) => handleVideoFiles(e.target.files)}
+                  />
+                </>
+              )}
 
-              {progress !== null && <UploadProgress progress={progress} processing={processing} slowMsg={slowMsg} />}
+              {/* Uploading / title input — shown after file is selected */}
+              {videoFile && (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  {/* Progress bar with speed */}
+                  {progress !== null && (
+                    <UploadProgressBar
+                      progress={progress}
+                      speed={uploadSpeed}
+                      processing={processing}
+                      slowMsg={slowMsg}
+                      fileName={videoFile.name}
+                    />
+                  )}
+
+                  {/* Title field — editable while uploading */}
+                  <TextField
+                    label="Video Title"
+                    fullWidth
+                    size="small"
+                    value={videoTitle}
+                    onChange={(e) => setVideoTitle(e.target.value)}
+                    placeholder="e.g. Lecture 5 — Newton's Laws"
+                    helperText={
+                      videoInProgress
+                        ? "You can edit the title while the video uploads"
+                        : videoUploadDone
+                          ? "Upload complete — confirm the title to finish"
+                          : undefined
+                    }
+                    disabled={videoRenaming}
+                  />
+
+                  {/* Confirm button — only active after upload finishes */}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={!videoUploadDone || videoRenaming || !videoTitle.trim()}
+                      onClick={() => void handleVideoTitleConfirm()}
+                      sx={{ minWidth: 120 }}
+                    >
+                      {videoRenaming
+                        ? "Saving..."
+                        : videoUploadDone
+                          ? "Confirm Title"
+                          : "Uploading..."}
+                    </Button>
+                    {videoUploadDone && !videoRenaming && (
+                      <Typography variant="caption" color="success.main">
+                        Upload complete
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              )}
             </Box>
           )}
         </Box>
@@ -817,17 +918,26 @@ export default function AddContent({
 
 // ── Sub-components ────────────────────────────────────────────
 
-function UploadProgress({
+function UploadProgressBar({
   progress,
+  speed,
   processing,
   slowMsg,
+  fileName,
 }: {
   progress: number;
+  speed: number;
   processing: boolean;
   slowMsg: string | null;
+  fileName?: string;
 }) {
   return (
-    <Box sx={{ mt: 1.5 }}>
+    <Box sx={{ mt: 1 }}>
+      {fileName && (
+        <Typography variant="caption" color="text.secondary" noWrap sx={{ mb: 0.25, display: "block" }}>
+          {fileName}
+        </Typography>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -839,11 +949,18 @@ function UploadProgress({
         <Typography variant="caption" color="text.secondary">
           {processing ? "Saving to Google Drive..." : `Uploading ${progress}%`}
         </Typography>
-        {slowMsg && (
-          <Typography variant="caption" color="warning.main">
-            {slowMsg}
-          </Typography>
-        )}
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+          {!processing && speed > 0 && (
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+              {formatSpeed(speed)}
+            </Typography>
+          )}
+          {slowMsg && (
+            <Typography variant="caption" color="warning.main">
+              {slowMsg}
+            </Typography>
+          )}
+        </Box>
       </Box>
       <LinearProgress
         variant={processing ? "indeterminate" : "determinate"}
