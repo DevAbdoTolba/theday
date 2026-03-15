@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 import ClassModel, { IClass } from "../../../lib/models/class";
 import ContentItemModel, { IContentItem } from "../../../lib/models/content-item";
 
@@ -10,7 +10,6 @@ export default async function handler(
 ): Promise<void> {
   try {
     if (req.method === "GET") {
-      const { user } = await requireAdmin(req);
       const { classId, category, shared, subjectName } = req.query as {
         classId: string;
         category: string;
@@ -21,6 +20,8 @@ export default async function handler(
       if (!classId || !category) {
         return sendError(res, 400, "Missing required query params: classId, category");
       }
+
+      await requireAdminForClass(req, classId);
 
       const localObjectId = new mongoose.Types.ObjectId(classId);
 
@@ -58,17 +59,14 @@ export default async function handler(
             sharedFrom: classNameMap.get(item.classId.toString()) ?? "Unknown",
           }));
 
-          void user;
           return res.status(200).json({ items: [...items, ...sharedWithSource] });
         }
       }
 
-      void user;
       return res.status(200).json({ items });
     }
 
     if (req.method === "POST") {
-      const { user } = await requireAdmin(req);
       const body = req.body as {
         type: "link" | "easter_egg";
         classId: string;
@@ -85,6 +83,8 @@ export default async function handler(
       if (!type || !classId || !category) {
         return sendError(res, 400, "Missing required fields: type, classId, category");
       }
+
+      const { user } = await requireAdminForClass(req, classId);
 
       if (type === "link") {
         if (!body.title || !body.url) {
@@ -125,13 +125,14 @@ export default async function handler(
     }
 
     if (req.method === "DELETE") {
-      const { user } = await requireAdmin(req);
-      const { _id } = req.body as { _id: string };
-      if (!_id) return sendError(res, 400, "Missing required field: _id");
+      const { _id, classId } = req.body as { _id: string; classId: string };
+      if (!_id || !classId) return sendError(res, 400, "Missing required fields: _id, classId");
+
+      await requireAdminForClass(req, classId);
 
       const item = await ContentItemModel.findById(_id);
       if (!item) return sendError(res, 404, "Content item not found");
-      if (item.classId.toString() !== user.assignedClassId?.toString()) {
+      if (item.classId.toString() !== classId) {
         return sendError(res, 403, "Cannot delete content from another class");
       }
 

@@ -106,7 +106,7 @@ export default function AddContent({
             "Content-Type": "application/json",
             Authorization: `Bearer ${delToken}`,
           },
-          body: JSON.stringify({ fileId: replaceFileId }),
+          body: JSON.stringify({ fileId: replaceFileId, classId }),
         });
         if (!delRes.ok) {
           throw new Error("Failed to delete existing file before replacement");
@@ -117,6 +117,7 @@ export default function AddContent({
       const params = new URLSearchParams({
         fileName: file.name,
         folderId,
+        classId,
         mimeType: file.type || "application/octet-stream",
       });
 
@@ -219,6 +220,7 @@ export default function AddContent({
           url: linkUrl.trim(),
           title: linkTitle.trim(),
           folderId,
+          classId,
         }),
       });
 

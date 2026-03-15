@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Readable } from "stream";
 import { google } from "googleapis";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 
 export const config = {
   api: { bodyParser: false },
@@ -46,16 +46,17 @@ export default async function handler(
   }
 
   try {
-    await requireAdmin(req);
-
     const fileName = req.query.fileName as string | undefined;
     const folderId = req.query.folderId as string | undefined;
+    const classId = req.query.classId as string | undefined;
     const mimeType =
       (req.query.mimeType as string | undefined) || "application/octet-stream";
 
-    if (!fileName || !folderId) {
-      return sendError(res, 400, "Missing fileName or folderId query params");
+    if (!fileName || !folderId || !classId) {
+      return sendError(res, 400, "Missing required query params: fileName, folderId, classId");
     }
+
+    await requireAdminForClass(req, classId);
 
     const body = await collectBody(req);
 

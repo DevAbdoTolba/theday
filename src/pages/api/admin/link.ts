@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { google } from "googleapis";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 
 function getWriteDrive() {
   const clientEmail = process.env.CLIENT_EMAIL;
@@ -27,17 +27,18 @@ export default async function handler(
   }
 
   try {
-    await requireAdmin(req);
-
-    const { url, title, folderId } = req.body as {
+    const { url, title, folderId, classId } = req.body as {
       url?: string;
       title?: string;
       folderId?: string;
+      classId?: string;
     };
 
-    if (!url || !title || !folderId) {
-      return sendError(res, 400, "Missing required fields: url, title, folderId");
+    if (!url || !title || !folderId || !classId) {
+      return sendError(res, 400, "Missing required fields: url, title, folderId, classId");
     }
+
+    await requireAdminForClass(req, classId);
 
     // Student-facing parser expects filename format: "https://... Display Name"
     const fileName = `${url} ${title}`;

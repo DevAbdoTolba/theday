@@ -291,6 +291,7 @@ function AdminContent() {
   };
 
   const handleRenameCategory = async (folderId: string, newName: string) => {
+    if (!classId) return;
     setCategoryBusy(true);
     try {
       const token = await getIdToken();
@@ -300,7 +301,7 @@ function AdminContent() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ folderId, newName }),
+        body: JSON.stringify({ folderId, newName, classId }),
       });
       if (res.ok) {
         const updated = (await res.json()) as Category;
@@ -326,11 +327,12 @@ function AdminContent() {
   };
 
   const handleDeleteCategory = async (folderId: string) => {
+    if (!classId) return;
     setCategoryBusy(true);
     try {
       const token = await getIdToken();
       const res = await fetch(
-        `/api/admin/categories?folderId=${encodeURIComponent(folderId)}`,
+        `/api/admin/categories?folderId=${encodeURIComponent(folderId)}&classId=${encodeURIComponent(classId)}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

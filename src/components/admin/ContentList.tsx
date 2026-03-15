@@ -190,7 +190,7 @@ export default function ContentList({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ fileId: item.id }),
+        body: JSON.stringify({ fileId: item.id, classId }),
       });
     } else {
       res = await fetch("/api/admin/content", {
@@ -199,7 +199,7 @@ export default function ContentList({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ _id: item._id }),
+        body: JSON.stringify({ _id: item._id, classId }),
       });
     }
 

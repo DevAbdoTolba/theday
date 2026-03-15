@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 import { getWriteAccessToken } from "../../../lib/google-auth-write";
 
 export default async function handler(
@@ -11,17 +11,18 @@ export default async function handler(
   }
 
   try {
-    await requireAdmin(req);
-
-    const { fileName, mimeType, folderId } = req.body as {
+    const { fileName, mimeType, folderId, classId } = req.body as {
       fileName: string;
       mimeType: string;
       folderId: string;
+      classId: string;
     };
 
-    if (!fileName || !mimeType || !folderId) {
-      return sendError(res, 400, "Missing required fields");
+    if (!fileName || !mimeType || !folderId || !classId) {
+      return sendError(res, 400, "Missing required fields: fileName, mimeType, folderId, classId");
     }
+
+    await requireAdminForClass(req, classId);
 
     const accessToken = await getWriteAccessToken();
 

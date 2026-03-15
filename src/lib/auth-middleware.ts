@@ -87,3 +87,24 @@ export async function requireSuperAdmin(
 
   return { user };
 }
+
+export async function requireAdminForClass(
+  req: NextApiRequest,
+  classId: string
+): Promise<{ user: mongoose.HydratedDocument<IUser> }> {
+  const { user, isSuperAdmin } = await verifyAuth(req);
+
+  if (isSuperAdmin) {
+    return { user };
+  }
+
+  if (!user.isAdmin) {
+    throw new Error("Forbidden");
+  }
+
+  if (!user.assignedClassId || user.assignedClassId !== classId) {
+    throw new Error("Forbidden");
+  }
+
+  return { user };
+}

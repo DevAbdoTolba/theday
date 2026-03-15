@@ -17,6 +17,7 @@ import { useAuth } from "../../hooks/useAuth";
 const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 
 interface ContentUploaderProps {
+  classId: string;
   folderId: string;
   category: string;
   subject: string;
@@ -24,6 +25,7 @@ interface ContentUploaderProps {
 }
 
 export default function ContentUploader({
+  classId,
   folderId,
   category,
   subject,
@@ -87,7 +89,7 @@ export default function ContentUploader({
             "Content-Type": "application/json",
             Authorization: `Bearer ${delToken}`,
           },
-          body: JSON.stringify({ fileId: replaceFileId }),
+          body: JSON.stringify({ fileId: replaceFileId, classId }),
         });
       }
 
@@ -96,6 +98,7 @@ export default function ContentUploader({
       const params = new URLSearchParams({
         fileName: file.name,
         folderId,
+        classId,
         mimeType: file.type || "application/octet-stream",
       });
 

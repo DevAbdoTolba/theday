@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { google } from "googleapis";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 
 function escapeDriveQuery(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -15,12 +15,12 @@ export default async function handler(
   }
 
   try {
-    await requireAdmin(req);
-
-    const { subject } = req.query as { subject: string };
-    if (!subject) {
-      return sendError(res, 400, "Missing required query param: subject");
+    const { subject, classId } = req.query as { subject: string; classId?: string };
+    if (!subject || !classId) {
+      return sendError(res, 400, "Missing required query params: subject, classId");
     }
+
+    await requireAdminForClass(req, classId);
 
     const clientEmail = process.env.CLIENT_EMAIL;
     const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");

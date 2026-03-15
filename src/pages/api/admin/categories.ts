@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { google, drive_v3 } from "googleapis";
 import mongoose from "mongoose";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
 import ContentItemModel from "../../../lib/models/content-item";
 import { serverGet, serverSet, serverInvalidate } from "../../../lib/server-cache";
 
@@ -62,8 +62,6 @@ async function handleGet(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  const { user } = await requireAdmin(req);
-
   const { classId, subject } = req.query as {
     classId?: string;
     subject?: string;
@@ -77,9 +75,7 @@ async function handleGet(
     );
   }
 
-  if (user.assignedClassId !== classId) {
-    return sendError(res, 403, "You are not assigned to this class");
-  }
+  await requireAdminForClass(req, classId);
 
   // Server-side cache for Drive API calls
   const cacheKey = `categories:${subject}`;
@@ -132,8 +128,6 @@ async function handlePost(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  const { user } = await requireAdmin(req);
-
   const { classId, subjectAbbreviation, categoryName } = req.body as {
     classId?: string;
     subjectAbbreviation?: string;
@@ -148,9 +142,7 @@ async function handlePost(
     );
   }
 
-  if (user.assignedClassId !== classId) {
-    return sendError(res, 403, "You are not assigned to this class");
-  }
+  await requireAdminForClass(req, classId);
 
   const drive = getWriteDrive();
   const subjectFolderId = await findSubjectFolder(drive, subjectAbbreviation);
@@ -180,16 +172,17 @@ async function handlePut(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  await requireAdmin(req);
-
-  const { folderId, newName } = req.body as {
+  const { folderId, newName, classId } = req.body as {
     folderId?: string;
     newName?: string;
+    classId?: string;
   };
 
-  if (!folderId || !newName) {
-    return sendError(res, 400, "Missing required fields: folderId, newName");
+  if (!folderId || !newName || !classId) {
+    return sendError(res, 400, "Missing required fields: folderId, newName, classId");
   }
+
+  await requireAdminForClass(req, classId);
 
   const drive = getWriteDrive();
 
@@ -211,13 +204,13 @@ async function handleDelete(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  await requireAdmin(req);
+  const { folderId, classId } = req.query as { folderId?: string; classId?: string };
 
-  const { folderId } = req.query as { folderId?: string };
-
-  if (!folderId) {
-    return sendError(res, 400, "Missing required query param: folderId");
+  if (!folderId || !classId) {
+    return sendError(res, 400, "Missing required query params: folderId, classId");
   }
+
+  await requireAdminForClass(req, classId);
 
   const drive = getWriteDrive();
 
