@@ -64,7 +64,6 @@ export interface AiCartItem {
 
 export interface UploadOptions {
   onProgress?: (percent: number) => void;
-  signal?: AbortSignal;
 }
 
 export interface UploadResult {

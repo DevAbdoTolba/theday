@@ -70,7 +70,6 @@ export default function AddContent({
   const [pendingLargeFile, setPendingLargeFile] = useState<File | null>(null);
   const [pendingLargeReplaceId, setPendingLargeReplaceId] = useState<string | null>(null);
   const [pendingLargeFolderId, setPendingLargeFolderId] = useState<string | null>(null);
-  const [pendingLargeFileName, setPendingLargeFileName] = useState<string | null>(null);
 
   // Link state
   const [linkTitle, setLinkTitle] = useState("");
@@ -90,7 +89,7 @@ export default function AddContent({
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: "success" | "error" | "info";
+    severity: "success" | "error";
   }>({ open: false, message: "", severity: "success" });
 
   const isUploading = progress !== null;
@@ -103,9 +102,6 @@ export default function AddContent({
 
   const showSuccess = (message: string) =>
     setSnackbar({ open: true, message, severity: "success" });
-
-  const showInfo = (message: string) =>
-    setSnackbar({ open: true, message, severity: "info" });
 
   /** Push a file entry into the session cache for optimistic UI. */
   const addToCache = (entry: { id: string; name: string; size?: number; mimeType?: string }) => {
@@ -195,23 +191,16 @@ export default function AddContent({
     replaceFileId?: string | null
   ): boolean => {
     if (file.size > UPLOAD_HARD_LIMIT) {
-      showError(
-        `File exceeds the 5 GB limit. To upload manually, open the Drive folder and add it directly.`
-      );
-      // Provide a clickable link via snackbar is limited; we show the folder URL in the message.
-      // The folder link is shown via the "Open Drive Folder" button that appears on error.
       setPendingLargeFile(file);
       setPendingLargeReplaceId(replaceFileId ?? null);
       setPendingLargeFolderId(targetFolderId);
-      setPendingLargeFileName(fileName);
-      setSizeConfirmDialog(true); // Reuse dialog to show Drive link; no upload will happen
+      setSizeConfirmDialog(true);
       return false;
     }
     if (file.size > UPLOAD_SOFT_LIMIT) {
       setPendingLargeFile(file);
       setPendingLargeReplaceId(replaceFileId ?? null);
       setPendingLargeFolderId(targetFolderId);
-      setPendingLargeFileName(fileName);
       setSizeConfirmDialog(true);
       return false;
     }
@@ -414,8 +403,7 @@ export default function AddContent({
       setProgress(null);
       setProcessing(false);
       setVideoTitle("");
-      showSuccess(`"${title}" uploaded`);
-      showInfo("Video will be processed within 24 hours");
+      showSuccess(`"${title}" uploaded — video will be processed within 24 hours`);
       onContentAdded();
     } catch (err) {
       setProgress(null);
@@ -447,7 +435,6 @@ export default function AddContent({
     setPendingLargeFile(null);
     setPendingLargeReplaceId(null);
     setPendingLargeFolderId(null);
-    setPendingLargeFileName(null);
     if (!file || isHardLimitExceeded) return;
 
     if (mode === "video-upload") {
@@ -462,7 +449,6 @@ export default function AddContent({
     setPendingLargeFile(null);
     setPendingLargeReplaceId(null);
     setPendingLargeFolderId(null);
-    setPendingLargeFileName(null);
   };
 
   // ── Render ───────────────────────────────────────────────────

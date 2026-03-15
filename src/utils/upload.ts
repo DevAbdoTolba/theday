@@ -130,11 +130,10 @@ export async function uploadFileDirect(
 
   let attempt = 0;
   let offset = 0;
-  let currentSessionUri = sessionUri;
 
   while (attempt < UPLOAD_MAX_RETRIES) {
     try {
-      const result = await uploadSlice(currentSessionUri, file, offset, reportProgress);
+      const result = await uploadSlice(sessionUri, file, offset, reportProgress);
       if (onProgress) onProgress(100);
       return result;
     } catch (err) {
@@ -151,7 +150,7 @@ export async function uploadFileDirect(
 
       // Query how many bytes Drive received so far, then resume from that offset
       try {
-        offset = await queryUploadOffset(currentSessionUri, file.size);
+        offset = await queryUploadOffset(sessionUri, file.size);
       } catch (queryErr) {
         if (queryErr instanceof SessionExpiredError) {
           throw queryErr;
