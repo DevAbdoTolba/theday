@@ -27,7 +27,6 @@ import { cacheGet, cacheSet } from "../../lib/session-cache";
 import {
   UPLOAD_SOFT_LIMIT,
   UPLOAD_HARD_LIMIT,
-  VIDEO_STAGING_FOLDER_ID,
   VIDEO_MIME_TYPES,
 } from "../../lib/constants";
 import { uploadFileDirect, SessionExpiredError } from "../../utils/upload";
@@ -405,13 +404,8 @@ export default function AddContent({
       return;
     }
 
-    if (!VIDEO_STAGING_FOLDER_ID) {
-      showError("Video staging folder is not configured. Contact the administrator.");
-      return;
-    }
-
     if (!skipSizeCheck) {
-      const proceed = validateSizeAndProceed(file, VIDEO_STAGING_FOLDER_ID, file.name);
+      const proceed = validateSizeAndProceed(file, folderId, file.name);
       if (!proceed) return;
     }
 
@@ -422,8 +416,8 @@ export default function AddContent({
     setVideoUploadedId(null);
 
     try {
-      // Upload immediately with the original filename as temp name
-      const created = await directUpload(file, VIDEO_STAGING_FOLDER_ID, file.name);
+      // Upload to the same category folder as regular files
+      const created = await directUpload(file, folderId, file.name);
       // Store the uploaded file ID — rename happens when user confirms title
       setVideoUploadedId(created.id);
       setProcessing(false);
