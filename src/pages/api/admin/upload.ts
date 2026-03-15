@@ -1,3 +1,7 @@
+// DEPRECATED: This endpoint is no longer used by AddContent.
+// File uploads now use /api/admin/upload-session + direct browser-to-Drive upload
+// (see src/utils/upload.ts). This file is kept for backward compatibility only
+// and will be removed in a future cleanup PR.
 import { NextApiRequest, NextApiResponse } from "next";
 import { Readable } from "stream";
 import { google } from "googleapis";
