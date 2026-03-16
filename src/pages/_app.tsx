@@ -1,7 +1,6 @@
 import "../styles/Material.css";
 import "../styles/DribbleButton.css";
 import "../styles/RainbowBorder.css";
-import "../styles/ai-cart-animations.css";
 
 import React, { useContext, useMemo, useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -15,8 +14,6 @@ import IndexedProvider from "../context/IndexedContext";
 import { DevOptionsProvider } from "../context/DevOptionsContext";
 import DevDashboard from "../components/DevDashboard";
 import { AuthProvider } from "../context/AuthContext";
-import { AiCartProvider } from "../context/AiCartContext";
-import AiCartFab from "../components/ai-cart/AiCartFab";
 
 import Script from 'next/script';
 
@@ -156,7 +153,6 @@ export default function App({
             <ColorModeContext.Provider value={colorMode}>
               <ThemeProvider theme={theme}>
                 <AuthProvider>
-                <AiCartProvider>
                 <CssBaseline />
                 <Image
                   src={"/icon-512x512.png"}
@@ -176,10 +172,8 @@ export default function App({
 
 
                 <Component {...pageProps} />
-                <AiCartFab />
                 <DevDashboard />
                 <Analytics />
-                </AiCartProvider>
                 </AuthProvider>
               </ThemeProvider>
             </ColorModeContext.Provider>

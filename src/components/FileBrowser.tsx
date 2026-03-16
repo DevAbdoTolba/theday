@@ -35,9 +35,6 @@ interface Props {
   subjectName: string;
   newItems?: string[];
   fetching?: boolean;
-  aiModeActive?: boolean;
-  onAiSelect?: (file: ParsedFile, category: string) => void;
-  isItemSelected?: (id: string) => boolean;
 }
 
 export default function FileBrowser({
@@ -45,9 +42,6 @@ export default function FileBrowser({
   subjectName,
   newItems = [],
   fetching = false,
-  aiModeActive = false,
-  onAiSelect,
-  isItemSelected,
 }: Props) {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
@@ -65,7 +59,7 @@ export default function FileBrowser({
   // Categories
   const categories = useMemo(() => ["All", ...Object.keys(data)], [data]);
 
-  // Flatten and Filter — also track category per file for AI cart
+  // Flatten and Filter
   const filteredFiles = useMemo(() => {
     const currentCategory = categories[activeTab];
     let files: { file: ParsedFile; category: string }[];
@@ -317,9 +311,6 @@ export default function FileBrowser({
                       mobileExpandedId={mobileExpandedCardId}
                       onMobileExpand={setMobileExpandedCardId}
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
-                      aiModeActive={aiModeActive}
-                      isSelected={isItemSelected?.(entry.file.id) ?? false}
-                      onAiSelect={onAiSelect ? (f) => onAiSelect(f, entry.category) : undefined}
                     />
                   </Grid>
                 ))}
@@ -332,9 +323,6 @@ export default function FileBrowser({
                     file={entry.file}
                     onClick={() => handleFileClick(entry.file)}
                     isNew={newItems.includes(entry.file.id)}
-                    aiModeActive={aiModeActive}
-                    isSelected={isItemSelected?.(entry.file.id) ?? false}
-                    onAiSelect={onAiSelect ? (f) => onAiSelect(f, entry.category) : undefined}
                   />
                 ))}
               </Box>

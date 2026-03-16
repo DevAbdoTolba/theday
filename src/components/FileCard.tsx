@@ -6,7 +6,6 @@ import {
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
-import AiSelectionOverlay from './ai-cart/AiSelectionOverlay';
 
 // Dynamic imports for MUI icons
 const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
@@ -45,10 +44,6 @@ interface FileCardProps {
   onMobileExpand?: (id: string | null) => void;
   // Position in grid (0 = left, 1 = right on 2-column mobile grid)
   gridPosition?: 'left' | 'right';
-  // AI Mode selection
-  aiModeActive?: boolean;
-  isSelected?: boolean;
-  onAiSelect?: (file: ParsedFile) => void;
 }
 
 export const FileCard = ({
@@ -59,9 +54,6 @@ export const FileCard = ({
   mobileExpandedId,
   onMobileExpand,
   gridPosition = 'left',
-  aiModeActive = false,
-  isSelected = false,
-  onAiSelect,
 }: FileCardProps) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
@@ -172,21 +164,12 @@ export const FileCard = ({
           }
         }}
         onClick={(e) => {
-          if (aiModeActive && onAiSelect) {
-            e.preventDefault();
-            e.stopPropagation();
-            onAiSelect(file);
-            return;
-          }
           if (file.type === 'youtube') {
             e.preventDefault();
             if (onClick) onClick();
           }
         }}
       >
-        {/* AI Selection Overlay */}
-        <AiSelectionOverlay isSelectable={aiModeActive} isSelected={isSelected} />
-
         {/* Zoom icon - always visible on mobile, clickable */}
         {!isDesktop && (
           <Box
@@ -216,10 +199,10 @@ export const FileCard = ({
         )}
 
         <CardActionArea
-          component={aiModeActive ? "div" : "a"}
-          href={aiModeActive ? undefined : file.url}
-          target={aiModeActive ? undefined : "_blank"}
-          rel={aiModeActive ? undefined : "noopener noreferrer"}
+          component="a"
+          href={file.url}
+          target="_blank"
+          rel="noopener noreferrer"
           sx={{ 
             flexGrow: 1, 
             display: 'flex', 

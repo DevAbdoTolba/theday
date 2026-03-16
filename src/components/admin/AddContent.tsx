@@ -101,6 +101,7 @@ export default function AddContent({
   const [videoDragging, setVideoDragging] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const progressRef = useRef(0);
 
   // Shared
   const [snackbar, setSnackbar] = useState<{
@@ -136,6 +137,7 @@ export default function AddContent({
   };
 
   const handleProgress = (p: UploadProgressInfo) => {
+    progressRef.current = p.percent;
     setProgress(p.percent);
     setUploadSpeed(p.speedBps);
     if (p.percent >= 99) setProcessing(true);
@@ -162,6 +164,7 @@ export default function AddContent({
           mimeType: file.type || "application/octet-stream",
           folderId: targetFolderId,
           classId,
+          origin: typeof window !== "undefined" ? window.location.origin : "",
         }),
       });
       if (!res.ok) {
@@ -183,25 +186,6 @@ export default function AddContent({
       }
       throw err;
     }
-  };
-
-  // ── Rename a Drive file (used after video upload completes) ───
-
-  const renameDriveFile = async (fileId: string, newName: string) => {
-    const token = await getIdToken();
-    const res = await fetch("/api/admin/drive-file", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ fileId, classId, newName }),
-    });
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      throw new Error(data.error ?? "Failed to rename file");
-    }
-    return (await res.json()) as { id: string; name: string };
   };
 
   // ── Size validation ───────────────────────────────────────────
@@ -292,7 +276,13 @@ export default function AddContent({
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    void uploadFile(files[0]);
+    const file = files[0];
+    if (VIDEO_MIME_TYPES.includes(file.type as typeof VIDEO_MIME_TYPES[number])) {
+      showError("Video files must be uploaded using the Video tab");
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    void uploadFile(file);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -394,7 +384,7 @@ export default function AddContent({
   };
 
   // ── Video file upload ────────────────────────────────────────
-  // Flow: select file → edit title → click Upload → uploading → rename → done
+  // Flow: select file → edit title → click Upload → uploading → done
 
   const stageVideoFile = (file: File, skipSizeCheck?: boolean) => {
     if (!VIDEO_MIME_TYPES.includes(file.type as typeof VIDEO_MIME_TYPES[number])) {
@@ -411,27 +401,34 @@ export default function AddContent({
     setVideoFile(file);
   };
 
-  /** User clicks "Upload" — start the actual upload, then rename */
+  /** User clicks "Upload" — upload directly with the staging name */
   const handleStartVideoUpload = async () => {
     if (!videoFile) return;
 
     const title = videoTitle.trim() || stripExtension(videoFile.name);
+    const stagingName = `${title}__${category}__${subject}`;
     const controller = new AbortController();
     abortRef.current = controller;
+    progressRef.current = 0;
 
     try {
-      const created = await directUpload(videoFile, folderId, videoFile.name, controller.signal);
-
-      // Rename to staging convention
-      setProcessing(true);
-      const stagingName = `${title}__${category}__${subject}`;
-      const renamed = await renameDriveFile(created.id, stagingName);
-      addToCache({ id: renamed.id, name: renamed.name, size: videoFile.size, mimeType: videoFile.type });
-      showSuccess(`"${title}" uploaded — video will be processed within 24 hours`);
+      // Upload directly with the staging name — no rename step needed
+      const created = await directUpload(videoFile, folderId, stagingName, controller.signal);
+      addToCache({ id: created.id, name: created.name, size: videoFile.size, mimeType: videoFile.type });
+      showSuccess(`"${title}" uploaded`);
       onContentAdded();
     } catch (err) {
       if (err instanceof UploadAbortedError) {
         // User cancelled — no error snackbar
+      } else if (
+        err instanceof Error &&
+        err.message.includes("Network error") &&
+        progressRef.current >= 98
+      ) {
+        // All bytes were sent but the response was lost (CORS / network hiccup).
+        // The file is on Drive with the correct staging name already.
+        showSuccess(`"${title}" uploaded — refresh if not visible`);
+        onContentAdded();
       } else {
         showError(err instanceof Error ? err.message : "Upload failed");
       }

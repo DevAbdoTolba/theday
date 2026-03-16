@@ -11,11 +11,12 @@ export default async function handler(
   }
 
   try {
-    const { fileName, mimeType, folderId, classId } = req.body as {
+    const { fileName, mimeType, folderId, classId, origin: clientOrigin } = req.body as {
       fileName: string;
       mimeType: string;
       folderId: string;
       classId: string;
+      origin?: string;
     };
 
     if (!fileName || !mimeType || !folderId || !classId) {
@@ -26,8 +27,9 @@ export default async function handler(
 
     const accessToken = await getWriteAccessToken();
 
-    // Forward the browser origin so Google sets CORS headers on the session URI
-    const origin = req.headers.origin
+    // Use client-provided origin (most reliable), fall back to request headers
+    const origin = clientOrigin
+      || req.headers.origin
       || (req.headers.referer ? new URL(req.headers.referer as string).origin : "");
     const uploadUrl = new URL("https://www.googleapis.com/upload/drive/v3/files");
     uploadUrl.searchParams.set("uploadType", "resumable");

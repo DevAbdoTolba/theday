@@ -4,9 +4,6 @@ import {
   Box, Typography, Chip, useTheme, Paper, Tooltip 
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
-import { alpha } from '@mui/material';
-
-const CheckCircle = dynamic(() => import('@mui/icons-material/CheckCircle'), { ssr: false });
 
 // Dynamic imports for MUI icons
 const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
@@ -41,12 +38,9 @@ interface Props {
   file: ParsedFile;
   onClick: () => void;
   isNew?: boolean;
-  aiModeActive?: boolean;
-  isSelected?: boolean;
-  onAiSelect?: (file: ParsedFile) => void;
 }
 
-export const FileListItem = ({ file, onClick, isNew, aiModeActive = false, isSelected = false, onAiSelect }: Props) => {
+export const FileListItem = ({ file, onClick, isNew }: Props) => {
   const theme = useTheme();
 
   // Right-side Action Icon Logic
@@ -58,14 +52,10 @@ export const FileListItem = ({ file, onClick, isNew, aiModeActive = false, isSel
 
   return (
     <Paper
-      component={aiModeActive ? "div" : "a"}
-      href={aiModeActive ? undefined : file.url}
+      component="a"
+      href={file.url}
       onClick={(e: React.MouseEvent) => {
         e.preventDefault();
-        if (aiModeActive && onAiSelect) {
-          onAiSelect(file);
-          return;
-        }
         onClick();
       }}
       elevation={0}
@@ -77,28 +67,19 @@ export const FileListItem = ({ file, onClick, isNew, aiModeActive = false, isSel
         textDecoration: 'none',
         borderRadius: 2,
         border: `1px solid ${
-          isSelected
-            ? theme.palette.primary.main
-            : isNew
-              ? theme.palette.success.main
-              : theme.palette.divider
+          isNew
+            ? theme.palette.success.main
+            : theme.palette.divider
         }`,
         transition: 'all 0.15s ease',
         cursor: 'pointer',
-        bgcolor: isSelected
-          ? alpha(theme.palette.primary.main, 0.08)
-          : isNew
-            ? `${theme.palette.success.main}08`
-            : 'transparent',
-        boxShadow: isSelected
-          ? `0 0 8px ${alpha(theme.palette.primary.main, 0.3)}`
-          : 'none',
+        bgcolor: isNew
+          ? `${theme.palette.success.main}08`
+          : 'transparent',
         '&:hover': {
-          bgcolor: isSelected
-            ? alpha(theme.palette.primary.main, 0.12)
-            : theme.palette.action.hover,
+          bgcolor: theme.palette.action.hover,
           borderColor: theme.palette.primary.main,
-          transform: aiModeActive ? 'none' : 'translateX(4px)',
+          transform: 'translateX(4px)',
         },
       }}
     >
@@ -138,9 +119,9 @@ export const FileListItem = ({ file, onClick, isNew, aiModeActive = false, isSel
       </Box>
 
       {/* Action Icon */}
-      <Tooltip title={isSelected ? "Selected" : "Open"}>
-        <Box sx={{ display: 'flex', alignItems: 'center', color: isSelected ? 'primary.main' : 'text.secondary', opacity: isSelected ? 1 : 0.7 }}>
-          {isSelected ? <CheckCircle fontSize="small" /> : getActionIcon()}
+      <Tooltip title="Open">
+        <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', opacity: 0.7 }}>
+          {getActionIcon()}
         </Box>
       </Tooltip>
     </Paper>
