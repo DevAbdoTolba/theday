@@ -37,8 +37,8 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
     }
   } else {
     // Standard File Logic
-    name = name.replace(/%20/g, ' '); 
-    
+    name = name.replace(/%20/g, ' ');
+
     if (file.mimeType.includes('folder')) type = 'folder';
     else if (file.mimeType.includes('pdf')) type = 'pdf';
     else if (file.mimeType.includes('image')) type = 'image';
@@ -46,6 +46,11 @@ export const parseGoogleFile = (file: DriveFile): ParsedFile => {
     else if (file.mimeType.includes('presentation')) type = 'slide';
     else if (file.mimeType.includes('spreadsheet')) type = 'sheet';
     else if (file.mimeType.includes('document')) type = 'doc';
+
+    // Strip pipeline routing suffix: "title__category__subject" → "title"
+    if (name.includes('__')) {
+      name = name.split('__')[0].trim() || name;
+    }
   }
 
   // 4. Generate Thumbnail URL - UPDATED LOGIC (Point 8)
