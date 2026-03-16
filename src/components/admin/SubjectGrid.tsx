@@ -9,6 +9,7 @@ import {
   DialogTitle,
   IconButton,
   InputAdornment,
+  Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
@@ -172,7 +173,28 @@ export default function SubjectGrid({
   const dialogOpen = formState.type !== "closed";
 
   if (loading) {
-    return <SkeletonGrid count={6} variant="subject" />;
+    return (
+      <Box>
+        {/* Toolbar skeleton: search + semester chips */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Skeleton variant="rounded" width={240} height={40} sx={{ flexShrink: 0 }} />
+          <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap", alignItems: "center" }}>
+            <Skeleton variant="rounded" width={40} height={24} sx={{ borderRadius: 12 }} />
+            <Skeleton variant="rounded" width={56} height={24} sx={{ borderRadius: 12 }} />
+            <Skeleton variant="rounded" width={56} height={24} sx={{ borderRadius: 12 }} />
+          </Box>
+        </Box>
+        <SkeletonGrid count={6} variant="subject" />
+      </Box>
+    );
   }
 
   return (
