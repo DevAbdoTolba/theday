@@ -29,7 +29,7 @@ import {
   UPLOAD_HARD_LIMIT,
   VIDEO_MIME_TYPES,
 } from "../../lib/constants";
-import { uploadFileDirect, SessionExpiredError } from "../../utils/upload";
+import { uploadFileDirect, SessionExpiredError, UploadAbortedError } from "../../utils/upload";
 import { getYoutubeId } from "../../utils/helpers";
 import { UploadProgress as UploadProgressInfo } from "../../utils/types";
 
@@ -96,12 +96,11 @@ export default function AddContent({
   const [ytTitle, setYtTitle] = useState("");
   const [ytSubmitting, setYtSubmitting] = useState(false);
 
-  // Video upload state — title appears AFTER file is selected
+  // Video upload state — file selected first, upload starts on user click
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDragging, setVideoDragging] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoUploadedId, setVideoUploadedId] = useState<string | null>(null);
-  const [videoRenaming, setVideoRenaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Shared
   const [snackbar, setSnackbar] = useState<{
@@ -147,7 +146,8 @@ export default function AddContent({
   const directUpload = async (
     file: File,
     targetFolderId: string,
-    fileName: string
+    fileName: string,
+    signal?: AbortSignal
   ): Promise<{ id: string; name: string }> => {
     const createSession = async () => {
       const token = await getIdToken();
@@ -175,11 +175,11 @@ export default function AddContent({
     let sessionUri = await createSession();
 
     try {
-      return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress });
+      return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress, signal });
     } catch (err) {
       if (err instanceof SessionExpiredError) {
         sessionUri = await createSession();
-        return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress });
+        return await uploadFileDirect(file, sessionUri, { onProgress: handleProgress, signal });
       }
       throw err;
     }
@@ -393,12 +393,10 @@ export default function AddContent({
     }
   };
 
-  // ── Video file upload (staging) ───────────────────────────────
-  // New flow: file selected → upload starts immediately with original
-  // filename → title field appears pre-filled → after upload, rename
-  // to {title}__{category}__{subject}
+  // ── Video file upload ────────────────────────────────────────
+  // Flow: select file → edit title → click Upload → uploading → rename → done
 
-  const startVideoUpload = async (file: File, skipSizeCheck?: boolean) => {
+  const stageVideoFile = (file: File, skipSizeCheck?: boolean) => {
     if (!VIDEO_MIME_TYPES.includes(file.type as typeof VIDEO_MIME_TYPES[number])) {
       showError("Only video files are accepted (MP4, MOV, AVI, MKV, WebM)");
       return;
@@ -409,56 +407,59 @@ export default function AddContent({
       if (!proceed) return;
     }
 
-    // Pre-fill title from filename and remember the file
-    const defaultTitle = stripExtension(file.name);
-    setVideoTitle(defaultTitle);
+    setVideoTitle(stripExtension(file.name));
     setVideoFile(file);
-    setVideoUploadedId(null);
-
-    try {
-      // Upload to the same category folder as regular files
-      const created = await directUpload(file, folderId, file.name);
-      // Store the uploaded file ID — rename happens when user confirms title
-      setVideoUploadedId(created.id);
-      setProcessing(false);
-    } catch (err) {
-      setProgress(null);
-      setProcessing(false);
-      setUploadSpeed(0);
-      setVideoFile(null);
-      showError(err instanceof Error ? err.message : "Upload failed");
-    }
   };
 
-  /** Called when the user confirms the title after upload finishes */
-  const handleVideoTitleConfirm = async () => {
-    if (!videoUploadedId || !videoFile) return;
+  /** User clicks "Upload" — start the actual upload, then rename */
+  const handleStartVideoUpload = async () => {
+    if (!videoFile) return;
 
     const title = videoTitle.trim() || stripExtension(videoFile.name);
-    const stagingName = `${title}__${category}__${subject}`;
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    setVideoRenaming(true);
     try {
-      const renamed = await renameDriveFile(videoUploadedId, stagingName);
+      const created = await directUpload(videoFile, folderId, videoFile.name, controller.signal);
+
+      // Rename to staging convention
+      setProcessing(true);
+      const stagingName = `${title}__${category}__${subject}`;
+      const renamed = await renameDriveFile(created.id, stagingName);
       addToCache({ id: renamed.id, name: renamed.name, size: videoFile.size, mimeType: videoFile.type });
       showSuccess(`"${title}" uploaded — video will be processed within 24 hours`);
       onContentAdded();
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to set video title");
+      if (err instanceof UploadAbortedError) {
+        // User cancelled — no error snackbar
+      } else {
+        showError(err instanceof Error ? err.message : "Upload failed");
+      }
     } finally {
-      // Reset all video upload state
+      abortRef.current = null;
       setProgress(null);
+      setProcessing(false);
       setUploadSpeed(0);
       setVideoFile(null);
-      setVideoUploadedId(null);
       setVideoTitle("");
-      setVideoRenaming(false);
     }
+  };
+
+  const handleCancelVideo = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setProgress(null);
+    setProcessing(false);
+    setUploadSpeed(0);
+    setVideoFile(null);
+    setVideoTitle("");
   };
 
   const handleVideoFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    void startVideoUpload(files[0]);
+    stageVideoFile(files[0]);
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
@@ -482,7 +483,7 @@ export default function AddContent({
     if (!file || isHardLimitExceeded) return;
 
     if (mode === "video-upload") {
-      void startVideoUpload(file, true);
+      stageVideoFile(file, true);
     } else {
       void uploadFile(file, replaceId ?? undefined, true);
     }
@@ -498,8 +499,8 @@ export default function AddContent({
   // ── Render ───────────────────────────────────────────────────
 
   const isVideoMode = mode === "video-youtube" || mode === "video-upload";
-  const videoUploadDone = videoUploadedId !== null;
-  const videoInProgress = isUploading && videoFile !== null && !videoUploadDone;
+  const videoReady = videoFile !== null && !isUploading;
+  const videoInProgress = isUploading && videoFile !== null;
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -744,13 +745,13 @@ export default function AddContent({
                 </>
               )}
 
-              {/* Uploading / title input — shown after file is selected */}
+              {/* Title + Upload/Cancel — shown after file is selected */}
               {videoFile && (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                  {/* Progress bar with speed */}
-                  {progress !== null && (
+                  {/* Progress bar — shown only during upload */}
+                  {videoInProgress && (
                     <UploadProgressBar
-                      progress={progress}
+                      progress={progress!}
                       speed={uploadSpeed}
                       processing={processing}
                       slowMsg={slowMsg}
@@ -758,7 +759,7 @@ export default function AddContent({
                     />
                   )}
 
-                  {/* Title field — editable while uploading */}
+                  {/* Title field — editable before upload starts */}
                   <TextField
                     label="Video Title"
                     fullWidth
@@ -766,36 +767,31 @@ export default function AddContent({
                     value={videoTitle}
                     onChange={(e) => setVideoTitle(e.target.value)}
                     placeholder="e.g. Lecture 5 — Newton's Laws"
-                    helperText={
-                      videoInProgress
-                        ? "You can edit the title while the video uploads"
-                        : videoUploadDone
-                          ? "Upload complete — confirm the title to finish"
-                          : undefined
-                    }
-                    disabled={videoRenaming}
+                    helperText={videoReady ? `File: ${videoFile.name}` : undefined}
+                    disabled={videoInProgress}
                   />
 
-                  {/* Confirm button — only active after upload finishes */}
+                  {/* Upload + Cancel buttons */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={!videoUploadDone || videoRenaming || !videoTitle.trim()}
-                      onClick={() => void handleVideoTitleConfirm()}
-                      sx={{ minWidth: 120 }}
-                    >
-                      {videoRenaming
-                        ? "Saving..."
-                        : videoUploadDone
-                          ? "Confirm Title"
-                          : "Uploading..."}
-                    </Button>
-                    {videoUploadDone && !videoRenaming && (
-                      <Typography variant="caption" color="success.main">
-                        Upload complete
-                      </Typography>
+                    {videoReady && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={!videoTitle.trim()}
+                        onClick={() => void handleStartVideoUpload()}
+                        sx={{ minWidth: 100 }}
+                      >
+                        Upload
+                      </Button>
                     )}
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="inherit"
+                      onClick={handleCancelVideo}
+                    >
+                      Cancel
+                    </Button>
                   </Box>
                 </Box>
               )}

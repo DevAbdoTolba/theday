@@ -26,8 +26,15 @@ export default async function handler(
 
     const accessToken = await getWriteAccessToken();
 
+    // Forward the browser origin so Google sets CORS headers on the session URI
+    const origin = req.headers.origin
+      || (req.headers.referer ? new URL(req.headers.referer as string).origin : "");
+    const uploadUrl = new URL("https://www.googleapis.com/upload/drive/v3/files");
+    uploadUrl.searchParams.set("uploadType", "resumable");
+    if (origin) uploadUrl.searchParams.set("origin", origin);
+
     const initResponse = await fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
+      uploadUrl.toString(),
       {
         method: "POST",
         headers: {

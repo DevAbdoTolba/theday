@@ -20,6 +20,13 @@ export class SessionExpiredError extends Error {
   }
 }
 
+export class UploadAbortedError extends Error {
+  constructor() {
+    super("Upload cancelled");
+    this.name = "UploadAbortedError";
+  }
+}
+
 /** Query how many bytes Drive has received for a resumable session. */
 async function queryUploadOffset(sessionUri: string, totalSize: number): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -50,14 +57,23 @@ function uploadSlice(
   sessionUri: string,
   file: File,
   offset: number,
-  onProgress: (loaded: number) => void
+  onProgress: (loaded: number) => void,
+  signal?: AbortSignal
 ): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new UploadAbortedError());
+
     const slice = file.slice(offset);
     const total = file.size;
     const end = total - 1;
 
     const xhr = new XMLHttpRequest();
+
+    const onAbort = () => {
+      xhr.abort();
+      reject(new UploadAbortedError());
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -66,6 +82,7 @@ function uploadSlice(
     };
 
     xhr.onload = () => {
+      signal?.removeEventListener("abort", onAbort);
       if (xhr.status === 200 || xhr.status === 201) {
         try {
           const result = JSON.parse(xhr.responseText) as UploadResult;
@@ -84,7 +101,10 @@ function uploadSlice(
       reject(new Error(msg));
     };
 
-    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.onerror = () => {
+      signal?.removeEventListener("abort", onAbort);
+      reject(new Error("Network error during upload"));
+    };
 
     xhr.open("PUT", sessionUri);
     xhr.setRequestHeader("Content-Range", `bytes ${offset}-${end}/${total}`);
@@ -106,7 +126,7 @@ export async function uploadFileDirect(
   sessionUri: string,
   options: UploadOptions = {}
 ): Promise<UploadResult> {
-  const { onProgress } = options;
+  const { onProgress, signal } = options;
 
   // Speed tracking state
   let lastTimestamp = Date.now();
@@ -142,7 +162,7 @@ export async function uploadFileDirect(
 
   while (attempt < UPLOAD_MAX_RETRIES) {
     try {
-      const result = await uploadSlice(sessionUri, file, offset, reportProgress);
+      const result = await uploadSlice(sessionUri, file, offset, reportProgress, signal);
       if (onProgress) {
         onProgress({ percent: 100, speedBps: 0, loadedBytes: file.size, totalBytes: file.size });
       }

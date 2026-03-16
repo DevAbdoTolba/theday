@@ -71,6 +71,7 @@ export interface UploadProgress {
 
 export interface UploadOptions {
   onProgress?: (progress: UploadProgress) => void;
+  signal?: AbortSignal;
 }
 
 export interface UploadResult {
