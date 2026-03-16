@@ -21,7 +21,7 @@ export default function ApprovalList({
   onReject,
 }: ApprovalListProps) {
   if (loading) {
-    return <SkeletonGrid count={3} cardHeight={160} />;
+    return <SkeletonGrid count={3} variant="approval" />;
   }
 
   return (

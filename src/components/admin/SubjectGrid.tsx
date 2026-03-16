@@ -172,7 +172,7 @@ export default function SubjectGrid({
   const dialogOpen = formState.type !== "closed";
 
   if (loading) {
-    return <SkeletonGrid count={6} />;
+    return <SkeletonGrid count={6} variant="subject" />;
   }
 
   return (
