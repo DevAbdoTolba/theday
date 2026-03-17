@@ -15,6 +15,7 @@ export default function StudyModeToggle() {
       onClick={toggleMode}
       size="small"
       disableRipple={false}
+      data-study-toggle="true"
       sx={{
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
