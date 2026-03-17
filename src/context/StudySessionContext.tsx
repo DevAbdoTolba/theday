@@ -25,13 +25,13 @@ const MAX_ITEMS = 50;
 export function StudySessionProvider({ children }: { children: ReactNode }) {
   const [isActive, setIsActive] = useState(false);
   const [items, setItems] = useState<SessionItem[]>([]);
-  // Ref for synchronous reads in callbacks (avoids stale closure issues)
+  // Ref updated synchronously during render — always current, no useEffect delay
   const itemsRef = useRef<SessionItem[]>([]);
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
+  itemsRef.current = items;
+  // Set for O(1) membership checks — rebuilt only when items changes
+  const itemIdSet = React.useMemo(() => new Set(items.map(i => i.id)), [items]);
+  const itemIdSetRef = useRef(itemIdSet);
+  itemIdSetRef.current = itemIdSet;
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -113,9 +113,10 @@ export function StudySessionProvider({ children }: { children: ReactNode }) {
 
   const clearAll = useCallback(() => setItems([]), []);
 
+  // Stable reference forever — reads from ref which is always current
   const isSelected = useCallback((id: string): boolean => {
-    return items.some(i => i.id === id);
-  }, [items]);
+    return itemIdSetRef.current.has(id);
+  }, []);
 
   return (
     <StudySessionContext.Provider value={{

@@ -51,7 +51,7 @@ interface FileCardProps {
   onStudySelect?: (file: ParsedFile) => void;
 }
 
-export const FileCard = ({
+const FileCardBase = ({
   file,
   onClick,
   isNew,
@@ -330,3 +330,16 @@ export const FileCard = ({
     </Box>
   );
 };
+
+// Only re-render when the props that affect visuals change.
+// Callbacks (onClick, onMobileExpand, onStudySelect) are intentionally excluded —
+// they are always new refs from FileBrowser's render but functionally unchanged.
+export const FileCard = React.memo(FileCardBase, (prev, next) =>
+  prev.file === next.file &&
+  prev.studyModeActive === next.studyModeActive &&
+  prev.isSelected === next.isSelected &&
+  prev.isNew === next.isNew &&
+  prev.peekMode === next.peekMode &&
+  prev.mobileExpandedId === next.mobileExpandedId &&
+  prev.gridPosition === next.gridPosition
+);

@@ -45,7 +45,7 @@ interface Props {
   onStudySelect?: (file: ParsedFile) => void;
 }
 
-export const FileListItem = ({
+const FileListItemBase = ({
   file,
   onClick,
   isNew,
@@ -154,3 +154,10 @@ export const FileListItem = ({
     </Paper>
   );
 };
+
+export const FileListItem = React.memo(FileListItemBase, (prev, next) =>
+  prev.file === next.file &&
+  prev.studyModeActive === next.studyModeActive &&
+  prev.isSelected === next.isSelected &&
+  prev.isNew === next.isNew
+);
