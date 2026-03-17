@@ -23,7 +23,7 @@ const AutoAwesome = dynamic(() => import('@mui/icons-material/AutoAwesome'), { s
 
 const MAX_ITEMS = 50;
 const WARN_THRESHOLD = 40;
-const NOTEBOOKLM_URL = 'https://notebooklm.google.com';
+const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/creating';
 
 async function writeToClipboard(text: string): Promise<boolean> {
   try {

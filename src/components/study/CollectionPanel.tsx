@@ -18,7 +18,7 @@ const Description = dynamic(() => import('@mui/icons-material/Description'), { s
 
 const LIMIT_WARN_THRESHOLD = 40;
 const MAX_ITEMS = 50;
-const NOTEBOOKLM_URL = 'https://notebooklm.google.com';
+const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/creating';
 
 interface Props {
   open: boolean;

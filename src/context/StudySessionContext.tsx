@@ -114,8 +114,8 @@ export function StudySessionProvider({ children }: { children: ReactNode }) {
   const clearAll = useCallback(() => setItems([]), []);
 
   const isSelected = useCallback((id: string): boolean => {
-    return itemsRef.current.some(i => i.id === id);
-  }, []);
+    return items.some(i => i.id === id);
+  }, [items]);
 
   return (
     <StudySessionContext.Provider value={{

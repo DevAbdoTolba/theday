@@ -2,12 +2,17 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useStudySession } from '../../context/StudySessionContext';
 
-// Smooth cubic ease-out — decelerates naturally, no snap
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+// Smooth ease-out cubic — slow luxurious deceleration
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 // Large enough to cover any screen diagonal
 const MAX_SIZE = 9000;
-// Centering shorthand for Framer Motion (% is relative to element's own size)
+// Framer Motion % centering (relative to element's own size)
 const CENTER = { x: '-50%', y: '-50%' } as const;
+
+// Burst duration in ms — ring animation is 3.2 s, border appears after it settles
+const BURST_DURATION_MS = 3400;
+// How long into the burst before border fades in
+const BORDER_DELAY_S = 2.8;
 
 export default function StudyActivationEffect() {
   const { isActive } = useStudySession();
@@ -15,12 +20,10 @@ export default function StudyActivationEffect() {
   const prevActiveRef = useRef(false);
   const [expandKey, setExpandKey] = useState(0);
   const [showExpand, setShowExpand] = useState(false);
-  // Pixel coords of button center, updated on each activation
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (isActive && !prevActiveRef.current && !prefersReducedMotion) {
-      // Locate the toggle button and derive pixel center
       const btn = document.querySelector('[data-study-toggle]');
       if (btn) {
         const r = btn.getBoundingClientRect();
@@ -28,14 +31,13 @@ export default function StudyActivationEffect() {
       }
       setExpandKey(k => k + 1);
       setShowExpand(true);
-      const t = setTimeout(() => setShowExpand(false), 2100);
+      const t = setTimeout(() => setShowExpand(false), BURST_DURATION_MS);
       prevActiveRef.current = true;
       return () => clearTimeout(t);
     }
     if (!isActive) prevActiveRef.current = false;
   }, [isActive, prefersReducedMotion]);
 
-  // Shared absolute positioning — each ring is centred on the button pixel coords
   const ringBase: React.CSSProperties = {
     position: 'absolute',
     left: origin.x,
@@ -46,72 +48,75 @@ export default function StudyActivationEffect() {
 
   return (
     <>
-      {/* ── Burst animation on activation ─────────────────────────────── */}
+      {/* ── Burst animation ───────────────────────────────────────────── */}
       <AnimatePresence>
         {showExpand && (
           <motion.div
             key={expandKey}
             style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9998 }}
           >
-            {/* Inner glow — solid radial fill, fades fast to give initial "flash" */}
+            {/* Soft warm glow orb — fades out before the ring reaches the edges */}
             <motion.div
-              initial={{ width: 0, height: 0, ...CENTER, opacity: 0.48 }}
-              animate={{ width: MAX_SIZE * 0.32, height: MAX_SIZE * 0.32, ...CENTER, opacity: 0 }}
-              transition={{ duration: 0.75, ease: [0.33, 1, 0.68, 1] }}
+              initial={{ width: 0, height: 0, ...CENTER, opacity: 0.38 }}
+              animate={{ width: MAX_SIZE * 0.28, height: MAX_SIZE * 0.28, ...CENTER, opacity: 0 }}
+              transition={{ duration: 1.2, ease: [0.33, 1, 0.68, 1] }}
               style={{
                 ...ringBase,
                 background:
-                  'radial-gradient(circle, rgba(139,92,246,0.55) 0%, rgba(59,130,246,0.22) 50%, transparent 100%)',
+                  'radial-gradient(circle, rgba(251,191,36,0.5) 0%, rgba(245,158,11,0.25) 40%, transparent 100%)',
               }}
             />
 
-            {/* Primary ring — iridescent conic, each stop has different alpha */}
+            {/* Main ring — warm iridescent with varying per-stop alpha */}
             <motion.div
-              initial={{ width: 0, height: 0, ...CENTER, opacity: 1 }}
+              initial={{ width: 0, height: 0, ...CENTER, opacity: 0.88 }}
               animate={{ width: MAX_SIZE, height: MAX_SIZE, ...CENTER, opacity: 0 }}
-              transition={{ duration: 1.9, ease: EASE }}
+              transition={{ duration: 3.2, ease: EASE }}
               style={{
                 ...ringBase,
+                // Warm aurora: amber → rose → violet → sky → amber
                 background:
-                  'conic-gradient(from 120deg,' +
-                  ' rgba(139,92,246,0.95),' +
-                  ' rgba(59,130,246,0.50),' +
-                  ' rgba(6,182,212,0.90),' +
-                  ' rgba(167,139,250,0.35),' +
-                  ' rgba(236,72,153,0.82),' +
-                  ' rgba(245,158,11,0.42),' +
-                  ' rgba(139,92,246,0.95))',
-                // Cut out everything except the outer 8 px band → hollow ring
+                  'conic-gradient(from 90deg,' +
+                  ' rgba(251,191,36,0.95),' +    // warm amber
+                  ' rgba(251,113,133,0.55),' +   // soft rose
+                  ' rgba(167,139,250,0.80),' +   // violet
+                  ' rgba(34,211,238,0.42),' +    // hint of sky
+                  ' rgba(245,158,11,0.88),' +    // deep amber
+                  ' rgba(236,72,153,0.50),' +    // magenta
+                  ' rgba(251,191,36,0.95))',
+                // Hollow ring: keep only outer ~7 px band
                 maskImage:
-                  'radial-gradient(farthest-side, transparent calc(100% - 8px), black calc(100% - 8px))',
+                  'radial-gradient(farthest-side, transparent calc(100% - 7px), black calc(100% - 7px))',
                 WebkitMaskImage:
-                  'radial-gradient(farthest-side, transparent calc(100% - 8px), black calc(100% - 8px))',
-                filter: 'blur(1.5px)',
+                  'radial-gradient(farthest-side, transparent calc(100% - 7px), black calc(100% - 7px))',
+                filter: 'blur(1px)',
               }}
             />
-
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Persistent 2 px "holy" border glow while Study Mode is active ── */}
+      {/* ── Persistent border glow — only fades in AFTER burst settles ── */}
       <AnimatePresence>
         {isActive && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.65, delay: showExpand ? 1.15 : 0 }}
+            transition={{
+              duration: 0.9,
+              // Wait until the expanding ring is nearly invisible before showing
+              delay: showExpand ? BORDER_DELAY_S : 0,
+            }}
             style={{
               position: 'fixed',
               inset: 0,
               pointerEvents: 'none',
               zIndex: 9997,
               boxShadow: [
-                // 1 px inner border, very subtle
-                'inset 0 0 0 1px rgba(139,92,246,0.28)',
-                // soft inner glow
-                'inset 0 0 18px rgba(139,92,246,0.12)',
+                'inset 0 0 0 2px rgba(251,191,36,0.32)',   // warm amber border
+                'inset 0 0 20px rgba(251,191,36,0.10)',    // inner amber wash
+                'inset 0 0 50px rgba(167,139,250,0.07)',   // distant violet hint
               ].join(', '),
             }}
           />
