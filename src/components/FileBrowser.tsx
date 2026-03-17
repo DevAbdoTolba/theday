@@ -35,6 +35,10 @@ interface Props {
   subjectName: string;
   newItems?: string[];
   fetching?: boolean;
+  // Study Mode props
+  studyModeActive?: boolean;
+  onStudySelect?: (file: ParsedFile, category: string) => void;
+  isItemSelected?: (id: string) => boolean;
 }
 
 export default function FileBrowser({
@@ -42,6 +46,9 @@ export default function FileBrowser({
   subjectName,
   newItems = [],
   fetching = false,
+  studyModeActive = false,
+  onStudySelect,
+  isItemSelected,
 }: Props) {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
@@ -311,6 +318,9 @@ export default function FileBrowser({
                       mobileExpandedId={mobileExpandedCardId}
                       onMobileExpand={setMobileExpandedCardId}
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
+                      studyModeActive={studyModeActive}
+                      isSelected={isItemSelected?.(entry.file.id) ?? false}
+                      onStudySelect={(file) => onStudySelect?.(file, entry.category)}
                     />
                   </Grid>
                 ))}
@@ -323,6 +333,9 @@ export default function FileBrowser({
                     file={entry.file}
                     onClick={() => handleFileClick(entry.file)}
                     isNew={newItems.includes(entry.file.id)}
+                    studyModeActive={studyModeActive}
+                    isSelected={isItemSelected?.(entry.file.id) ?? false}
+                    onStudySelect={(file) => onStudySelect?.(file, entry.category)}
                   />
                 ))}
               </Box>

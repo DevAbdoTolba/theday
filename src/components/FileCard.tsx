@@ -1,11 +1,12 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { 
-  Card, CardActionArea, CardContent, CardMedia, 
+import {
+  Card, CardActionArea, CardContent, CardMedia,
   Typography, Box, Chip, Tooltip, useTheme, useMediaQuery
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
+import SelectionOverlay from './study/SelectionOverlay';
 
 // Dynamic imports for MUI icons
 const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
@@ -44,6 +45,10 @@ interface FileCardProps {
   onMobileExpand?: (id: string | null) => void;
   // Position in grid (0 = left, 1 = right on 2-column mobile grid)
   gridPosition?: 'left' | 'right';
+  // Study Mode props
+  studyModeActive?: boolean;
+  isSelected?: boolean;
+  onStudySelect?: (file: ParsedFile) => void;
 }
 
 export const FileCard = ({
@@ -54,7 +59,12 @@ export const FileCard = ({
   mobileExpandedId,
   onMobileExpand,
   gridPosition = 'left',
+  studyModeActive = false,
+  isSelected = false,
+  onStudySelect,
 }: FileCardProps) => {
+  // Study mode is only active for non-folder items
+  const studySelectable = studyModeActive && file.type !== 'folder';
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   
@@ -198,16 +208,21 @@ export const FileCard = ({
           </Box>
         )}
 
+        {/* Study Mode selection overlay */}
+        {studySelectable && (
+          <SelectionOverlay isSelectable={studySelectable} isSelected={isSelected} />
+        )}
+
         <CardActionArea
-          component="a"
-          href={file.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            flexDirection: 'column', 
+          component={studySelectable ? 'div' : 'a'}
+          {...(!studySelectable && { href: file.url, target: '_blank', rel: 'noopener noreferrer' })}
+          onClick={studySelectable ? (e: React.MouseEvent) => { e.preventDefault(); onStudySelect?.(file); } : undefined}
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
             alignItems: 'stretch',
+            cursor: studySelectable ? 'pointer' : undefined,
           }}
         >
           {/* Thumbnail with smooth height transition */}

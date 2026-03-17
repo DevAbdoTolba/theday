@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+const StudyModeToggle = dynamic(() => import('./study/StudyModeToggle'), { ssr: false });
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Button,
   useTheme, Tooltip, useMediaQuery, alpha, Menu, MenuItem,
@@ -164,7 +165,10 @@ export default function ModernHeader({
           )}
 
           <Box display="flex" alignItems="center" gap={1}>
-            
+
+            {/* Study Mode Toggle — subject pages only */}
+            {isSearch && <StudyModeToggle />}
+
             {/* CLASS SWITCHER CONTROL */}
             {classes.length > 1 && (
               <>

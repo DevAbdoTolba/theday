@@ -1,6 +1,7 @@
 import "../styles/Material.css";
 import "../styles/DribbleButton.css";
 import "../styles/RainbowBorder.css";
+import "../styles/study-mode.css";
 
 import React, { useContext, useMemo, useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -14,6 +15,9 @@ import IndexedProvider from "../context/IndexedContext";
 import { DevOptionsProvider } from "../context/DevOptionsContext";
 import DevDashboard from "../components/DevDashboard";
 import { AuthProvider } from "../context/AuthContext";
+import { StudySessionProvider } from "../context/StudySessionContext";
+import dynamic from "next/dynamic";
+const StudyFab = dynamic(() => import("../components/study/StudyFab"), { ssr: false });
 
 import Script from 'next/script';
 
@@ -153,6 +157,7 @@ export default function App({
             <ColorModeContext.Provider value={colorMode}>
               <ThemeProvider theme={theme}>
                 <AuthProvider>
+                <StudySessionProvider>
                 <CssBaseline />
                 <Image
                   src={"/icon-512x512.png"}
@@ -172,8 +177,10 @@ export default function App({
 
 
                 <Component {...pageProps} />
+                <StudyFab />
                 <DevDashboard />
                 <Analytics />
+                </StudySessionProvider>
                 </AuthProvider>
               </ThemeProvider>
             </ColorModeContext.Provider>

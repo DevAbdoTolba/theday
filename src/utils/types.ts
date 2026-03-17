@@ -47,6 +47,25 @@ export interface ParsedFile {
   youtubeId?: string | null
 }
 
+// --- Study Session types ---
+
+export interface SessionItem {
+  id: string;
+  name: string;
+  url: string;
+  type: ParsedFile['type'];
+  subjectName: string;
+  subjectAbbr: string;
+  category: string;
+  thumbnailUrl?: string;
+  addedAt: number;
+}
+
+export interface StudySessionState {
+  isActive: boolean;
+  items: SessionItem[];
+}
+
 // --- Upload types ---
 
 export interface UploadProgress {
