@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Box, Typography, Chip, useTheme, Paper, Tooltip, alpha
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
+import { selectionStore } from '../utils/selectionStore';
 
 // Dynamic imports for MUI icons
 const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
@@ -41,7 +42,6 @@ interface Props {
   isNew?: boolean;
   // Study Mode props
   studyModeActive?: boolean;
-  isSelected?: boolean;
   onStudySelect?: (file: ParsedFile) => void;
 }
 
@@ -50,12 +50,17 @@ const FileListItemBase = ({
   onClick,
   isNew,
   studyModeActive = false,
-  isSelected = false,
   onStudySelect,
 }: Props) => {
   const theme = useTheme();
   // Study mode only applies to non-folder items
   const studySelectable = studyModeActive && file.type !== 'folder';
+  // Subscribe directly — only THIS row re-renders when its selection changes
+  const isSelected = useSyncExternalStore(
+    selectionStore.subscribe,
+    () => selectionStore.isSelected(file.id),
+    () => false,
+  );
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -158,6 +163,5 @@ const FileListItemBase = ({
 export const FileListItem = React.memo(FileListItemBase, (prev, next) =>
   prev.file === next.file &&
   prev.studyModeActive === next.studyModeActive &&
-  prev.isSelected === next.isSelected &&
   prev.isNew === next.isNew
 );

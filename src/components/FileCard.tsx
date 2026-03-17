@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Card, CardActionArea, CardContent, CardMedia,
   Typography, Box, Chip, Tooltip, useTheme, useMediaQuery
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
+import { selectionStore } from '../utils/selectionStore';
 import { getYoutubeThumbnail } from '../utils/helpers';
 import SelectionOverlay from './study/SelectionOverlay';
 
@@ -47,7 +48,6 @@ interface FileCardProps {
   gridPosition?: 'left' | 'right';
   // Study Mode props
   studyModeActive?: boolean;
-  isSelected?: boolean;
   onStudySelect?: (file: ParsedFile) => void;
 }
 
@@ -60,11 +60,16 @@ const FileCardBase = ({
   onMobileExpand,
   gridPosition = 'left',
   studyModeActive = false,
-  isSelected = false,
   onStudySelect,
 }: FileCardProps) => {
   // Study mode is only active for non-folder items
   const studySelectable = studyModeActive && file.type !== 'folder';
+  // Subscribe directly to the selection store — only THIS card re-renders on change
+  const isSelected = useSyncExternalStore(
+    selectionStore.subscribe,
+    () => selectionStore.isSelected(file.id),
+    () => false,
+  );
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   
@@ -337,7 +342,6 @@ const FileCardBase = ({
 export const FileCard = React.memo(FileCardBase, (prev, next) =>
   prev.file === next.file &&
   prev.studyModeActive === next.studyModeActive &&
-  prev.isSelected === next.isSelected &&
   prev.isNew === next.isNew &&
   prev.peekMode === next.peekMode &&
   prev.mobileExpandedId === next.mobileExpandedId &&

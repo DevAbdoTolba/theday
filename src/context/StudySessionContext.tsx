@@ -3,6 +3,7 @@ import React, {
   useCallback, useRef, ReactNode,
 } from 'react';
 import { SessionItem } from '../utils/types';
+import { selectionStore } from '../utils/selectionStore';
 
 interface StudySessionContextValue {
   isActive: boolean;
@@ -44,6 +45,7 @@ export function StudySessionProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(savedItems) as SessionItem[];
         setItems(parsed);
         itemsRef.current = parsed;
+        selectionStore.setAll(parsed.map((i: SessionItem) => i.id));
       } catch {
         // ignore malformed JSON
       }
@@ -61,6 +63,7 @@ export function StudySessionProvider({ children }: { children: ReactNode }) {
           const parsed = JSON.parse(e.newValue) as SessionItem[];
           setItems(parsed);
           itemsRef.current = parsed;
+          selectionStore.setAll(parsed.map((i: SessionItem) => i.id));
         } catch {
           // ignore
         }
@@ -89,29 +92,42 @@ export function StudySessionProvider({ children }: { children: ReactNode }) {
     if (current.length >= MAX_ITEMS || current.some(i => i.id === item.id)) {
       return false;
     }
-    setItems(prev => [...prev, item]);
+    setItems(prev => {
+      const next = [...prev, item];
+      selectionStore.setAll(next.map(i => i.id));
+      return next;
+    });
     return true;
   }, []);
 
   const removeItem = useCallback((id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+    setItems(prev => {
+      const next = prev.filter(i => i.id !== id);
+      selectionStore.setAll(next.map(i => i.id));
+      return next;
+    });
   }, []);
 
   const toggleItem = useCallback((item: SessionItem): boolean => {
     const current = itemsRef.current;
     const exists = current.some(i => i.id === item.id);
     if (!exists && current.length >= MAX_ITEMS) {
-      return false; // blocked at limit
+      return false;
     }
-    setItems(prev =>
-      prev.some(i => i.id === item.id)
+    setItems(prev => {
+      const next = prev.some(i => i.id === item.id)
         ? prev.filter(i => i.id !== item.id)
-        : [...prev, item]
-    );
+        : [...prev, item];
+      selectionStore.setAll(next.map(i => i.id));
+      return next;
+    });
     return true;
   }, []);
 
-  const clearAll = useCallback(() => setItems([]), []);
+  const clearAll = useCallback(() => {
+    setItems([]);
+    selectionStore.setAll([]);
+  }, []);
 
   // Stable reference forever — reads from ref which is always current
   const isSelected = useCallback((id: string): boolean => {

@@ -42,7 +42,7 @@ export default function SubjectPage({
   const [limitToast, setLimitToast] = useState(false);
 
   // Study Session integration
-  const { isActive, toggleItem, isSelected } = useStudySession();
+  const { isActive, toggleItem } = useStudySession();
 
   // Resolve full subject name from abbreviation
   const subjectFullName = useMemo(() => {
@@ -187,7 +187,6 @@ export default function SubjectPage({
             fetching={loadingFiles}
             studyModeActive={isActive}
             onStudySelect={handleStudySelect}
-            isItemSelected={isSelected}
           />
         ) : !loadingFolders && !loadingFiles ? (
           <Alert severity="info">No data available for this subject.</Alert>
