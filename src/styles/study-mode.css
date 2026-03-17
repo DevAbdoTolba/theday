@@ -28,12 +28,25 @@
   }
 }
 
+/* Apple Intelligence–style border: hue-rotate is GPU-only, zero repaint */
+@keyframes appleGlowCycle {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(360deg); }
+}
+
+.apple-glow-border {
+  animation: appleGlowCycle 5s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .study-selectable-border {
     animation: none;
     opacity: 0.8;
   }
   .study-selection-flash {
+    animation: none;
+  }
+  .apple-glow-border {
     animation: none;
   }
 }
