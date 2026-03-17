@@ -28,7 +28,7 @@ export default function StudyActivationEffect() {
       }
       setExpandKey(k => k + 1);
       setShowExpand(true);
-      const t = setTimeout(() => setShowExpand(false), 2700);
+      const t = setTimeout(() => setShowExpand(false), 2100);
       prevActiveRef.current = true;
       return () => clearTimeout(t);
     }
@@ -90,28 +90,6 @@ export default function StudyActivationEffect() {
               }}
             />
 
-            {/* Secondary ring — offset hue rotation, trails by 0.25 s */}
-            <motion.div
-              initial={{ width: 0, height: 0, ...CENTER, opacity: 0.62 }}
-              animate={{ width: MAX_SIZE, height: MAX_SIZE, ...CENTER, opacity: 0 }}
-              transition={{ duration: 2.2, ease: EASE, delay: 0.25 }}
-              style={{
-                ...ringBase,
-                background:
-                  'conic-gradient(from 285deg,' +
-                  ' rgba(6,182,212,0.72),' +
-                  ' rgba(167,139,250,0.45),' +
-                  ' rgba(236,72,153,0.68),' +
-                  ' rgba(59,130,246,0.40),' +
-                  ' rgba(139,92,246,0.72),' +
-                  ' rgba(6,182,212,0.45))',
-                maskImage:
-                  'radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px))',
-                WebkitMaskImage:
-                  'radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px))',
-                filter: 'blur(2.5px)',
-              }}
-            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -130,12 +108,10 @@ export default function StudyActivationEffect() {
               pointerEvents: 'none',
               zIndex: 9997,
               boxShadow: [
-                // solid 2 px inner border
-                'inset 0 0 0 2px rgba(139,92,246,0.70)',
-                // tight inner glow band
-                'inset 0 0 14px rgba(139,92,246,0.42)',
-                // wider soft wash
-                'inset 0 0 45px rgba(59,130,246,0.16)',
+                // 1 px inner border, very subtle
+                'inset 0 0 0 1px rgba(139,92,246,0.28)',
+                // soft inner glow
+                'inset 0 0 18px rgba(139,92,246,0.12)',
               ].join(', '),
             }}
           />
