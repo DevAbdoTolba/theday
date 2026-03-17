@@ -29,6 +29,7 @@ const GridView = dynamic(() => import("@mui/icons-material/GridView"), { ssr: fa
 const ViewList = dynamic(() => import("@mui/icons-material/ViewList"), { ssr: false });
 const AutoAwesome = dynamic(() => import("@mui/icons-material/AutoAwesome"), { ssr: false });
 const VisibilityOutlined = dynamic(() => import("@mui/icons-material/VisibilityOutlined"), { ssr: false });
+const StudyModeToggle = dynamic(() => import("./study/StudyModeToggle"), { ssr: false });
 
 interface Props {
   data: SubjectMaterials;
@@ -229,6 +230,12 @@ export default function FileBrowser({
               </ToggleButton>
             </Tooltip>
           )}
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
+          />
+          <StudyModeToggle />
           <Divider
             orientation="vertical"
             flexItem

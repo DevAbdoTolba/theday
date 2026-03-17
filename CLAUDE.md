@@ -13,6 +13,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-12
 - MongoDB (users, classes, content_items, subject_change_requests), Google Drive (files) (006-admin-class-auth)
 - TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, googleapis v118, Firebase Admin 13.7.0, Framer Motion 11.3.28 (007-direct-upload-video)
 - Google Drive (files via service account), MongoDB (users, classes — unchanged), Session cache (client-side in-memory, 5-min TTL) (007-direct-upload-video)
+- localStorage (client-side persistence), browser Storage event (cross-tab sync) (008-notebooklm-study-builder)
 
 - TypeScript 5.x (strict mode) + Storybook v7.x, Next.js 15, React 19, MUI v5, Framer Motion (001-storybook-components)
 
@@ -32,9 +33,9 @@ npm test && npm run lint
 TypeScript 5.x (strict mode): Follow standard conventions
 
 ## Recent Changes
+- 008-notebooklm-study-builder: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Framer Motion 11.3.28
 - 007-direct-upload-video: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, googleapis v118, Firebase Admin 13.7.0, Framer Motion 11.3.28
 - 006-admin-class-auth: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, Firebase Admin 13.7.0
-- 004-admin-sudo-ux: Added TypeScript 5.2.2 (strict mode) + Next.js 15 (Pages Router), React 19, MUI v6, Mongoose 8.4, Firebase 12.10.0, Firebase Admin 13.7.0, googleapis 118, Framer Motion, Dexie (IndexedDB)
 
 
 <!-- MANUAL ADDITIONS START -->

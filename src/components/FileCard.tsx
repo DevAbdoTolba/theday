@@ -208,6 +208,24 @@ export const FileCard = ({
           </Box>
         )}
 
+        {/* Click capture layer for study mode — must be on top of everything */}
+        {studySelectable && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 20,
+              cursor: 'pointer',
+              borderRadius: 'inherit',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onStudySelect?.(file);
+            }}
+          />
+        )}
+
         {/* Study Mode selection overlay */}
         {studySelectable && (
           <SelectionOverlay isSelectable={studySelectable} isSelected={isSelected} />

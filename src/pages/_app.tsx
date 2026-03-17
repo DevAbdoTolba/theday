@@ -17,7 +17,8 @@ import DevDashboard from "../components/DevDashboard";
 import { AuthProvider } from "../context/AuthContext";
 import { StudySessionProvider } from "../context/StudySessionContext";
 import dynamic from "next/dynamic";
-const StudyFab = dynamic(() => import("../components/study/StudyFab"), { ssr: false });
+const StudyQueuePanel = dynamic(() => import("../components/study/StudyQueuePanel"), { ssr: false });
+const StudyActivationEffect = dynamic(() => import("../components/study/StudyActivationEffect"), { ssr: false });
 
 import Script from 'next/script';
 
@@ -177,7 +178,8 @@ export default function App({
 
 
                 <Component {...pageProps} />
-                <StudyFab />
+                <StudyQueuePanel />
+                <StudyActivationEffect />
                 <DevDashboard />
                 <Analytics />
                 </StudySessionProvider>
