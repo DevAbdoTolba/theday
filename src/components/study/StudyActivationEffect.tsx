@@ -13,7 +13,7 @@ export default function StudyActivationEffect() {
     if (isActive && !prevActiveRef.current && !prefersReducedMotion) {
       setExpandKey(k => k + 1);
       setShowExpand(true);
-      const t = setTimeout(() => setShowExpand(false), 1100);
+      const t = setTimeout(() => setShowExpand(false), 1900);
       prevActiveRef.current = true;
       return () => clearTimeout(t);
     }
@@ -29,9 +29,9 @@ export default function StudyActivationEffect() {
         {showExpand && (
           <motion.div
             key={expandKey}
-            initial={{ clipPath: 'circle(0px at 22% 42%)', opacity: 0.75 }}
+            initial={{ clipPath: 'circle(0px at 22% 42%)', opacity: 0.45 }}
             animate={{ clipPath: 'circle(200vmax at 22% 42%)', opacity: 0 }}
-            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.8, ease: [0.25, 0.46, 0.45, 0.94] }}
             style={{
               position: 'fixed',
               inset: 0,
@@ -50,7 +50,7 @@ export default function StudyActivationEffect() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, delay: showExpand ? 0.7 : 0 }}
+            transition={{ duration: 0.8, delay: showExpand ? 1.2 : 0 }}
             style={{
               position: 'fixed',
               inset: 0,
