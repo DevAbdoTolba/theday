@@ -35,23 +35,15 @@ async function writeToClipboard(text: string): Promise<boolean> {
 }
 
 export default function StudyQueuePanel() {
-  const { isActive, items, itemCount, removeItem, clearAll } = useStudySession();
+  const { isActive, items, itemCount, removeItem, clearAll, toggleMode } = useStudySession();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [collapsed, setCollapsed] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  // Auto-unhide only when study mode is toggled ON
-  const prevActive = React.useRef(isActive);
-  React.useEffect(() => {
-    if (isActive && !prevActive.current) setHidden(false);
-    prevActive.current = isActive;
-  }, [isActive]);
-
-  const visible = !hidden && isActive;
+  const visible = isActive;
 
   const handleCopyUrls = async () => {
     const text = formatUrls(items);
@@ -152,7 +144,7 @@ export default function StudyQueuePanel() {
               <Tooltip title="Hide panel">
                 <IconButton
                   size="small"
-                  onClick={(e) => { e.stopPropagation(); setHidden(true); }}
+                  onClick={(e) => { e.stopPropagation(); if (isActive) toggleMode(); }}
                   sx={{ color: 'text.secondary' }}
                 >
                   <Close sx={{ fontSize: 18 }} />
