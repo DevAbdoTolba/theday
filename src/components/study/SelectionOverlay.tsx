@@ -15,7 +15,7 @@ export default function SelectionOverlay({ isSelectable, fileId }: Props) {
     () => false,
   );
 
-  if (!isSelectable) return null;
+  if (!isSelectable || !isSelected) return null;
 
   const primary = theme.palette.primary.main;
 
@@ -29,7 +29,6 @@ export default function SelectionOverlay({ isSelectable, fileId }: Props) {
         zIndex: 10,
         border: `2px solid ${primary}`,
       }}
-      className={!isSelected ? 'study-selectable-border' : undefined}
     >
       {/* Tinted background */}
       <div
