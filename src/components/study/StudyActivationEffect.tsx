@@ -74,7 +74,11 @@ export default function StudyActivationEffect() {
       <div
         className={`study-activation-border study-activation-${phase}${phase === 'active' ? ' apple-glow-border' : ''}`}
         style={{
-          position: 'absolute',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           boxShadow:
             'inset 0 0 0 2px rgba(188,130,243,0.85), inset 0 0 18px rgba(188,130,243,0.15)',
           ...vars,
