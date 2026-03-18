@@ -38,6 +38,64 @@
   animation: appleGlowCycle 5s linear infinite;
 }
 
+/* ── Study Activation Border (expanding circle → screen rectangle) ── */
+
+.study-activation-border {
+  will-change: inset, border-radius, opacity;
+}
+
+.study-activation-expanding {
+  animation: studyBorderExpand 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.study-activation-active {
+  inset: 0;
+  border-radius: 0;
+  opacity: 1;
+}
+
+.study-activation-collapsing {
+  animation: studyBorderCollapse 0.45s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+@keyframes studyBorderExpand {
+  0% {
+    inset: var(--sae-top) var(--sae-right) var(--sae-bottom) var(--sae-left);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  28% {
+    border-radius: var(--sae-br1, 47% 47% 47% 47% / 47% 47% 47% 47%);
+  }
+  55% {
+    border-radius: var(--sae-br2, 26% 26% 26% 26% / 26% 26% 26% 26%);
+  }
+  80% {
+    border-radius: var(--sae-br3, 11% 11% 11% 11% / 11% 11% 11% 11%);
+  }
+  100% {
+    inset: 0 0 0 0;
+    border-radius: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes studyBorderCollapse {
+  0% {
+    inset: 0 0 0 0;
+    border-radius: 0;
+    opacity: 1;
+  }
+  100% {
+    inset: var(--sae-top) var(--sae-right) var(--sae-bottom) var(--sae-left);
+    border-radius: 50%;
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .study-selectable-border {
     animation: none;
@@ -48,5 +106,12 @@
   }
   .apple-glow-border {
     animation: none;
+  }
+  .study-activation-expanding,
+  .study-activation-collapsing {
+    animation: none;
+    inset: 0;
+    border-radius: 0;
+    opacity: 1;
   }
 }
