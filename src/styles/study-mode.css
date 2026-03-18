@@ -51,9 +51,9 @@
   padding: 2px;
   background: conic-gradient(
     from var(--border-angle),
-    #f472b6, #c084fc, #a855f7, #818cf8,
-    #60a5fa, #38bdf8, #22d3ee, #2dd4bf,
-    #c084fc, #f472b6
+    #f472b6, #c084fc, #a78bfa, #818cf8,
+    #6d8ff8, #60a5fa, #38bdf8, #22d3ee,
+    #60a5fa, #a78bfa, #c084fc, #f472b6
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
