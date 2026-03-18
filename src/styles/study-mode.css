@@ -153,8 +153,13 @@
 @media (prefers-reduced-motion: reduce) {
   .vp-border {
     animation: none !important;
-    transition: opacity 0.3s ease !important;
   }
+  .vp-core.vp-in,
+  .vp-core.vp-active  { opacity: 0.70; }
+  .vp-ambient.vp-in,
+  .vp-ambient.vp-active { opacity: 0.18; }
+  .vp-core.vp-out,
+  .vp-ambient.vp-out { transition: opacity 0.3s ease; opacity: 0; }
   .study-selection-flash {
     animation: none;
   }

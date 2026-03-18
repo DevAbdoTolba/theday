@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Box, Paper, Typography, IconButton, Button, Divider,
+  Box, Paper, Typography, IconButton, Button,
   Collapse, Alert, Snackbar, Dialog, DialogTitle,
   DialogContent, DialogActions, Tooltip, useTheme,
   useMediaQuery, alpha,
@@ -43,8 +43,6 @@ export default function StudyQueuePanel() {
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  const visible = isActive;
-
   const handleCopyUrls = async () => {
     const text = formatUrls(items);
     const ok = await writeToClipboard(text);
@@ -65,8 +63,6 @@ export default function StudyQueuePanel() {
     setToast('URLs copied — Create a new notebook → Add sources → Paste as website URLs');
   };
 
-  if (!visible) return null;
-
   const panelWidth = isMobile ? '100vw' : 380;
   const panelEdge = isMobile ? 0 : 16;
   const panelBorderRadius = isMobile ? '12px 12px 0 0' : '12px';
@@ -74,19 +70,21 @@ export default function StudyQueuePanel() {
   return (
     <>
       <AnimatePresence>
-        <motion.div
-          initial={{ y: 120, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 120, opacity: 0 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          style={{
-            position: 'fixed',
-            bottom: isMobile ? 0 : 16,
-            right: panelEdge,
-            width: panelWidth,
-            zIndex: 1300,
-          }}
-        >
+        {isActive && (
+          <motion.div
+            key="study-queue-panel"
+            initial={{ y: 120, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 120, opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            style={{
+              position: 'fixed',
+              bottom: isMobile ? 0 : 16,
+              right: panelEdge,
+              width: panelWidth,
+              zIndex: 1300,
+            }}
+          >
           <Paper
             elevation={12}
             sx={{
@@ -141,7 +139,7 @@ export default function StudyQueuePanel() {
                   {collapsed ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />}
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Hide panel">
+              <Tooltip title="End study session">
                 <IconButton
                   size="small"
                   onClick={(e) => { e.stopPropagation(); if (isActive) toggleMode(); }}
@@ -237,6 +235,7 @@ export default function StudyQueuePanel() {
             </Collapse>
           </Paper>
         </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Clear All confirmation */}

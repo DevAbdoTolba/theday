@@ -37,8 +37,6 @@ export default function SelectionOverlay({ isSelectable, fileId }: Props) {
           inset: 0,
           borderRadius: 'inherit',
           backgroundColor: `${primary}20`,
-          opacity: isSelected ? 1 : 0,
-          transition: 'opacity 0.12s ease',
         }}
       />
 
@@ -57,10 +55,6 @@ export default function SelectionOverlay({ isSelectable, fileId }: Props) {
           alignItems: 'center',
           justifyContent: 'center',
           color: '#fff',
-          transform: isSelected ? 'scale(1)' : 'scale(0)',
-          opacity: isSelected ? 1 : 0,
-          transition: 'transform 0.12s ease, opacity 0.12s ease',
-          willChange: 'transform, opacity',
         }}
       >
         {/* Inline check-circle SVG — zero import cost */}
