@@ -18,61 +18,57 @@
 }
 
 
-/* ── Core: tight bright glow concentrated at edges ── */
+/* ── Core: thin bright glow right at the edges ── */
 .vp-core {
   background:
-    /* edges */
-    radial-gradient(ellipse 55% 16% at 50%   0%, rgba(168, 85,247,0.75) 0%, transparent 100%),
-    radial-gradient(ellipse 16% 55% at 100% 50%, rgba( 56,189,248,0.65) 0%, transparent 100%),
-    radial-gradient(ellipse 55% 16% at 50% 100%, rgba( 45,212,191,0.55) 0%, transparent 100%),
-    radial-gradient(ellipse 16% 55% at   0% 50%, rgba(244,114,182,0.65) 0%, transparent 100%),
+    /* edges — narrow */
+    radial-gradient(ellipse 45%  7% at 50%   0%, rgba(168, 85,247,0.70) 0%, transparent 100%),
+    radial-gradient(ellipse  7% 45% at 100% 50%, rgba( 56,189,248,0.60) 0%, transparent 100%),
+    radial-gradient(ellipse 45%  7% at 50% 100%, rgba( 45,212,191,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse  7% 45% at   0% 50%, rgba(244,114,182,0.60) 0%, transparent 100%),
     /* corners */
-    radial-gradient(ellipse 20% 20% at   0%   0%, rgba(192,132,252,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 20% 20% at 100%   0%, rgba(129,140,248,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 20% 20% at 100% 100%, rgba( 96,165,250,0.40) 0%, transparent 100%),
-    radial-gradient(ellipse 20% 20% at   0% 100%, rgba(168, 85,247,0.35) 0%, transparent 100%);
-  filter: blur(30px);
+    radial-gradient(ellipse 12% 12% at   0%   0%, rgba(192,132,252,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 12% 12% at 100%   0%, rgba(129,140,248,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 12% 12% at 100% 100%, rgba( 96,165,250,0.35) 0%, transparent 100%),
+    radial-gradient(ellipse 12% 12% at   0% 100%, rgba(168, 85,247,0.30) 0%, transparent 100%);
+  filter: blur(22px);
 }
 
 
-/* ── Ambient: large spread that pulses inward to cover the page ── */
+/* ── Ambient: soft halo just beyond the core, barely reaches inward ── */
 .vp-ambient {
   background:
-    /* edges — deep reach toward center */
-    radial-gradient(ellipse 80% 42% at 50%   0%, rgba(168, 85,247,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 42% 80% at 100% 50%, rgba( 56,189,248,0.42) 0%, transparent 100%),
-    radial-gradient(ellipse 80% 42% at 50% 100%, rgba( 45,212,191,0.36) 0%, transparent 100%),
-    radial-gradient(ellipse 42% 80% at   0% 50%, rgba(244,114,182,0.42) 0%, transparent 100%),
-    /* corners — wide */
-    radial-gradient(ellipse 38% 38% at   0%   0%, rgba(192,132,252,0.28) 0%, transparent 100%),
-    radial-gradient(ellipse 38% 38% at 100%   0%, rgba(129,140,248,0.28) 0%, transparent 100%),
-    radial-gradient(ellipse 38% 38% at 100% 100%, rgba( 96,165,250,0.24) 0%, transparent 100%),
-    radial-gradient(ellipse 38% 38% at   0% 100%, rgba(168, 85,247,0.20) 0%, transparent 100%),
-    /* center wash — visible at peak opacity */
-    radial-gradient(ellipse 45% 45% at 50% 50%, rgba(129,140,248,0.15) 0%, transparent 100%),
-    radial-gradient(ellipse 30% 30% at 30% 35%, rgba(168, 85,247,0.10) 0%, transparent 100%),
-    radial-gradient(ellipse 30% 30% at 70% 65%, rgba( 56,189,248,0.10) 0%, transparent 100%);
-  filter: blur(60px);
+    /* edges — modest reach */
+    radial-gradient(ellipse 55% 14% at 50%   0%, rgba(168, 85,247,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 55% at 100% 50%, rgba( 56,189,248,0.32) 0%, transparent 100%),
+    radial-gradient(ellipse 55% 14% at 50% 100%, rgba( 45,212,191,0.28) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 55% at   0% 50%, rgba(244,114,182,0.32) 0%, transparent 100%),
+    /* corners */
+    radial-gradient(ellipse 18% 18% at   0%   0%, rgba(192,132,252,0.20) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at 100%   0%, rgba(129,140,248,0.20) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at 100% 100%, rgba( 96,165,250,0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at   0% 100%, rgba(168, 85,247,0.15) 0%, transparent 100%);
+  filter: blur(45px);
 }
 
 
 /* ═══════════════════════════════════════════════════
    Pulse-In  (activation burst)
    ═══════════════════════════════════════════════════ */
-.vp-core.vp-in    { animation: vpCoreIn    0.60s var(--vp-spring) forwards; }
-.vp-ambient.vp-in { animation: vpAmbientIn 0.85s var(--vp-spring) forwards; }
+.vp-core.vp-in    { animation: vpCoreIn    0.70s var(--vp-spring) forwards; }
+.vp-ambient.vp-in { animation: vpAmbientIn 0.90s var(--vp-spring) forwards; }
 
 @keyframes vpCoreIn {
-  0%   { opacity: 0;    transform: scale(0.95); }
-  50%  { opacity: 0.95; transform: scale(1.01); }
-  100% { opacity: 0.80; transform: scale(1); }
+  0%   { opacity: 0;    transform: scale(0.85); }
+  40%  { opacity: 0.5;  transform: scale(0.94); }
+  70%  { opacity: 0.85; transform: scale(1.005); }
+  100% { opacity: 0.70; transform: scale(1); }
 }
 
 @keyframes vpAmbientIn {
-  0%   { opacity: 0;   transform: scale(0.92); }
-  35%  { opacity: 0.3; }
-  70%  { opacity: 0.55; transform: scale(1.01); }
-  100% { opacity: 0.30; transform: scale(1); }
+  0%   { opacity: 0;    transform: scale(0.80); }
+  45%  { opacity: 0.08; transform: scale(0.92); }
+  100% { opacity: 0.18; transform: scale(1); }
 }
 
 
@@ -84,23 +80,23 @@
    of sync for organic, non-mechanical feel.
    ═══════════════════════════════════════════════════ */
 .vp-core.vp-active {
-  opacity: 0.80;
+  opacity: 0.70;
   animation: vpCoreBreathe 3s ease-in-out infinite;
 }
 
 .vp-ambient.vp-active {
-  opacity: 0.30;
+  opacity: 0.18;
   animation: vpAmbientBreathe 4.5s ease-in-out infinite;
 }
 
 @keyframes vpCoreBreathe {
-  0%, 100% { opacity: 0.60; transform: scale(1); }
-  50%      { opacity: 0.95; transform: scale(1.006); }
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.004); }
 }
 
 @keyframes vpAmbientBreathe {
-  0%, 100% { opacity: 0.08; transform: scale(0.97); }
-  50%      { opacity: 0.55; transform: scale(1.02); }
+  0%, 100% { opacity: 0.10; transform: scale(0.99); }
+  50%      { opacity: 0.25; transform: scale(1.01); }
 }
 
 
@@ -111,13 +107,13 @@
 .vp-ambient.vp-out { animation: vpAmbientOut 0.65s var(--vp-ease-out) forwards; }
 
 @keyframes vpCoreOut {
-  0%   { opacity: 0.80; transform: scale(1); }
-  100% { opacity: 0;    transform: scale(0.96); }
+  0%   { opacity: 0.70; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.90); }
 }
 
 @keyframes vpAmbientOut {
-  0%   { opacity: 0.30; transform: scale(1); }
-  100% { opacity: 0;    transform: scale(0.93); }
+  0%   { opacity: 0.18; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.88); }
 }
 
 
