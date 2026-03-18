@@ -44,12 +44,14 @@ export default function StudyQueuePanel() {
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  // Auto-unhide when items are added or study mode is activated
+  // Auto-unhide only when study mode is toggled ON
+  const prevActive = React.useRef(isActive);
   React.useEffect(() => {
-    if ((isActive || itemCount > 0) && hidden) setHidden(false);
-  }, [isActive, itemCount, hidden]);
+    if (isActive && !prevActive.current) setHidden(false);
+    prevActive.current = isActive;
+  }, [isActive]);
 
-  const visible = !hidden && (isActive || itemCount > 0);
+  const visible = !hidden && isActive;
 
   const handleCopyUrls = async () => {
     const text = formatUrls(items);
