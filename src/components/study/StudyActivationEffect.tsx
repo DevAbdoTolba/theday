@@ -69,21 +69,14 @@ export default function StudyActivationEffect() {
 
   if (phase === 'idle') return null;
 
+  const phaseClass = `study-activation-${phase}`;
+
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9997 }}>
-      <div
-        className={`study-activation-border study-activation-${phase}${phase === 'active' ? ' apple-glow-border' : ''}`}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          boxShadow:
-            'inset 0 0 0 2px rgba(188,130,243,0.85), inset 0 0 18px rgba(188,130,243,0.15)',
-          ...vars,
-        }}
-      />
+      {/* Soft glow layer (blurred duplicate) */}
+      <div className={`study-ai-border study-ai-glow ${phaseClass}`} style={vars} />
+      {/* Crisp gradient border */}
+      <div className={`study-ai-border ${phaseClass}`} style={vars} />
     </div>
   );
 }

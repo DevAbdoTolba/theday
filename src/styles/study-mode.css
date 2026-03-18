@@ -28,24 +28,62 @@
   }
 }
 
-/* Apple Intelligence–style border: hue-rotate is GPU-only, zero repaint */
-@keyframes appleGlowCycle {
-  from { filter: hue-rotate(0deg); }
-  to   { filter: hue-rotate(360deg); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Apple Intelligence–style Gradient Border
+   - Conic gradient rotates around the viewport edge
+   - CSS mask shows only the 2px border strip
+   - Blurred glow layer for soft diffused light
+   ══════════════════════════════════════════════════════════════════════ */
+
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-.apple-glow-border {
-  animation: appleGlowCycle 5s linear infinite;
+.study-ai-border {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--border-angle),
+    #f472b6, #c084fc, #a855f7, #818cf8,
+    #60a5fa, #38bdf8, #22d3ee, #2dd4bf,
+    #c084fc, #f472b6
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  will-change: top, right, bottom, left, border-radius, opacity;
 }
 
-/* ── Study Activation Border (expanding circle → screen rectangle) ── */
-
-.study-activation-border {
-  will-change: inset, border-radius, opacity;
+/* Soft glow — same gradient, thicker + blurred */
+.study-ai-glow {
+  padding: 6px;
+  filter: blur(16px);
+  opacity: 0.5;
 }
+
+@keyframes borderRotate {
+  to { --border-angle: 360deg; }
+}
+
+
+/* ── Phase animations ── */
 
 .study-activation-expanding {
-  animation: studyBorderExpand 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation:
+    studyBorderExpand 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    borderRotate 4s linear infinite;
 }
 
 .study-activation-active {
@@ -55,10 +93,13 @@
   left: 0 !important;
   border-radius: 0;
   opacity: 1;
+  animation: borderRotate 4s linear infinite;
 }
 
 .study-activation-collapsing {
-  animation: studyBorderCollapse 0.45s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  animation:
+    studyBorderCollapse 0.45s cubic-bezier(0.55, 0, 1, 0.45) forwards,
+    borderRotate 4s linear infinite;
 }
 
 @keyframes studyBorderExpand {
@@ -111,6 +152,9 @@
   }
 }
 
+
+/* ── Accessibility ── */
+
 @media (prefers-reduced-motion: reduce) {
   .study-selectable-border {
     animation: none;
@@ -119,13 +163,16 @@
   .study-selection-flash {
     animation: none;
   }
-  .apple-glow-border {
+  .study-ai-border {
     animation: none;
   }
   .study-activation-expanding,
   .study-activation-collapsing {
     animation: none;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     border-radius: 0;
     opacity: 1;
   }
