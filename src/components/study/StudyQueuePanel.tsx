@@ -39,11 +39,17 @@ export default function StudyQueuePanel() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [collapsed, setCollapsed] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  const visible = isActive || itemCount > 0;
+  // Auto-unhide when items are added or study mode is activated
+  React.useEffect(() => {
+    if ((isActive || itemCount > 0) && hidden) setHidden(false);
+  }, [isActive, itemCount, hidden]);
+
+  const visible = !hidden && (isActive || itemCount > 0);
 
   const handleCopyUrls = async () => {
     const text = formatUrls(items);
@@ -68,7 +74,7 @@ export default function StudyQueuePanel() {
   if (!visible) return null;
 
   const panelWidth = isMobile ? '100vw' : 380;
-  const panelLeft = isMobile ? 0 : 16;
+  const panelEdge = isMobile ? 0 : 16;
   const panelBorderRadius = isMobile ? '12px 12px 0 0' : '12px';
 
   return (
@@ -82,7 +88,7 @@ export default function StudyQueuePanel() {
           style={{
             position: 'fixed',
             bottom: isMobile ? 0 : 16,
-            left: panelLeft,
+            right: panelEdge,
             width: panelWidth,
             zIndex: 1300,
           }}
@@ -141,10 +147,10 @@ export default function StudyQueuePanel() {
                   {collapsed ? <ExpandLess sx={{ fontSize: 18 }} /> : <ExpandMore sx={{ fontSize: 18 }} />}
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Close panel">
+              <Tooltip title="Hide panel">
                 <IconButton
                   size="small"
-                  onClick={(e) => { e.stopPropagation(); clearAll(); }}
+                  onClick={(e) => { e.stopPropagation(); setHidden(true); }}
                   sx={{ color: 'text.secondary' }}
                 >
                   <Close sx={{ fontSize: 18 }} />
