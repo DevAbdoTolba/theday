@@ -5,19 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apple Intelligence Glow — Prototype</title>
 <style>
-  /* ═══════════════════════════════════════════════════════════════
-     TOKENS
-     ═══════════════════════════════════════════════════════════════ */
   :root {
-    --spring:      cubic-bezier(0.15, 0, 0.2, 1);
-    --spring-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --ease-out:    cubic-bezier(0.32, 0, 0.67, 0);
-    --press-ms:    600;
+    --spring:   cubic-bezier(0.15, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.32, 0, 0.67, 0);
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     RESET
-     ═══════════════════════════════════════════════════════════════ */
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -30,16 +22,8 @@
     overflow: hidden;
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     SQUIRCLE (G2-continuous clip-path via SVG superellipse)
-     Applied to button + core glow for Apple-quality corners.
-     objectBoundingBox scales to any aspect ratio.
-     ═══════════════════════════════════════════════════════════════ */
   .squircle-clip { clip-path: url(#squircle); }
 
-  /* ═══════════════════════════════════════════════════════════════
-     WRAPPER — relative container for the 3-layer stack
-     ═══════════════════════════════════════════════════════════════ */
   .siri-wrapper {
     position: relative;
     display: inline-flex;
@@ -47,10 +31,7 @@
     justify-content: center;
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     LAYER 3 (BOTTOM) — Ambient Pulse
-     Large, low-opacity glow expanding far outward.
-     ═══════════════════════════════════════════════════════════════ */
+  /* ─── Bottom: Ambient Pulse ─── */
   .ambient {
     position: absolute;
     inset: 0;
@@ -64,23 +45,19 @@
 
   .ambient__mesh {
     position: absolute;
-    /* stretch well beyond the button */
     inset: -100px;
     background:
-      radial-gradient(ellipse 55% 80% at 10% 50%, rgba(168, 85, 247, 0.50) 0%, transparent 70%),
-      radial-gradient(ellipse 55% 80% at 90% 50%, rgba( 56,189,248, 0.40) 0%, transparent 65%),
-      radial-gradient(ellipse 80% 55% at 50% 10%, rgba(244,114,182, 0.35) 0%, transparent 60%),
-      radial-gradient(ellipse 80% 55% at 50% 90%, rgba( 45,212,191, 0.30) 0%, transparent 55%),
-      radial-gradient(ellipse 45% 45% at 25% 75%, rgba(129,140,248, 0.28) 0%, transparent 50%),
-      radial-gradient(ellipse 45% 45% at 75% 25%, rgba(192,132,252, 0.32) 0%, transparent 50%);
+      radial-gradient(ellipse 55% 80% at 10% 50%, rgba(168,85,247,0.50) 0%, transparent 70%),
+      radial-gradient(ellipse 55% 80% at 90% 50%, rgba(56,189,248,0.40) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 55% at 50% 10%, rgba(244,114,182,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 55% at 50% 90%, rgba(45,212,191,0.30) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 45% at 25% 75%, rgba(129,140,248,0.28) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 45% at 75% 25%, rgba(192,132,252,0.32) 0%, transparent 50%);
     filter: blur(60px);
     border-radius: 50%;
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     LAYER 2 (MIDDLE) — Core Glow
-     High-opacity gradient hugging the button edge.
-     ═══════════════════════════════════════════════════════════════ */
+  /* ─── Middle: Core Glow ─── */
   .core {
     position: absolute;
     inset: -8px;
@@ -96,17 +73,15 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 55% 140% at  8% 50%, rgba(168, 85,247, 0.85) 0%, transparent 55%),
-      radial-gradient(ellipse 55% 140% at 92% 50%, rgba( 56,189,248, 0.75) 0%, transparent 50%),
-      radial-gradient(ellipse 110% 55% at 50%  8%, rgba(244,114,182, 0.65) 0%, transparent 50%),
-      radial-gradient(ellipse 110% 55% at 50% 92%, rgba( 45,212,191, 0.55) 0%, transparent 45%),
-      radial-gradient(ellipse 50%  50% at 50% 50%, rgba(129,140,248, 0.70) 0%, transparent 50%);
+      radial-gradient(ellipse 55% 140% at  8% 50%, rgba(168,85,247,0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 140% at 92% 50%, rgba(56,189,248,0.75) 0%, transparent 50%),
+      radial-gradient(ellipse 110% 55% at 50%  8%, rgba(244,114,182,0.65) 0%, transparent 50%),
+      radial-gradient(ellipse 110% 55% at 50% 92%, rgba(45,212,191,0.55) 0%, transparent 45%),
+      radial-gradient(ellipse 50%  50% at 50% 50%, rgba(129,140,248,0.70) 0%, transparent 50%);
     filter: blur(20px);
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     LAYER 1 (TOP) — The Button
-     ═══════════════════════════════════════════════════════════════ */
+  /* ─── Top: Button ─── */
   .siri-btn {
     position: relative;
     z-index: 3;
@@ -120,18 +95,15 @@
     user-select: none;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-
     font-family: inherit;
     font-size: 13.5px;
     font-weight: 700;
     letter-spacing: 0.4px;
-
-    color: rgba(167, 139, 250, 0.95);
-    background: rgba(139, 92, 246, 0.08);
+    color: rgba(167,139,250,0.95);
+    background: rgba(139,92,246,0.08);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.22);
-
+    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.22);
     will-change: transform;
     transition:
       transform 0.5s var(--spring),
@@ -142,32 +114,23 @@
 
   .siri-btn:hover {
     transform: translateY(-1px);
-    background: rgba(139, 92, 246, 0.14);
-    box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.35);
+    background: rgba(139,92,246,0.14);
+    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.35);
   }
 
-  /* Visual tension while held */
-  .siri-btn.pressing {
-    transform: scale(0.93);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  .siri-btn:active { transform: scale(0.95); }
 
-  /* Active / studying state */
   .siri-btn.active {
     color: #fff;
     background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 60%, #06b6d4 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255, 0.20),
-      inset 0 0 0 1px rgba(139, 92, 246, 0.55);
+      inset 0 1px 0 rgba(255,255,255,0.20),
+      inset 0 0 0 1px rgba(139,92,246,0.55);
   }
 
   .siri-btn__icon { font-size: 12px; line-height: 1; }
 
-  /* ═══════════════════════════════════════════════════════════════
-     ANIMATIONS — only transform + opacity (GPU-composited)
-     ═══════════════════════════════════════════════════════════════ */
-
-  /* ── Pulse-In (activation burst) ── */
+  /* ─── Pulse-In ─── */
   .core.pulse-in    { animation: coreIn    0.55s var(--spring) forwards; }
   .ambient.pulse-in { animation: ambientIn 0.80s var(--spring) forwards; }
 
@@ -176,23 +139,19 @@
     50%  { opacity: 1;    transform: scale(1.12); }
     100% { opacity: 0.85; transform: scale(1.05); }
   }
-
   @keyframes ambientIn {
     0%   { opacity: 0;   transform: scale(0.85); }
     40%  { opacity: 0.5; }
     100% { opacity: 0.3; transform: scale(2.4); }
   }
 
-  /* ── Breathing (sustained glow) ── */
+  /* ─── Breathing ─── */
   .core.breathing {
-    opacity: 0.85;
-    transform: scale(1.05);
+    opacity: 0.85; transform: scale(1.05);
     animation: coreBreathe 3.5s ease-in-out infinite;
   }
-
   .ambient.breathing {
-    opacity: 0.3;
-    transform: scale(2.4);
+    opacity: 0.3; transform: scale(2.4);
     animation: ambientBreathe 4s ease-in-out infinite;
   }
 
@@ -200,13 +159,12 @@
     0%, 100% { opacity: 0.72; transform: scale(1.02); }
     50%      { opacity: 0.95; transform: scale(1.09); }
   }
-
   @keyframes ambientBreathe {
     0%, 100% { opacity: 0.20; transform: scale(2.1); }
     50%      { opacity: 0.38; transform: scale(2.6); }
   }
 
-  /* ── Pulse-Out (deactivation) ── */
+  /* ─── Pulse-Out ─── */
   .core.pulse-out    { animation: coreOut    0.50s var(--ease-out) forwards; }
   .ambient.pulse-out { animation: ambientOut 0.65s var(--ease-out) forwards; }
 
@@ -214,85 +172,28 @@
     0%   { opacity: 0.85; transform: scale(1.05); }
     100% { opacity: 0;    transform: scale(0.88); }
   }
-
   @keyframes ambientOut {
     0%   { opacity: 0.3;  transform: scale(2.4); }
     100% { opacity: 0;    transform: scale(1); }
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     PROGRESS RING (visual feedback during long-press)
-     ═══════════════════════════════════════════════════════════════ */
-  .press-ring {
-    position: absolute;
-    inset: -3px;
-    z-index: 4;
-    opacity: 0;
-    pointer-events: none;
-    will-change: opacity;
-    transition: opacity 0.15s ease;
-  }
-
-  .press-ring.visible { opacity: 1; }
-
-  .press-ring__svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .press-ring__track {
-    fill: none;
-    stroke: rgba(168, 85, 247, 0.45);
-    stroke-width: 2;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    stroke-linecap: round;
-  }
-
-  .press-ring__track.filling {
-    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    stroke-dashoffset: 0;
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
-     A11Y
-     ═══════════════════════════════════════════════════════════════ */
   @media (prefers-reduced-motion: reduce) {
-    .core, .ambient {
-      animation: none !important;
-      transition: opacity 0.3s ease !important;
-    }
-    .core.breathing    { animation: none !important; }
-    .ambient.breathing { animation: none !important; }
+    .core, .ambient { animation: none !important; transition: opacity 0.3s ease !important; }
     .siri-btn { transition: none !important; }
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     DEMO LABEL
-     ═══════════════════════════════════════════════════════════════ */
   .hint {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.25);
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 0.5px;
     pointer-events: none;
   }
 </style>
 </head>
 <body>
 
-<!-- Hidden SVG: squircle clip-path (G2-continuous superellipse) -->
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
   <defs>
     <clipPath id="squircle" clipPathUnits="objectBoundingBox">
-      <!--
-        Superellipse n≈5 with G2 continuity.
-        Curves begin earlier than border-radius, creating
-        the seamless "iOS icon" corner blend.
-      -->
       <path d="
         M 0.5,0
         C 0.81,0  0.93,0  0.965,0.035
@@ -303,143 +204,49 @@
         C 0,0.93  0,0.81  0,0.5
         C 0,0.19  0,0.07  0.035,0.035
         C 0.07,0  0.19,0  0.5,0
-        Z
-      "/>
+        Z"/>
     </clipPath>
   </defs>
 </svg>
 
 <div class="siri-wrapper">
-  <!-- Layer 3 — Ambient Pulse (bottom) -->
-  <div class="ambient" aria-hidden="true">
-    <div class="ambient__mesh"></div>
-  </div>
-
-  <!-- Layer 2 — Core Glow (middle) -->
-  <div class="core" aria-hidden="true">
-    <div class="core__mesh squircle-clip"></div>
-  </div>
-
-  <!-- Progress ring (over glow, under button) -->
-  <div class="press-ring" aria-hidden="true">
-    <svg class="press-ring__svg" viewBox="0 0 200 60" preserveAspectRatio="none">
-      <rect class="press-ring__track" x="1" y="1" width="198" height="58" rx="22"/>
-    </svg>
-  </div>
-
-  <!-- Layer 1 — Button (top) -->
+  <div class="ambient" aria-hidden="true"><div class="ambient__mesh"></div></div>
+  <div class="core" aria-hidden="true"><div class="core__mesh squircle-clip"></div></div>
   <button class="siri-btn squircle-clip" type="button">
     <span class="siri-btn__icon">✦</span>
     <span>Study</span>
   </button>
 </div>
 
-<p class="hint">Long-press to activate · tap again to deactivate</p>
+<p class="hint">Click to toggle</p>
 
 <script>
 (() => {
-  'use strict';
+  const btn = document.querySelector('.siri-btn');
+  const core = document.querySelector('.core');
+  const ambient = document.querySelector('.ambient');
+  let active = false;
 
-  const PRESS_MS = 600;
+  btn.addEventListener('click', () => active ? deactivate() : activate());
 
-  const btn      = document.querySelector('.siri-btn');
-  const core     = document.querySelector('.core');
-  const ambient  = document.querySelector('.ambient');
-  const ring     = document.querySelector('.press-ring');
-  const track    = document.querySelector('.press-ring__track');
-
-  let pressTimer = null;
-  let active     = false;
-
-  /* ── Press start ── */
-  function onPointerDown(e) {
-    e.preventDefault();
-
-    if (active) return;              // will deactivate on pointerup
-
-    btn.classList.add('pressing');
-
-    // Show progress ring
-    ring.classList.add('visible');
-    // Force reflow so removing 'filling' + re-adding works
-    track.classList.remove('filling');
-    void track.offsetWidth;
-    track.classList.add('filling');
-
-    pressTimer = setTimeout(() => {
-      pressTimer = null;
-      activate();
-    }, PRESS_MS);
-  }
-
-  /* ── Press end ── */
-  function onPointerUp() {
-    btn.classList.remove('pressing');
-    ring.classList.remove('visible');
-    track.classList.remove('filling');
-
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-      return;                        // released too early — no action
-    }
-
-    if (active) deactivate();
-  }
-
-  /* ── Press cancel (drag away / multi-touch) ── */
-  function onPressCancel() {
-    btn.classList.remove('pressing');
-    ring.classList.remove('visible');
-    track.classList.remove('filling');
-
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-    }
-  }
-
-  /* ── Activate ── */
   function activate() {
     active = true;
-    btn.classList.remove('pressing');
     btn.classList.add('active');
-    ring.classList.remove('visible');
-    track.classList.remove('filling');
-
-    // Burst
-    core.className    = 'core pulse-in';
+    core.className = 'core pulse-in';
     ambient.className = 'ambient pulse-in';
-
-    // → Breathing after burst settles
     setTimeout(() => {
       if (!active) return;
-      core.className    = 'core breathing';
+      core.className = 'core breathing';
       ambient.className = 'ambient breathing';
     }, 800);
   }
 
-  /* ── Deactivate ── */
   function deactivate() {
     active = false;
     btn.classList.remove('active');
-    core.className    = 'core pulse-out';
+    core.className = 'core pulse-out';
     ambient.className = 'ambient pulse-out';
   }
-
-  /* ── Event binding ── */
-  btn.addEventListener('pointerdown',   onPointerDown);
-  btn.addEventListener('pointerup',     onPointerUp);
-  btn.addEventListener('pointerleave',  onPressCancel);
-  btn.addEventListener('pointercancel', onPressCancel);
-
-  /* Keyboard: Space/Enter = instant toggle (skip long-press) */
-  btn.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      active ? deactivate() : activate();
-    }
-  });
 })();
 </script>
 </body>

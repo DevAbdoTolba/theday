@@ -1,8 +1,130 @@
-/* Study Mode — minimal retained styles (selection only) */
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Viewport Border (Apple Intelligence Mesh Glow)
+   Only transform + opacity are animated. filter: blur() is static.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --vp-spring:   cubic-bezier(0.15, 0, 0.2, 1);
+  --vp-ease-out: cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+.vp-border {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+/* ── Core: tight, bright glow hugging the viewport edges ── */
+.vp-core {
+  background:
+    /* edges */
+    radial-gradient(ellipse 50%  8%  at 50%   0%, rgba(168, 85,247,0.70) 0%, transparent 100%),
+    radial-gradient(ellipse  8% 50%  at 100% 50%, rgba( 56,189,248,0.60) 0%, transparent 100%),
+    radial-gradient(ellipse 50%  8%  at 50% 100%, rgba( 45,212,191,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse  8% 50%  at   0% 50%, rgba(244,114,182,0.60) 0%, transparent 100%),
+    /* corners */
+    radial-gradient(ellipse 18% 18% at   0%   0%, rgba(192,132,252,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at 100%   0%, rgba(129,140,248,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at 100% 100%, rgba( 96,165,250,0.35) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 18% at   0% 100%, rgba(168, 85,247,0.30) 0%, transparent 100%);
+  filter: blur(28px);
+}
+
+/* ── Ambient: wide, soft glow spreading further ── */
+.vp-ambient {
+  background:
+    /* edges */
+    radial-gradient(ellipse 65% 14% at 50%   0%, rgba(168, 85,247,0.40) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 65% at 100% 50%, rgba( 56,189,248,0.32) 0%, transparent 100%),
+    radial-gradient(ellipse 65% 14% at 50% 100%, rgba( 45,212,191,0.28) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 65% at   0% 50%, rgba(244,114,182,0.32) 0%, transparent 100%),
+    /* corners */
+    radial-gradient(ellipse 30% 30% at   0%   0%, rgba(192,132,252,0.22) 0%, transparent 100%),
+    radial-gradient(ellipse 30% 30% at 100%   0%, rgba(129,140,248,0.22) 0%, transparent 100%),
+    radial-gradient(ellipse 30% 30% at 100% 100%, rgba( 96,165,250,0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 30% 30% at   0% 100%, rgba(168, 85,247,0.15) 0%, transparent 100%);
+  filter: blur(55px);
+}
+
+
+/* ── Pulse-In ── */
+.vp-core.vp-in    { animation: vpCoreIn    0.60s var(--vp-spring) forwards; }
+.vp-ambient.vp-in { animation: vpAmbientIn 0.80s var(--vp-spring) forwards; }
+
+@keyframes vpCoreIn {
+  0%   { opacity: 0;    transform: scale(0.96); }
+  50%  { opacity: 0.95; transform: scale(1.015); }
+  100% { opacity: 0.85; transform: scale(1); }
+}
+
+@keyframes vpAmbientIn {
+  0%   { opacity: 0;   transform: scale(0.98); }
+  40%  { opacity: 0.4; }
+  100% { opacity: 0.35; transform: scale(1); }
+}
+
+
+/* ── Breathing (sustained) ── */
+.vp-core.vp-active {
+  opacity: 0.85;
+  animation: vpCoreBreathe 3.5s ease-in-out infinite;
+}
+
+.vp-ambient.vp-active {
+  opacity: 0.35;
+  animation: vpAmbientBreathe 4s ease-in-out infinite;
+}
+
+@keyframes vpCoreBreathe {
+  0%, 100% { opacity: 0.70; transform: scale(0.995); }
+  50%      { opacity: 0.95; transform: scale(1.008); }
+}
+
+@keyframes vpAmbientBreathe {
+  0%, 100% { opacity: 0.25; transform: scale(0.998); }
+  50%      { opacity: 0.42; transform: scale(1.005); }
+}
+
+
+/* ── Pulse-Out ── */
+.vp-core.vp-out    { animation: vpCoreOut    0.50s var(--vp-ease-out) forwards; }
+.vp-ambient.vp-out { animation: vpAmbientOut 0.60s var(--vp-ease-out) forwards; }
+
+@keyframes vpCoreOut {
+  0%   { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+@keyframes vpAmbientOut {
+  0%   { opacity: 0.35; }
+  100% { opacity: 0; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Button Pulse (StudyModeToggle active state)
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes studyButtonPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139,92,246,0.55), 0 0 40px rgba(59,130,246,0.25), 0 6px 14px rgba(0,0,0,0.25);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139,92,246,0.75), 0 0 60px rgba(59,130,246,0.4), 0 8px 18px rgba(0,0,0,0.28);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Card Selection
+   ═══════════════════════════════════════════════════════════════ */
 
 @keyframes studySelectionFlash {
-  0% { opacity: 0; }
-  30% { opacity: 0.6; }
+  0%   { opacity: 0; }
+  30%  { opacity: 0.6; }
   100% { opacity: 0; }
 }
 
@@ -10,7 +132,16 @@
   animation: studySelectionFlash 0.4s ease-out forwards;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   Accessibility
+   ═══════════════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
+  .vp-border {
+    animation: none !important;
+    transition: opacity 0.3s ease !important;
+  }
   .study-selection-flash {
     animation: none;
   }
