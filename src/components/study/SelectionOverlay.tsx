@@ -1,49 +1,56 @@
-import React from 'react';
-import { Box, useTheme } from '@mui/material';
-import CheckCircle from '@mui/icons-material/CheckCircle';
+import React, { useSyncExternalStore } from 'react';
+import { useTheme } from '@mui/material';
+import { selectionStore } from '../../utils/selectionStore';
 
 interface Props {
   isSelectable: boolean;
-  isSelected: boolean;
+  fileId: string;
 }
 
-export default function SelectionOverlay({ isSelectable, isSelected }: Props) {
+export default function SelectionOverlay({ isSelectable, fileId }: Props) {
   const theme = useTheme();
+  const isSelected = useSyncExternalStore(
+    selectionStore.subscribe,
+    () => selectionStore.isSelected(fileId),
+    () => false,
+  );
 
   if (!isSelectable) return null;
 
+  const primary = theme.palette.primary.main;
+
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         position: 'absolute',
         inset: 0,
         borderRadius: 'inherit',
         pointerEvents: 'none',
         zIndex: 10,
-        border: `2px solid ${theme.palette.primary.main}`,
+        border: `2px solid ${primary}`,
       }}
       className={!isSelected ? 'study-selectable-border' : undefined}
     >
-      {/* Tinted background — CSS opacity transition, no JS */}
-      <Box
-        sx={{
+      {/* Tinted background */}
+      <div
+        style={{
           position: 'absolute',
           inset: 0,
           borderRadius: 'inherit',
-          bgcolor: `${theme.palette.primary.main}20`,
+          backgroundColor: `${primary}20`,
           opacity: isSelected ? 1 : 0,
           transition: 'opacity 0.12s ease',
         }}
       />
 
-      {/* Check badge — CSS scale+opacity, cannot queue up like Framer Motion */}
-      <Box
-        sx={{
+      {/* Check badge */}
+      <div
+        style={{
           position: 'absolute',
           top: 6,
           right: 6,
           zIndex: 11,
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: primary,
           borderRadius: '50%',
           width: 24,
           height: 24,
@@ -57,8 +64,11 @@ export default function SelectionOverlay({ isSelectable, isSelected }: Props) {
           willChange: 'transform, opacity',
         }}
       >
-        <CheckCircle sx={{ fontSize: 20 }} />
-      </Box>
-    </Box>
+        {/* Inline check-circle SVG — zero import cost */}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5l-4-4 1.41-1.41L10 13.67l6.59-6.59L18 8.5l-8 8z" />
+        </svg>
+      </div>
+    </div>
   );
 }

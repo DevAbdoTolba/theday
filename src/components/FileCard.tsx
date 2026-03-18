@@ -1,11 +1,10 @@
-import React, { useSyncExternalStore } from 'react';
+import React from 'react';
 import dynamic from 'next/dynamic';
 import {
   Card, CardActionArea, CardContent, CardMedia,
   Typography, Box, Chip, Tooltip, useTheme, useMediaQuery
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
-import { selectionStore } from '../utils/selectionStore';
 import { getYoutubeThumbnail } from '../utils/helpers';
 import SelectionOverlay from './study/SelectionOverlay';
 
@@ -64,12 +63,6 @@ const FileCardBase = ({
 }: FileCardProps) => {
   // Study mode is only active for non-folder items
   const studySelectable = studyModeActive && file.type !== 'folder';
-  // Subscribe directly to the selection store — only THIS card re-renders on change
-  const isSelected = useSyncExternalStore(
-    selectionStore.subscribe,
-    () => selectionStore.isSelected(file.id),
-    () => false,
-  );
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   
@@ -233,7 +226,7 @@ const FileCardBase = ({
 
         {/* Study Mode selection overlay */}
         {studySelectable && (
-          <SelectionOverlay isSelectable={studySelectable} isSelected={isSelected} />
+          <SelectionOverlay isSelectable={studySelectable} fileId={file.id} />
         )}
 
         <CardActionArea
