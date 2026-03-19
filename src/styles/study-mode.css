@@ -165,11 +165,6 @@
    Study Mode — Onboarding (shimmer wave + hint label)
    ═══════════════════════════════════════════════════════════════ */
 
-@keyframes studyShimmerWave {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
-}
-
 @keyframes studyHintIn {
   0%   { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
@@ -195,8 +190,7 @@
   .vp-ambient.vp-active { opacity: 0.18; }
   .vp-core.vp-out,
   .vp-ambient.vp-out { transition: opacity 0.3s ease; opacity: 0; }
-  .study-selection-flash,
-  .study-shimmer-wave {
+  .study-selection-flash {
     animation: none;
   }
 }

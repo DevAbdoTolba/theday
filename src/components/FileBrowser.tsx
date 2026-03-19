@@ -62,11 +62,10 @@ export default function FileBrowser({
     title: string;
   } | null>(null);
 
-  // Study mode onboarding — shimmer wave + hint label
+  // Study mode onboarding — hint label next to Study button
   const prevStudyMode = useRef(false);
   const [showHint, setShowHint] = useState(false);
   const [hintFading, setHintFading] = useState(false);
-  const [showShimmer, setShowShimmer] = useState(false);
 
   const dismissHint = useCallback(() => {
     setHintFading(true);
@@ -77,16 +76,13 @@ export default function FileBrowser({
     if (studyModeActive && !prevStudyMode.current) {
       setShowHint(true);
       setHintFading(false);
-      setShowShimmer(true);
-      const shimmerTimer = setTimeout(() => setShowShimmer(false), 1200);
       const hintTimer = setTimeout(() => dismissHint(), 4000);
       prevStudyMode.current = true;
-      return () => { clearTimeout(shimmerTimer); clearTimeout(hintTimer); };
+      return () => clearTimeout(hintTimer);
     }
     if (!studyModeActive) {
       setShowHint(false);
       setHintFading(false);
-      setShowShimmer(false);
       prevStudyMode.current = false;
     }
   }, [studyModeActive, dismissHint]);
@@ -263,6 +259,22 @@ export default function FileBrowser({
             sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
           />
           <StudyModeToggle />
+          {showHint && (
+            <Chip
+              label="Tap items to add"
+              size="small"
+              sx={{
+                bgcolor: alpha(theme.palette.primary.main, 0.10),
+                color: theme.palette.primary.main,
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                height: 28,
+                animation: hintFading
+                  ? 'studyHintOut 0.4s ease forwards'
+                  : 'studyHintIn 0.5s ease forwards',
+              }}
+            />
+          )}
           <Divider
             orientation="vertical"
             flexItem
@@ -325,35 +337,10 @@ export default function FileBrowser({
         </Tabs>
       </Box>
 
-      {/* Study mode hint label */}
-      {showHint && (
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          mb: 2,
-          animation: hintFading
-            ? 'studyHintOut 0.4s ease forwards'
-            : 'studyHintIn 0.5s ease forwards',
-        }}>
-          <Chip
-            label="Tap items to add to your study session"
-            size="small"
-            sx={{
-              bgcolor: alpha(theme.palette.primary.main, 0.10),
-              color: theme.palette.primary.main,
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              px: 1,
-            }}
-          />
-        </Box>
-      )}
-
       {/* Content with simple GPU-accelerated transition */}
       <Box
         key={activeTab}
         sx={{
-          position: 'relative',
           minHeight: 200,
           opacity: 1,
           willChange: 'opacity',
@@ -364,31 +351,6 @@ export default function FileBrowser({
           },
         }}
       >
-          {/* Shimmer wave — single sweep overlay */}
-          {showShimmer && (
-            <Box sx={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              overflow: 'hidden',
-              zIndex: 10,
-              borderRadius: 2,
-            }}>
-              <Box
-                className="study-shimmer-wave"
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '30%',
-                  height: '100%',
-                  background: `linear-gradient(90deg, transparent, ${alpha(theme.palette.primary.main, 0.07)}, transparent)`,
-                  animation: 'studyShimmerWave 1.2s ease-out forwards',
-                }}
-              />
-            </Box>
-          )}
-
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
               <Grid container spacing={2}>
