@@ -8,6 +8,21 @@
   --vp-ease-out: cubic-bezier(0.32, 0, 0.67, 0);
 }
 
+/* ── Container: sides-only on mobile, inset on desktop ── */
+.vp-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+}
+
+@media (min-width: 768px) {
+  .vp-container {
+    left: 7.5%;
+    right: 7.5%;
+  }
+}
+
 .vp-border {
   position: absolute;
   inset: 0;
@@ -18,36 +33,24 @@
 }
 
 
-/* ── Core: thin bright glow right at the edges ── */
+/* ── Core: thin bright glow — sides only ── */
 .vp-core {
   background:
-    /* edges — narrow */
-    radial-gradient(ellipse 45%  7% at 50%   0%, rgba(168, 85,247,0.70) 0%, transparent 100%),
+    /* right side */
     radial-gradient(ellipse  7% 45% at 100% 50%, rgba( 56,189,248,0.60) 0%, transparent 100%),
-    radial-gradient(ellipse 45%  7% at 50% 100%, rgba( 45,212,191,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse  7% 45% at   0% 50%, rgba(244,114,182,0.60) 0%, transparent 100%),
-    /* corners */
-    radial-gradient(ellipse 12% 12% at   0%   0%, rgba(192,132,252,0.40) 0%, transparent 100%),
-    radial-gradient(ellipse 12% 12% at 100%   0%, rgba(129,140,248,0.40) 0%, transparent 100%),
-    radial-gradient(ellipse 12% 12% at 100% 100%, rgba( 96,165,250,0.35) 0%, transparent 100%),
-    radial-gradient(ellipse 12% 12% at   0% 100%, rgba(168, 85,247,0.30) 0%, transparent 100%);
+    /* left side */
+    radial-gradient(ellipse  7% 45% at   0% 50%, rgba(244,114,182,0.60) 0%, transparent 100%);
   filter: blur(22px);
 }
 
 
-/* ── Ambient: soft halo just beyond the core, barely reaches inward ── */
+/* ── Ambient: soft halo — sides only ── */
 .vp-ambient {
   background:
-    /* edges — modest reach */
-    radial-gradient(ellipse 55% 14% at 50%   0%, rgba(168, 85,247,0.40) 0%, transparent 100%),
+    /* right side */
     radial-gradient(ellipse 14% 55% at 100% 50%, rgba( 56,189,248,0.32) 0%, transparent 100%),
-    radial-gradient(ellipse 55% 14% at 50% 100%, rgba( 45,212,191,0.28) 0%, transparent 100%),
-    radial-gradient(ellipse 14% 55% at   0% 50%, rgba(244,114,182,0.32) 0%, transparent 100%),
-    /* corners */
-    radial-gradient(ellipse 18% 18% at   0%   0%, rgba(192,132,252,0.20) 0%, transparent 100%),
-    radial-gradient(ellipse 18% 18% at 100%   0%, rgba(129,140,248,0.20) 0%, transparent 100%),
-    radial-gradient(ellipse 18% 18% at 100% 100%, rgba( 96,165,250,0.18) 0%, transparent 100%),
-    radial-gradient(ellipse 18% 18% at   0% 100%, rgba(168, 85,247,0.15) 0%, transparent 100%);
+    /* left side */
+    radial-gradient(ellipse 14% 55% at   0% 50%, rgba(244,114,182,0.32) 0%, transparent 100%);
   filter: blur(45px);
 }
 

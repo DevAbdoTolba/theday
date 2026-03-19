@@ -34,7 +34,7 @@ export default function StudyActivationEffect() {
   const cls = `vp-border vp-${phase}`;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9997 }}>
+    <div className="vp-container">
       <div className={`${cls} vp-ambient`} />
       <div className={`${cls} vp-core`} />
     </div>

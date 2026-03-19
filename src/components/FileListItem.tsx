@@ -56,11 +56,13 @@ const FileListItemBase = ({
   // Study mode only applies to non-folder items
   const studySelectable = studyModeActive && file.type !== 'folder';
   // Subscribe directly — only THIS row re-renders when its selection changes
-  const isSelected = useSyncExternalStore(
+  const rawSelected = useSyncExternalStore(
     selectionStore.subscribe,
     () => selectionStore.isSelected(file.id),
     () => false,
   );
+  // Only show selection visuals when study mode is active
+  const isSelected = studySelectable && rawSelected;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
