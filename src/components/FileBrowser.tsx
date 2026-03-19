@@ -1,6 +1,6 @@
 import YoutubePlayer from "./YoutubePlayer";
 import VisualState from "./feedback/VisualState";
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import {
   Box,
@@ -62,67 +62,51 @@ export default function FileBrowser({
     title: string;
   } | null>(null);
 
-  // Study mode onboarding — show hint for first 3 sessions only
-  // A "session" = a new subject visited 24h+ after the last hint was shown
+  // Study mode onboarding — show hint once on first activation per session.
+  // A "session" = visiting the site 24h+ after the last hint. After 3 sessions, never again.
   const HINT_STORAGE_KEY = 'studyHintSessions';
   const prevStudyMode = useRef(false);
   const [showHint, setShowHint] = useState(false);
-  const [hintFading, setHintFading] = useState(false);
   const hintAllowed = useRef<boolean | null>(null);
 
-  // Check on mount whether this session qualifies for a hint
   useEffect(() => {
     try {
       const raw = localStorage.getItem(HINT_STORAGE_KEY);
-      const data = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
-      if (data.count >= 3) {
+      const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+      if (stored.count >= 3) {
         hintAllowed.current = false;
-      } else if (Date.now() - data.lastShown >= 24 * 60 * 60 * 1000) {
+      } else if (Date.now() - stored.lastShown >= 24 * 60 * 60 * 1000) {
         hintAllowed.current = true;
       } else {
-        // Same day session — still show if under 3, don't increment
-        hintAllowed.current = true;
+        hintAllowed.current = false; // same day — already shown this session
       }
     } catch {
       hintAllowed.current = true;
     }
   }, []);
 
-  const dismissHint = useCallback(() => {
-    setHintFading(true);
-    setTimeout(() => { setShowHint(false); setHintFading(false); }, 400);
-  }, []);
-
   useEffect(() => {
-    if (studyModeActive && !prevStudyMode.current) {
-      if (hintAllowed.current) {
-        setShowHint(true);
-        setHintFading(false);
-        // Record this session
-        try {
-          const raw = localStorage.getItem(HINT_STORAGE_KEY);
-          const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
-          const isNewSession = Date.now() - stored.lastShown >= 24 * 60 * 60 * 1000;
-          const next = {
-            count: isNewSession ? stored.count + 1 : stored.count,
-            lastShown: Date.now(),
-          };
-          localStorage.setItem(HINT_STORAGE_KEY, JSON.stringify(next));
-          if (next.count >= 3) hintAllowed.current = false;
-        } catch { /* ignore */ }
-        const hintTimer = setTimeout(() => dismissHint(), 4000);
-        prevStudyMode.current = true;
-        return () => clearTimeout(hintTimer);
-      }
+    if (studyModeActive && !prevStudyMode.current && hintAllowed.current) {
+      setShowHint(true);
+      hintAllowed.current = false; // never again this session
+      try {
+        const raw = localStorage.getItem(HINT_STORAGE_KEY);
+        const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+        localStorage.setItem(HINT_STORAGE_KEY, JSON.stringify({
+          count: stored.count + 1,
+          lastShown: Date.now(),
+        }));
+      } catch { /* ignore */ }
+      const t = setTimeout(() => setShowHint(false), 4000);
       prevStudyMode.current = true;
-      return;
+      return () => clearTimeout(t);
     }
+    if (studyModeActive) prevStudyMode.current = true;
     if (!studyModeActive) {
       setShowHint(false);
-      setHintFading(false);
       prevStudyMode.current = false;
     }
-  }, [studyModeActive, dismissHint]);
+  }, [studyModeActive]);
 
   // Categories
   const categories = useMemo(() => ["All", ...Object.keys(data)], [data]);
@@ -296,7 +280,7 @@ export default function FileBrowser({
             sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
           />
           <Tooltip
-            open={showHint && !hintFading}
+            open={showHint}
             title="Tap any file to add it to your study list"
             arrow
             placement="bottom"
@@ -415,7 +399,7 @@ export default function FileBrowser({
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
                       studyModeActive={studyModeActive}
 
-                      onStudySelect={(file) => { if (showHint) dismissHint(); onStudySelect?.(file, entry.category); }}
+                      onStudySelect={(file) => { setShowHint(false); onStudySelect?.(file, entry.category); }}
                     />
                   </Grid>
                 ))}
@@ -430,7 +414,7 @@ export default function FileBrowser({
                     isNew={newItems.includes(entry.file.id)}
                     studyModeActive={studyModeActive}
 
-                    onStudySelect={(file) => { if (showHint) dismissHint(); onStudySelect?.(file, entry.category); }}
+                    onStudySelect={(file) => { setShowHint(false); onStudySelect?.(file, entry.category); }}
                   />
                 ))}
               </Box>
