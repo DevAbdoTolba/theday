@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Drawer, Box, Typography, IconButton, Button, Divider,
@@ -6,7 +6,7 @@ import {
   DialogActions, useTheme, useMediaQuery, alpha,
 } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
-import { formatStudyContext } from '../../utils/study-export';
+import { formatUrls, formatStudyContext } from '../../utils/study-export';
 import CollectionGroup from './CollectionGroup';
 import ClipboardFallback from './ClipboardFallback';
 
@@ -41,6 +41,17 @@ export default function CollectionPanel({ open, onClose }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [shiftHeld, setShiftHeld] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => setShiftHeld(e.shiftKey);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
+    };
+  }, []);
 
   // Group items by subject, sorted alphabetically
   const groupedItems = useMemo(() => {
@@ -53,12 +64,22 @@ export default function CollectionPanel({ open, onClose }: Props) {
   }, [items]);
 
   const handleCopy = async () => {
-    const text = formatStudyContext(items);
-    const ok = await writeToClipboard(text);
-    if (ok) {
-      setToast('Study context copied — paste as a text source in NotebookLM');
+    if (shiftHeld) {
+      const text = formatStudyContext(items);
+      const ok = await writeToClipboard(text);
+      if (ok) {
+        setToast('Study context copied — paste as a text source in NotebookLM');
+      } else {
+        setFallback({ content: text, title: 'Copy Study Context' });
+      }
     } else {
-      setFallback({ content: text, title: 'Copy Study Context' });
+      const text = formatUrls(items);
+      const ok = await writeToClipboard(text);
+      if (ok) {
+        setToast('URLs copied — paste as website sources in NotebookLM');
+      } else {
+        setFallback({ content: text, title: 'Copy URLs' });
+      }
     }
   };
 
@@ -170,7 +191,7 @@ export default function CollectionPanel({ open, onClose }: Props) {
               disabled={itemCount === 0}
               sx={{ flex: 1 }}
             >
-              Copy
+              {shiftHeld ? 'Context' : 'Copy'}
             </Button>
             <Button
               fullWidth

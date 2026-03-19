@@ -1,6 +1,13 @@
 import { SessionItem } from './types';
 
 /**
+ * Formats collected items as one URL per line for pasting into NotebookLM as website sources.
+ */
+export function formatUrls(items: SessionItem[]): string {
+  return items.map(item => item.url).join('\n');
+}
+
+/**
  * Formats collected items as structured XML with direct URLs for pasting into NotebookLM as a text source.
  * Items are grouped by subjectName → category, sorted alphabetically.
  */

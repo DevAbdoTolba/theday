@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,7 +8,7 @@ import {
   useMediaQuery, alpha,
 } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
-import { formatStudyContext } from '../../utils/study-export';
+import { formatUrls, formatStudyContext } from '../../utils/study-export';
 import SessionItemRow from './SessionItemRow';
 import ClipboardFallback from './ClipboardFallback';
 
@@ -41,12 +41,30 @@ export default function StudyQueuePanel() {
   const [toast, setToast] = useState<string | null>(null);
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [shiftHeld, setShiftHeld] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => setShiftHeld(e.shiftKey);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
+    };
+  }, []);
 
   const handleCopy = async () => {
-    const text = formatStudyContext(items);
-    const ok = await writeToClipboard(text);
-    if (ok) setToast('Study context copied — paste as a text source in NotebookLM');
-    else setFallback({ content: text, title: 'Copy Study Context' });
+    if (shiftHeld) {
+      const text = formatStudyContext(items);
+      const ok = await writeToClipboard(text);
+      if (ok) setToast('Study context copied — paste as a text source in NotebookLM');
+      else setFallback({ content: text, title: 'Copy Study Context' });
+    } else {
+      const text = formatUrls(items);
+      const ok = await writeToClipboard(text);
+      if (ok) setToast('URLs copied — paste as website sources in NotebookLM');
+      else setFallback({ content: text, title: 'Copy URLs' });
+    }
   };
 
   const handleOpenNotebookLM = () => {
@@ -158,7 +176,7 @@ export default function StudyQueuePanel() {
                     onClick={handleCopy}
                     sx={{ flex: 1, fontSize: '0.72rem', py: 0.5, borderRadius: 1.5, textTransform: 'none', fontWeight: 600 }}
                   >
-                    Copy
+                    {shiftHeld ? 'Context' : 'Copy'}
                   </Button>
                   <Button
                     size="small"
