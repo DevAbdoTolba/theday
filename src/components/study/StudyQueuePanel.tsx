@@ -8,7 +8,7 @@ import {
   useMediaQuery, alpha,
 } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
-import { formatUrls, formatStudyContext } from '../../utils/study-export';
+import { formatStudyContext } from '../../utils/study-export';
 import SessionItemRow from './SessionItemRow';
 import ClipboardFallback from './ClipboardFallback';
 
@@ -17,13 +17,12 @@ const ExpandLess = dynamic(() => import('@mui/icons-material/ExpandLess'), { ssr
 const ExpandMore = dynamic(() => import('@mui/icons-material/ExpandMore'), { ssr: false });
 const ContentCopy = dynamic(() => import('@mui/icons-material/ContentCopy'), { ssr: false });
 const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
-const Description = dynamic(() => import('@mui/icons-material/Description'), { ssr: false });
 const DeleteSweep = dynamic(() => import('@mui/icons-material/DeleteSweep'), { ssr: false });
 const AutoAwesome = dynamic(() => import('@mui/icons-material/AutoAwesome'), { ssr: false });
 
 const MAX_ITEMS = 50;
 const WARN_THRESHOLD = 40;
-const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/creating';
+const NOTEBOOKLM_URL = 'https://notebooklm.google.com/';
 
 async function writeToClipboard(text: string): Promise<boolean> {
   try {
@@ -43,24 +42,15 @@ export default function StudyQueuePanel() {
   const [fallback, setFallback] = useState<{ content: string; title: string } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  const handleCopyUrls = async () => {
-    const text = formatUrls(items);
-    const ok = await writeToClipboard(text);
-    if (ok) setToast('URLs copied — paste as website sources in NotebookLM');
-    else setFallback({ content: text, title: 'Copy URLs' });
-  };
-
-  const handleCopyContext = async () => {
+  const handleCopy = async () => {
     const text = formatStudyContext(items);
     const ok = await writeToClipboard(text);
     if (ok) setToast('Study context copied — paste as a text source in NotebookLM');
     else setFallback({ content: text, title: 'Copy Study Context' });
   };
 
-  const handleOpenNotebookLM = async () => {
-    await writeToClipboard(formatUrls(items));
+  const handleOpenNotebookLM = () => {
     window.open(NOTEBOOKLM_URL, '_blank');
-    setToast('URLs copied — Create a new notebook → Add sources → Paste as website URLs');
   };
 
   const panelWidth = isMobile ? '100vw' : 380;
@@ -165,19 +155,10 @@ export default function StudyQueuePanel() {
                     size="small"
                     variant="outlined"
                     startIcon={<ContentCopy sx={{ fontSize: '14px !important' }} />}
-                    onClick={handleCopyUrls}
+                    onClick={handleCopy}
                     sx={{ flex: 1, fontSize: '0.72rem', py: 0.5, borderRadius: 1.5, textTransform: 'none', fontWeight: 600 }}
                   >
-                    Copy URLs
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Description sx={{ fontSize: '14px !important' }} />}
-                    onClick={handleCopyContext}
-                    sx={{ flex: 1, fontSize: '0.72rem', py: 0.5, borderRadius: 1.5, textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Context
+                    Copy
                   </Button>
                   <Button
                     size="small"

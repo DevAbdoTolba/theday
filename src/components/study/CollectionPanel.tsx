@@ -6,7 +6,7 @@ import {
   DialogActions, useTheme, useMediaQuery, alpha,
 } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
-import { formatUrls, formatStudyContext } from '../../utils/study-export';
+import { formatStudyContext } from '../../utils/study-export';
 import CollectionGroup from './CollectionGroup';
 import ClipboardFallback from './ClipboardFallback';
 
@@ -14,11 +14,10 @@ const Close = dynamic(() => import('@mui/icons-material/Close'), { ssr: false })
 const ContentCopy = dynamic(() => import('@mui/icons-material/ContentCopy'), { ssr: false });
 const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
 const DeleteSweep = dynamic(() => import('@mui/icons-material/DeleteSweep'), { ssr: false });
-const Description = dynamic(() => import('@mui/icons-material/Description'), { ssr: false });
 
 const LIMIT_WARN_THRESHOLD = 40;
 const MAX_ITEMS = 50;
-const NOTEBOOKLM_URL = 'https://notebooklm.google.com/notebook/creating';
+const NOTEBOOKLM_URL = 'https://notebooklm.google.com/';
 
 interface Props {
   open: boolean;
@@ -53,17 +52,7 @@ export default function CollectionPanel({ open, onClose }: Props) {
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [items]);
 
-  const handleCopyUrls = async () => {
-    const text = formatUrls(items);
-    const ok = await writeToClipboard(text);
-    if (ok) {
-      setToast('URLs copied — paste as website sources in NotebookLM');
-    } else {
-      setFallback({ content: text, title: 'Copy URLs' });
-    }
-  };
-
-  const handleCopyContext = async () => {
+  const handleCopy = async () => {
     const text = formatStudyContext(items);
     const ok = await writeToClipboard(text);
     if (ok) {
@@ -73,11 +62,8 @@ export default function CollectionPanel({ open, onClose }: Props) {
     }
   };
 
-  const handleOpenNotebookLM = async () => {
-    const text = formatUrls(items);
-    await writeToClipboard(text);
+  const handleOpenNotebookLM = () => {
     window.open(NOTEBOOKLM_URL, '_blank');
-    setToast('URLs copied — Create a new notebook → Add sources → Paste as website URLs');
   };
 
   const handleConfirmClear = () => {
@@ -174,27 +160,17 @@ export default function CollectionPanel({ open, onClose }: Props) {
             gap: 1,
           }}
         >
-          <Button
-            fullWidth
-            variant="contained"
-            size="small"
-            startIcon={<ContentCopy />}
-            onClick={handleCopyUrls}
-            disabled={itemCount === 0}
-          >
-            Copy URLs
-          </Button>
           <Box display="flex" gap={1}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="contained"
               size="small"
-              startIcon={<Description />}
-              onClick={handleCopyContext}
+              startIcon={<ContentCopy />}
+              onClick={handleCopy}
               disabled={itemCount === 0}
               sx={{ flex: 1 }}
             >
-              Copy Context
+              Copy
             </Button>
             <Button
               fullWidth
@@ -205,7 +181,7 @@ export default function CollectionPanel({ open, onClose }: Props) {
               disabled={itemCount === 0}
               sx={{ flex: 1 }}
             >
-              Open NotebookLM
+              NotebookLM
             </Button>
           </Box>
           <Divider />
