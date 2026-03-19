@@ -62,10 +62,31 @@ export default function FileBrowser({
     title: string;
   } | null>(null);
 
-  // Study mode onboarding — hint label next to Study button
+  // Study mode onboarding — show hint for first 3 sessions only
+  // A "session" = a new subject visited 24h+ after the last hint was shown
+  const HINT_STORAGE_KEY = 'studyHintSessions';
   const prevStudyMode = useRef(false);
   const [showHint, setShowHint] = useState(false);
   const [hintFading, setHintFading] = useState(false);
+  const hintAllowed = useRef<boolean | null>(null);
+
+  // Check on mount whether this session qualifies for a hint
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HINT_STORAGE_KEY);
+      const data = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+      if (data.count >= 3) {
+        hintAllowed.current = false;
+      } else if (Date.now() - data.lastShown >= 24 * 60 * 60 * 1000) {
+        hintAllowed.current = true;
+      } else {
+        // Same day session — still show if under 3, don't increment
+        hintAllowed.current = true;
+      }
+    } catch {
+      hintAllowed.current = true;
+    }
+  }, []);
 
   const dismissHint = useCallback(() => {
     setHintFading(true);
@@ -74,11 +95,27 @@ export default function FileBrowser({
 
   useEffect(() => {
     if (studyModeActive && !prevStudyMode.current) {
-      setShowHint(true);
-      setHintFading(false);
-      const hintTimer = setTimeout(() => dismissHint(), 4000);
+      if (hintAllowed.current) {
+        setShowHint(true);
+        setHintFading(false);
+        // Record this session
+        try {
+          const raw = localStorage.getItem(HINT_STORAGE_KEY);
+          const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+          const isNewSession = Date.now() - stored.lastShown >= 24 * 60 * 60 * 1000;
+          const next = {
+            count: isNewSession ? stored.count + 1 : stored.count,
+            lastShown: Date.now(),
+          };
+          localStorage.setItem(HINT_STORAGE_KEY, JSON.stringify(next));
+          if (next.count >= 3) hintAllowed.current = false;
+        } catch { /* ignore */ }
+        const hintTimer = setTimeout(() => dismissHint(), 4000);
+        prevStudyMode.current = true;
+        return () => clearTimeout(hintTimer);
+      }
       prevStudyMode.current = true;
-      return () => clearTimeout(hintTimer);
+      return;
     }
     if (!studyModeActive) {
       setShowHint(false);
