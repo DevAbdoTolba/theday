@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    Study Mode — Viewport Border (Apple Intelligence Mesh Glow)
-   Only transform + opacity are animated. filter: blur() is static.
+   Only transform + opacity are animated. No filter: blur() —
+   softness comes from wider gradient spread (zero GPU filter cost).
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -26,25 +27,23 @@
 }
 
 
-/* ── Core: thin bright glow — sides only ── */
+/* ── Core: bright edge glow — wide gradient simulates blur(22px) ── */
 .vp-core {
   background:
     /* right side */
-    radial-gradient(ellipse  7% 45% at 100% 50%, rgba( 56,189,248,0.60) 0%, transparent 100%),
+    radial-gradient(ellipse 15% 50% at 100% 50%, rgba( 56,189,248,0.42) 0%, rgba( 56,189,248,0.12) 45%, transparent 100%),
     /* left side */
-    radial-gradient(ellipse  7% 45% at   0% 50%, rgba(244,114,182,0.60) 0%, transparent 100%);
-  filter: blur(22px);
+    radial-gradient(ellipse 15% 50% at   0% 50%, rgba(244,114,182,0.42) 0%, rgba(244,114,182,0.12) 45%, transparent 100%);
 }
 
 
-/* ── Ambient: soft halo — sides only ── */
+/* ── Ambient: soft halo — wide gradient simulates blur(45px) ── */
 .vp-ambient {
   background:
     /* right side */
-    radial-gradient(ellipse 14% 55% at 100% 50%, rgba( 56,189,248,0.32) 0%, transparent 100%),
+    radial-gradient(ellipse 28% 65% at 100% 50%, rgba( 56,189,248,0.18) 0%, rgba( 56,189,248,0.05) 50%, transparent 100%),
     /* left side */
-    radial-gradient(ellipse 14% 55% at   0% 50%, rgba(244,114,182,0.32) 0%, transparent 100%);
-  filter: blur(45px);
+    radial-gradient(ellipse 28% 65% at   0% 50%, rgba(244,114,182,0.18) 0%, rgba(244,114,182,0.05) 50%, transparent 100%);
 }
 
 
