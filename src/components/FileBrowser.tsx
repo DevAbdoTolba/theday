@@ -258,32 +258,35 @@ export default function FileBrowser({
             flexItem
             sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
           />
-          <Box sx={{ position: 'relative' }}>
-            <StudyModeToggle />
-            {showHint && (
-              <Chip
-                label="Tap any file to add it to your study list"
-                size="small"
-                sx={{
-                  position: 'absolute',
-                  top: '110%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  whiteSpace: 'nowrap',
-                  zIndex: 20,
-                  bgcolor: alpha(theme.palette.primary.main, 0.10),
-                  color: theme.palette.primary.main,
+          <Tooltip
+            open={showHint && !hintFading}
+            title="Tap any file to add it to your study list"
+            arrow
+            placement="bottom"
+            disableHoverListener
+            disableFocusListener
+            disableTouchListener
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: alpha(theme.palette.primary.main, 0.92),
+                  color: '#fff',
                   fontWeight: 600,
-                  fontSize: '0.72rem',
-                  height: 26,
-                  pointerEvents: 'none',
-                  animation: hintFading
-                    ? 'studyHintOut 0.4s ease forwards'
-                    : 'studyHintIn 0.5s ease forwards',
-                }}
-              />
-            )}
-          </Box>
+                  fontSize: '0.75rem',
+                  px: 1.5,
+                  py: 0.75,
+                  borderRadius: 2,
+                },
+              },
+              arrow: {
+                sx: { color: alpha(theme.palette.primary.main, 0.92) },
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex' }}>
+              <StudyModeToggle />
+            </Box>
+          </Tooltip>
           <Divider
             orientation="vertical"
             flexItem
