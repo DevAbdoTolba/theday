@@ -39,7 +39,13 @@ export class SubjectModel extends Dexie {
 }
 
 export const db = new SubjectModel();
-const IndexedContext = createContext<any>(null);
+export const IndexedContext = createContext<any>({
+  updatedItems: [],
+  loading: false,
+  setLoading: () => {},
+  getSubjectByName: async () => null,
+  addOrUpdateSubject: async () => ({ msg: "noop", newItems: [] }),
+});
 
 export function useIndexedContext() {
   return useContext(IndexedContext);

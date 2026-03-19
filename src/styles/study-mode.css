@@ -1,0 +1,181 @@
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Viewport Border (Apple Intelligence Mesh Glow)
+   Only transform + opacity are animated. No filter: blur() —
+   softness comes from wider gradient spread (zero GPU filter cost).
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --vp-spring:   cubic-bezier(0.15, 0, 0.2, 1);
+  --vp-ease-out: cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+/* ── Container: full-viewport glow wrapper ── */
+.vp-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+}
+
+.vp-border {
+  position: absolute;
+  inset: 0 -4% 0 -4%;
+  will-change: transform, opacity;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+
+/* ── Core: bright edge glow — multi-stop gradient, no filter blur ── */
+.vp-core {
+  background:
+    /* right side */
+    radial-gradient(ellipse 24% 55% at 100% 50%,
+      rgba( 56,189,248,0.45) 0%,
+      rgba( 56,189,248,0.22) 30%,
+      rgba( 56,189,248,0.06) 60%,
+      rgba( 56,189,248,0.01) 80%,
+      transparent 100%),
+    /* left side */
+    radial-gradient(ellipse 24% 55% at   0% 50%,
+      rgba(244,114,182,0.45) 0%,
+      rgba(244,114,182,0.22) 30%,
+      rgba(244,114,182,0.06) 60%,
+      rgba(244,114,182,0.01) 80%,
+      transparent 100%);
+}
+
+
+/* ── Ambient: soft halo — multi-stop gradient, no filter blur ── */
+.vp-ambient {
+  background:
+    /* right side */
+    radial-gradient(ellipse 40% 70% at 100% 50%,
+      rgba( 56,189,248,0.20) 0%,
+      rgba( 56,189,248,0.09) 30%,
+      rgba( 56,189,248,0.02) 60%,
+      rgba( 56,189,248,0.005) 80%,
+      transparent 100%),
+    /* left side */
+    radial-gradient(ellipse 40% 70% at   0% 50%,
+      rgba(244,114,182,0.20) 0%,
+      rgba(244,114,182,0.09) 30%,
+      rgba(244,114,182,0.02) 60%,
+      rgba(244,114,182,0.005) 80%,
+      transparent 100%);
+}
+
+
+/* ═══════════════════════════════════════════════════
+   Pulse-In  (activation burst)
+   ═══════════════════════════════════════════════════ */
+.vp-core.vp-in    { animation: vpCoreIn    0.70s var(--vp-spring) forwards; }
+.vp-ambient.vp-in { animation: vpAmbientIn 0.90s var(--vp-spring) forwards; }
+
+@keyframes vpCoreIn {
+  0%   { opacity: 0;    transform: scale(0.85); }
+  40%  { opacity: 0.5;  transform: scale(0.94); }
+  70%  { opacity: 0.85; transform: scale(1.005); }
+  100% { opacity: 0.70; transform: scale(1); }
+}
+
+@keyframes vpAmbientIn {
+  0%   { opacity: 0;    transform: scale(0.80); }
+  45%  { opacity: 0.08; transform: scale(0.92); }
+  100% { opacity: 0.18; transform: scale(1); }
+}
+
+
+/* ═══════════════════════════════════════════════════
+   Breathing  (sustained — colors pulse to fill page)
+   Core:    steady edge glow, subtle opacity variation
+   Ambient: dramatic opacity sweep — colors expand inward
+   Different periods (3s vs 4.5s) so they drift in/out
+   of sync for organic, non-mechanical feel.
+   ═══════════════════════════════════════════════════ */
+.vp-core.vp-active {
+  opacity: 0.70;
+  animation: vpCoreBreathe 3s ease-in-out infinite;
+}
+
+.vp-ambient.vp-active {
+  opacity: 0.18;
+  animation: vpAmbientBreathe 4.5s ease-in-out infinite;
+}
+
+@keyframes vpCoreBreathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.004); }
+}
+
+@keyframes vpAmbientBreathe {
+  0%, 100% { opacity: 0.10; transform: scale(0.99); }
+  50%      { opacity: 0.25; transform: scale(1.01); }
+}
+
+
+/* ═══════════════════════════════════════════════════
+   Pulse-Out  (deactivation)
+   ═══════════════════════════════════════════════════ */
+.vp-core.vp-out    { animation: vpCoreOut    0.50s var(--vp-ease-out) forwards; }
+.vp-ambient.vp-out { animation: vpAmbientOut 0.65s var(--vp-ease-out) forwards; }
+
+@keyframes vpCoreOut {
+  0%   { opacity: 0.70; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.90); }
+}
+
+@keyframes vpAmbientOut {
+  0%   { opacity: 0.18; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(0.88); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Button Pulse (StudyModeToggle active state)
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes studyButtonPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139,92,246,0.55), 0 0 40px rgba(59,130,246,0.25), 0 6px 14px rgba(0,0,0,0.25);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139,92,246,0.75), 0 0 60px rgba(59,130,246,0.4), 0 8px 18px rgba(0,0,0,0.28);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Study Mode — Card Selection
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes studySelectionFlash {
+  0%   { opacity: 0; }
+  30%  { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+.study-selection-flash {
+  animation: studySelectionFlash 0.4s ease-out forwards;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Accessibility
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-border {
+    animation: none !important;
+  }
+  .vp-core.vp-in,
+  .vp-core.vp-active  { opacity: 0.70; }
+  .vp-ambient.vp-in,
+  .vp-ambient.vp-active { opacity: 0.18; }
+  .vp-core.vp-out,
+  .vp-ambient.vp-out { transition: opacity 0.3s ease; opacity: 0; }
+  .study-selection-flash {
+    animation: none;
+  }
+}

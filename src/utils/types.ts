@@ -3,6 +3,7 @@
 export interface Subject {
   name: string;
   abbreviation: string;
+  shared?: boolean;
 }
 
 export interface Semester {
@@ -44,5 +45,78 @@ export interface ParsedFile {
   thumbnailUrl?: string;
   isExternalLink: boolean;
   youtubeId?: string | null
+}
+
+// --- Study Session types ---
+
+export interface SessionItem {
+  id: string;
+  name: string;
+  url: string;
+  type: ParsedFile['type'];
+  subjectName: string;
+  subjectAbbr: string;
+  category: string;
+  thumbnailUrl?: string;
+  addedAt: number;
+}
+
+export interface StudySessionState {
+  isActive: boolean;
+  items: SessionItem[];
+}
+
+// --- Upload types ---
+
+export interface UploadProgress {
+  percent: number;
+  speedBps: number; // bytes per second
+  loadedBytes: number;
+  totalBytes: number;
+}
+
+export interface UploadOptions {
+  onProgress?: (progress: UploadProgress) => void;
+  signal?: AbortSignal;
+}
+
+export interface UploadResult {
+  id: string;
+  name: string;
+}
+
+// --- Subject Change Request types ---
+
+export type ChangeType = "create" | "edit" | "delete";
+
+export type ChangeStatus = "pending" | "approved" | "rejected";
+
+export interface ISubjectChangeRequest {
+  _id: string;
+  classId: string;
+  changeType: ChangeType;
+  subjectName: string;
+  subjectAbbreviation: string;
+  shared: boolean;
+  semesterIndex: number;
+  originalSubjectName?: string;
+  originalSubjectAbbreviation?: string;
+  status: ChangeStatus;
+  requestedBy: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SubjectWithPending = Subject & {
+  pendingChange?: ISubjectChangeRequest;
+  semesterIndex: number;
+};
+
+export interface PendingApproval extends ISubjectChangeRequest {
+  className: string;
+  requestedByName: string;
+  requestedByEmail: string;
 }
 

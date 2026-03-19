@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple Intelligence Glow — Prototype</title>
+<style>
+  :root {
+    --spring:   cubic-bezier(0.15, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.32, 0, 0.67, 0);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  .squircle-clip { clip-path: url(#squircle); }
+
+  .siri-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ─── Bottom: Ambient Pulse ─── */
+  .ambient {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    transform: scale(1);
+    will-change: transform, opacity;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .ambient__mesh {
+    position: absolute;
+    inset: -100px;
+    background:
+      radial-gradient(ellipse 55% 80% at 10% 50%, rgba(168,85,247,0.50) 0%, transparent 70%),
+      radial-gradient(ellipse 55% 80% at 90% 50%, rgba(56,189,248,0.40) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 55% at 50% 10%, rgba(244,114,182,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 55% at 50% 90%, rgba(45,212,191,0.30) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 45% at 25% 75%, rgba(129,140,248,0.28) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 45% at 75% 25%, rgba(192,132,252,0.32) 0%, transparent 50%);
+    filter: blur(60px);
+    border-radius: 50%;
+  }
+
+  /* ─── Middle: Core Glow ─── */
+  .core {
+    position: absolute;
+    inset: -8px;
+    z-index: 2;
+    opacity: 0;
+    transform: scale(0.92);
+    will-change: transform, opacity;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .core__mesh {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 140% at  8% 50%, rgba(168,85,247,0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 55% 140% at 92% 50%, rgba(56,189,248,0.75) 0%, transparent 50%),
+      radial-gradient(ellipse 110% 55% at 50%  8%, rgba(244,114,182,0.65) 0%, transparent 50%),
+      radial-gradient(ellipse 110% 55% at 50% 92%, rgba(45,212,191,0.55) 0%, transparent 45%),
+      radial-gradient(ellipse 50%  50% at 50% 50%, rgba(129,140,248,0.70) 0%, transparent 50%);
+    filter: blur(20px);
+  }
+
+  /* ─── Top: Button ─── */
+  .siri-btn {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 26px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: rgba(167,139,250,0.95);
+    background: rgba(139,92,246,0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.22);
+    will-change: transform;
+    transition:
+      transform 0.5s var(--spring),
+      color 0.3s ease,
+      background 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .siri-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(139,92,246,0.14);
+    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.35);
+  }
+
+  .siri-btn:active { transform: scale(0.95); }
+
+  .siri-btn.active {
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 60%, #06b6d4 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.20),
+      inset 0 0 0 1px rgba(139,92,246,0.55);
+  }
+
+  .siri-btn__icon { font-size: 12px; line-height: 1; }
+
+  /* ─── Pulse-In ─── */
+  .core.pulse-in    { animation: coreIn    0.55s var(--spring) forwards; }
+  .ambient.pulse-in { animation: ambientIn 0.80s var(--spring) forwards; }
+
+  @keyframes coreIn {
+    0%   { opacity: 0;    transform: scale(0.80); }
+    50%  { opacity: 1;    transform: scale(1.12); }
+    100% { opacity: 0.85; transform: scale(1.05); }
+  }
+  @keyframes ambientIn {
+    0%   { opacity: 0;   transform: scale(0.85); }
+    40%  { opacity: 0.5; }
+    100% { opacity: 0.3; transform: scale(2.4); }
+  }
+
+  /* ─── Breathing ─── */
+  .core.breathing {
+    opacity: 0.85; transform: scale(1.05);
+    animation: coreBreathe 3.5s ease-in-out infinite;
+  }
+  .ambient.breathing {
+    opacity: 0.3; transform: scale(2.4);
+    animation: ambientBreathe 4s ease-in-out infinite;
+  }
+
+  @keyframes coreBreathe {
+    0%, 100% { opacity: 0.72; transform: scale(1.02); }
+    50%      { opacity: 0.95; transform: scale(1.09); }
+  }
+  @keyframes ambientBreathe {
+    0%, 100% { opacity: 0.20; transform: scale(2.1); }
+    50%      { opacity: 0.38; transform: scale(2.6); }
+  }
+
+  /* ─── Pulse-Out ─── */
+  .core.pulse-out    { animation: coreOut    0.50s var(--ease-out) forwards; }
+  .ambient.pulse-out { animation: ambientOut 0.65s var(--ease-out) forwards; }
+
+  @keyframes coreOut {
+    0%   { opacity: 0.85; transform: scale(1.05); }
+    100% { opacity: 0;    transform: scale(0.88); }
+  }
+  @keyframes ambientOut {
+    0%   { opacity: 0.3;  transform: scale(2.4); }
+    100% { opacity: 0;    transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .core, .ambient { animation: none !important; transition: opacity 0.3s ease !important; }
+    .siri-btn { transition: none !important; }
+  }
+
+  .hint {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 0.5px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <clipPath id="squircle" clipPathUnits="objectBoundingBox">
+      <path d="
+        M 0.5,0
+        C 0.81,0  0.93,0  0.965,0.035
+        C 1,0.07  1,0.19  1,0.5
+        C 1,0.81  1,0.93  0.965,0.965
+        C 0.93,1  0.81,1  0.5,1
+        C 0.19,1  0.07,1  0.035,0.965
+        C 0,0.93  0,0.81  0,0.5
+        C 0,0.19  0,0.07  0.035,0.035
+        C 0.07,0  0.19,0  0.5,0
+        Z"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<div class="siri-wrapper">
+  <div class="ambient" aria-hidden="true"><div class="ambient__mesh"></div></div>
+  <div class="core" aria-hidden="true"><div class="core__mesh squircle-clip"></div></div>
+  <button class="siri-btn squircle-clip" type="button">
+    <span class="siri-btn__icon">✦</span>
+    <span>Study</span>
+  </button>
+</div>
+
+<p class="hint">Click to toggle</p>
+
+<script>
+(() => {
+  const btn = document.querySelector('.siri-btn');
+  const core = document.querySelector('.core');
+  const ambient = document.querySelector('.ambient');
+  let active = false;
+
+  btn.addEventListener('click', () => active ? deactivate() : activate());
+
+  function activate() {
+    active = true;
+    btn.classList.add('active');
+    core.className = 'core pulse-in';
+    ambient.className = 'ambient pulse-in';
+    setTimeout(() => {
+      if (!active) return;
+      core.className = 'core breathing';
+      ambient.className = 'ambient breathing';
+    }, 800);
+  }
+
+  function deactivate() {
+    active = false;
+    btn.classList.remove('active');
+    core.className = 'core pulse-out';
+    ambient.className = 'ambient pulse-out';
+  }
+})();
+</script>
+</body>
+</html>

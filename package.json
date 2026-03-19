@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o .storybook-build"
   },
   "dependencies": {
     "@emotion/react": "^11.10.8",
@@ -18,6 +20,9 @@
     "dexie": "^4.0.8",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.5.9",
+    "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
+    "firebase-tools": "^15.9.1",
     "framer-motion": "^11.3.28",
     "googleapis": "^118.0.0",
     "mongoose": "^8.4.3",
@@ -29,8 +34,17 @@
     "styled-jsx": "5.1.7"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^8.6.18",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/builder-vite": "^8.6.18",
+    "@storybook/nextjs": "^8.6.18",
+    "@storybook/react": "^8.6.18",
+    "@storybook/react-vite": "^8.6.18",
     "@types/node": "^22.0.0",
     "@types/react": "19.2.7",
-    "typescript": "5.2.2"
+    "storybook": "^8.6.18",
+    "typescript": "5.2.2",
+    "vite": "^5.4.21"
   }
 }

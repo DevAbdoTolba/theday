@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
@@ -10,6 +10,8 @@ import {
   Snackbar,
   Paper,
 } from "@mui/material";
+import { useStudySession } from "../../context/StudySessionContext";
+import { SessionItem, ParsedFile } from "../../utils/types";
 
 import ModernHeader from "../../components/ModernHeader";
 import FileBrowser from "../../components/FileBrowser";
@@ -20,6 +22,8 @@ import ProgressiveLoadingUI from "../../components/ProgressiveLoadingUI";
 import { SubjectMaterials } from "../../utils/types";
 import { useSplitSubject } from "../../hooks/useSplitSubject";
 import coursesData from "../../Data/data.json";
+
+interface CourseSemester { index: number; subjects: { name: string; abbreviation: string }[] }
 
 interface Props {
   subject: string;
@@ -35,6 +39,37 @@ export default function SubjectPage({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newItemsMsg, setNewItemsMsg] = useState("");
+  const [limitToast, setLimitToast] = useState(false);
+
+  // Study Session integration
+  const { isActive, toggleItem } = useStudySession();
+
+  // Resolve full subject name from abbreviation
+  const subjectFullName = useMemo(() => {
+    for (const sem of (coursesData.semesters as CourseSemester[])) {
+      const found = sem.subjects.find(s => s.abbreviation === subject);
+      if (found) return found.name;
+    }
+    return subject;
+  }, [subject]);
+
+  const handleStudySelect = useCallback((file: ParsedFile, category: string) => {
+    const item: SessionItem = {
+      id: file.id,
+      name: file.name,
+      url: file.url,
+      type: file.type,
+      subjectName: subjectFullName,
+      subjectAbbr: subject,
+      category,
+      thumbnailUrl: file.thumbnailUrl,
+      addedAt: Date.now(),
+    };
+    const success = toggleItem(item);
+    if (!success) {
+      setLimitToast(true);
+    }
+  }, [subject, subjectFullName, toggleItem]);
 
   // Use split subject hook for progressive loading
   const {
@@ -123,7 +158,7 @@ export default function SubjectPage({
         onMenuClick={handleDrawerToggle}
       />
 
-      <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
+      <Container maxWidth={false} sx={{ py: 4, minHeight: "85vh", px: { xs: 2, md: '7.5%' } }}>
         
         {/* Progressive Loading UI */}
         {process.env.NODE_ENV === "development" && (
@@ -150,6 +185,8 @@ export default function SubjectPage({
             subjectName={subject}
             newItems={newItems}
             fetching={loadingFiles}
+            studyModeActive={isActive}
+            onStudySelect={handleStudySelect}
           />
         ) : !loadingFolders && !loadingFiles ? (
           <Alert severity="info">No data available for this subject.</Alert>
@@ -161,6 +198,18 @@ export default function SubjectPage({
         semesterIndex={semesterIndex}
         onAddToCustom={handleAddToCustom}
       />
+
+      {/* Study limit notification */}
+      <Snackbar
+        open={limitToast}
+        autoHideDuration={3000}
+        onClose={() => setLimitToast(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="warning" onClose={() => setLimitToast(false)}>
+          Limit reached — remove items before adding more (50 max for NotebookLM)
+        </Alert>
+      </Snackbar>
 
       {/* New items notification */}
       {newItemsMsg && (

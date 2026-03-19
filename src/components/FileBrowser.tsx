@@ -1,6 +1,6 @@
 import YoutubePlayer from "./YoutubePlayer";
 import VisualState from "./feedback/VisualState";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import {
   Box,
@@ -16,6 +16,7 @@ import {
   Chip,
   Divider,
   Tooltip,
+  alpha,
 } from "@mui/material";
 import { SubjectMaterials, ParsedFile } from "../utils/types";
 import { parseGoogleFile } from "../utils/helpers";
@@ -29,12 +30,16 @@ const GridView = dynamic(() => import("@mui/icons-material/GridView"), { ssr: fa
 const ViewList = dynamic(() => import("@mui/icons-material/ViewList"), { ssr: false });
 const AutoAwesome = dynamic(() => import("@mui/icons-material/AutoAwesome"), { ssr: false });
 const VisibilityOutlined = dynamic(() => import("@mui/icons-material/VisibilityOutlined"), { ssr: false });
+const StudyModeToggle = dynamic(() => import("./study/StudyModeToggle"), { ssr: false });
 
 interface Props {
   data: SubjectMaterials;
   subjectName: string;
   newItems?: string[];
   fetching?: boolean;
+  // Study Mode props
+  studyModeActive?: boolean;
+  onStudySelect?: (file: ParsedFile, category: string) => void;
 }
 
 export default function FileBrowser({
@@ -42,6 +47,8 @@ export default function FileBrowser({
   subjectName,
   newItems = [],
   fetching = false,
+  studyModeActive = false,
+  onStudySelect,
 }: Props) {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
@@ -54,7 +61,52 @@ export default function FileBrowser({
     id: string;
     title: string;
   } | null>(null);
-  
+
+  // Study mode onboarding — show hint once on first activation per session.
+  // A "session" = visiting the site 24h+ after the last hint. After 3 sessions, never again.
+  const HINT_STORAGE_KEY = 'studyHintSessions';
+  const prevStudyMode = useRef(false);
+  const [showHint, setShowHint] = useState(false);
+  const hintAllowed = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HINT_STORAGE_KEY);
+      const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+      if (stored.count >= 3) {
+        hintAllowed.current = false;
+      } else if (Date.now() - stored.lastShown >= 24 * 60 * 60 * 1000) {
+        hintAllowed.current = true;
+      } else {
+        hintAllowed.current = false; // same day — already shown this session
+      }
+    } catch {
+      hintAllowed.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (studyModeActive && !prevStudyMode.current && hintAllowed.current) {
+      setShowHint(true);
+      hintAllowed.current = false; // never again this session
+      try {
+        const raw = localStorage.getItem(HINT_STORAGE_KEY);
+        const stored = raw ? JSON.parse(raw) : { count: 0, lastShown: 0 };
+        localStorage.setItem(HINT_STORAGE_KEY, JSON.stringify({
+          count: stored.count + 1,
+          lastShown: Date.now(),
+        }));
+      } catch { /* ignore */ }
+      const t = setTimeout(() => setShowHint(false), 4000);
+      prevStudyMode.current = true;
+      return () => clearTimeout(t);
+    }
+    if (studyModeActive) prevStudyMode.current = true;
+    if (!studyModeActive) {
+      setShowHint(false);
+      prevStudyMode.current = false;
+    }
+  }, [studyModeActive]);
 
   // Categories
   const categories = useMemo(() => ["All", ...Object.keys(data)], [data]);
@@ -62,23 +114,29 @@ export default function FileBrowser({
   // Flatten and Filter
   const filteredFiles = useMemo(() => {
     const currentCategory = categories[activeTab];
-    let files =
-      currentCategory === "All"
-        ? Object.values(data).flat()
-        : data[currentCategory] || [];
-    const parsed = files.map(parseGoogleFile);
+    let files: { file: ParsedFile; category: string }[];
+    if (currentCategory === "All") {
+      files = Object.entries(data).flatMap(([cat, driveFiles]) =>
+        driveFiles.map(parseGoogleFile).map((f) => ({ file: f, category: cat }))
+      );
+    } else {
+      files = (data[currentCategory] || [])
+        .map(parseGoogleFile)
+        .map((f) => ({ file: f, category: currentCategory }));
+    }
 
     // Apply text filter
-    let filtered = parsed;
+    let filtered = files;
     if (filter) {
-      filtered = filtered.filter((f) =>
-        f.name.toLowerCase().includes(filter.toLowerCase())
+      const lf = filter.toLowerCase();
+      filtered = filtered.filter((entry) =>
+        entry.file.name.toLowerCase().includes(lf)
       );
     }
 
     // Apply "new items only" filter
     if (showOnlyNew) {
-      filtered = filtered.filter((f) => newItems.includes(f.id));
+      filtered = filtered.filter((entry) => newItems.includes(entry.file.id));
     }
 
     return filtered;
@@ -219,6 +277,40 @@ export default function FileBrowser({
           <Divider
             orientation="vertical"
             flexItem
+            sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
+          />
+          <Tooltip
+            open={showHint}
+            title="Tap any file to add it to your study list"
+            arrow
+            placement="bottom"
+            disableHoverListener
+            disableFocusListener
+            disableTouchListener
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: alpha(theme.palette.primary.main, 0.92),
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  px: 1.5,
+                  py: 0.75,
+                  borderRadius: 2,
+                },
+              },
+              arrow: {
+                sx: { color: alpha(theme.palette.primary.main, 0.92) },
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex' }}>
+              <StudyModeToggle />
+            </Box>
+          </Tooltip>
+          <Divider
+            orientation="vertical"
+            flexItem
             sx={{
               height: 24,
               alignSelf: "center",
@@ -279,9 +371,9 @@ export default function FileBrowser({
       </Box>
 
       {/* Content with simple GPU-accelerated transition */}
-      <Box 
+      <Box
         key={activeTab}
-        sx={{ 
+        sx={{
           minHeight: 200,
           opacity: 1,
           willChange: 'opacity',
@@ -295,28 +387,34 @@ export default function FileBrowser({
           {filteredFiles.length > 0 ? (
             viewMode === "grid" ? (
               <Grid container spacing={2}>
-                {filteredFiles.map((file, index) => (
-                  <Grid item xs={6} sm={6} md={4} lg={3} key={file.id}>
+                {filteredFiles.map((entry, index) => (
+                  <Grid item xs={6} sm={6} md={4} lg={3} key={entry.file.id}>
                     <FileCard
-                      file={file}
-                      onClick={() => handleFileClick(file)}
-                      isNew={newItems.includes(file.id)}
+                      file={entry.file}
+                      onClick={() => handleFileClick(entry.file)}
+                      isNew={newItems.includes(entry.file.id)}
                       peekMode={peekMode}
                       mobileExpandedId={mobileExpandedCardId}
                       onMobileExpand={setMobileExpandedCardId}
                       gridPosition={index % 2 === 0 ? 'left' : 'right'}
+                      studyModeActive={studyModeActive}
+
+                      onStudySelect={(file) => { setShowHint(false); onStudySelect?.(file, entry.category); }}
                     />
                   </Grid>
                 ))}
               </Grid>
             ) : (
               <Box>
-                {filteredFiles.map((file) => (
+                {filteredFiles.map((entry) => (
                   <FileListItem
-                    key={file.id}
-                    file={file}
-                    onClick={() => handleFileClick(file)}
-                    isNew={newItems.includes(file.id)}
+                    key={entry.file.id}
+                    file={entry.file}
+                    onClick={() => handleFileClick(entry.file)}
+                    isNew={newItems.includes(entry.file.id)}
+                    studyModeActive={studyModeActive}
+
+                    onStudySelect={(file) => { setShowHint(false); onStudySelect?.(file, entry.category); }}
                   />
                 ))}
               </Box>

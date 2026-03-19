@@ -1,0 +1,92 @@
+// DEPRECATED: This endpoint is no longer used by AddContent.
+// File uploads now use /api/admin/upload-session + direct browser-to-Drive upload
+// (see src/utils/upload.ts). This file is kept for backward compatibility only
+// and will be removed in a future cleanup PR.
+import { NextApiRequest, NextApiResponse } from "next";
+import { Readable } from "stream";
+import { google } from "googleapis";
+import { requireAdminForClass, sendError } from "../../../lib/auth-middleware";
+
+export const config = {
+  api: { bodyParser: false },
+};
+
+const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
+
+function getWriteDrive() {
+  const clientEmail = process.env.CLIENT_EMAIL;
+  const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+  if (!clientEmail || !privateKey) {
+    throw new Error("Missing Google credentials");
+  }
+
+  const auth = new google.auth.GoogleAuth({
+    credentials: { client_email: clientEmail, private_key: privateKey },
+    scopes: ["https://www.googleapis.com/auth/drive"],
+  });
+
+  return google.drive({ version: "v3", auth });
+}
+
+async function collectBody(req: NextApiRequest): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req as unknown as AsyncIterable<Buffer>) {
+    const buf = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+    size += buf.length;
+    if (size > MAX_SIZE) throw new Error("File exceeds 50 MB limit");
+    chunks.push(buf);
+  }
+  return Buffer.concat(chunks);
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+): Promise<void> {
+  if (req.method !== "POST") {
+    return sendError(res, 405, "Method not allowed");
+  }
+
+  try {
+    const fileName = req.query.fileName as string | undefined;
+    const folderId = req.query.folderId as string | undefined;
+    const classId = req.query.classId as string | undefined;
+    const mimeType =
+      (req.query.mimeType as string | undefined) || "application/octet-stream";
+
+    if (!fileName || !folderId || !classId) {
+      return sendError(res, 400, "Missing required query params: fileName, folderId, classId");
+    }
+
+    await requireAdminForClass(req, classId);
+
+    const body = await collectBody(req);
+
+    const drive = getWriteDrive();
+
+    const { data } = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        parents: [folderId],
+      },
+      media: {
+        mimeType,
+        body: Readable.from(body),
+      },
+      fields: "id, name",
+    });
+
+    return res.status(201).json({ id: data.id, name: data.name });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "Unauthorized")
+      return sendError(res, 401, "Unauthorized");
+    if (message === "Forbidden") return sendError(res, 403, "Forbidden");
+    if (message === "File exceeds 50 MB limit")
+      return sendError(res, 413, message);
+    console.error("[admin/upload] unexpected error:", error);
+    return sendError(res, 500, "Internal server error");
+  }
+}

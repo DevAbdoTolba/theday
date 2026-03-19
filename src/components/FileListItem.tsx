@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
-import { 
-  Box, Typography, Chip, useTheme, Paper, Tooltip 
+import {
+  Box, Typography, Chip, useTheme, Paper, Tooltip, alpha
 } from '@mui/material';
 import { ParsedFile } from '../utils/types';
+import { selectionStore } from '../utils/selectionStore';
 
 // Dynamic imports for MUI icons
 const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
@@ -18,6 +19,7 @@ const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: 
 const Visibility = dynamic(() => import('@mui/icons-material/Visibility'), { ssr: false });
 const PlayCircle = dynamic(() => import('@mui/icons-material/PlayCircle'), { ssr: false });
 const FolderOpen = dynamic(() => import('@mui/icons-material/FolderOpen'), { ssr: false });
+const CheckCircle = dynamic(() => import('@mui/icons-material/CheckCircle'), { ssr: false });
 
 // Left-side File Type Icon
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
@@ -38,13 +40,42 @@ interface Props {
   file: ParsedFile;
   onClick: () => void;
   isNew?: boolean;
+  // Study Mode props
+  studyModeActive?: boolean;
+  onStudySelect?: (file: ParsedFile) => void;
 }
 
-export const FileListItem = ({ file, onClick, isNew }: Props) => {
+const FileListItemBase = ({
+  file,
+  onClick,
+  isNew,
+  studyModeActive = false,
+  onStudySelect,
+}: Props) => {
   const theme = useTheme();
+  // Study mode only applies to non-folder items
+  const studySelectable = studyModeActive && file.type !== 'folder';
+  // Subscribe directly — only THIS row re-renders when its selection changes
+  const rawSelected = useSyncExternalStore(
+    selectionStore.subscribe,
+    () => selectionStore.isSelected(file.id),
+    () => false,
+  );
+  // Only show selection visuals when study mode is active
+  const isSelected = studySelectable && rawSelected;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (studySelectable) {
+      onStudySelect?.(file);
+    } else {
+      onClick();
+    }
+  };
 
   // Right-side Action Icon Logic
   const getActionIcon = () => {
+    if (studySelectable && isSelected) return <CheckCircle fontSize="small" color="primary" />;
     if (file.type === 'folder') return <FolderOpen fontSize="small" />;
     if (file.type === 'youtube' || file.type === 'video') return <PlayCircle fontSize="small" />;
     return <Visibility fontSize="small" />;
@@ -54,10 +85,7 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
     <Paper
       component="a"
       href={file.url}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
+      onClick={handleClick}
       elevation={0}
       sx={{
         display: 'flex',
@@ -66,15 +94,27 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
         mb: 1,
         textDecoration: 'none',
         borderRadius: 2,
-        border: `1px solid ${isNew ? theme.palette.success.main : theme.palette.divider}`,
+        border: `1px solid ${
+          isSelected
+            ? theme.palette.primary.main
+            : isNew
+              ? theme.palette.success.main
+              : theme.palette.divider
+        }`,
         transition: 'all 0.15s ease',
         cursor: 'pointer',
-        bgcolor: isNew ? `${theme.palette.success.main}08` : 'transparent',
+        bgcolor: isSelected
+          ? alpha(theme.palette.primary.main, 0.06)
+          : isNew
+            ? `${theme.palette.success.main}08`
+            : 'transparent',
         '&:hover': {
-          bgcolor: theme.palette.action.hover,
+          bgcolor: isSelected
+            ? alpha(theme.palette.primary.main, 0.10)
+            : theme.palette.action.hover,
           borderColor: theme.palette.primary.main,
-          transform: 'translateX(4px)'
-        }
+          transform: 'translateX(4px)',
+        },
       }}
     >
       {/* File Type Icon */}
@@ -121,3 +161,9 @@ export const FileListItem = ({ file, onClick, isNew }: Props) => {
     </Paper>
   );
 };
+
+export const FileListItem = React.memo(FileListItemBase, (prev, next) =>
+  prev.file === next.file &&
+  prev.studyModeActive === next.studyModeActive &&
+  prev.isNew === next.isNew
+);

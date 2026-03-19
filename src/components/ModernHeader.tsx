@@ -3,8 +3,9 @@ import dynamic from "next/dynamic";
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Button,
   useTheme, Tooltip, useMediaQuery, alpha, Menu, MenuItem,
-  ListItemIcon, Divider
+  ListItemIcon, Divider, Avatar
 } from "@mui/material";
+import { useAuth } from "../hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import SearchDialog from "../components/SearchDialog";
@@ -23,6 +24,10 @@ const VpnKey = dynamic(() => import("@mui/icons-material/VpnKey"), { ssr: false 
 const ExpandMore = dynamic(() => import("@mui/icons-material/ExpandMore"), { ssr: false });
 const Check = dynamic(() => import("@mui/icons-material/Check"), { ssr: false });
 const School = dynamic(() => import("@mui/icons-material/School"), { ssr: false });
+const Logout = dynamic(() => import("@mui/icons-material/Logout"), { ssr: false });
+const AdminPanelSettings = dynamic(() => import("@mui/icons-material/AdminPanelSettings"), { ssr: false });
+const Shield = dynamic(() => import("@mui/icons-material/AdminPanelSettings"), { ssr: false }); // Using the shield/admin icon
+
 
 interface Props {
   title: string;
@@ -51,6 +56,9 @@ export default function ModernHeader({
   const { className, setClassName, setLoadingTranscript } = React.useContext(DataContext);
   const [classes, setClasses] = useState<any[]>([]);
   const [classMenuAnchor, setClassMenuAnchor] = useState<null | HTMLElement>(null);
+  
+  const { user, signOut } = useAuth();
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     const storedClasses = JSON.parse(localStorage.getItem("classes") as string) || [];
@@ -156,7 +164,7 @@ export default function ModernHeader({
           )}
 
           <Box display="flex" alignItems="center" gap={1}>
-            
+
             {/* CLASS SWITCHER CONTROL */}
             {classes.length > 1 && (
               <>
@@ -200,7 +208,21 @@ export default function ModernHeader({
                 <VpnKey fontSize="small" />
               </IconButton>
             </Tooltip>
-            
+
+            {(user?.isAdmin || user?.isSuperAdmin) && (
+              <Tooltip title="Admin Dashboard">
+                <IconButton 
+                  onClick={() => router.push("/admin")} 
+                  color="inherit"
+                  sx={{ 
+                    bgcolor: alpha(theme.palette.success.main, 0.05),
+                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.1) }
+                  }}
+                >
+                  <Shield fontSize="small" color="success" />
+                </IconButton>
+              </Tooltip>
+            )}
             {(!isMobile || !data) && (
                 <Tooltip title="Toggle Theme">
                 <IconButton onClick={colorMode.toggleColorMode} color="inherit">
@@ -213,6 +235,57 @@ export default function ModernHeader({
               <IconButton onClick={() => setSearchOpen(true)} color="inherit">
                 <Search />
               </IconButton>
+            )}
+
+            {user && (
+              <>
+                <Tooltip title="Account settings">
+                  <IconButton
+                    onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                    size="small"
+                    sx={{ ml: 1, border: `2px solid ${alpha(theme.palette.primary.main, 0.5)}` }}
+                  >
+                    <Avatar 
+                      src={user.photoURL || ""} 
+                      sx={{ width: 28, height: 28 }}
+                    >
+                      {user.displayName?.charAt(0)}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={() => setUserMenuAnchor(null)}
+                  PaperProps={{
+                    sx: { mt: 1.5, borderRadius: 2, minWidth: 200 }
+                  }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                >
+                  <Box sx={{ px: 2, py: 1.5 }}>
+                    <Typography variant="subtitle2" fontWeight={700}>{user.displayName}</Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap display="block">
+                      {user.email}
+                    </Typography>
+                  </Box>
+                  <Divider />
+                  {user.isSuperAdmin && (
+                    <MenuItem onClick={() => { setUserMenuAnchor(null); router.push("/sudo-1337"); }}>
+                      <ListItemIcon>
+                        <AdminPanelSettings fontSize="small" color="error" />
+                      </ListItemIcon>
+                      <Typography variant="body2">Sudo Panel</Typography>
+                    </MenuItem>
+                  )}
+                  <MenuItem onClick={() => { setUserMenuAnchor(null); void signOut(); }}>
+                    <ListItemIcon>
+                      <Logout fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="body2">Logout</Typography>
+                  </MenuItem>
+                </Menu>
+              </>
             )}
           </Box>
         </Toolbar>
