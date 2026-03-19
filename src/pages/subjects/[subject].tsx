@@ -158,7 +158,7 @@ export default function SubjectPage({
         onMenuClick={handleDrawerToggle}
       />
 
-      <Container maxWidth="xl" sx={{ py: 4, minHeight: "85vh" }}>
+      <Container maxWidth={false} sx={{ py: 4, minHeight: "85vh", px: { xs: 2, md: '7.5%' } }}>
         
         {/* Progressive Loading UI */}
         {process.env.NODE_ENV === "development" && (
