@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Sudo Admin has full access
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.token.email == 'mtolba2004@gmail.com';
+    }
+
+    // Check if user is assigned to a specific class
+    function isAssignedTo(classId) {
+      return request.auth != null && request.auth.token.assignedClassId == classId;
+    }
+
+    // Default: Sudo can do anything
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // Class documents: Read by all auth users, Write by Sudo or assigned Admin
+    match /classes/{classId} {
+      allow read: if request.auth != null;
+      allow write: if isSuperAdmin() || isAssignedTo(classId);
+      
+      // Nested content within a class
+      match /{allSubcollections=**} {
+        allow read: if request.auth != null;
+        allow write: if isSuperAdmin() || isAssignedTo(classId);
+      }
+    }
+    
+    // User profile documents
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isSuperAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isSuperAdmin());
+    }
+  }
+}
