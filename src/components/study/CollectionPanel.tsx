@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
 import { formatUrls, formatStudyContext } from '../../utils/study-export';
+import { trackButtonClick } from '../../utils/clarity';
 import CollectionGroup from './CollectionGroup';
 import ClipboardFallback from './ClipboardFallback';
 
@@ -64,6 +65,8 @@ export default function CollectionPanel({ open, onClose }: Props) {
   }, [items]);
 
   const handleCopy = async () => {
+    const subjects = Array.from(new Set(items.map(i => i.subjectName))).join(', ');
+    trackButtonClick('CollectionCopy', { item_count: itemCount, copy_type: shiftHeld ? 'Context' : 'URLs', subjects: subjects || 'None' });
     if (shiftHeld) {
       const text = formatStudyContext(items);
       const ok = await writeToClipboard(text);
@@ -84,6 +87,8 @@ export default function CollectionPanel({ open, onClose }: Props) {
   };
 
   const handleOpenNotebookLM = () => {
+    const subjects = Array.from(new Set(items.map(i => i.subjectName))).join(', ');
+    trackButtonClick('CollectionOpenNLM', { item_count: itemCount, subjects: subjects || 'None' });
     window.open(NOTEBOOKLM_URL, '_blank');
   };
 
