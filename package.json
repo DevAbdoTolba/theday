@@ -33,6 +33,10 @@
     "react-draggable": "^4.4.5",
     "styled-jsx": "5.1.7"
   },
+  "overrides": {
+    "picomatch@<=2.3.1": "2.3.2",
+    "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+  },
   "devDependencies": {
     "@storybook/addon-a11y": "^8.6.18",
     "@storybook/addon-essentials": "^8.6.14",
