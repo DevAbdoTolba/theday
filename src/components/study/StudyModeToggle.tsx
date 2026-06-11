@@ -2,7 +2,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Button, useTheme } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
-import { trackButtonClick } from '../../utils/clarity';
+import { trackStudyToggle } from '../../utils/clarity';
 
 const AutoAwesome = dynamic(() => import('@mui/icons-material/AutoAwesome'), { ssr: false });
 
@@ -12,7 +12,7 @@ export default function StudyModeToggle() {
   const isDark = theme.palette.mode === 'dark';
 
   const handleToggle = () => {
-    trackButtonClick('StudyToggle', { StudyModeActive: !isActive });
+    trackStudyToggle(!isActive);
     toggleMode();
   };
 
