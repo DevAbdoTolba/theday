@@ -1,4 +1,4 @@
-import { SessionItem } from './types';
+import type { SessionItem } from './types';
 
 function set(key: string, value: string | number | boolean): void {
   if (typeof window !== 'undefined' && (window as any).clarity) {
