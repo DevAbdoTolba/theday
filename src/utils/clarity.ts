@@ -21,10 +21,10 @@ export function trackStudyToggle(nowActive: boolean): void {
 }
 
 export function trackStudyCopy(items: SessionItem[], mode: 'URLs' | 'Context', source: 'Queue' | 'Collection'): void {
-  const subjects = [...new Set(items.map(i => i.subjectName))];
-  const abbrs   = [...new Set(items.map(i => i.subjectAbbr))];
-  const cats    = [...new Set(items.map(i => i.category))];
-  const types   = [...new Set(items.map(i => i.type))];
+  const subjects = Array.from(new Set(items.map(i => i.subjectName)));
+  const abbrs   = Array.from(new Set(items.map(i => i.subjectAbbr)));
+  const cats    = Array.from(new Set(items.map(i => i.category)));
+  const types   = Array.from(new Set(items.map(i => i.type)));
 
   set('StudyAction',          `Copy_${mode}`);
   set('StudySource',          source);
@@ -42,10 +42,10 @@ export function trackStudyCopy(items: SessionItem[], mode: 'URLs' | 'Context', s
 }
 
 export function trackStudyOpenNLM(items: SessionItem[], source: 'Queue' | 'Collection'): void {
-  const subjects = [...new Set(items.map(i => i.subjectName))];
-  const abbrs   = [...new Set(items.map(i => i.subjectAbbr))];
-  const cats    = [...new Set(items.map(i => i.category))];
-  const types   = [...new Set(items.map(i => i.type))];
+  const subjects = Array.from(new Set(items.map(i => i.subjectName)));
+  const abbrs   = Array.from(new Set(items.map(i => i.subjectAbbr)));
+  const cats    = Array.from(new Set(items.map(i => i.category)));
+  const types   = Array.from(new Set(items.map(i => i.type)));
 
   set('StudyAction',          'OpenNLM');
   set('StudySource',          source);
