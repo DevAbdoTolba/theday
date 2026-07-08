@@ -19,6 +19,7 @@ import { StudySessionProvider } from "../context/StudySessionContext";
 import dynamic from "next/dynamic";
 const StudyQueuePanel = dynamic(() => import("../components/study/StudyQueuePanel"), { ssr: false });
 const StudyActivationEffect = dynamic(() => import("../components/study/StudyActivationEffect"), { ssr: false });
+const GradSeal = dynamic(() => import("../components/grad/GradSeal"), { ssr: false });
 
 import Script from 'next/script';
 
@@ -180,6 +181,7 @@ export default function App({
                 <Component {...pageProps} />
                 <StudyQueuePanel />
                 <StudyActivationEffect />
+                <GradSeal />
                 <DevDashboard />
                 <Analytics />
                 </StudySessionProvider>

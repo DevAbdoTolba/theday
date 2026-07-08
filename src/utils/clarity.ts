@@ -60,3 +60,8 @@ export function trackStudyOpenNLM(items: SessionItem[], source: 'Queue' | 'Colle
   set('StudyItemIds',         items.map(i => i.id).join(','));
   set('StudyItemUrls',        items.map(i => i.url).join(' '));
 }
+
+export function trackGradWingVisit(section: string): void {
+  set('GradWing',       section);
+  set('GradWingAction', 'Visit');
+}
