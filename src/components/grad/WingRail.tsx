@@ -5,7 +5,8 @@
 // vertical index, mobile a sticky strip of editorial tabs.
 
 import React from "react";
-import { Box, ButtonBase, Typography, useTheme } from "@mui/material";
+import { useRouter } from "next/router";
+import { Box, ButtonBase, Tooltip, Typography, alpha, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import { wingAccent } from "./gradTheme";
 import type { GradFolder } from "../../utils/gradTypes";
@@ -21,15 +22,38 @@ interface Props {
   onSelect: (id: string) => void;
   progress: Record<string, FolderProgress>;
   variant: "rail" | "tabs";
+  /** Routes of sibling sections that aren't open yet — shown as redacted entries */
+  teasers?: string[];
 }
 
 const spring = { type: "spring" as const, stiffness: 480, damping: 40 };
 
 const num = (i: number) => String(i + 1).padStart(2, "0");
 
-export default function WingRail({ folders, selectedId, onSelect, progress, variant }: Props) {
+/** A censored bar where a name should be. */
+function Redaction({ width, height = 10 }: { width: number; height?: number }) {
+  const theme = useTheme();
+  return (
+    <Box
+      sx={{
+        width,
+        height,
+        borderRadius: "2px",
+        bgcolor: alpha(theme.palette.text.primary, 0.22),
+        animation: "wing-redact 2.6s ease-in-out infinite",
+        "@keyframes wing-redact": {
+          "0%, 100%": { opacity: 0.55 },
+          "50%": { opacity: 1 },
+        },
+      }}
+    />
+  );
+}
+
+export default function WingRail({ folders, selectedId, onSelect, progress, variant, teasers = [] }: Props) {
   const theme = useTheme();
   const accent = wingAccent(theme.palette.mode);
+  const router = useRouter();
 
   if (variant === "tabs") {
     return (
@@ -85,6 +109,37 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
             </ButtonBase>
           );
         })}
+        {teasers.map((href, t) => (
+          <Tooltip key={href} title="Something new is being typeset…">
+            <ButtonBase
+              onClick={() => router.push(href)}
+              sx={{
+                position: "relative",
+                px: 1.5,
+                py: 1.25,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                opacity: 0.85,
+              }}
+            >
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {num(folders.length + t)}
+              </Typography>
+              <Redaction width={34} height={9} />
+              <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: accent.main, flexShrink: 0 }} />
+            </ButtonBase>
+          </Tooltip>
+        ))}
       </Box>
     );
   }
@@ -175,6 +230,51 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
           </ButtonBase>
         );
       })}
+      {teasers.map((href, t) => (
+        <Tooltip key={href} title="Something new is being typeset…" placement="right">
+          <ButtonBase
+            onClick={() => router.push(href)}
+            sx={{
+              position: "relative",
+              width: "100%",
+              justifyContent: "space-between",
+              gap: 1.5,
+              px: 1.25,
+              py: 1.2,
+              textAlign: "left",
+              "&:hover": { bgcolor: theme.palette.action.hover },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+              <Typography
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontVariantNumeric: "tabular-nums",
+                  color: "text.secondary",
+                }}
+              >
+                {num(folders.length + t)}
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Redaction width={58} />
+                <Redaction width={24} />
+              </Box>
+            </Box>
+            <Typography
+              sx={{
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: "0.24em",
+                color: accent.main,
+                flexShrink: 0,
+              }}
+            >
+              SOON
+            </Typography>
+          </ButtonBase>
+        </Tooltip>
+      ))}
     </Box>
   );
 }

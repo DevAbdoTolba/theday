@@ -13,6 +13,8 @@ interface GradSection {
   folderName: string;
   title: string;
   tagline: string;
+  /** Teaser sections render a "coming soon" page; no data is served for them */
+  teaser?: boolean;
 }
 
 // Registry of hidden sections. Keys are the secret URL segments.
@@ -22,7 +24,21 @@ const GRAD_SECTIONS: Record<string, GradSection> = {
     title: "The Graduation Wing",
     tagline: "For the ones who made it out.",
   },
+  cv: {
+    folderName: "cv",
+    title: "The Next Door",
+    tagline: "Your story, on one page.",
+    teaser: true,
+  },
 };
+
+/** Sibling teaser routes to hint at from inside an open section. */
+export function listTeaserPaths(excludeKey: string): string[] {
+  const exclude = excludeKey.toLowerCase();
+  return Object.entries(GRAD_SECTIONS)
+    .filter(([k, s]) => s.teaser && k !== exclude)
+    .map(([k]) => `/grad/d/${k}`);
+}
 
 const MAX_DEPTH = 6;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes

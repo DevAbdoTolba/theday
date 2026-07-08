@@ -16,7 +16,8 @@ export default async function handler(
   const szRaw = parseInt((req.query.sz as string) ?? "400", 10);
   const sz = ALLOWED_SIZES.has(szRaw) ? szRaw : 400;
 
-  if (!getGradSection(g) || !id) {
+  const section = getGradSection(g);
+  if (!section || section.teaser || !id) {
     return res.status(404).json({ message: "Not found" });
   }
 

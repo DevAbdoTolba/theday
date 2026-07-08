@@ -11,8 +11,10 @@ export default async function handler(
 
   const g = req.query.g as string;
 
-  // Unknown keys look exactly like a route that doesn't exist.
-  if (!getGradSection(g)) {
+  // Unknown keys look exactly like a route that doesn't exist; teaser
+  // sections have no data to serve yet.
+  const section = getGradSection(g);
+  if (!section || section.teaser) {
     return res.status(404).json({ message: "Not found" });
   }
 

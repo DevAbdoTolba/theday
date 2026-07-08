@@ -9,6 +9,7 @@ import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import { Baloo_2, Fraunces, Space_Grotesk } from "next/font/google";
 import GradWing from "../../../components/grad/GradWing";
+import GradTeaser from "../../../components/grad/GradTeaser";
 
 // Self-hosted at build time (no external requests), scoped to the wing via
 // CSS variables — the rest of TheDay never sees these fonts.
@@ -39,9 +40,11 @@ interface Props {
   gradKey: string;
   title: string;
   tagline: string;
+  isTeaser: boolean;
+  teaserPaths: string[];
 }
 
-export default function GradSectionPage({ gradKey, title, tagline }: Props) {
+export default function GradSectionPage({ gradKey, title, tagline, isTeaser, teaserPaths }: Props) {
   return (
     <>
       <Head>
@@ -50,7 +53,11 @@ export default function GradSectionPage({ gradKey, title, tagline }: Props) {
         <link rel="icon" href="/main.png" />
       </Head>
       <div className={`${fraunces.variable} ${grotesk.variable} ${baloo.variable}`}>
-        <GradWing gradKey={gradKey} title={title} tagline={tagline} />
+        {isTeaser ? (
+          <GradTeaser gradKey={gradKey} title={title} tagline={tagline} />
+        ) : (
+          <GradWing gradKey={gradKey} title={title} tagline={tagline} teaserPaths={teaserPaths} />
+        )}
       </div>
     </>
   );
@@ -61,7 +68,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (typeof g !== "string") return { notFound: true };
 
   // Dynamic import keeps the registry (and googleapis) strictly server-side.
-  const { getGradSection } = await import("../../../lib/grad-server");
+  const { getGradSection, listTeaserPaths } = await import("../../../lib/grad-server");
   const section = getGradSection(g);
   if (!section) return { notFound: true };
 
@@ -73,6 +80,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       gradKey: g.toLowerCase(),
       title: section.title,
       tagline: section.tagline,
+      isTeaser: Boolean(section.teaser),
+      // Open sections hint at their locked siblings; teasers reveal nothing.
+      teaserPaths: section.teaser ? [] : listTeaserPaths(g),
     },
   };
 };
