@@ -53,6 +53,10 @@ function sortTree(node: GradFolder): void {
   node.folders.forEach(sortTree);
 }
 
+// Coalesce concurrent tree builds (e.g. a burst of thumbnail requests on a
+// cold cache) into one Drive round trip.
+const inflightTrees = new Map<string, Promise<GradTree | null>>();
+
 /**
  * Fetches the whole folder/file tree of a section with breadth-first
  * batched queries (one Drive call per depth level + one file sweep per
@@ -66,6 +70,19 @@ export async function fetchGradTree(key: string): Promise<GradTree | null> {
   const cached = serverGet<GradTree>(cacheKey, CACHE_TTL);
   if (cached) return cached;
 
+  let inflight = inflightTrees.get(key);
+  if (!inflight) {
+    inflight = buildGradTree(key).finally(() => inflightTrees.delete(key));
+    inflightTrees.set(key, inflight);
+  }
+  return inflight;
+}
+
+async function buildGradTree(key: string): Promise<GradTree | null> {
+  const section = getGradSection(key);
+  if (!section) return null;
+
+  const cacheKey = `grad-tree:${key}`;
   const drive = getDrive();
 
   const { data: rootSearch } = await drive.files.list({
@@ -165,4 +182,59 @@ export async function fetchGradTree(key: string): Promise<GradTree | null> {
   };
   serverSet(cacheKey, tree);
   return tree;
+}
+
+// --- Thumbnails ---------------------------------------------------------------
+// Served through our own API instead of drive.google.com/thumbnail directly:
+// the browser's Google cookies, burst rate limits, and sharing settings all
+// stop mattering — the service account fetches once, we cache and re-serve.
+
+const THUMB_TTL = 6 * 60 * 60 * 1000; // 6 hours
+
+export interface GradThumb {
+  /** base64-encoded image bytes (Buffer-safe for the in-memory cache) */
+  data: string;
+  mime: string;
+}
+
+function collectTreeFileIds(node: GradFolder, into = new Set<string>()): Set<string> {
+  node.files.forEach((f) => into.add(f.id));
+  node.folders.forEach((f) => collectTreeFileIds(f, into));
+  return into;
+}
+
+export async function fetchGradThumb(
+  key: string,
+  fileId: string,
+  size: number
+): Promise<GradThumb | null> {
+  if (!getGradSection(key)) return null;
+  if (!/^[\w-]{10,}$/.test(fileId)) return null;
+
+  const cacheKey = `grad-thumb:${key}:${fileId}:${size}`;
+  const cached = serverGet<GradThumb>(cacheKey, THUMB_TTL);
+  if (cached) return cached;
+
+  // Only serve files that actually live in this section's tree
+  const tree = await fetchGradTree(key);
+  if (!tree || !collectTreeFileIds(tree.root).has(fileId)) return null;
+
+  const drive = getDrive();
+  const { data: meta } = await drive.files.get({
+    fileId,
+    fields: "thumbnailLink",
+  });
+  if (!meta.thumbnailLink) return null;
+
+  // thumbnailLink ends with a size directive like "=s220" — swap it
+  const sized = meta.thumbnailLink.replace(/=s\d+[^/]*$/, `=s${size}`);
+  const resp = await fetch(sized);
+  if (!resp.ok) return null;
+
+  const thumb: GradThumb = {
+    data: Buffer.from(await resp.arrayBuffer()).toString("base64"),
+    mime: resp.headers.get("content-type") ?? "image/jpeg",
+  };
+  serverSet(cacheKey, thumb);
+  return thumb;
 }
