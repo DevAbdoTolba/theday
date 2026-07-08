@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
+  ButtonBase,
   IconButton,
   InputBase,
   Snackbar,
@@ -81,6 +82,53 @@ const TYPE_ICON: Record<ParsedFile["type"], typeof LinkRounded> = {
 
 /** Smaller payload for the inline contact-sheet thumb; hover shows w800. */
 const inlineThumb = (url: string) => url.replace("sz=w800", "sz=w220");
+
+/** Mid-size payload for sheet-view stills. */
+const sheetThumb = (url: string) => url.replace("sz=w800", "sz=w400");
+
+type ViewMode = "register" | "sheet";
+const VIEW_KEY = "gradViewMode";
+
+/**
+ * Sheet-view still: a large framed image with the type glyph fallback,
+ * sized by the grid cell (16:10 like a printed contact sheet).
+ */
+function SheetStill({ parsed, dimmed, active }: { parsed: ParsedFile; dimmed: boolean; active: boolean }) {
+  const theme = useTheme();
+  const accent = wingAccent(theme.palette.mode);
+  const [failed, setFailed] = useState(false);
+  const Icon = TYPE_ICON[parsed.type];
+
+  const frame = {
+    width: "100%",
+    aspectRatio: "16 / 10",
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: "3px",
+    boxShadow: active ? `0 0 0 2px ${accent.main}` : "none",
+    opacity: dimmed ? 0.55 : 1,
+    transition: "opacity 120ms ease, box-shadow 120ms ease",
+    bgcolor: "background.paper",
+  };
+
+  if (!parsed.thumbnailUrl || failed) {
+    return (
+      <Box sx={{ ...frame, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Icon sx={{ fontSize: 28, color: "text.secondary" }} />
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      component="img"
+      src={sheetThumb(parsed.thumbnailUrl)}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+      sx={{ ...frame, objectFit: "cover", display: "block" }}
+    />
+  );
+}
 
 /**
  * Contact-sheet thumbnail: a small bordered still for visual memory.
@@ -200,6 +248,19 @@ export default function WingFiles({
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(-1);
   const [toast, setToast] = useState("");
+  const [view, setView] = useState<ViewMode>(() => {
+    if (typeof window === "undefined") return "register";
+    return localStorage.getItem(VIEW_KEY) === "sheet" ? "sheet" : "register";
+  });
+
+  const switchView = (v: ViewMode) => {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      // private mode — the toggle still works for this visit
+    }
+  };
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -333,22 +394,43 @@ export default function WingFiles({
         </Typography>
       </Box>
 
-      <Typography
-        sx={{
-          mt: 1.25,
-          mb: 0.5,
-          fontSize: 10.5,
-          fontWeight: 600,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "text.secondary",
-        }}
-      >
-        {searching
-          ? `${visible.length} result${visible.length === 1 ? "" : "s"} · all folders`
-          : `${visible.length} file${visible.length === 1 ? "" : "s"}${doneCount > 0 ? ` · ${doneCount} studied` : ""}`}
-      </Typography>
+      <Box sx={{ mt: 1.25, mb: 0.5, display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 2 }}>
+        <Typography
+          sx={{
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "text.secondary",
+          }}
+        >
+          {searching
+            ? `${visible.length} result${visible.length === 1 ? "" : "s"} · all folders`
+            : `${visible.length} file${visible.length === 1 ? "" : "s"}${doneCount > 0 ? ` · ${doneCount} studied` : ""}`}
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1.75, flexShrink: 0 }}>
+          {(["register", "sheet"] as const).map((v) => (
+            <ButtonBase key={v} onClick={() => switchView(v)}>
+              <Typography
+                sx={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: view === v ? accent.main : "text.secondary",
+                  borderBottom: "1px solid",
+                  borderBottomColor: view === v ? accent.main : "transparent",
+                  pb: 0.1,
+                }}
+              >
+                {v}
+              </Typography>
+            </ButtonBase>
+          ))}
+        </Box>
+      </Box>
 
+      {view === "register" && (
       <Box>
         {visible.map((row, i) => {
           const isDone = Boolean(studied[row.file.id]);
@@ -522,18 +604,171 @@ export default function WingFiles({
             </React.Fragment>
           );
         })}
-
-        {visible.length === 0 && (
-          <Box sx={{ py: 7 }}>
-            <Typography sx={{ fontSize: 14.5, color: "text.secondary" }}>
-              <Box component="span" sx={{ color: accent.main, mr: 1 }}>
-                —
-              </Box>
-              {searching ? `Nothing matches “${query.trim()}”.` : "Nothing filed here yet."}
-            </Typography>
-          </Box>
-        )}
       </Box>
+      )}
+
+      {view === "sheet" && (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+            columnGap: 2.5,
+            rowGap: 3,
+            mt: 1.5,
+          }}
+        >
+          {visible.map((row, i) => {
+            const isDone = Boolean(studied[row.file.id]);
+            const isActive = i === activeIdx;
+            const size = humanSize(row.file.size);
+            const meta = [TYPE_LABEL[row.parsed.type], size].filter(Boolean).join(" · ");
+            const TypeGlyph = TYPE_ICON[row.parsed.type];
+
+            const sectionLabel = searching ? row.folderName : row.section;
+            const showHeader = sectionLabel !== lastSection;
+            lastSection = sectionLabel;
+
+            return (
+              <React.Fragment key={`${row.folderId}-${row.file.id}`}>
+                {showHeader && sectionLabel && (
+                  <Typography
+                    sx={{
+                      gridColumn: "1 / -1",
+                      mt: i === 0 ? 0.5 : 1.5,
+                      mb: -1,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "text.primary",
+                    }}
+                  >
+                    <Box component="span" sx={{ color: accent.main, mr: 1 }}>
+                      —
+                    </Box>
+                    {sectionLabel}
+                  </Typography>
+                )}
+                <Box
+                  ref={(el: HTMLElement | null) => {
+                    rowRefs.current[i] = el;
+                  }}
+                  onClick={() => onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId })}
+                  sx={{
+                    cursor: "pointer",
+                    minWidth: 0,
+                    "&:hover .wing-row-actions": { opacity: 1 },
+                  }}
+                >
+                  <SheetStill parsed={row.parsed} dimmed={isDone} active={isActive} />
+                  <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, mt: 1 }}>
+                    <Typography
+                      sx={{
+                        flexShrink: 0,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        fontVariantNumeric: "tabular-nums",
+                        lineHeight: "19px",
+                        color: isDone ? accent.main : "text.secondary",
+                      }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </Typography>
+                    <TypeGlyph
+                      sx={{
+                        fontSize: 14,
+                        mt: "2.5px",
+                        flexShrink: 0,
+                        color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.9),
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        fontSize: 13.5,
+                        fontWeight: 500,
+                        lineHeight: 1.4,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        color: isDone ? "text.secondary" : "text.primary",
+                        textDecoration: isDone ? "line-through" : "none",
+                        textDecorationColor: alpha(theme.palette.text.secondary, 0.5),
+                      }}
+                    >
+                      {row.parsed.name}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pl: "26px" }}>
+                    <Typography
+                      noWrap
+                      sx={{
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "text.secondary",
+                        minWidth: 0,
+                      }}
+                    >
+                      {meta}
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                      <Box
+                        className="wing-row-actions"
+                        sx={{ display: "flex", opacity: { xs: 1, md: 0 }, transition: "opacity 140ms ease" }}
+                      >
+                        <Tooltip title="Copy link">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyLink(row);
+                            }}
+                            sx={{ color: "text.secondary" }}
+                          >
+                            <ContentCopyRounded sx={{ fontSize: 14 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                      <Tooltip title={isDone ? "Studied — click to undo" : "Mark as studied"}>
+                        <IconButton
+                          size="small"
+                          aria-label={isDone ? "Mark as not studied" : "Mark as studied"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleStudied(row.file.id);
+                          }}
+                          sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.45) }}
+                        >
+                          {isDone ? (
+                            <CheckCircleRounded sx={{ fontSize: 17 }} />
+                          ) : (
+                            <RadioButtonUncheckedRounded sx={{ fontSize: 17 }} />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+                </Box>
+              </React.Fragment>
+            );
+          })}
+        </Box>
+      )}
+
+      {visible.length === 0 && (
+        <Box sx={{ py: 7 }}>
+          <Typography sx={{ fontSize: 14.5, color: "text.secondary" }}>
+            <Box component="span" sx={{ color: accent.main, mr: 1 }}>
+              —
+            </Box>
+            {searching ? `Nothing matches “${query.trim()}”.` : "Nothing filed here yet."}
+          </Typography>
+        </Box>
+      )}
 
       <Snackbar
         open={Boolean(toast)}
