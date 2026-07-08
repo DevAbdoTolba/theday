@@ -1,14 +1,15 @@
 // src/components/grad/WingRail.tsx
 // Folder navigation for the Graduation Wing. Desktop: a vertical rail with a
 // sliding tonal active indicator (shared-layout) whose shape container
-// gently morphs — Material 3 Expressive style. Mobile: a bottom bar with the
-// same language.
+// gently morphs — Material 3 Expressive in silhouette, ITI-disciplined in
+// color: red for the active folder, quiet neutrals for the rest.
+// Mobile: a bottom bar with the same language.
 
 import React from "react";
 import { Box, ButtonBase, LinearProgress, Typography, alpha, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 import ExpressiveShape from "./ExpressiveShape";
-import { accentFor } from "./gradTheme";
+import { wingAccent, shapeFor } from "./gradTheme";
 import type { GradFolder } from "../../utils/gradTypes";
 
 export interface FolderProgress {
@@ -29,6 +30,7 @@ const spring = { type: "spring" as const, stiffness: 420, damping: 34 };
 export default function WingRail({ folders, selectedId, onSelect, progress, variant }: Props) {
   const theme = useTheme();
   const mode = theme.palette.mode;
+  const accent = wingAccent(mode);
 
   if (variant === "bar") {
     return (
@@ -47,12 +49,11 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
           px: 1,
           pt: 1,
           pb: "calc(10px + env(safe-area-inset-bottom))",
-          bgcolor: mode === "dark" ? "#241419" : "#FBEDEE",
+          bgcolor: "background.paper",
           borderTop: `1px solid ${theme.palette.divider}`,
         }}
       >
         {folders.map((f, i) => {
-          const accent = accentFor(mode, i);
           const selected = f.id === selectedId;
           return (
             <ButtonBase
@@ -81,12 +82,12 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
                   />
                 )}
                 <ExpressiveShape
-                  shape={selected ? [accent.shape, "squircle"] : "squircle"}
+                  shape={selected ? [shapeFor(i), "squircle"] : "squircle"}
                   morphDuration={7}
                   size={26}
-                  fill={selected ? accent.main : alpha(theme.palette.text.secondary, 0.25)}
+                  fill={selected ? accent.main : alpha(theme.palette.text.secondary, 0.16)}
                 >
-                  <Typography sx={{ fontSize: 12, fontWeight: 800, color: selected ? accent.container : theme.palette.text.secondary, lineHeight: 1 }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 800, color: selected ? accent.onMain : theme.palette.text.secondary, lineHeight: 1 }}>
                     {f.name.charAt(0).toUpperCase()}
                   </Typography>
                 </ExpressiveShape>
@@ -113,7 +114,6 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
   return (
     <Box component="nav" aria-label="Material folders" sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
       {folders.map((f, i) => {
-        const accent = accentFor(mode, i);
         const selected = f.id === selectedId;
         const p = progress[f.id] ?? { done: 0, total: 0 };
         return (
@@ -127,7 +127,7 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
               gap: 1.5,
               px: 1.5,
               py: 1.25,
-              borderRadius: "18px",
+              borderRadius: "14px",
               width: "100%",
             }}
           >
@@ -138,20 +138,20 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
                 style={{
                   position: "absolute",
                   inset: 0,
-                  borderRadius: 18,
+                  borderRadius: 14,
                   background: accent.container,
                 }}
               />
             )}
             <Box sx={{ position: "relative", display: "flex", alignItems: "center", gap: 1.5, width: "100%", minWidth: 0 }}>
               <ExpressiveShape
-                shape={selected ? [accent.shape, "blob", accent.shape] : "squircle"}
+                shape={selected ? [shapeFor(i), "blob", shapeFor(i)] : "squircle"}
                 morphDuration={9}
-                rotateDuration={selected ? 80 : 0}
+                rotateDuration={selected ? 90 : 0}
                 size={40}
-                fill={selected ? accent.main : alpha(accent.main, 0.14)}
+                fill={selected ? accent.main : alpha(theme.palette.text.secondary, 0.1)}
               >
-                <Typography sx={{ fontWeight: 800, fontSize: 16, color: selected ? accent.container : accent.main, lineHeight: 1 }}>
+                <Typography sx={{ fontWeight: 800, fontSize: 16, color: selected ? accent.onMain : "text.secondary", lineHeight: 1 }}>
                   {f.name.charAt(0).toUpperCase()}
                 </Typography>
               </ExpressiveShape>
@@ -171,7 +171,7 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
                   noWrap
                   sx={{
                     fontSize: 12,
-                    color: selected ? alpha(accent.onContainer, 0.75) : "text.secondary",
+                    color: selected ? alpha(accent.onContainer, 0.72) : "text.secondary",
                     mb: p.total > 0 ? 0.5 : 0,
                   }}
                 >
@@ -183,9 +183,11 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
                     variant="determinate"
                     value={(p.done / p.total) * 100}
                     sx={{
-                      height: 4,
+                      height: 3,
                       borderRadius: 2,
-                      bgcolor: alpha(accent.main, selected ? 0.25 : 0.12),
+                      bgcolor: selected
+                        ? alpha(accent.main, 0.22)
+                        : alpha(theme.palette.text.secondary, 0.12),
                       "& .MuiLinearProgress-bar": { bgcolor: accent.main, borderRadius: 2 },
                     }}
                   />

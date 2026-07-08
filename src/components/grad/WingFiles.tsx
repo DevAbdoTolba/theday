@@ -34,7 +34,7 @@ import InsertDriveFileRounded from "@mui/icons-material/InsertDriveFileRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import ExpressiveShape from "./ExpressiveShape";
-import { accentFor } from "./gradTheme";
+import { wingAccent } from "./gradTheme";
 import { parseGoogleFile } from "../../utils/helpers";
 import type { ParsedFile } from "../../utils/types";
 import type { GradFile, GradFolder } from "../../utils/gradTypes";
@@ -58,16 +58,16 @@ interface Props {
   onHighlightConsumed: () => void;
 }
 
-const TYPE_META: Record<ParsedFile["type"], { label: string; accentIndex: number; Icon: typeof LinkRounded }> = {
-  pdf: { label: "PDF", accentIndex: 0, Icon: PictureAsPdfRounded },
-  video: { label: "Video", accentIndex: 1, Icon: OndemandVideoRounded },
-  youtube: { label: "Video", accentIndex: 1, Icon: OndemandVideoRounded },
-  doc: { label: "Doc", accentIndex: 2, Icon: DescriptionRounded },
-  sheet: { label: "Sheet", accentIndex: 2, Icon: TableChartRounded },
-  slide: { label: "Slides", accentIndex: 3, Icon: SlideshowRounded },
-  image: { label: "Image", accentIndex: 3, Icon: ImageRounded },
-  folder: { label: "Folder", accentIndex: 2, Icon: InsertDriveFileRounded },
-  unknown: { label: "Link", accentIndex: 1, Icon: LinkRounded },
+const TYPE_META: Record<ParsedFile["type"], { label: string; Icon: typeof LinkRounded }> = {
+  pdf: { label: "PDF", Icon: PictureAsPdfRounded },
+  video: { label: "Video", Icon: OndemandVideoRounded },
+  youtube: { label: "Video", Icon: OndemandVideoRounded },
+  doc: { label: "Doc", Icon: DescriptionRounded },
+  sheet: { label: "Sheet", Icon: TableChartRounded },
+  slide: { label: "Slides", Icon: SlideshowRounded },
+  image: { label: "Image", Icon: ImageRounded },
+  folder: { label: "Folder", Icon: InsertDriveFileRounded },
+  unknown: { label: "Link", Icon: LinkRounded },
 };
 
 function humanSize(bytes?: number): string | null {
@@ -259,8 +259,7 @@ export default function WingFiles({
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
         {visible.map((row, i) => {
           const meta = TYPE_META[row.parsed.type];
-          const accent = accentFor(mode, searching ? row.folderIndex : meta.accentIndex);
-          const typeAccent = accentFor(mode, meta.accentIndex);
+          const accent = wingAccent(mode);
           const isDone = Boolean(studied[row.file.id]);
           const isActive = i === activeIdx;
           const Icon = meta.Icon;
@@ -281,7 +280,7 @@ export default function WingFiles({
                     fontWeight: 800,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    color: searching ? accent.main : "text.secondary",
+                    color: "text.secondary",
                   }}
                 >
                   {sectionLabel}
@@ -300,7 +299,7 @@ export default function WingFiles({
                   py: 0.9,
                   borderRadius: "14px",
                   cursor: "pointer",
-                  outline: isActive ? `2px solid ${typeAccent.main}` : "2px solid transparent",
+                  outline: isActive ? `2px solid ${accent.main}` : "2px solid transparent",
                   outlineOffset: -2,
                   transition: "background-color 120ms ease, outline-color 120ms ease",
                   "&:hover": { bgcolor: theme.palette.action.hover },
@@ -310,9 +309,14 @@ export default function WingFiles({
                 <ExpressiveShape
                   shape="squircle"
                   size={38}
-                  fill={alpha(typeAccent.main, isDone ? 0.1 : 0.16)}
+                  fill={alpha(theme.palette.text.primary, isDone ? 0.04 : 0.07)}
                 >
-                  <Icon sx={{ fontSize: 19, color: alpha(typeAccent.main, isDone ? 0.5 : 1) }} />
+                  <Icon
+                    sx={{
+                      fontSize: 19,
+                      color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.95),
+                    }}
+                  />
                 </ExpressiveShape>
 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -375,7 +379,7 @@ export default function WingFiles({
                       e.stopPropagation();
                       onToggleStudied(row.file.id);
                     }}
-                    sx={{ color: isDone ? typeAccent.main : alpha(theme.palette.text.secondary, 0.5) }}
+                    sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.5) }}
                   >
                     {isDone ? (
                       <CheckCircleRounded sx={{ fontSize: 22 }} />

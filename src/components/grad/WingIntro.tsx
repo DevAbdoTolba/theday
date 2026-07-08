@@ -34,11 +34,11 @@ interface Props {
 const INK = "#151a2c";
 const GOLD = "#F6CE6B";
 const GOLD_DEEP = "#DB9A2D";
-const CRIMSON = "#A4243B";
-const CRIMSON_SOFT = "#FF8A96";
+const CRIMSON = "#C8102E";
+const CRIMSON_SOFT = "#FF5A68";
 
-// scene backdrop colors: indigo (TheDay) → transition → deep maroon (the wing)
-const SCENE_BG = [INK, "#1d1524", "#241016", "#181114"];
+// scene backdrop colors: indigo (TheDay) → transition → wing charcoal
+const SCENE_BG = [INK, "#191622", "#1D0E12", "#131316"];
 const SCENE_MS = [2400, 2400, 2700, 2100];
 
 const CAPTIONS = [
@@ -140,7 +140,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
           y: Math.sin(angle) * dist * 0.82,
           size: 12 + (i % 3) * 7,
           rotate: (i * 97) % 360,
-          color: [GOLD, CRIMSON_SOFT, "#86D2CE", "#D9B3E4"][i % 4],
+          color: [GOLD, CRIMSON_SOFT, "#FFFFFF", "#8E8E96"][i % 4],
           d: SHAPES[shapeNames[i % 4]],
           delay: 0.05 + (i % 5) * 0.045,
         };
@@ -369,7 +369,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                   >
                     <Typography
                       sx={{
-                        color: "#F3DEDF",
+                        color: "#EDEDF0",
                         fontWeight: 800,
                         letterSpacing: "-0.02em",
                         fontSize: "clamp(2.1rem, 7vw, 3.6rem)",
