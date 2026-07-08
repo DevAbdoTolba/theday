@@ -502,6 +502,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                 )}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <WingFiles
+                    sectionKey={gradKey}
                     folders={materials}
                     selectedFolderId={selectedFolderId}
                     studied={studied}

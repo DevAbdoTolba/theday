@@ -47,6 +47,7 @@ interface FlatRow {
 }
 
 interface Props {
+  sectionKey: string;
   folders: GradFolder[];
   selectedFolderId: string | null;
   studied: Record<string, number>;
@@ -80,11 +81,18 @@ const TYPE_ICON: Record<ParsedFile["type"], typeof LinkRounded> = {
   unknown: LinkRounded,
 };
 
-/** Smaller payload for the inline contact-sheet thumb; hover shows w800. */
-const inlineThumb = (url: string) => url.replace("sz=w800", "sz=w220");
-
-/** Mid-size payload for sheet-view stills. */
-const sheetThumb = (url: string) => url.replace("sz=w800", "sz=w400");
+/**
+ * Thumbnail source: YouTube stills load straight from img.youtube.com;
+ * Drive previews go through our own /api/grad/thumb proxy so the browser's
+ * Google cookies, sharing settings, and burst rate limits can't break them.
+ */
+const thumbFor = (sectionKey: string, row: FlatRow, size: 220 | 400 | 800): string | null => {
+  if (row.parsed.type === "youtube") return row.parsed.thumbnailUrl ?? null;
+  if (row.parsed.thumbnailUrl) {
+    return `/api/grad/thumb/${encodeURIComponent(sectionKey)}?id=${encodeURIComponent(row.file.id)}&sz=${size}`;
+  }
+  return null;
+};
 
 type ViewMode = "register" | "sheet";
 const VIEW_KEY = "gradViewMode";
@@ -93,7 +101,17 @@ const VIEW_KEY = "gradViewMode";
  * Sheet-view still: a large framed image with the type glyph fallback,
  * sized by the grid cell (16:10 like a printed contact sheet).
  */
-function SheetStill({ parsed, dimmed, active }: { parsed: ParsedFile; dimmed: boolean; active: boolean }) {
+function SheetStill({
+  parsed,
+  src,
+  dimmed,
+  active,
+}: {
+  parsed: ParsedFile;
+  src: string | null;
+  dimmed: boolean;
+  active: boolean;
+}) {
   const theme = useTheme();
   const accent = wingAccent(theme.palette.mode);
   const [failed, setFailed] = useState(false);
@@ -110,7 +128,7 @@ function SheetStill({ parsed, dimmed, active }: { parsed: ParsedFile; dimmed: bo
     bgcolor: "background.paper",
   };
 
-  if (!parsed.thumbnailUrl || failed) {
+  if (!src || failed) {
     return (
       <Box sx={{ ...frame, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Icon sx={{ fontSize: 28, color: "text.secondary" }} />
@@ -121,7 +139,7 @@ function SheetStill({ parsed, dimmed, active }: { parsed: ParsedFile; dimmed: bo
   return (
     <Box
       component="img"
-      src={sheetThumb(parsed.thumbnailUrl)}
+      src={src}
       alt=""
       loading="lazy"
       onError={() => setFailed(true)}
@@ -135,7 +153,17 @@ function SheetStill({ parsed, dimmed, active }: { parsed: ParsedFile; dimmed: bo
  * Falls back to the type glyph on a paper card when Drive has no preview
  * (or the image fails to load).
  */
-function RowThumb({ parsed, dimmed }: { parsed: ParsedFile; dimmed: boolean }) {
+function RowThumb({
+  parsed,
+  src,
+  previewSrc,
+  dimmed,
+}: {
+  parsed: ParsedFile;
+  src: string | null;
+  previewSrc: string | null;
+  dimmed: boolean;
+}) {
   const theme = useTheme();
   const [failed, setFailed] = useState(false);
   const Icon = TYPE_ICON[parsed.type];
@@ -150,7 +178,7 @@ function RowThumb({ parsed, dimmed }: { parsed: ParsedFile; dimmed: boolean }) {
     transition: "opacity 120ms ease",
   };
 
-  if (!parsed.thumbnailUrl || failed) {
+  if (!src || failed) {
     return (
       <Box
         sx={{
@@ -173,7 +201,7 @@ function RowThumb({ parsed, dimmed }: { parsed: ParsedFile; dimmed: boolean }) {
       title={
         <Box
           component="img"
-          src={parsed.thumbnailUrl}
+          src={previewSrc ?? src}
           alt=""
           sx={{ display: "block", width: 260, maxHeight: 200, objectFit: "cover" }}
         />
@@ -193,7 +221,7 @@ function RowThumb({ parsed, dimmed }: { parsed: ParsedFile; dimmed: boolean }) {
     >
       <Box
         component="img"
-        src={inlineThumb(parsed.thumbnailUrl)}
+        src={src}
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
@@ -235,6 +263,7 @@ function flattenFolder(folder: GradFolder): FlatRow[] {
 }
 
 export default function WingFiles({
+  sectionKey,
   folders,
   selectedFolderId,
   studied,
@@ -497,7 +526,12 @@ export default function WingFiles({
                   {String(i + 1).padStart(2, "0")}
                 </Typography>
 
-                <RowThumb parsed={row.parsed} dimmed={isDone} />
+                <RowThumb
+                  parsed={row.parsed}
+                  src={thumbFor(sectionKey, row, 220)}
+                  previewSrc={thumbFor(sectionKey, row, 800)}
+                  dimmed={isDone}
+                />
 
                 <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 0.9 }}>
                   <TypeGlyph
@@ -660,7 +694,12 @@ export default function WingFiles({
                     "&:hover .wing-row-actions": { opacity: 1 },
                   }}
                 >
-                  <SheetStill parsed={row.parsed} dimmed={isDone} active={isActive} />
+                  <SheetStill
+                    parsed={row.parsed}
+                    src={thumbFor(sectionKey, row, 400)}
+                    dimmed={isDone}
+                    active={isActive}
+                  />
                   <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, mt: 1 }}>
                     <Typography
                       sx={{
