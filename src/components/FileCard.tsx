@@ -7,33 +7,15 @@ import {
 import { ParsedFile } from '../utils/types';
 import { getYoutubeThumbnail } from '../utils/helpers';
 import SelectionOverlay from './study/SelectionOverlay';
+import FileTypeIcon, { FILE_TYPE_TINT } from './FileTypeIcon';
 
 // Dynamic imports for MUI icons
-const PictureAsPdf = dynamic(() => import('@mui/icons-material/PictureAsPdf'), { ssr: false });
-const Folder = dynamic(() => import('@mui/icons-material/Folder'), { ssr: false });
-const ImageIcon = dynamic(() => import('@mui/icons-material/Image'), { ssr: false });
-const YouTube = dynamic(() => import('@mui/icons-material/YouTube'), { ssr: false });
-const Article = dynamic(() => import('@mui/icons-material/Article'), { ssr: false });
-const Slideshow = dynamic(() => import('@mui/icons-material/Slideshow'), { ssr: false });
-const TableChart = dynamic(() => import('@mui/icons-material/TableChart'), { ssr: false });
-const InsertDriveFile = dynamic(() => import('@mui/icons-material/InsertDriveFile'), { ssr: false });
 const OpenInNew = dynamic(() => import('@mui/icons-material/OpenInNew'), { ssr: false });
-const PlayCircle = dynamic(() => import('@mui/icons-material/PlayCircle'), { ssr: false });
 const ZoomOutMap = dynamic(() => import('@mui/icons-material/ZoomOutMap'), { ssr: false });
 
-const FileIcon = ({ type }: { type: ParsedFile['type'] }) => {
-  switch (type) {
-    case 'youtube': return <PlayCircle color="error" />;
-    case 'pdf': return <PictureAsPdf color="error" />;
-    case 'folder': return <Folder color="primary" />;
-    case 'image': return <ImageIcon color="secondary" />;
-    case 'video': return <YouTube color="action" />;
-    case 'doc': return <Article color="primary" />;
-    case 'slide': return <Slideshow color="warning" />;
-    case 'sheet': return <TableChart color="success" />;
-    default: return <InsertDriveFile color="disabled" />;
-  }
-};
+const FileIcon = ({ type }: { type: ParsedFile['type'] }) => (
+  <FileTypeIcon type={type} color={FILE_TYPE_TINT[type]} />
+);
 
 interface FileCardProps {
   file: ParsedFile;

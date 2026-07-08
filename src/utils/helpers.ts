@@ -3,8 +3,15 @@ import { DriveFile, ParsedFile } from './types';
 
 // Robust parsing for "URL Name" or "Name" formats
 export const parseGoogleFile = (file: DriveFile): ParsedFile => {
-  // 1. Decode the filename first (Fixes the %3A%2F issue)
-  let rawName = decodeURIComponent(file.name);
+  // 1. Decode the filename first (Fixes the %3A%2F issue).
+  // Names with a bare "%" (e.g. "100% coverage.pdf") aren't URI-encoded and
+  // make decodeURIComponent throw URIError — fall back to the raw name.
+  let rawName: string;
+  try {
+    rawName = decodeURIComponent(file.name);
+  } catch {
+    rawName = file.name;
+  }
   let name = rawName;
   let url = `https://drive.google.com/file/d/${file.id}/preview`;
   let type: ParsedFile['type'] = 'unknown';

@@ -7,11 +7,25 @@
 interface CacheEntry {
   data: unknown;
   ts: number;
+  /** TTL recorded at write time so expired entries can be swept */
+  ttl: number;
 }
 
 const store = new Map<string, CacheEntry>();
 
 const DEFAULT_TTL = 2 * 60 * 1000; // 2 minutes
+const SWEEP_EVERY_N_SETS = 32;
+
+let setsSinceSweep = 0;
+
+/** Drop every expired entry so long-lived processes don't accumulate
+ *  never-re-read payloads (e.g. cached thumbnails). */
+function sweep(): void {
+  const now = Date.now();
+  store.forEach((entry, key) => {
+    if (now - entry.ts > entry.ttl) store.delete(key);
+  });
+}
 
 export function serverGet<T>(key: string, ttlMs = DEFAULT_TTL): T | null {
   const entry = store.get(key);
@@ -23,8 +37,12 @@ export function serverGet<T>(key: string, ttlMs = DEFAULT_TTL): T | null {
   return entry.data as T;
 }
 
-export function serverSet(key: string, data: unknown): void {
-  store.set(key, { data, ts: Date.now() });
+export function serverSet(key: string, data: unknown, ttlMs = DEFAULT_TTL): void {
+  store.set(key, { data, ts: Date.now(), ttl: ttlMs });
+  if (++setsSinceSweep >= SWEEP_EVERY_N_SETS) {
+    setsSinceSweep = 0;
+    sweep();
+  }
 }
 
 export function serverInvalidate(prefix?: string): void {

@@ -6,6 +6,8 @@
 //   Enter      open the highlighted entry
 //   Space      mark it studied / unstudied
 // Red is reserved for studied numerals, the focus rule, and search focus.
+// Register and sheet views share row derivation, headers, and actions —
+// only the layout differs.
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -24,15 +26,7 @@ import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUncheckedRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
-import PictureAsPdfRounded from "@mui/icons-material/PictureAsPdfRounded";
-import YouTube from "@mui/icons-material/YouTube";
-import OndemandVideoRounded from "@mui/icons-material/OndemandVideoRounded";
-import DescriptionRounded from "@mui/icons-material/DescriptionRounded";
-import TableChartRounded from "@mui/icons-material/TableChartRounded";
-import SlideshowRounded from "@mui/icons-material/SlideshowRounded";
-import ImageRounded from "@mui/icons-material/ImageRounded";
-import FolderRounded from "@mui/icons-material/FolderRounded";
-import LinkRounded from "@mui/icons-material/LinkRounded";
+import FileTypeIcon, { FILE_TYPE_LABEL } from "../FileTypeIcon";
 import { wingAccent } from "./gradTheme";
 import { parseGoogleFile } from "../../utils/helpers";
 import type { ParsedFile } from "../../utils/types";
@@ -57,30 +51,6 @@ interface Props {
   onHighlightConsumed: () => void;
 }
 
-const TYPE_LABEL: Record<ParsedFile["type"], string> = {
-  pdf: "PDF",
-  video: "Video",
-  youtube: "YouTube",
-  doc: "Doc",
-  sheet: "Sheet",
-  slide: "Slides",
-  image: "Image",
-  folder: "Folder",
-  unknown: "Link",
-};
-
-const TYPE_ICON: Record<ParsedFile["type"], typeof LinkRounded> = {
-  pdf: PictureAsPdfRounded,
-  video: OndemandVideoRounded,
-  youtube: YouTube,
-  doc: DescriptionRounded,
-  sheet: TableChartRounded,
-  slide: SlideshowRounded,
-  image: ImageRounded,
-  folder: FolderRounded,
-  unknown: LinkRounded,
-};
-
 /**
  * Thumbnail source: YouTube stills load straight from img.youtube.com;
  * Drive previews go through our own /api/grad/thumb proxy so the browser's
@@ -96,6 +66,109 @@ const thumbFor = (sectionKey: string, row: FlatRow, size: 220 | 400 | 800): stri
 
 type ViewMode = "register" | "sheet";
 const VIEW_KEY = "gradViewMode";
+
+/** Section header shared by both views ("— SUBFOLDER"). */
+function SectionHeader({ label, first, grid = false }: { label: string; first: boolean; grid?: boolean }) {
+  const theme = useTheme();
+  const accent = wingAccent(theme.palette.mode);
+  return (
+    <Typography
+      sx={{
+        ...(grid
+          ? { gridColumn: "1 / -1", mt: first ? 0.5 : 1.5, mb: -1 }
+          : { mt: first ? 1.5 : 3, mb: 0.25 }),
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "text.primary",
+      }}
+    >
+      <Box component="span" sx={{ color: accent.main, mr: 1 }}>
+        —
+      </Box>
+      {label}
+    </Typography>
+  );
+}
+
+/** Copy / open (hover-revealed) + the studied toggle — shared by both views. */
+function RowActions({
+  isDone,
+  actionSize,
+  toggleSize,
+  onCopy,
+  onOpenRow,
+  onToggle,
+}: {
+  isDone: boolean;
+  actionSize: number;
+  toggleSize: number;
+  onCopy: () => void;
+  /** when provided, an explicit open-in-new-tab button is shown */
+  onOpenRow?: () => void;
+  onToggle: () => void;
+}) {
+  const theme = useTheme();
+  const accent = wingAccent(theme.palette.mode);
+  return (
+    <>
+      <Box
+        className="wing-row-actions"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          opacity: { xs: 1, md: 0 },
+          transition: "opacity 140ms ease",
+        }}
+      >
+        <Tooltip title="Copy link">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopy();
+            }}
+            sx={{ color: "text.secondary" }}
+          >
+            <ContentCopyRounded sx={{ fontSize: actionSize }} />
+          </IconButton>
+        </Tooltip>
+        {onOpenRow && (
+          <Tooltip title="Open in new tab">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenRow();
+              }}
+              sx={{ color: "text.secondary" }}
+            >
+              <OpenInNewRounded sx={{ fontSize: actionSize }} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+      <Tooltip title={isDone ? "Studied — click to undo" : "Mark as studied"}>
+        <IconButton
+          size="small"
+          aria-label={isDone ? "Mark as not studied" : "Mark as studied"}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.45) }}
+        >
+          {isDone ? (
+            <CheckCircleRounded sx={{ fontSize: toggleSize }} />
+          ) : (
+            <RadioButtonUncheckedRounded sx={{ fontSize: toggleSize }} />
+          )}
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+}
 
 /**
  * Sheet-view still: a large framed image with the type glyph fallback,
@@ -115,7 +188,6 @@ function SheetStill({
   const theme = useTheme();
   const accent = wingAccent(theme.palette.mode);
   const [failed, setFailed] = useState(false);
-  const Icon = TYPE_ICON[parsed.type];
 
   const frame = {
     width: "100%",
@@ -131,7 +203,11 @@ function SheetStill({
   if (!src || failed) {
     return (
       <Box sx={{ ...frame, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Icon sx={{ fontSize: 28, color: "text.secondary" }} />
+        <FileTypeIcon
+          type={parsed.type}
+          external={parsed.isExternalLink}
+          sx={{ fontSize: 28, color: "text.secondary" }}
+        />
       </Box>
     );
   }
@@ -166,7 +242,6 @@ function RowThumb({
 }) {
   const theme = useTheme();
   const [failed, setFailed] = useState(false);
-  const Icon = TYPE_ICON[parsed.type];
 
   const frame = {
     width: 58,
@@ -189,7 +264,11 @@ function RowThumb({
           bgcolor: "background.paper",
         }}
       >
-        <Icon sx={{ fontSize: 16, color: "text.secondary" }} />
+        <FileTypeIcon
+          type={parsed.type}
+          external={parsed.isExternalLink}
+          sx={{ fontSize: 16, color: "text.secondary" }}
+        />
       </Box>
     );
   }
@@ -292,6 +371,9 @@ export default function WingFiles({
   };
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<(HTMLElement | null)[]>([]);
+  // Which highlight we already scrolled to — so parent re-renders during the
+  // highlight window don't re-fire the smooth scroll and fight the user.
+  const scrolledHighlight = useRef<string | null>(null);
 
   const allRows = useMemo(() => folders.map((f) => flattenFolder(f)), [folders]);
 
@@ -314,13 +396,19 @@ export default function WingFiles({
 
   // "Continue where you left off" — jump to and highlight a specific file
   useEffect(() => {
-    if (!highlightId) return;
+    if (!highlightId) {
+      scrolledHighlight.current = null;
+      return;
+    }
     const idx = visible.findIndex((r) => r.file.id === highlightId);
     if (idx >= 0) {
       setActiveIdx(idx);
-      requestAnimationFrame(() =>
-        rowRefs.current[idx]?.scrollIntoView({ block: "center", behavior: "smooth" })
-      );
+      if (scrolledHighlight.current !== highlightId) {
+        scrolledHighlight.current = highlightId;
+        requestAnimationFrame(() =>
+          rowRefs.current[idx]?.scrollIntoView({ block: "center", behavior: "smooth" })
+        );
+      }
       const t = setTimeout(onHighlightConsumed, 2200);
       return () => clearTimeout(t);
     }
@@ -378,10 +466,21 @@ export default function WingFiles({
     }
   };
 
+  const openRow = (row: FlatRow) =>
+    onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId });
+
+  // Per-row derivations shared by both views
+  const rowState = (row: FlatRow, i: number) => ({
+    isDone: Boolean(studied[row.file.id]),
+    isActive: i === activeIdx,
+    meta: [FILE_TYPE_LABEL[row.parsed.type], humanSize(row.file.size)].filter(Boolean).join(" · "),
+  });
+
   const doneCount = visible.filter((r) => studied[r.file.id]).length;
 
   // Group consecutive rows by section (subfolders inside a material folder)
   let lastSection: string | null | undefined;
+  const sectionOf = (row: FlatRow) => (searching ? row.folderName : row.section);
 
   return (
     <Box sx={{ minWidth: 0 }}>
@@ -460,185 +559,121 @@ export default function WingFiles({
       </Box>
 
       {view === "register" && (
-      <Box>
-        {visible.map((row, i) => {
-          const isDone = Boolean(studied[row.file.id]);
-          const isActive = i === activeIdx;
-          const size = humanSize(row.file.size);
-          const meta = [TYPE_LABEL[row.parsed.type], size].filter(Boolean).join(" · ");
-          const TypeGlyph = TYPE_ICON[row.parsed.type];
+        <Box>
+          {visible.map((row, i) => {
+            const { isDone, isActive, meta } = rowState(row, i);
+            const sectionLabel = sectionOf(row);
+            const showHeader = sectionLabel !== lastSection;
+            lastSection = sectionLabel;
 
-          const sectionLabel = searching ? row.folderName : row.section;
-          const showHeader = sectionLabel !== lastSection;
-          lastSection = sectionLabel;
-
-          return (
-            <React.Fragment key={`${row.folderId}-${row.file.id}`}>
-              {showHeader && sectionLabel && (
-                <Typography
-                  sx={{
-                    mt: i === 0 ? 1.5 : 3,
-                    mb: 0.25,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "text.primary",
-                  }}
-                >
-                  <Box component="span" sx={{ color: accent.main, mr: 1 }}>
-                    —
-                  </Box>
-                  {sectionLabel}
-                </Typography>
-              )}
-              <Box
-                ref={(el: HTMLElement | null) => {
-                  rowRefs.current[i] = el;
-                }}
-                onClick={() => onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId })}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.25,
-                  minHeight: 52,
-                  py: 0.75,
-                  px: 0.75,
-                  cursor: "pointer",
-                  borderBottom: `1px solid ${theme.palette.divider}`,
-                  bgcolor: isActive ? theme.palette.action.hover : "transparent",
-                  boxShadow: isActive ? `inset 2px 0 0 ${accent.main}` : "none",
-                  transition: "background-color 120ms ease",
-                  "&:hover": { bgcolor: theme.palette.action.hover },
-                  "&:hover .wing-row-actions": { opacity: 1 },
-                }}
-              >
-                <Typography
-                  sx={{
-                    width: 24,
-                    flexShrink: 0,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    fontVariantNumeric: "tabular-nums",
-                    color: isDone ? accent.main : "text.secondary",
-                  }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </Typography>
-
-                <RowThumb
-                  parsed={row.parsed}
-                  src={thumbFor(sectionKey, row, 220)}
-                  previewSrc={thumbFor(sectionKey, row, 800)}
-                  dimmed={isDone}
-                />
-
-                <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 0.9 }}>
-                  <TypeGlyph
-                    sx={{
-                      fontSize: 15,
-                      flexShrink: 0,
-                      color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.9),
-                    }}
-                  />
-                  <Typography
-                    noWrap
-                    sx={{
-                      fontSize: 14.5,
-                      fontWeight: 500,
-                      minWidth: 0,
-                      flexShrink: 1,
-                      color: isDone ? "text.secondary" : "text.primary",
-                      textDecoration: isDone ? "line-through" : "none",
-                      textDecorationColor: alpha(theme.palette.text.secondary, 0.5),
-                    }}
-                  >
-                    {row.parsed.name}
-                  </Typography>
-                  <Box
-                    aria-hidden
-                    sx={{
-                      flex: 1,
-                      mx: 1,
-                      borderBottom: `1px dotted ${alpha(theme.palette.text.secondary, 0.4)}`,
-                      transform: "translateY(4px)",
-                      display: { xs: "none", sm: "block" },
-                      minWidth: 16,
-                    }}
-                  />
-                  <Typography
-                    noWrap
-                    sx={{
-                      flexShrink: 0,
-                      fontSize: 10.5,
-                      fontWeight: 600,
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "text.secondary",
-                      display: { xs: "none", sm: "block" },
-                    }}
-                  >
-                    {searching && row.section ? `${row.section} · ${meta}` : meta}
-                  </Typography>
-                </Box>
-
+            return (
+              <React.Fragment key={`${row.folderId}-${row.file.id}`}>
+                {showHeader && sectionLabel && <SectionHeader label={sectionLabel} first={i === 0} />}
                 <Box
-                  className="wing-row-actions"
+                  ref={(el: HTMLElement | null) => {
+                    rowRefs.current[i] = el;
+                  }}
+                  onClick={() => openRow(row)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    opacity: { xs: 1, md: 0 },
-                    transition: "opacity 140ms ease",
+                    gap: 1.25,
+                    minHeight: 52,
+                    py: 0.75,
+                    px: 0.75,
+                    cursor: "pointer",
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    bgcolor: isActive ? theme.palette.action.hover : "transparent",
+                    boxShadow: isActive ? `inset 2px 0 0 ${accent.main}` : "none",
+                    transition: "background-color 120ms ease",
+                    "&:hover": { bgcolor: theme.palette.action.hover },
+                    "&:hover .wing-row-actions": { opacity: 1 },
                   }}
                 >
-                  <Tooltip title="Copy link">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        copyLink(row);
-                      }}
-                      sx={{ color: "text.secondary" }}
-                    >
-                      <ContentCopyRounded sx={{ fontSize: 15 }} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Open in new tab">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId });
-                      }}
-                      sx={{ color: "text.secondary" }}
-                    >
-                      <OpenInNewRounded sx={{ fontSize: 15 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-
-                <Tooltip title={isDone ? "Studied — click to undo" : "Mark as studied"}>
-                  <IconButton
-                    size="small"
-                    aria-label={isDone ? "Mark as not studied" : "Mark as studied"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleStudied(row.file.id);
+                  <Typography
+                    sx={{
+                      width: 24,
+                      flexShrink: 0,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      fontVariantNumeric: "tabular-nums",
+                      color: isDone ? accent.main : "text.secondary",
                     }}
-                    sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.45) }}
                   >
-                    {isDone ? (
-                      <CheckCircleRounded sx={{ fontSize: 19 }} />
-                    ) : (
-                      <RadioButtonUncheckedRounded sx={{ fontSize: 19 }} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </React.Fragment>
-          );
-        })}
-      </Box>
+                    {String(i + 1).padStart(2, "0")}
+                  </Typography>
+
+                  <RowThumb
+                    parsed={row.parsed}
+                    src={thumbFor(sectionKey, row, 220)}
+                    previewSrc={thumbFor(sectionKey, row, 800)}
+                    dimmed={isDone}
+                  />
+
+                  <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 0.9 }}>
+                    <FileTypeIcon
+                      type={row.parsed.type}
+                      external={row.parsed.isExternalLink}
+                      sx={{
+                        fontSize: 15,
+                        flexShrink: 0,
+                        color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.9),
+                      }}
+                    />
+                    <Typography
+                      noWrap
+                      sx={{
+                        fontSize: 14.5,
+                        fontWeight: 500,
+                        minWidth: 0,
+                        flexShrink: 1,
+                        color: isDone ? "text.secondary" : "text.primary",
+                        textDecoration: isDone ? "line-through" : "none",
+                        textDecorationColor: alpha(theme.palette.text.secondary, 0.5),
+                      }}
+                    >
+                      {row.parsed.name}
+                    </Typography>
+                    <Box
+                      aria-hidden
+                      sx={{
+                        flex: 1,
+                        mx: 1,
+                        borderBottom: `1px dotted ${alpha(theme.palette.text.secondary, 0.4)}`,
+                        transform: "translateY(4px)",
+                        display: { xs: "none", sm: "block" },
+                        minWidth: 16,
+                      }}
+                    />
+                    <Typography
+                      noWrap
+                      sx={{
+                        flexShrink: 0,
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "text.secondary",
+                        display: { xs: "none", sm: "block" },
+                      }}
+                    >
+                      {searching && row.section ? `${row.section} · ${meta}` : meta}
+                    </Typography>
+                  </Box>
+
+                  <RowActions
+                    isDone={isDone}
+                    actionSize={15}
+                    toggleSize={19}
+                    onCopy={() => copyLink(row)}
+                    onOpenRow={() => openRow(row)}
+                    onToggle={() => onToggleStudied(row.file.id)}
+                  />
+                </Box>
+              </React.Fragment>
+            );
+          })}
+        </Box>
       )}
 
       {view === "sheet" && (
@@ -652,42 +687,21 @@ export default function WingFiles({
           }}
         >
           {visible.map((row, i) => {
-            const isDone = Boolean(studied[row.file.id]);
-            const isActive = i === activeIdx;
-            const size = humanSize(row.file.size);
-            const meta = [TYPE_LABEL[row.parsed.type], size].filter(Boolean).join(" · ");
-            const TypeGlyph = TYPE_ICON[row.parsed.type];
-
-            const sectionLabel = searching ? row.folderName : row.section;
+            const { isDone, isActive, meta } = rowState(row, i);
+            const sectionLabel = sectionOf(row);
             const showHeader = sectionLabel !== lastSection;
             lastSection = sectionLabel;
 
             return (
               <React.Fragment key={`${row.folderId}-${row.file.id}`}>
                 {showHeader && sectionLabel && (
-                  <Typography
-                    sx={{
-                      gridColumn: "1 / -1",
-                      mt: i === 0 ? 0.5 : 1.5,
-                      mb: -1,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "text.primary",
-                    }}
-                  >
-                    <Box component="span" sx={{ color: accent.main, mr: 1 }}>
-                      —
-                    </Box>
-                    {sectionLabel}
-                  </Typography>
+                  <SectionHeader label={sectionLabel} first={i === 0} grid />
                 )}
                 <Box
                   ref={(el: HTMLElement | null) => {
                     rowRefs.current[i] = el;
                   }}
-                  onClick={() => onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId })}
+                  onClick={() => openRow(row)}
                   sx={{
                     cursor: "pointer",
                     minWidth: 0,
@@ -713,7 +727,9 @@ export default function WingFiles({
                     >
                       {String(i + 1).padStart(2, "0")}
                     </Typography>
-                    <TypeGlyph
+                    <FileTypeIcon
+                      type={row.parsed.type}
+                      external={row.parsed.isExternalLink}
                       sx={{
                         fontSize: 14,
                         mt: "2.5px",
@@ -755,40 +771,13 @@ export default function WingFiles({
                       {meta}
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-                      <Box
-                        className="wing-row-actions"
-                        sx={{ display: "flex", opacity: { xs: 1, md: 0 }, transition: "opacity 140ms ease" }}
-                      >
-                        <Tooltip title="Copy link">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              copyLink(row);
-                            }}
-                            sx={{ color: "text.secondary" }}
-                          >
-                            <ContentCopyRounded sx={{ fontSize: 14 }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                      <Tooltip title={isDone ? "Studied — click to undo" : "Mark as studied"}>
-                        <IconButton
-                          size="small"
-                          aria-label={isDone ? "Mark as not studied" : "Mark as studied"}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleStudied(row.file.id);
-                          }}
-                          sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.45) }}
-                        >
-                          {isDone ? (
-                            <CheckCircleRounded sx={{ fontSize: 17 }} />
-                          ) : (
-                            <RadioButtonUncheckedRounded sx={{ fontSize: 17 }} />
-                          )}
-                        </IconButton>
-                      </Tooltip>
+                      <RowActions
+                        isDone={isDone}
+                        actionSize={14}
+                        toggleSize={17}
+                        onCopy={() => copyLink(row)}
+                        onToggle={() => onToggleStudied(row.file.id)}
+                      />
                     </Box>
                   </Box>
                 </Box>
