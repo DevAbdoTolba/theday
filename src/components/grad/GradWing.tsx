@@ -179,7 +179,6 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
   }, [lastOpened, materials]);
 
   const loading = !tree && !error;
-  const stampDigits = intake?.name.match(/\d+/)?.[0] ?? "GW";
   const contextLine = [intake?.name, course && course !== intake ? course.name : null]
     .filter(Boolean)
     .join(" — ");
@@ -274,30 +273,20 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                 size={isMobile ? 68 : 92}
                 fill={accent.main}
               >
-                <Box sx={{ textAlign: "center", lineHeight: 1 }}>
-                  <Typography
-                    sx={{
-                      fontFamily: WING_DISPLAY,
-                      fontWeight: 700,
-                      fontSize: isMobile ? 20 : 27,
-                      color: accent.onMain,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {stampDigits}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: isMobile ? 6.5 : 8,
-                      fontWeight: 700,
-                      letterSpacing: "0.3em",
-                      color: alpha(accent.onMain, 0.85),
-                      mt: 0.4,
-                    }}
-                  >
-                    INTAKE
-                  </Typography>
-                </Box>
+                <Typography
+                  sx={{
+                    fontFamily: WING_DISPLAY,
+                    fontWeight: 700,
+                    fontSize: isMobile ? 20 : 28,
+                    letterSpacing: "0.06em",
+                    color: accent.onMain,
+                    lineHeight: 1,
+                    // optically center the monogram against its tracking
+                    pl: "0.06em",
+                  }}
+                >
+                  ITI
+                </Typography>
               </ExpressiveShape>
             </Box>
           </Box>
