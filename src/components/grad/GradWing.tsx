@@ -4,7 +4,7 @@
 // crimson Material-3-Expressive theme, folder rail, keyboard-first file list,
 // and progress that survives on-device.
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -12,7 +12,9 @@ import {
   Chip,
   CircularProgress,
   Container,
+  IconButton,
   Skeleton,
+  Tooltip,
   Typography,
   alpha,
   useMediaQuery,
@@ -22,7 +24,9 @@ import { ThemeProvider } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
-import ExpressiveShape from "./ExpressiveShape";
+import LightModeRounded from "@mui/icons-material/LightModeRounded";
+import DarkModeRounded from "@mui/icons-material/DarkModeRounded";
+import { ColorModeContext } from "../../pages/_app";
 import WingRail, { FolderProgress } from "./WingRail";
 import WingFiles from "./WingFiles";
 import WingIntro from "./WingIntro";
@@ -69,6 +73,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
   const router = useRouter();
   const outerTheme = useTheme();
   const mode = outerTheme.palette.mode;
+  const colorMode = useContext(ColorModeContext);
   const theme = useMemo(() => createWingTheme(mode), [mode]);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -195,31 +200,47 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
               <Typography sx={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.14em" }}>THEDAY</Typography>
             </ButtonBase>
 
-            {overall.total > 0 && (
-              <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                <CircularProgress
-                  variant="determinate"
-                  value={100}
-                  size={52}
-                  thickness={3.5}
-                  sx={{ color: alpha(theme.palette.primary.main, 0.15), position: "absolute" }}
-                />
-                <CircularProgress variant="determinate" value={overall.pct} size={52} thickness={3.5} color="primary" />
-                <Typography
-                  sx={{ position: "absolute", fontSize: 12, fontWeight: 800 }}
-                  aria-label={`${overall.done} of ${overall.total} studied`}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Tooltip title={mode === "dark" ? "Switch to light" : "Switch to dark"}>
+                <IconButton
+                  onClick={colorMode.toggleColorMode}
+                  size="small"
+                  sx={{ color: "text.secondary", border: `1px solid ${theme.palette.divider}` }}
                 >
-                  {overall.pct}%
-                </Typography>
-              </Box>
-            )}
+                  {mode === "dark" ? (
+                    <LightModeRounded sx={{ fontSize: 18 }} />
+                  ) : (
+                    <DarkModeRounded sx={{ fontSize: 18 }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+              {overall.total > 0 && (
+                <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <CircularProgress
+                    variant="determinate"
+                    value={100}
+                    size={52}
+                    thickness={3.5}
+                    sx={{ color: alpha(theme.palette.primary.main, 0.15), position: "absolute" }}
+                  />
+                  <CircularProgress variant="determinate" value={overall.pct} size={52} thickness={3.5} color="primary" />
+                  <Typography
+                    sx={{ position: "absolute", fontSize: 12, fontWeight: 800 }}
+                    aria-label={`${overall.done} of ${overall.total} studied`}
+                  >
+                    {overall.pct}%
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           </Box>
 
           <Box sx={{ mb: { xs: 3, md: 4.5 } }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.28em", color: "secondary.main", mb: 1 }}>
+            <Box sx={{ width: 40, height: 4, bgcolor: "primary.main", borderRadius: 2, mb: 1.5 }} />
+            <Typography sx={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.28em", color: "primary.main", mb: 1 }}>
               GRADUATE WING
             </Typography>
-            <Typography variant="h2" sx={{ fontSize: { xs: "2rem", md: "3rem" }, lineHeight: 1.05 }}>
+            <Typography variant="h2" sx={{ fontSize: { xs: "2rem", md: "2.75rem" }, lineHeight: 1.05 }}>
               {title}
             </Typography>
             <Typography sx={{ mt: 1, color: "text.secondary", fontSize: 15 }}>{tagline}</Typography>
@@ -234,9 +255,10 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                   onClick={intakes.length > 1 ? () => setIntakeId(it.id) : undefined}
                   sx={{
                     fontWeight: 700,
-                    bgcolor: it.id === intake?.id ? alpha(theme.palette.primary.main, 0.18) : "transparent",
+                    bgcolor: it.id === intake?.id ? alpha(theme.palette.primary.main, 0.12) : "transparent",
                     color: it.id === intake?.id ? "primary.main" : "text.secondary",
-                    border: `1px solid ${alpha(theme.palette.primary.main, it.id === intake?.id ? 0.35 : 0.12)}`,
+                    border: "1px solid",
+                    borderColor: it.id === intake?.id ? alpha(theme.palette.primary.main, 0.3) : theme.palette.divider,
                   }}
                 />
               ))}
@@ -251,9 +273,10 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                       onClick={courses.length > 1 ? () => setCourseId(c.id) : undefined}
                       sx={{
                         fontWeight: 700,
-                        bgcolor: c.id === course?.id ? alpha(theme.palette.secondary.main, 0.16) : "transparent",
-                        color: c.id === course?.id ? "secondary.main" : "text.secondary",
-                        border: `1px solid ${alpha(theme.palette.secondary.main, c.id === course?.id ? 0.4 : 0.12)}`,
+                        bgcolor: c.id === course?.id ? alpha(theme.palette.primary.main, 0.12) : "transparent",
+                        color: c.id === course?.id ? "primary.main" : "text.secondary",
+                        border: "1px solid",
+                        borderColor: c.id === course?.id ? alpha(theme.palette.primary.main, 0.3) : theme.palette.divider,
                       }}
                     />
                   ))}
@@ -265,15 +288,18 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
               {lastOpened && (
                 <Chip
                   size="small"
-                  icon={<PlayArrowRounded sx={{ fontSize: 16 }} />}
+                  icon={<PlayArrowRounded sx={{ fontSize: 16, color: theme.palette.primary.main }} />}
                   label={`Continue · ${lastOpened.fileName.length > 34 ? lastOpened.fileName.slice(0, 34) + "…" : lastOpened.fileName}`}
                   onClick={handleContinue}
                   sx={{
                     ml: { md: "auto" },
                     fontWeight: 700,
-                    bgcolor: alpha(theme.palette.secondary.main, 0.14),
-                    color: "secondary.main",
+                    bgcolor: "transparent",
+                    color: "text.primary",
+                    border: "1px solid",
+                    borderColor: theme.palette.divider,
                     maxWidth: { xs: "100%", md: 380 },
+                    "&:hover": { bgcolor: theme.palette.action.hover },
                   }}
                 />
               )}
@@ -340,23 +366,6 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
           />
         )}
 
-        {/* subtle expressive backdrop accent, pure decoration */}
-        <Box
-          aria-hidden
-          sx={{
-            position: "fixed",
-            top: -140,
-            right: -140,
-            width: 380,
-            height: 380,
-            opacity: mode === "dark" ? 0.07 : 0.06,
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        >
-          <ExpressiveShape shape={["scallop", "flower", "burst"]} size="100%" fill={theme.palette.primary.main} morphDuration={26} rotateDuration={160} />
-        </Box>
-
         {/* the one-time ceremony */}
         <AnimatePresence>
           {intro === "show" && (
@@ -369,7 +378,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
           )}
         </AnimatePresence>
         {intro === "unknown" && (
-          <motion.div style={{ position: "fixed", inset: 0, zIndex: 2999, background: mode === "dark" ? "#181114" : "#FFF8F7" }} />
+          <motion.div style={{ position: "fixed", inset: 0, zIndex: 2999, background: mode === "dark" ? "#131316" : "#FAFAFA" }} />
         )}
       </Box>
     </ThemeProvider>
