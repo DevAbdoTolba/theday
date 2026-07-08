@@ -1,13 +1,21 @@
 // src/components/grad/WingIntro.tsx
 // The one-time ceremony. First visit to the wing shows a quiet stage with a
-// joyful Material-3 play seal; pressing it runs a ~9.5s motion story that
-// bridges TheDay's indigo into the wing's crimson:
+// joyful Material-3 play seal; pressing it runs a ~15s motion story that
+// bridges TheDay's indigo into the wing's charcoal:
 //
-//   1. "It started with ordinary days."        — a gold day-dot, days orbiting in
+//   1. "It started with ordinary days."        — a gold day-dot, a week of days
+//                                                flying into a spinning orbit
 //   2. "Lecture by lecture, they stacked up."  — the dot grows, morphs through
-//                                                expressive shapes, turns crimson
-//   3. "Until one day — you made it."          — the shape bursts, a mortarboard rises
-//   4. Title card                              — The Graduation Wing
+//                                                expressive shapes, turns red,
+//                                                moons circling it
+//   3. (the grind)                             — EXAMS. DEADLINES. ALL-NIGHTERS.
+//                                                slam in like rubber stamps while
+//                                                the shape shakes under the load
+//   4. "Until one day — you made it."          — the shape bursts: confetti,
+//                                                shockwave rings, a mortarboard
+//                                                that lands and takes a bow
+//   5. "This wing is yours now."               — the red seal comes down. THUNK.
+//   6. Title card                              — The Graduation Wing, embers rising
 //
 // Skippable like a game cinematic (with confirmation), plays exactly once
 // per device, and animates transform/opacity only so it stays smooth on
@@ -36,15 +44,27 @@ const GOLD = "#F6CE6B";
 const GOLD_DEEP = "#DB9A2D";
 const CRIMSON = "#C8102E";
 const CRIMSON_SOFT = "#FF5A68";
+const SANS = "var(--wing-sans), sans-serif";
+const DISPLAY = "var(--wing-display), Georgia, serif";
 
-// scene backdrop colors: indigo (TheDay) → transition → wing charcoal
-const SCENE_BG = [INK, "#191622", "#1D0E12", "#131316"];
-const SCENE_MS = [2400, 2400, 2700, 2100];
+// scene backdrops: indigo (TheDay) → strain → burst → seal → wing charcoal
+const SCENE_BG = [INK, "#191622", "#221019", "#1D0E12", "#170D12", "#131316"];
+const SCENE_MS = [2600, 2600, 2400, 2800, 2200, 2400];
 
-const CAPTIONS = [
+const CAPTIONS: (string | null)[] = [
   "It started with ordinary days.",
   "Lecture by lecture, they stacked up.",
+  null, // the slammed words speak for themselves
   "Until one day — you made it.",
+  "This wing is yours now.",
+  null,
+];
+
+const GRIND_WORDS = [
+  { text: "Exams.", x: -82, y: -58, rotate: -8, color: "rgba(255,255,255,0.92)", big: true },
+  { text: "Deadlines.", x: 78, y: -14, rotate: 6, color: GOLD, big: true },
+  { text: "All-nighters.", x: -58, y: 44, rotate: -5, color: CRIMSON_SOFT, big: true },
+  { text: "And still — you kept going.", x: 0, y: 104, rotate: 0, color: "rgba(255,255,255,0.85)", big: false },
 ];
 
 function Caption({ text }: { text: string }) {
@@ -70,7 +90,7 @@ function Caption({ text }: { text: string }) {
             fontSize: "clamp(1.15rem, 3.4vw, 1.7rem)",
             fontWeight: 500,
             letterSpacing: "0.01em",
-            fontFamily: "var(--wing-display), Georgia, serif",
+            fontFamily: DISPLAY,
             fontStyle: "italic",
           }}
         >
@@ -112,13 +132,14 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
   const play = () => {
     markIntroSeen(sectionKey); // it never comes back — even if the tab closes mid-story
     setPhase("playing");
-    const scenes = reducedMotion ? [SCENE_MS[3]] : SCENE_MS;
-    if (reducedMotion) setScene(3);
+    const finalScene = SCENE_MS.length - 1;
+    const scenes = reducedMotion ? [SCENE_MS[finalScene]] : SCENE_MS;
+    if (reducedMotion) setScene(finalScene);
     let acc = 0;
     scenes.forEach((ms, i) => {
       acc += ms;
       if (i < scenes.length - 1) {
-        timers.current.push(setTimeout(() => setScene(reducedMotion ? 3 : i + 1), acc));
+        timers.current.push(setTimeout(() => setScene(reducedMotion ? finalScene : i + 1), acc));
       } else {
         timers.current.push(setTimeout(finish, acc + 500));
       }
@@ -133,14 +154,14 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
   // deterministic confetti — no Math.random so SSR/renders stay stable
   const confetti = useMemo(
     () =>
-      Array.from({ length: 14 }, (_, i) => {
-        const angle = (i / 14) * Math.PI * 2 + 0.35;
-        const dist = 130 + (i % 4) * 46;
+      Array.from({ length: 18 }, (_, i) => {
+        const angle = (i / 18) * Math.PI * 2 + 0.35;
+        const dist = 120 + (i % 4) * 48;
         const shapeNames = ["scallop", "burst", "flower", "clover"] as const;
         return {
           x: Math.cos(angle) * dist,
           y: Math.sin(angle) * dist * 0.82,
-          size: 12 + (i % 3) * 7,
+          size: 11 + (i % 3) * 7,
           rotate: (i * 97) % 360,
           color: [GOLD, CRIMSON_SOFT, "#FFFFFF", "#8E8E96"][i % 4],
           d: SHAPES[shapeNames[i % 4]],
@@ -262,7 +283,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
         {/* ------------------------------------------------ STORY */}
         {phase === "playing" && (
           <>
-            {/* Scene 1: orbiting day-dots */}
+            {/* Scene 1: a week of days flies into a spinning orbit */}
             <AnimatePresence>
               {scene === 0 && (
                 <motion.div
@@ -274,27 +295,40 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                 >
                   <motion.div
                     initial={{ scale: 0 }}
-                    animate={{ scale: [0, 1.15, 1] }}
-                    transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
+                    animate={{ scale: [0, 1.2, 1, 1.12, 1] }}
+                    transition={{ duration: 2.3, times: [0, 0.16, 0.32, 0.66, 1], ease: "easeInOut" }}
                     style={{ width: 26, height: 26, borderRadius: "50%", background: GOLD, boxShadow: `0 0 34px ${GOLD_DEEP}` }}
                   />
-                  {Array.from({ length: 7 }, (_, i) => {
-                    const a = (i / 7) * Math.PI * 2 - Math.PI / 2;
-                    return (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
-                        animate={{ opacity: 0.85, x: Math.cos(a) * 92, y: Math.sin(a) * 92, scale: 1 }}
-                        transition={{ delay: 0.5 + i * 0.16, duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
-                        style={{ position: "absolute", width: 10, height: 10, borderRadius: "50%", background: "rgba(255,255,255,0.75)" }}
-                      />
-                    );
-                  })}
+                  {/* the orbit itself spins while days pop in */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const a = (i / 7) * Math.PI * 2 - Math.PI / 2;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: 0, y: 0, scale: 0 }}
+                          animate={{ opacity: 0.85, x: Math.cos(a) * 92, y: Math.sin(a) * 92, scale: [0, 1.4, 1] }}
+                          transition={{ delay: 0.45 + i * 0.14, duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
+                          style={{ position: "absolute", width: 10, height: 10, borderRadius: "50%", background: "rgba(255,255,255,0.75)" }}
+                        />
+                      );
+                    })}
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Scene 2: the morphing accumulation */}
+            {/* Scene 2: the morphing accumulation, moons circling */}
             <AnimatePresence>
               {scene === 1 && (
                 <motion.div
@@ -311,18 +345,97 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                       animate={{
                         d: [SHAPES.circle, SHAPES.scallop, SHAPES.flower, SHAPES.burst],
                         fill: [GOLD, GOLD_DEEP, CRIMSON_SOFT, CRIMSON],
-                        rotate: 90,
+                        rotate: 200,
                       }}
-                      transition={{ duration: 2.3, ease: "easeInOut" }}
+                      transition={{ duration: 2.5, ease: "easeInOut" }}
                     />
                   </motion.svg>
+                  {/* little moons — the days keep circling what they built */}
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 6.5, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {[GOLD, "rgba(255,255,255,0.8)", CRIMSON_SOFT].map((c, i) => {
+                      const a = (i / 3) * Math.PI * 2;
+                      return (
+                        <motion.svg
+                          key={i}
+                          viewBox={SHAPE_VIEWBOX}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 + i * 0.2, type: "spring", stiffness: 300, damping: 18 }}
+                          style={{
+                            position: "absolute",
+                            width: 16 + (i % 2) * 6,
+                            height: 16 + (i % 2) * 6,
+                            transform: `translate(${Math.cos(a) * 128}px, ${Math.sin(a) * 128}px)`,
+                          }}
+                        >
+                          <path d={SHAPES[(["clover", "flower", "scallop"] as const)[i]]} fill={c} />
+                        </motion.svg>
+                      );
+                    })}
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Scene 3: the burst + mortarboard */}
+            {/* Scene 3: the grind — words slam like rubber stamps */}
             <AnimatePresence>
               {scene === 2 && (
+                <motion.div
+                  key="grind"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.4 } }}
+                  style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  {/* the shape under strain */}
+                  <motion.svg
+                    viewBox={SHAPE_VIEWBOX}
+                    animate={{ x: [0, -4, 4, -3, 3, -2, 2, 0], rotate: [0, -2, 2, -1, 1, 0] }}
+                    transition={{ duration: 0.65, repeat: Infinity, ease: "easeInOut" }}
+                    style={{ width: 190, height: 190, opacity: 0.45 }}
+                  >
+                    <path d={SHAPES.burst} fill={CRIMSON} />
+                  </motion.svg>
+                  {GRIND_WORDS.map((w, i) => (
+                    <div
+                      key={w.text}
+                      style={{ position: "absolute", transform: `translate(${w.x}px, ${w.y}px)` }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, scale: 2.6, rotate: w.rotate * 2.5 }}
+                        animate={{ opacity: 1, scale: 1, rotate: w.rotate }}
+                        transition={{ delay: 0.15 + i * 0.48, type: "spring", stiffness: 420, damping: 21 }}
+                        style={{
+                          fontFamily: SANS,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.07em",
+                          whiteSpace: "nowrap",
+                          fontSize: w.big ? "clamp(1.25rem, 4.2vw, 1.85rem)" : "clamp(0.85rem, 2.6vw, 1.05rem)",
+                          color: w.color,
+                        }}
+                      >
+                        {w.text}
+                      </motion.div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Scene 4: the burst — confetti, shockwaves, and a bow */}
+            <AnimatePresence>
+              {scene === 3 && (
                 <motion.div
                   key="burst"
                   initial={{ opacity: 0 }}
@@ -330,6 +443,22 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                   exit={{ opacity: 0, transition: { duration: 0.55 } }}
                   style={{ position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
+                  {/* shockwave rings */}
+                  {[0, 1].map((r) => (
+                    <motion.div
+                      key={`ring-${r}`}
+                      initial={{ scale: 0.2, opacity: 0.9 }}
+                      animate={{ scale: 2.7 + r * 0.9, opacity: 0 }}
+                      transition={{ delay: 0.28 + r * 0.3, duration: 1.15, ease: "easeOut" }}
+                      style={{
+                        position: "absolute",
+                        width: 150,
+                        height: 150,
+                        borderRadius: "50%",
+                        border: `2px solid ${r ? CRIMSON_SOFT : GOLD}`,
+                      }}
+                    />
+                  ))}
                   {confetti.map((c, i) => (
                     <motion.svg
                       key={i}
@@ -347,23 +476,93 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                     animate={{ y: 0, scale: 1, opacity: 1 }}
                     transition={{ delay: 0.35, type: "spring", stiffness: 190, damping: 15 }}
                   >
-                    <ExpressiveShape shape="scallop" size={150} gradient={[GOLD, GOLD_DEEP]} rotateDuration={60}>
-                      <SchoolRounded sx={{ fontSize: 64, color: INK }} />
-                    </ExpressiveShape>
+                    {/* …lands, then takes a little bow */}
+                    <motion.div
+                      animate={{ rotate: [0, 0, -6, 5, -2, 0] }}
+                      transition={{ delay: 1.15, duration: 1.0, ease: "easeInOut" }}
+                    >
+                      <ExpressiveShape shape="scallop" size={150} gradient={[GOLD, GOLD_DEEP]} rotateDuration={60}>
+                        <SchoolRounded sx={{ fontSize: 64, color: INK }} />
+                      </ExpressiveShape>
+                    </motion.div>
                   </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Scene 4: title card */}
+            {/* Scene 5: the seal comes down. THUNK. */}
             <AnimatePresence>
-              {scene === 3 && (
+              {scene === 4 && (
+                <motion.div
+                  key="seal"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, y: [0, 0, 7, -3, 1, 0] }}
+                  exit={{ opacity: 0, scale: 1.15, transition: { duration: 0.45 } }}
+                  transition={{ opacity: { duration: 0.25 }, y: { delay: 0.3, duration: 0.55, ease: "easeOut" } }}
+                  style={{ position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  <motion.div
+                    initial={{ scale: 3.2, opacity: 0, rotate: -28 }}
+                    animate={{ scale: 1, opacity: 1, rotate: -7 }}
+                    transition={{ type: "spring", stiffness: 340, damping: 17, delay: 0.12 }}
+                  >
+                    <ExpressiveShape shape={["scallop", "flower"]} morphDuration={10} size={150} fill={CRIMSON}>
+                      <SchoolRounded sx={{ fontSize: 58, color: GOLD }} />
+                    </ExpressiveShape>
+                  </motion.div>
+                  {/* impact poof */}
+                  {Array.from({ length: 8 }, (_, i) => {
+                    const a = (i / 8) * Math.PI * 2 + 0.4;
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ x: 0, y: 0, scale: 0, opacity: 0 }}
+                        animate={{ x: Math.cos(a) * 112, y: Math.sin(a) * 92, scale: [0, 1, 0.6], opacity: [0, 1, 0] }}
+                        transition={{ delay: 0.34, duration: 0.7, ease: "easeOut" }}
+                        style={{
+                          position: "absolute",
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          background: i % 2 ? GOLD : "rgba(255,255,255,0.8)",
+                        }}
+                      />
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Scene 6: title card, embers rising */}
+            <AnimatePresence>
+              {scene === 5 && (
                 <motion.div
                   key="title"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{ position: "absolute", textAlign: "center", padding: 24 }}
                 >
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <motion.svg
+                      key={i}
+                      viewBox={SHAPE_VIEWBOX}
+                      initial={{ y: 50, opacity: 0 }}
+                      animate={{ y: -110, opacity: [0, 0.45, 0] }}
+                      transition={{ delay: 0.25 + i * 0.22, duration: 2.1, ease: "easeOut" }}
+                      style={{
+                        position: "absolute",
+                        bottom: -40,
+                        left: `${12 + i * 15}%`,
+                        width: 10 + (i % 3) * 5,
+                        height: 10 + (i % 3) * 5,
+                      }}
+                    >
+                      <path
+                        d={SHAPES[(["clover", "scallop", "flower"] as const)[i % 3]]}
+                        fill={[GOLD, CRIMSON_SOFT, "rgba(255,255,255,0.7)"][i % 3]}
+                      />
+                    </motion.svg>
+                  ))}
                   <motion.div
                     initial={{ y: 34, opacity: 0, filter: "blur(10px)" }}
                     animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
@@ -372,7 +571,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                     <Typography
                       sx={{
                         color: "#F0EDE6",
-                        fontFamily: "var(--wing-display), Georgia, serif",
+                        fontFamily: DISPLAY,
                         fontWeight: 700,
                         letterSpacing: "-0.015em",
                         fontSize: "clamp(2.2rem, 7vw, 3.8rem)",
@@ -397,7 +596,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                         fontSize: 16.5,
                         fontWeight: 400,
                         fontStyle: "italic",
-                        fontFamily: "var(--wing-display), Georgia, serif",
+                        fontFamily: DISPLAY,
                         letterSpacing: "0.02em",
                       }}
                     >
@@ -421,7 +620,7 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
               }}
             >
               <AnimatePresence mode="wait">
-                {scene < 3 && <Caption key={scene} text={CAPTIONS[scene]} />}
+                {CAPTIONS[scene] && <Caption key={scene} text={CAPTIONS[scene] as string} />}
               </AnimatePresence>
             </Box>
 
