@@ -23,6 +23,15 @@ import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUncheckedRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
+import PictureAsPdfRounded from "@mui/icons-material/PictureAsPdfRounded";
+import YouTube from "@mui/icons-material/YouTube";
+import OndemandVideoRounded from "@mui/icons-material/OndemandVideoRounded";
+import DescriptionRounded from "@mui/icons-material/DescriptionRounded";
+import TableChartRounded from "@mui/icons-material/TableChartRounded";
+import SlideshowRounded from "@mui/icons-material/SlideshowRounded";
+import ImageRounded from "@mui/icons-material/ImageRounded";
+import FolderRounded from "@mui/icons-material/FolderRounded";
+import LinkRounded from "@mui/icons-material/LinkRounded";
 import { wingAccent } from "./gradTheme";
 import { parseGoogleFile } from "../../utils/helpers";
 import type { ParsedFile } from "../../utils/types";
@@ -49,7 +58,7 @@ interface Props {
 const TYPE_LABEL: Record<ParsedFile["type"], string> = {
   pdf: "PDF",
   video: "Video",
-  youtube: "Video",
+  youtube: "YouTube",
   doc: "Doc",
   sheet: "Sheet",
   slide: "Slides",
@@ -57,6 +66,94 @@ const TYPE_LABEL: Record<ParsedFile["type"], string> = {
   folder: "Folder",
   unknown: "Link",
 };
+
+const TYPE_ICON: Record<ParsedFile["type"], typeof LinkRounded> = {
+  pdf: PictureAsPdfRounded,
+  video: OndemandVideoRounded,
+  youtube: YouTube,
+  doc: DescriptionRounded,
+  sheet: TableChartRounded,
+  slide: SlideshowRounded,
+  image: ImageRounded,
+  folder: FolderRounded,
+  unknown: LinkRounded,
+};
+
+/** Smaller payload for the inline contact-sheet thumb; hover shows w800. */
+const inlineThumb = (url: string) => url.replace("sz=w800", "sz=w220");
+
+/**
+ * Contact-sheet thumbnail: a small bordered still for visual memory.
+ * Falls back to the type glyph on a paper card when Drive has no preview
+ * (or the image fails to load).
+ */
+function RowThumb({ parsed, dimmed }: { parsed: ParsedFile; dimmed: boolean }) {
+  const theme = useTheme();
+  const [failed, setFailed] = useState(false);
+  const Icon = TYPE_ICON[parsed.type];
+
+  const frame = {
+    width: 58,
+    height: 38,
+    flexShrink: 0,
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: "3px",
+    opacity: dimmed ? 0.55 : 1,
+    transition: "opacity 120ms ease",
+  };
+
+  if (!parsed.thumbnailUrl || failed) {
+    return (
+      <Box
+        sx={{
+          ...frame,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "background.paper",
+        }}
+      >
+        <Icon sx={{ fontSize: 16, color: "text.secondary" }} />
+      </Box>
+    );
+  }
+
+  return (
+    <Tooltip
+      enterDelay={250}
+      placement="right"
+      title={
+        <Box
+          component="img"
+          src={parsed.thumbnailUrl}
+          alt=""
+          sx={{ display: "block", width: 260, maxHeight: 200, objectFit: "cover" }}
+        />
+      }
+      slotProps={{
+        tooltip: {
+          sx: {
+            p: 0.5,
+            bgcolor: "background.paper",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: "4px",
+            boxShadow: theme.shadows[4],
+            maxWidth: "none",
+          },
+        },
+      }}
+    >
+      <Box
+        component="img"
+        src={inlineThumb(parsed.thumbnailUrl)}
+        alt=""
+        loading="lazy"
+        onError={() => setFailed(true)}
+        sx={{ ...frame, objectFit: "cover", display: "block", bgcolor: "background.paper" }}
+      />
+    </Tooltip>
+  );
+}
 
 function humanSize(bytes?: number): string | null {
   if (!bytes || bytes <= 0) return null;
@@ -258,6 +355,7 @@ export default function WingFiles({
           const isActive = i === activeIdx;
           const size = humanSize(row.file.size);
           const meta = [TYPE_LABEL[row.parsed.type], size].filter(Boolean).join(" · ");
+          const TypeGlyph = TYPE_ICON[row.parsed.type];
 
           const sectionLabel = searching ? row.folderName : row.section;
           const showHeader = sectionLabel !== lastSection;
@@ -292,7 +390,8 @@ export default function WingFiles({
                   display: "flex",
                   alignItems: "center",
                   gap: 1.25,
-                  minHeight: 46,
+                  minHeight: 52,
+                  py: 0.75,
                   px: 0.75,
                   cursor: "pointer",
                   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -316,7 +415,16 @@ export default function WingFiles({
                   {String(i + 1).padStart(2, "0")}
                 </Typography>
 
-                <Box sx={{ display: "flex", alignItems: "baseline", flex: 1, minWidth: 0 }}>
+                <RowThumb parsed={row.parsed} dimmed={isDone} />
+
+                <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 0.9 }}>
+                  <TypeGlyph
+                    sx={{
+                      fontSize: 15,
+                      flexShrink: 0,
+                      color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.9),
+                    }}
+                  />
                   <Typography
                     noWrap
                     sx={{
@@ -335,9 +443,9 @@ export default function WingFiles({
                     aria-hidden
                     sx={{
                       flex: 1,
-                      mx: 1.25,
+                      mx: 1,
                       borderBottom: `1px dotted ${alpha(theme.palette.text.secondary, 0.4)}`,
-                      transform: "translateY(-3px)",
+                      transform: "translateY(4px)",
                       display: { xs: "none", sm: "block" },
                       minWidth: 16,
                     }}
