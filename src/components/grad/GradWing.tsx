@@ -49,6 +49,8 @@ interface Props {
   gradKey: string;
   title: string;
   tagline: string;
+  /** Routes of sibling sections not open yet — surfaced as redacted index entries */
+  teaserPaths?: string[];
 }
 
 /** A folder "level": use children if any exist, otherwise the node itself. */
@@ -154,7 +156,7 @@ function WingStamp({ accent, isMobile, ink }: { accent: WingAccent; isMobile: bo
   );
 }
 
-export default function GradWing({ gradKey, title, tagline }: Props) {
+export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: Props) {
   const router = useRouter();
   const outerTheme = useTheme();
   const mode = outerTheme.palette.mode;
@@ -485,6 +487,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                     onSelect={setFolderId}
                     progress={progress}
                     variant="tabs"
+                    teasers={teaserPaths}
                   />
                 </Box>
               )}
@@ -497,6 +500,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                       onSelect={setFolderId}
                       progress={progress}
                       variant="rail"
+                      teasers={teaserPaths}
                     />
                   </Box>
                 )}
