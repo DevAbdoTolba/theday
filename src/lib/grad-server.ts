@@ -196,7 +196,7 @@ async function buildGradTree(key: string): Promise<GradTree | null> {
     root,
     fetchedAt: Date.now(),
   };
-  serverSet(cacheKey, tree);
+  serverSet(cacheKey, tree, CACHE_TTL);
   return tree;
 }
 
@@ -219,6 +219,19 @@ function collectTreeFileIds(node: GradFolder, into = new Set<string>()): Set<str
   return into;
 }
 
+// Membership Sets computed once per tree build (keyed on the cached root
+// object), instead of re-walking the tree for every thumbnail request.
+const treeIdSets = new WeakMap<GradFolder, Set<string>>();
+
+function idSetFor(root: GradFolder): Set<string> {
+  let ids = treeIdSets.get(root);
+  if (!ids) {
+    ids = collectTreeFileIds(root);
+    treeIdSets.set(root, ids);
+  }
+  return ids;
+}
+
 export async function fetchGradThumb(
   key: string,
   fileId: string,
@@ -233,17 +246,25 @@ export async function fetchGradThumb(
 
   // Only serve files that actually live in this section's tree
   const tree = await fetchGradTree(key);
-  if (!tree || !collectTreeFileIds(tree.root).has(fileId)) return null;
+  if (!tree || !idSetFor(tree.root).has(fileId)) return null;
 
-  const drive = getDrive();
-  const { data: meta } = await drive.files.get({
-    fileId,
-    fields: "thumbnailLink",
-  });
-  if (!meta.thumbnailLink) return null;
+  // thumbnailLink is size-independent — fetch the metadata once per file,
+  // not once per (file, size) combination.
+  const linkKey = `grad-thumb-link:${key}:${fileId}`;
+  let link = serverGet<string>(linkKey, THUMB_TTL);
+  if (!link) {
+    const drive = getDrive();
+    const { data: meta } = await drive.files.get({
+      fileId,
+      fields: "thumbnailLink",
+    });
+    if (!meta.thumbnailLink) return null;
+    link = meta.thumbnailLink;
+    serverSet(linkKey, link, THUMB_TTL);
+  }
 
   // thumbnailLink ends with a size directive like "=s220" — swap it
-  const sized = meta.thumbnailLink.replace(/=s\d+[^/]*$/, `=s${size}`);
+  const sized = link.replace(/=s\d+[^/]*$/, `=s${size}`);
   const resp = await fetch(sized);
   if (!resp.ok) return null;
 
@@ -251,6 +272,6 @@ export async function fetchGradThumb(
     data: Buffer.from(await resp.arrayBuffer()).toString("base64"),
     mime: resp.headers.get("content-type") ?? "image/jpeg",
   };
-  serverSet(cacheKey, thumb);
+  serverSet(cacheKey, thumb, THUMB_TTL);
   return thumb;
 }

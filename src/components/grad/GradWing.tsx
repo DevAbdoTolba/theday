@@ -272,6 +272,9 @@ export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: 
     setHighlightId(lastOpened.fileId);
   }, [lastOpened, materials]);
 
+  // Stable identity — WingFiles keys an effect on this callback
+  const handleHighlightConsumed = useCallback(() => setHighlightId(null), []);
+
   const loading = !tree && !error;
   const contextLine = [intake?.name, course && course !== intake ? course.name : null]
     .filter(Boolean)
@@ -511,7 +514,7 @@ export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: 
                     onToggleStudied={handleToggleStudied}
                     onOpen={handleOpen}
                     highlightId={highlightId}
-                    onHighlightConsumed={() => setHighlightId(null)}
+                    onHighlightConsumed={handleHighlightConsumed}
                   />
                 </Box>
               </Box>
