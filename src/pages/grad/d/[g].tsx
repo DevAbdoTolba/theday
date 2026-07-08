@@ -7,7 +7,7 @@
 import React from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { Fraunces, Space_Grotesk, Unbounded } from "next/font/google";
 import GradWing from "../../../components/grad/GradWing";
 
 // Self-hosted at build time (no external requests), scoped to the wing via
@@ -27,6 +27,14 @@ const grotesk = Space_Grotesk({
   display: "swap",
 });
 
+// The seal's wordmark face — geometric display with institute presence.
+const unbounded = Unbounded({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--wing-mark",
+  display: "swap",
+});
+
 interface Props {
   gradKey: string;
   title: string;
@@ -41,7 +49,7 @@ export default function GradSectionPage({ gradKey, title, tagline }: Props) {
         <meta name="robots" content="noindex, nofollow" />
         <link rel="icon" href="/main.png" />
       </Head>
-      <div className={`${fraunces.variable} ${grotesk.variable}`}>
+      <div className={`${fraunces.variable} ${grotesk.variable} ${unbounded.variable}`}>
         <GradWing gradKey={gradKey} title={title} tagline={tagline} />
       </div>
     </>
