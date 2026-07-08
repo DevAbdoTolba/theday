@@ -8,12 +8,120 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, ButtonBase, Container, Typography, alpha, useTheme } from "@mui/material";
+import { Box, ButtonBase, Container, Typography, alpha, useMediaQuery, useTheme } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { motion, useReducedMotion } from "framer-motion";
 import ExpressiveShape from "./ExpressiveShape";
 import { createWingTheme, wingAccent, WING_DISPLAY, WING_MARK } from "./gradTheme";
 import { getGradPass } from "../../utils/gradStore";
+
+// --- The falling faces -------------------------------------------------------
+// A faithful port of the entrance effect on cvcrack.vercel.app — same image,
+// same seven positions, delays, durations, sizes, the same 0→180° tumble and
+// 0.75-opacity plateau — reworked properly: compositor-only CSS keyframes,
+// a real leaf-like sway layered on the fall, rendered BEHIND the content
+// instead of over it, and switched off for reduced-motion users.
+
+interface FallItem {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  size: number;
+}
+
+const FALL_DESKTOP: FallItem[] = [
+  { id: 1, left: 2, delay: 0, duration: 16, size: 100 },
+  { id: 2, left: 18, delay: 5, duration: 18, size: 90 },
+  { id: 3, left: 35, delay: 10, duration: 14, size: 120 },
+  { id: 4, left: 50, delay: 3, duration: 17, size: 100 },
+  { id: 5, left: 65, delay: 8, duration: 15, size: 110 },
+  { id: 6, left: 78, delay: 12, duration: 19, size: 90 },
+  { id: 7, left: 90, delay: 4, duration: 16, size: 100 },
+];
+
+const FALL_MOBILE: FallItem[] = [
+  { id: 1, left: 3, delay: 0, duration: 11, size: 45 },
+  { id: 2, left: 18, delay: 0, duration: 13, size: 40 },
+  { id: 3, left: 35, delay: 0, duration: 12, size: 45 },
+  { id: 4, left: 52, delay: 0, duration: 14, size: 40 },
+  { id: 5, left: 70, delay: 0, duration: 11, size: 45 },
+  { id: 6, left: 88, delay: 0, duration: 13, size: 40 },
+];
+
+// cvcrack's neon green — the border is part of the effect's identity
+const CRACK_GREEN = "rgba(46, 255, 138, 0.55)";
+
+function CvLeafFall() {
+  const theme = useTheme();
+  const reduced = useReducedMotion();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  if (reduced) return null;
+  const items = isMobile ? FALL_MOBILE : FALL_DESKTOP;
+
+  return (
+    <Box
+      aria-hidden
+      sx={{
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
+        pointerEvents: "none",
+        zIndex: 0,
+        "@keyframes grad-cv-fall": {
+          "0%": { transform: "translateY(-200px) rotate(0deg)", opacity: 0 },
+          "5%": { opacity: 0.75 },
+          "95%": { opacity: 0.75 },
+          "100%": { transform: "translateY(105vh) rotate(180deg)", opacity: 0 },
+        },
+        "@keyframes grad-cv-sway": {
+          from: { transform: "translateX(-13px) rotate(-4deg)" },
+          to: { transform: "translateX(13px) rotate(4deg)" },
+        },
+      }}
+    >
+      {items.map((it) => (
+        <Box
+          key={it.id}
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: `${it.left}%`,
+            animation: `grad-cv-fall ${it.duration}s linear infinite`,
+            animationDelay: `${it.delay}s`,
+            willChange: "transform, opacity",
+          }}
+        >
+          {/* the sway rides on top of the fall — that's what makes it a leaf */}
+          <Box
+            sx={{
+              animation: `grad-cv-sway ${2.8 + (it.id % 4) * 0.45}s ease-in-out infinite alternate`,
+              animationDelay: `${-((it.id * 0.7) % 2.4)}s`,
+            }}
+          >
+            <Box
+              component="img"
+              src="/grad-cv-leaf.png"
+              alt=""
+              draggable={false}
+              sx={{
+                display: "block",
+                width: it.size,
+                height: it.size,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: `3px solid ${CRACK_GREEN}`,
+                opacity: 0.75,
+                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.28)",
+              }}
+            />
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 interface Props {
   gradKey: string;
@@ -77,8 +185,11 @@ export default function GradTeaser({ gradKey, title, tagline }: Props) {
           color: "text.primary",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {gradKey === "cv" && <CvLeafFall />}
         <Container
           maxWidth="sm"
           sx={{
@@ -89,6 +200,8 @@ export default function GradTeaser({ gradKey, title, tagline }: Props) {
             justifyContent: "center",
             textAlign: "center",
             py: 7,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {/* the seal already knows what's coming */}
@@ -233,7 +346,7 @@ export default function GradTeaser({ gradKey, title, tagline }: Props) {
           </Typography>
         </Container>
 
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 3, pb: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 3, pb: 5, position: "relative", zIndex: 1 }}>
           {backPath && (
             <ButtonBase onClick={() => router.push(backPath)} sx={{ px: 2, py: 1 }}>
               <Typography
