@@ -487,7 +487,6 @@ export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: 
                     onSelect={setFolderId}
                     progress={progress}
                     variant="tabs"
-                    teasers={teaserPaths}
                   />
                 </Box>
               )}
@@ -500,7 +499,6 @@ export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: 
                       onSelect={setFolderId}
                       progress={progress}
                       variant="rail"
-                      teasers={teaserPaths}
                     />
                   </Box>
                 )}
@@ -517,6 +515,39 @@ export default function GradWing({ gradKey, title, tagline, teaserPaths = [] }: 
                   />
                 </Box>
               </Box>
+
+              {/* a footnote most people will never notice — exactly as intended */}
+              {teaserPaths.length > 0 && (
+                <Box sx={{ mt: { xs: 12, md: 18 }, display: "flex", justifyContent: "center" }}>
+                  {teaserPaths.map((href) => (
+                    <Tooltip key={href} title="Something new is being typeset…">
+                      <ButtonBase
+                        onClick={() => router.push(href)}
+                        aria-label="A door not yet open"
+                        sx={{
+                          px: 2.5,
+                          py: 1.5,
+                          borderRadius: 2,
+                          opacity: 0.22,
+                          transition: "opacity 400ms ease",
+                          "&:hover": { opacity: 0.95 },
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <Box sx={{ width: 26, height: 7, borderRadius: "2px", bgcolor: "text.secondary" }} />
+                        <Box sx={{ width: 12, height: 7, borderRadius: "2px", bgcolor: "text.secondary" }} />
+                        <Typography
+                          sx={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.3em", color: "primary.main", ml: 0.5 }}
+                        >
+                          SOON
+                        </Typography>
+                      </ButtonBase>
+                    </Tooltip>
+                  ))}
+                </Box>
+              )}
             </>
           )}
         </Container>
