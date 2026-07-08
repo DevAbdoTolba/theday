@@ -1,42 +1,31 @@
 // src/components/grad/gradTheme.ts
-// The Graduation Wing's identity, disciplined: ITI's language is one strong
-// red on white and charcoal — nothing else. Color is reserved for the active
-// state and progress; everything else is neutral surface and typography.
-// The Material 3 Expressive character survives in shape, not in color.
+// The Graduation Wing's identity: a printed course-reader. Warm paper (or
+// warm ink in dark mode), near-black typography, and ITI's red used with
+// commitment — the stamp, the index marker, progress, nothing else.
+// Typography carries the design: Fraunces for the masthead (via
+// --wing-display), Space Grotesk for the registry (via --wing-sans).
 
 import { createTheme, Theme } from "@mui/material/styles";
 import type { ShapeName } from "./expressiveShapes";
 
+export const WING_DISPLAY = "var(--wing-display), Georgia, serif";
+export const WING_SANS = "var(--wing-sans), Roboto, sans-serif";
+
 export interface WingAccent {
   /** the red */
   main: string;
-  /** what sits on top of `main` (letters inside filled shapes) */
+  /** what sits on top of `main` (the stamp's numerals) */
   onMain: string;
-  /** tonal container behind active items */
-  container: string;
-  /** text on the tonal container */
-  onContainer: string;
 }
 
-const RED_LIGHT: WingAccent = {
-  main: "#C8102E",
-  onMain: "#FFFFFF",
-  container: "#FCE9EC",
-  onContainer: "#59091A",
-};
-
-const RED_DARK: WingAccent = {
-  main: "#FF5A68",
-  onMain: "#3A060E",
-  container: "#43121B",
-  onContainer: "#FFD9DD",
-};
+const RED_LIGHT: WingAccent = { main: "#BE0F2C", onMain: "#FFF6F0" };
+const RED_DARK: WingAccent = { main: "#FF4D5E", onMain: "#2A0509" };
 
 export function wingAccent(mode: "light" | "dark"): WingAccent {
   return mode === "dark" ? RED_DARK : RED_LIGHT;
 }
 
-// Folders keep individual silhouettes — identity through shape, not color.
+// Kept for the masthead stamp and the ceremony.
 export const WING_SHAPES: ShapeName[] = ["scallop", "burst", "flower", "clover"];
 
 export function shapeFor(index: number): ShapeName {
@@ -50,20 +39,19 @@ export function createWingTheme(mode: "light" | "dark"): Theme {
     palette: {
       mode,
       primary: { main: accent.main, contrastText: accent.onMain },
-      secondary: { main: dark ? "#9C9CA4" : "#64646B" },
+      secondary: { main: dark ? "#9A948A" : "#6E675D" },
       background: dark
-        ? { default: "#131316", paper: "#1C1C20" }
-        : { default: "#FAFAFA", paper: "#FFFFFF" },
+        ? { default: "#171519", paper: "#1E1C21" }
+        : { default: "#F7F4EE", paper: "#FDFBF7" },
       text: dark
-        ? { primary: "#EDEDF0", secondary: "#9C9CA4" }
-        : { primary: "#18181B", secondary: "#64646B" },
-      divider: dark ? "rgba(237, 237, 240, 0.08)" : "rgba(24, 24, 27, 0.09)",
+        ? { primary: "#F0EDE6", secondary: "#9A948A" }
+        : { primary: "#1C1917", secondary: "#6E675D" },
+      divider: dark ? "rgba(240, 237, 230, 0.12)" : "rgba(28, 25, 23, 0.14)",
     },
-    shape: { borderRadius: 14 },
+    shape: { borderRadius: 4 },
     typography: {
-      h2: { fontWeight: 800, letterSpacing: "-0.02em" },
-      h6: { fontWeight: 700 },
-      button: { textTransform: "none", fontWeight: 700 },
+      fontFamily: WING_SANS,
+      button: { textTransform: "none", fontWeight: 600 },
     },
     transitions: { duration: { shortest: 150 } },
   });

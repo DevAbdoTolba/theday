@@ -7,7 +7,25 @@
 import React from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
+import { Fraunces, Space_Grotesk } from "next/font/google";
 import GradWing from "../../../components/grad/GradWing";
+
+// Self-hosted at build time (no external requests), scoped to the wing via
+// CSS variables — the rest of TheDay never sees these fonts.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--wing-display",
+  display: "swap",
+});
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--wing-sans",
+  display: "swap",
+});
 
 interface Props {
   gradKey: string;
@@ -23,7 +41,9 @@ export default function GradSectionPage({ gradKey, title, tagline }: Props) {
         <meta name="robots" content="noindex, nofollow" />
         <link rel="icon" href="/main.png" />
       </Head>
-      <GradWing gradKey={gradKey} title={title} tagline={tagline} />
+      <div className={`${fraunces.variable} ${grotesk.variable}`}>
+        <GradWing gradKey={gradKey} title={title} tagline={tagline} />
+      </div>
     </>
   );
 }

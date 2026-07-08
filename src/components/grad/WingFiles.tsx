@@ -1,20 +1,18 @@
 // src/components/grad/WingFiles.tsx
-// The wing's study surface: a fast, keyboard-first file list.
+// The register: files typeset as an index — numeral, title, dotted leader,
+// small-caps meta — with the same fast keyboard model throughout:
 //   /          focus search (searches across ALL folders at once)
-//   ↑ / ↓      move through files
-//   Enter      open the highlighted file
+//   ↑ / ↓      move through entries
+//   Enter      open the highlighted entry
 //   Space      mark it studied / unstudied
-// Every file row: type-coded expressive icon, size, studied toggle,
-// copy-link on hover. No cards, no noise — graduates get an instrument.
+// Red is reserved for studied numerals, the focus rule, and search focus.
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
-  ButtonBase,
   IconButton,
-  InputAdornment,
+  InputBase,
   Snackbar,
-  TextField,
   Tooltip,
   Typography,
   alpha,
@@ -23,17 +21,8 @@ import {
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUncheckedRounded";
-import LinkRounded from "@mui/icons-material/LinkRounded";
-import PictureAsPdfRounded from "@mui/icons-material/PictureAsPdfRounded";
-import OndemandVideoRounded from "@mui/icons-material/OndemandVideoRounded";
-import ImageRounded from "@mui/icons-material/ImageRounded";
-import DescriptionRounded from "@mui/icons-material/DescriptionRounded";
-import TableChartRounded from "@mui/icons-material/TableChartRounded";
-import SlideshowRounded from "@mui/icons-material/SlideshowRounded";
-import InsertDriveFileRounded from "@mui/icons-material/InsertDriveFileRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
-import ExpressiveShape from "./ExpressiveShape";
 import { wingAccent } from "./gradTheme";
 import { parseGoogleFile } from "../../utils/helpers";
 import type { ParsedFile } from "../../utils/types";
@@ -44,7 +33,6 @@ interface FlatRow {
   parsed: ParsedFile;
   folderId: string;
   folderName: string;
-  folderIndex: number;
   section: string | null;
 }
 
@@ -58,16 +46,16 @@ interface Props {
   onHighlightConsumed: () => void;
 }
 
-const TYPE_META: Record<ParsedFile["type"], { label: string; Icon: typeof LinkRounded }> = {
-  pdf: { label: "PDF", Icon: PictureAsPdfRounded },
-  video: { label: "Video", Icon: OndemandVideoRounded },
-  youtube: { label: "Video", Icon: OndemandVideoRounded },
-  doc: { label: "Doc", Icon: DescriptionRounded },
-  sheet: { label: "Sheet", Icon: TableChartRounded },
-  slide: { label: "Slides", Icon: SlideshowRounded },
-  image: { label: "Image", Icon: ImageRounded },
-  folder: { label: "Folder", Icon: InsertDriveFileRounded },
-  unknown: { label: "Link", Icon: LinkRounded },
+const TYPE_LABEL: Record<ParsedFile["type"], string> = {
+  pdf: "PDF",
+  video: "Video",
+  youtube: "Video",
+  doc: "Doc",
+  sheet: "Sheet",
+  slide: "Slides",
+  image: "Image",
+  folder: "Folder",
+  unknown: "Link",
 };
 
 function humanSize(bytes?: number): string | null {
@@ -82,7 +70,7 @@ function humanSize(bytes?: number): string | null {
   return `${v >= 10 || u === 0 ? Math.round(v) : v.toFixed(1)} ${units[u]}`;
 }
 
-function flattenFolder(folder: GradFolder, folderIndex: number): FlatRow[] {
+function flattenFolder(folder: GradFolder): FlatRow[] {
   const rows: FlatRow[] = [];
   const push = (file: GradFile, section: string | null) =>
     rows.push({
@@ -90,7 +78,6 @@ function flattenFolder(folder: GradFolder, folderIndex: number): FlatRow[] {
       parsed: parseGoogleFile({ ...file, parents: [] }),
       folderId: folder.id,
       folderName: folder.name,
-      folderIndex,
       section,
     });
   folder.files.forEach((f) => push(f, null));
@@ -112,17 +99,14 @@ export default function WingFiles({
   onHighlightConsumed,
 }: Props) {
   const theme = useTheme();
-  const mode = theme.palette.mode;
+  const accent = wingAccent(theme.palette.mode);
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(-1);
   const [toast, setToast] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const allRows = useMemo(
-    () => folders.map((f, i) => flattenFolder(f, i)),
-    [folders]
-  );
+  const allRows = useMemo(() => folders.map((f) => flattenFolder(f)), [folders]);
 
   const searching = query.trim().length > 0;
 
@@ -213,56 +197,67 @@ export default function WingFiles({
   let lastSection: string | null | undefined;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
-      <TextField
-        inputRef={searchRef}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search everything…"
-        size="small"
-        fullWidth
-        autoComplete="off"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchRounded fontSize="small" />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <Box
-                sx={{
-                  display: { xs: "none", md: "block" },
-                  px: 0.9,
-                  py: 0.1,
-                  borderRadius: 1.5,
-                  border: `1px solid ${theme.palette.divider}`,
-                  color: "text.secondary",
-                  fontSize: 12,
-                  fontFamily: "monospace",
-                }}
-              >
-                /
-              </Box>
-            </InputAdornment>
-          ),
-          sx: { borderRadius: 999, bgcolor: "background.paper" },
+    <Box sx={{ minWidth: 0 }}>
+      {/* search — an underlined register line, not a rounded field */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          pb: 0.9,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          transition: "border-color 150ms ease",
+          "&:focus-within": { borderColor: accent.main },
         }}
-      />
+      >
+        <SearchRounded sx={{ fontSize: 18, color: "text.secondary" }} />
+        <InputBase
+          inputRef={searchRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search the register…"
+          fullWidth
+          autoComplete="off"
+          sx={{ fontSize: 14.5, "& input::placeholder": { color: theme.palette.text.secondary, opacity: 0.8 } }}
+        />
+        <Typography
+          component="kbd"
+          sx={{
+            display: { xs: "none", md: "block" },
+            fontSize: 11,
+            px: 0.75,
+            color: "text.secondary",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 0.5,
+            fontFamily: "inherit",
+          }}
+        >
+          /
+        </Typography>
+      </Box>
 
-      <Typography sx={{ fontSize: 12.5, color: "text.secondary", px: 1 }}>
+      <Typography
+        sx={{
+          mt: 1.25,
+          mb: 0.5,
+          fontSize: 10.5,
+          fontWeight: 600,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+        }}
+      >
         {searching
-          ? `${visible.length} result${visible.length === 1 ? "" : "s"} across all folders`
+          ? `${visible.length} result${visible.length === 1 ? "" : "s"} · all folders`
           : `${visible.length} file${visible.length === 1 ? "" : "s"}${doneCount > 0 ? ` · ${doneCount} studied` : ""}`}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+      <Box>
         {visible.map((row, i) => {
-          const meta = TYPE_META[row.parsed.type];
-          const accent = wingAccent(mode);
           const isDone = Boolean(studied[row.file.id]);
           const isActive = i === activeIdx;
-          const Icon = meta.Icon;
+          const size = humanSize(row.file.size);
+          const meta = [TYPE_LABEL[row.parsed.type], size].filter(Boolean).join(" · ");
 
           const sectionLabel = searching ? row.folderName : row.section;
           const showHeader = sectionLabel !== lastSection;
@@ -273,16 +268,18 @@ export default function WingFiles({
               {showHeader && sectionLabel && (
                 <Typography
                   sx={{
-                    mt: i === 0 ? 0.5 : 2,
-                    mb: 0.5,
-                    px: 1,
-                    fontSize: 11.5,
-                    fontWeight: 800,
-                    letterSpacing: "0.08em",
+                    mt: i === 0 ? 1.5 : 3,
+                    mb: 0.25,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "text.secondary",
+                    color: "text.primary",
                   }}
                 >
+                  <Box component="span" sx={{ color: accent.main, mr: 1 }}>
+                    —
+                  </Box>
                   {sectionLabel}
                 </Typography>
               )}
@@ -294,47 +291,70 @@ export default function WingFiles({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1.5,
-                  px: 1.25,
-                  py: 0.9,
-                  borderRadius: "14px",
+                  gap: 1.25,
+                  minHeight: 46,
+                  px: 0.75,
                   cursor: "pointer",
-                  outline: isActive ? `2px solid ${accent.main}` : "2px solid transparent",
-                  outlineOffset: -2,
-                  transition: "background-color 120ms ease, outline-color 120ms ease",
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  bgcolor: isActive ? theme.palette.action.hover : "transparent",
+                  boxShadow: isActive ? `inset 2px 0 0 ${accent.main}` : "none",
+                  transition: "background-color 120ms ease",
                   "&:hover": { bgcolor: theme.palette.action.hover },
                   "&:hover .wing-row-actions": { opacity: 1 },
                 }}
               >
-                <ExpressiveShape
-                  shape="squircle"
-                  size={38}
-                  fill={alpha(theme.palette.text.primary, isDone ? 0.04 : 0.07)}
+                <Typography
+                  sx={{
+                    width: 24,
+                    flexShrink: 0,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontVariantNumeric: "tabular-nums",
+                    color: isDone ? accent.main : "text.secondary",
+                  }}
                 >
-                  <Icon
-                    sx={{
-                      fontSize: 19,
-                      color: alpha(theme.palette.text.secondary, isDone ? 0.5 : 0.95),
-                    }}
-                  />
-                </ExpressiveShape>
+                  {String(i + 1).padStart(2, "0")}
+                </Typography>
 
-                <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: "flex", alignItems: "baseline", flex: 1, minWidth: 0 }}>
                   <Typography
                     noWrap
                     sx={{
                       fontSize: 14.5,
-                      fontWeight: 600,
+                      fontWeight: 500,
+                      minWidth: 0,
+                      flexShrink: 1,
                       color: isDone ? "text.secondary" : "text.primary",
-                      opacity: isDone ? 0.72 : 1,
+                      textDecoration: isDone ? "line-through" : "none",
+                      textDecorationColor: alpha(theme.palette.text.secondary, 0.5),
                     }}
                   >
                     {row.parsed.name}
                   </Typography>
-                  <Typography noWrap sx={{ fontSize: 12, color: "text.secondary" }}>
-                    {meta.label}
-                    {humanSize(row.file.size) ? ` · ${humanSize(row.file.size)}` : ""}
-                    {searching && row.section ? ` · ${row.section}` : ""}
+                  <Box
+                    aria-hidden
+                    sx={{
+                      flex: 1,
+                      mx: 1.25,
+                      borderBottom: `1px dotted ${alpha(theme.palette.text.secondary, 0.4)}`,
+                      transform: "translateY(-3px)",
+                      display: { xs: "none", sm: "block" },
+                      minWidth: 16,
+                    }}
+                  />
+                  <Typography
+                    noWrap
+                    sx={{
+                      flexShrink: 0,
+                      fontSize: 10.5,
+                      fontWeight: 600,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "text.secondary",
+                      display: { xs: "none", sm: "block" },
+                    }}
+                  >
+                    {searching && row.section ? `${row.section} · ${meta}` : meta}
                   </Typography>
                 </Box>
 
@@ -354,8 +374,9 @@ export default function WingFiles({
                         e.stopPropagation();
                         copyLink(row);
                       }}
+                      sx={{ color: "text.secondary" }}
                     >
-                      <ContentCopyRounded sx={{ fontSize: 17 }} />
+                      <ContentCopyRounded sx={{ fontSize: 15 }} />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Open in new tab">
@@ -365,8 +386,9 @@ export default function WingFiles({
                         e.stopPropagation();
                         onOpen({ file: row.file, parsed: row.parsed, folderId: row.folderId });
                       }}
+                      sx={{ color: "text.secondary" }}
                     >
-                      <OpenInNewRounded sx={{ fontSize: 17 }} />
+                      <OpenInNewRounded sx={{ fontSize: 15 }} />
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -379,12 +401,12 @@ export default function WingFiles({
                       e.stopPropagation();
                       onToggleStudied(row.file.id);
                     }}
-                    sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.5) }}
+                    sx={{ color: isDone ? accent.main : alpha(theme.palette.text.secondary, 0.45) }}
                   >
                     {isDone ? (
-                      <CheckCircleRounded sx={{ fontSize: 22 }} />
+                      <CheckCircleRounded sx={{ fontSize: 19 }} />
                     ) : (
-                      <RadioButtonUncheckedRounded sx={{ fontSize: 22 }} />
+                      <RadioButtonUncheckedRounded sx={{ fontSize: 19 }} />
                     )}
                   </IconButton>
                 </Tooltip>
@@ -394,17 +416,12 @@ export default function WingFiles({
         })}
 
         {visible.length === 0 && (
-          <Box sx={{ py: 8, textAlign: "center" }}>
-            <ExpressiveShape
-              shape={["flower", "clover"]}
-              morphDuration={10}
-              size={64}
-              fill={alpha(theme.palette.primary.main, 0.14)}
-            >
-              <SearchRounded sx={{ color: "primary.main", opacity: 0.7 }} />
-            </ExpressiveShape>
-            <Typography sx={{ mt: 2, color: "text.secondary", fontSize: 14.5 }}>
-              {searching ? `Nothing matches “${query.trim()}”` : "This folder is empty for now."}
+          <Box sx={{ py: 7 }}>
+            <Typography sx={{ fontSize: 14.5, color: "text.secondary" }}>
+              <Box component="span" sx={{ color: accent.main, mr: 1 }}>
+                —
+              </Box>
+              {searching ? `Nothing matches “${query.trim()}”.` : "Nothing filed here yet."}
             </Typography>
           </Box>
         )}
