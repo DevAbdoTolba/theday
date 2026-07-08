@@ -90,6 +90,9 @@ function CvLeafFall() {
             left: `${it.left}%`,
             animation: `grad-cv-fall ${it.duration}s linear infinite`,
             animationDelay: `${it.delay}s`,
+            // hold the 0% frame (off-screen, opacity 0) through the delay —
+            // otherwise delayed faces sit parked at the top until they start
+            animationFillMode: "backwards",
             willChange: "transform, opacity",
           }}
         >
