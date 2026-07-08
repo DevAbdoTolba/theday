@@ -1,16 +1,14 @@
 // src/components/grad/GradWing.tsx
 // Shell of the Graduation Wing (/grad/d/…): grants the device pass, runs the
-// one-time cinematic, then renders the professional study desk — its own
-// crimson Material-3-Expressive theme, folder rail, keyboard-first file list,
-// and progress that survives on-device.
+// one-time cinematic, then renders the reading room — typeset like a printed
+// course reader. Fraunces masthead, a red intake stamp, a numbered index,
+// and a register of files. Red appears only where it means something.
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
   ButtonBase,
-  Chip,
-  CircularProgress,
   Container,
   IconButton,
   Skeleton,
@@ -22,15 +20,14 @@ import {
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
-import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
 import LightModeRounded from "@mui/icons-material/LightModeRounded";
 import DarkModeRounded from "@mui/icons-material/DarkModeRounded";
 import { ColorModeContext } from "../../pages/_app";
+import ExpressiveShape from "./ExpressiveShape";
 import WingRail, { FolderProgress } from "./WingRail";
 import WingFiles from "./WingFiles";
 import WingIntro from "./WingIntro";
-import { createWingTheme } from "./gradTheme";
+import { createWingTheme, wingAccent, WING_DISPLAY } from "./gradTheme";
 import { GRAD_PASS_EVENT } from "./GradSeal";
 import {
   getCachedTree,
@@ -59,10 +56,6 @@ function levelOf(node: GradFolder | null): GradFolder[] {
   return node.folders.length > 0 ? node.folders : [node];
 }
 
-function countFiles(node: GradFolder): number {
-  return node.files.length + node.folders.reduce((acc, f) => acc + countFiles(f), 0);
-}
-
 function collectFileIds(node: GradFolder, into: string[] = []): string[] {
   node.files.forEach((f) => into.push(f.id));
   node.folders.forEach((f) => collectFileIds(f, into));
@@ -75,6 +68,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
   const mode = outerTheme.palette.mode;
   const colorMode = useContext(ColorModeContext);
   const theme = useMemo(() => createWingTheme(mode), [mode]);
+  const accent = wingAccent(mode);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [tree, setTree] = useState<GradTree | null>(null);
@@ -185,186 +179,282 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
   }, [lastOpened, materials]);
 
   const loading = !tree && !error;
+  const stampDigits = intake?.name.match(/\d+/)?.[0] ?? "GW";
+  const contextLine = [intake?.name, course && course !== intake ? course.name : null]
+    .filter(Boolean)
+    .join(" — ");
+
+  const microLabel = {
+    fontSize: 10.5,
+    fontWeight: 600,
+    letterSpacing: "0.22em",
+    textTransform: "uppercase" as const,
+    color: "text.secondary",
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default", color: "text.primary" }}>
-        <Container maxWidth="lg" sx={{ pt: { xs: 2.5, md: 4 }, pb: { xs: 14, md: 8 } }}>
-          {/* ---------------------------------------------------- header */}
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: { xs: 3, md: 4 } }}>
-            <ButtonBase
-              onClick={() => router.push("/")}
-              sx={{ display: "flex", gap: 1, alignItems: "center", px: 1.5, py: 1, borderRadius: 999, color: "text.secondary" }}
-            >
-              <ArrowBackRounded sx={{ fontSize: 18 }} />
-              <Typography sx={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.14em" }}>THEDAY</Typography>
+        <Container maxWidth="md" sx={{ pt: { xs: 2, md: 3.5 }, pb: 10 }}>
+          {/* ------------------------------------------------ micro bar */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              pb: 1.25,
+              borderBottom: `1px solid ${theme.palette.text.primary}`,
+            }}
+          >
+            <ButtonBase onClick={() => router.push("/")} sx={{ py: 0.5 }}>
+              <Typography sx={{ ...microLabel, "&:hover": { color: "text.primary" } }}>
+                ← TheDay
+              </Typography>
             </ButtonBase>
+            <Typography sx={{ ...microLabel, display: { xs: "none", sm: "block" } }}>
+              Graduate Wing
+            </Typography>
+            <Tooltip title={mode === "dark" ? "Switch to light" : "Switch to dark"}>
+              <IconButton onClick={colorMode.toggleColorMode} size="small" sx={{ color: "text.secondary" }}>
+                {mode === "dark" ? (
+                  <LightModeRounded sx={{ fontSize: 17 }} />
+                ) : (
+                  <DarkModeRounded sx={{ fontSize: 17 }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Tooltip title={mode === "dark" ? "Switch to light" : "Switch to dark"}>
-                <IconButton
-                  onClick={colorMode.toggleColorMode}
-                  size="small"
-                  sx={{ color: "text.secondary", border: `1px solid ${theme.palette.divider}` }}
-                >
-                  {mode === "dark" ? (
-                    <LightModeRounded sx={{ fontSize: 18 }} />
-                  ) : (
-                    <DarkModeRounded sx={{ fontSize: 18 }} />
-                  )}
-                </IconButton>
-              </Tooltip>
-              {overall.total > 0 && (
-                <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    size={52}
-                    thickness={3.5}
-                    sx={{ color: alpha(theme.palette.primary.main, 0.15), position: "absolute" }}
-                  />
-                  <CircularProgress variant="determinate" value={overall.pct} size={52} thickness={3.5} color="primary" />
+          {/* ------------------------------------------------ masthead */}
+          <Box sx={{ position: "relative", pt: { xs: 3.5, md: 5 }, mb: { xs: 3, md: 4 } }}>
+            <Typography
+              component="h1"
+              sx={{
+                fontFamily: WING_DISPLAY,
+                fontWeight: 700,
+                fontSize: { xs: "2.4rem", md: "3.4rem" },
+                lineHeight: 1.02,
+                letterSpacing: "-0.015em",
+                pr: { xs: 9, md: 13 },
+              }}
+            >
+              {title}
+              <Box component="span" sx={{ color: accent.main }}>
+                .
+              </Box>
+            </Typography>
+            <Typography
+              sx={{
+                mt: 1.5,
+                fontFamily: WING_DISPLAY,
+                fontStyle: "italic",
+                fontWeight: 400,
+                fontSize: { xs: 15.5, md: 17 },
+                color: "text.secondary",
+              }}
+            >
+              {tagline}
+            </Typography>
+
+            {/* the intake stamp — the page's one expressive object */}
+            <Box
+              aria-hidden
+              sx={{
+                position: "absolute",
+                top: { xs: 8, md: 16 },
+                right: 0,
+                transform: "rotate(-7deg)",
+              }}
+            >
+              <ExpressiveShape
+                shape={["scallop", "flower"]}
+                morphDuration={18}
+                rotateDuration={140}
+                size={isMobile ? 68 : 92}
+                fill={accent.main}
+              >
+                <Box sx={{ textAlign: "center", lineHeight: 1 }}>
                   <Typography
-                    sx={{ position: "absolute", fontSize: 12, fontWeight: 800 }}
-                    aria-label={`${overall.done} of ${overall.total} studied`}
+                    sx={{
+                      fontFamily: WING_DISPLAY,
+                      fontWeight: 700,
+                      fontSize: isMobile ? 20 : 27,
+                      color: accent.onMain,
+                      lineHeight: 1,
+                    }}
                   >
-                    {overall.pct}%
+                    {stampDigits}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: isMobile ? 6.5 : 8,
+                      fontWeight: 700,
+                      letterSpacing: "0.3em",
+                      color: alpha(accent.onMain, 0.85),
+                      mt: 0.4,
+                    }}
+                  >
+                    INTAKE
                   </Typography>
                 </Box>
-              )}
+              </ExpressiveShape>
             </Box>
           </Box>
 
-          <Box sx={{ mb: { xs: 3, md: 4.5 } }}>
-            <Box sx={{ width: 40, height: 4, bgcolor: "primary.main", borderRadius: 2, mb: 1.5 }} />
-            <Typography sx={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.28em", color: "primary.main", mb: 1 }}>
-              GRADUATE WING
-            </Typography>
-            <Typography variant="h2" sx={{ fontSize: { xs: "2rem", md: "2.75rem" }, lineHeight: 1.05 }}>
-              {title}
-            </Typography>
-            <Typography sx={{ mt: 1, color: "text.secondary", fontSize: 15 }}>{tagline}</Typography>
-
-            {/* breadcrumb pickers: intake ▸ course */}
-            <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1, mt: 2.5 }}>
-              {intakes.map((it) => (
-                <Chip
-                  key={it.id}
-                  label={it.name}
-                  size="small"
-                  onClick={intakes.length > 1 ? () => setIntakeId(it.id) : undefined}
-                  sx={{
-                    fontWeight: 700,
-                    bgcolor: it.id === intake?.id ? alpha(theme.palette.primary.main, 0.12) : "transparent",
-                    color: it.id === intake?.id ? "primary.main" : "text.secondary",
-                    border: "1px solid",
-                    borderColor: it.id === intake?.id ? alpha(theme.palette.primary.main, 0.3) : theme.palette.divider,
-                  }}
-                />
+          {/* ------------------------------------------------ context + stats */}
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 2, flexWrap: "wrap", mb: 1 }}>
+            {contextLine && <Typography sx={microLabel}>{contextLine}</Typography>}
+            {intakes.length > 1 &&
+              intakes.map((it) => (
+                <ButtonBase key={it.id} onClick={() => setIntakeId(it.id)}>
+                  <Typography
+                    sx={{
+                      ...microLabel,
+                      color: it.id === intake?.id ? accent.main : "text.secondary",
+                      borderBottom: it.id === intake?.id ? `1px solid ${accent.main}` : "1px solid transparent",
+                    }}
+                  >
+                    {it.name}
+                  </Typography>
+                </ButtonBase>
               ))}
-              {courses.length > 0 && courses[0] !== intake && (
-                <>
-                  <Typography sx={{ color: "text.secondary", fontSize: 13 }}>›</Typography>
-                  {courses.map((c) => (
-                    <Chip
-                      key={c.id}
-                      label={c.name}
-                      size="small"
-                      onClick={courses.length > 1 ? () => setCourseId(c.id) : undefined}
-                      sx={{
-                        fontWeight: 700,
-                        bgcolor: c.id === course?.id ? alpha(theme.palette.primary.main, 0.12) : "transparent",
-                        color: c.id === course?.id ? "primary.main" : "text.secondary",
-                        border: "1px solid",
-                        borderColor: c.id === course?.id ? alpha(theme.palette.primary.main, 0.3) : theme.palette.divider,
-                      }}
-                    />
-                  ))}
-                </>
-              )}
-              {refreshing && tree && (
-                <CircularProgress size={14} thickness={5} sx={{ ml: 0.5, color: "text.secondary" }} />
-              )}
-              {lastOpened && (
-                <Chip
-                  size="small"
-                  icon={<PlayArrowRounded sx={{ fontSize: 16, color: theme.palette.primary.main }} />}
-                  label={`Continue · ${lastOpened.fileName.length > 34 ? lastOpened.fileName.slice(0, 34) + "…" : lastOpened.fileName}`}
-                  onClick={handleContinue}
-                  sx={{
-                    ml: { md: "auto" },
-                    fontWeight: 700,
-                    bgcolor: "transparent",
-                    color: "text.primary",
-                    border: "1px solid",
-                    borderColor: theme.palette.divider,
-                    maxWidth: { xs: "100%", md: 380 },
-                    "&:hover": { bgcolor: theme.palette.action.hover },
-                  }}
-                />
-              )}
-            </Box>
+            {courses.length > 1 &&
+              courses.map((c) => (
+                <ButtonBase key={c.id} onClick={() => setCourseId(c.id)}>
+                  <Typography
+                    sx={{
+                      ...microLabel,
+                      color: c.id === course?.id ? accent.main : "text.secondary",
+                      borderBottom: c.id === course?.id ? `1px solid ${accent.main}` : "1px solid transparent",
+                    }}
+                  >
+                    {c.name}
+                  </Typography>
+                </ButtonBase>
+              ))}
+            <Typography sx={{ ...microLabel, ml: "auto", fontVariantNumeric: "tabular-nums" }}>
+              {overall.total > 0
+                ? `${overall.done} / ${overall.total} studied`
+                : loading
+                ? "opening…"
+                : ""}
+              {refreshing && tree ? " · syncing" : ""}
+            </Typography>
           </Box>
 
-          {/* ---------------------------------------------------- body */}
+          {/* progress hairline */}
+          <Box sx={{ position: "relative", height: 2, bgcolor: alpha(theme.palette.text.primary, 0.1), mb: lastOpened ? 2 : { xs: 3, md: 4.5 } }}>
+            <motion.div
+              animate={{ width: `${overall.pct}%` }}
+              transition={{ type: "spring", stiffness: 80, damping: 24 }}
+              style={{ position: "absolute", left: 0, top: 0, bottom: 0, background: accent.main }}
+            />
+          </Box>
+
+          {lastOpened && (
+            <Box sx={{ mb: { xs: 3, md: 4.5 } }}>
+              <ButtonBase onClick={handleContinue}>
+                <Typography
+                  sx={{
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    color: accent.main,
+                    borderBottom: `1px solid ${alpha(accent.main, 0.5)}`,
+                    "&:hover": { borderBottomColor: accent.main },
+                  }}
+                >
+                  Continue where you left off →{" "}
+                  {lastOpened.fileName.length > 40
+                    ? lastOpened.fileName.slice(0, 40) + "…"
+                    : lastOpened.fileName}
+                </Typography>
+              </ButtonBase>
+            </Box>
+          )}
+
+          {/* ------------------------------------------------ body */}
           {error && !tree ? (
-            <Box sx={{ py: 10, textAlign: "center" }}>
-              <Typography sx={{ color: "text.secondary", mb: 2 }}>{error}</Typography>
-              <Chip label="Retry" color="primary" onClick={() => router.reload()} sx={{ fontWeight: 700 }} />
+            <Box sx={{ py: 8 }}>
+              <Typography sx={{ color: "text.secondary", mb: 2, fontSize: 14.5 }}>{error}</Typography>
+              <ButtonBase onClick={() => router.reload()}>
+                <Typography
+                  sx={{
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    color: accent.main,
+                    borderBottom: `1px solid ${accent.main}`,
+                  }}
+                >
+                  Try again
+                </Typography>
+              </ButtonBase>
             </Box>
           ) : loading ? (
-            <Box sx={{ display: "flex", gap: 4 }}>
+            <Box sx={{ display: "flex", gap: 5 }}>
               {!isMobile && (
-                <Box sx={{ width: 264, flexShrink: 0, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ width: 224, flexShrink: 0 }}>
                   {[0, 1, 2, 3].map((i) => (
-                    <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: "18px" }} />
+                    <Skeleton key={i} variant="text" height={38} sx={{ my: 0.5 }} />
                   ))}
                 </Box>
               )}
-              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                <Skeleton variant="rounded" height={40} sx={{ borderRadius: 999, mb: 1 }} />
-                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                  <Skeleton key={i} variant="rounded" height={56} sx={{ borderRadius: "14px" }} />
+              <Box sx={{ flex: 1 }}>
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <Skeleton key={i} variant="text" height={40} sx={{ my: 0.25 }} />
                 ))}
               </Box>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", gap: 4, alignItems: "flex-start" }}>
-              {!isMobile && (
-                <Box sx={{ width: 264, flexShrink: 0, position: "sticky", top: 24 }}>
+            <>
+              {isMobile && (
+                <Box
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
+                    bgcolor: "background.default",
+                    mx: -2,
+                    px: 2,
+                    mb: 2,
+                  }}
+                >
                   <WingRail
                     folders={materials}
                     selectedId={selectedFolderId}
                     onSelect={setFolderId}
                     progress={progress}
-                    variant="rail"
+                    variant="tabs"
                   />
                 </Box>
               )}
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <WingFiles
-                  folders={materials}
-                  selectedFolderId={selectedFolderId}
-                  studied={studied}
-                  onToggleStudied={handleToggleStudied}
-                  onOpen={handleOpen}
-                  highlightId={highlightId}
-                  onHighlightConsumed={() => setHighlightId(null)}
-                />
+              <Box sx={{ display: "flex", gap: 5, alignItems: "flex-start" }}>
+                {!isMobile && (
+                  <Box sx={{ width: 224, flexShrink: 0, position: "sticky", top: 24 }}>
+                    <WingRail
+                      folders={materials}
+                      selectedId={selectedFolderId}
+                      onSelect={setFolderId}
+                      progress={progress}
+                      variant="rail"
+                    />
+                  </Box>
+                )}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <WingFiles
+                    folders={materials}
+                    selectedFolderId={selectedFolderId}
+                    studied={studied}
+                    onToggleStudied={handleToggleStudied}
+                    onOpen={handleOpen}
+                    highlightId={highlightId}
+                    onHighlightConsumed={() => setHighlightId(null)}
+                  />
+                </Box>
               </Box>
-            </Box>
+            </>
           )}
         </Container>
-
-        {isMobile && !loading && !error && (
-          <WingRail
-            folders={materials}
-            selectedId={selectedFolderId}
-            onSelect={setFolderId}
-            progress={progress}
-            variant="bar"
-          />
-        )}
 
         {/* the one-time ceremony */}
         <AnimatePresence>
@@ -378,7 +468,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
           )}
         </AnimatePresence>
         {intro === "unknown" && (
-          <motion.div style={{ position: "fixed", inset: 0, zIndex: 2999, background: mode === "dark" ? "#131316" : "#FAFAFA" }} />
+          <motion.div style={{ position: "fixed", inset: 0, zIndex: 2999, background: mode === "dark" ? "#171519" : "#F7F4EE" }} />
         )}
       </Box>
     </ThemeProvider>

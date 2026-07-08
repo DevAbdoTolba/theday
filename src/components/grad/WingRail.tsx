@@ -1,15 +1,13 @@
 // src/components/grad/WingRail.tsx
-// Folder navigation for the Graduation Wing. Desktop: a vertical rail with a
-// sliding tonal active indicator (shared-layout) whose shape container
-// gently morphs — Material 3 Expressive in silhouette, ITI-disciplined in
-// color: red for the active folder, quiet neutrals for the rest.
-// Mobile: a bottom bar with the same language.
+// The wing's index — folders typeset like a table of contents. A 2px red
+// marker slides between entries (shared layout); numbers are tabular,
+// names are letterspaced caps, counts sit flush right. Desktop renders a
+// vertical index, mobile a sticky strip of editorial tabs.
 
 import React from "react";
-import { Box, ButtonBase, LinearProgress, Typography, alpha, useTheme } from "@mui/material";
+import { Box, ButtonBase, Typography, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
-import ExpressiveShape from "./ExpressiveShape";
-import { wingAccent, shapeFor } from "./gradTheme";
+import { wingAccent } from "./gradTheme";
 import type { GradFolder } from "../../utils/gradTypes";
 
 export interface FolderProgress {
@@ -22,35 +20,28 @@ interface Props {
   selectedId: string | null;
   onSelect: (id: string) => void;
   progress: Record<string, FolderProgress>;
-  variant: "rail" | "bar";
+  variant: "rail" | "tabs";
 }
 
-const spring = { type: "spring" as const, stiffness: 420, damping: 34 };
+const spring = { type: "spring" as const, stiffness: 480, damping: 40 };
+
+const num = (i: number) => String(i + 1).padStart(2, "0");
 
 export default function WingRail({ folders, selectedId, onSelect, progress, variant }: Props) {
   const theme = useTheme();
-  const mode = theme.palette.mode;
-  const accent = wingAccent(mode);
+  const accent = wingAccent(theme.palette.mode);
 
-  if (variant === "bar") {
+  if (variant === "tabs") {
     return (
       <Box
         component="nav"
         aria-label="Material folders"
         sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1200,
           display: "flex",
-          justifyContent: "space-around",
-          alignItems: "stretch",
-          px: 1,
-          pt: 1,
-          pb: "calc(10px + env(safe-area-inset-bottom))",
-          bgcolor: "background.paper",
-          borderTop: `1px solid ${theme.palette.divider}`,
+          gap: 0.5,
+          overflowX: "auto",
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
         {folders.map((f, i) => {
@@ -59,51 +50,38 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
             <ButtonBase
               key={f.id}
               onClick={() => onSelect(f.id)}
-              sx={{
-                flexDirection: "column",
-                gap: 0.5,
-                flex: 1,
-                py: 0.5,
-                borderRadius: 3,
-                minWidth: 0,
-              }}
+              sx={{ position: "relative", px: 1.5, py: 1.25, flexShrink: 0 }}
             >
-              <Box sx={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 60, height: 36 }}>
-                {selected && (
-                  <motion.div
-                    layoutId="wing-bar-pill"
-                    transition={spring}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: 18,
-                      background: accent.container,
-                    }}
-                  />
-                )}
-                <ExpressiveShape
-                  shape={selected ? [shapeFor(i), "squircle"] : "squircle"}
-                  morphDuration={7}
-                  size={26}
-                  fill={selected ? accent.main : alpha(theme.palette.text.secondary, 0.16)}
-                >
-                  <Typography sx={{ fontSize: 12, fontWeight: 800, color: selected ? accent.onMain : theme.palette.text.secondary, lineHeight: 1 }}>
-                    {f.name.charAt(0).toUpperCase()}
-                  </Typography>
-                </ExpressiveShape>
-              </Box>
               <Typography
-                noWrap
+                component="span"
                 sx={{
-                  fontSize: 11,
-                  fontWeight: selected ? 800 : 600,
-                  color: selected ? accent.main : theme.palette.text.secondary,
-                  maxWidth: "100%",
-                  px: 0.5,
+                  fontSize: 12,
+                  fontWeight: selected ? 700 : 500,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: selected ? "text.primary" : "text.secondary",
+                  whiteSpace: "nowrap",
                 }}
               >
+                <Box component="span" sx={{ color: selected ? accent.main : "inherit", mr: 0.75, fontVariantNumeric: "tabular-nums" }}>
+                  {num(i)}
+                </Box>
                 {f.name}
               </Typography>
+              {selected && (
+                <motion.div
+                  layoutId="wing-tab-marker"
+                  transition={spring}
+                  style={{
+                    position: "absolute",
+                    left: 8,
+                    right: 8,
+                    bottom: -1,
+                    height: 2,
+                    background: accent.main,
+                  }}
+                />
+              )}
             </ButtonBase>
           );
         })}
@@ -112,88 +90,88 @@ export default function WingRail({ folders, selectedId, onSelect, progress, vari
   }
 
   return (
-    <Box component="nav" aria-label="Material folders" sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+    <Box component="nav" aria-label="Material folders">
+      <Typography
+        sx={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.28em",
+          color: "text.secondary",
+          pb: 1,
+          mb: 0.5,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        INDEX
+      </Typography>
       {folders.map((f, i) => {
         const selected = f.id === selectedId;
         const p = progress[f.id] ?? { done: 0, total: 0 };
+        const complete = p.total > 0 && p.done === p.total;
         return (
           <ButtonBase
             key={f.id}
             onClick={() => onSelect(f.id)}
             sx={{
               position: "relative",
-              justifyContent: "flex-start",
-              textAlign: "left",
-              gap: 1.5,
-              px: 1.5,
-              py: 1.25,
-              borderRadius: "14px",
               width: "100%",
+              justifyContent: "space-between",
+              gap: 1.5,
+              px: 1.25,
+              py: 1.2,
+              textAlign: "left",
+              "&:hover": { bgcolor: theme.palette.action.hover },
             }}
           >
             {selected && (
               <motion.div
-                layoutId="wing-rail-pill"
+                layoutId="wing-index-marker"
                 transition={spring}
                 style={{
                   position: "absolute",
-                  inset: 0,
-                  borderRadius: 14,
-                  background: accent.container,
+                  left: 0,
+                  top: 7,
+                  bottom: 7,
+                  width: 2,
+                  background: accent.main,
                 }}
               />
             )}
-            <Box sx={{ position: "relative", display: "flex", alignItems: "center", gap: 1.5, width: "100%", minWidth: 0 }}>
-              <ExpressiveShape
-                shape={selected ? [shapeFor(i), "blob", shapeFor(i)] : "squircle"}
-                morphDuration={9}
-                rotateDuration={selected ? 90 : 0}
-                size={40}
-                fill={selected ? accent.main : alpha(theme.palette.text.secondary, 0.1)}
+            <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.25, minWidth: 0 }}>
+              <Typography
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontVariantNumeric: "tabular-nums",
+                  color: selected ? accent.main : "text.secondary",
+                }}
               >
-                <Typography sx={{ fontWeight: 800, fontSize: 16, color: selected ? accent.onMain : "text.secondary", lineHeight: 1 }}>
-                  {f.name.charAt(0).toUpperCase()}
-                </Typography>
-              </ExpressiveShape>
-
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  noWrap
-                  sx={{
-                    fontSize: 14.5,
-                    fontWeight: selected ? 800 : 600,
-                    color: selected ? accent.onContainer : "text.primary",
-                  }}
-                >
-                  {f.name}
-                </Typography>
-                <Typography
-                  noWrap
-                  sx={{
-                    fontSize: 12,
-                    color: selected ? alpha(accent.onContainer, 0.72) : "text.secondary",
-                    mb: p.total > 0 ? 0.5 : 0,
-                  }}
-                >
-                  {p.total} {p.total === 1 ? "item" : "items"}
-                  {p.done > 0 ? ` · ${p.done} done` : ""}
-                </Typography>
-                {p.total > 0 && (
-                  <LinearProgress
-                    variant="determinate"
-                    value={(p.done / p.total) * 100}
-                    sx={{
-                      height: 3,
-                      borderRadius: 2,
-                      bgcolor: selected
-                        ? alpha(accent.main, 0.22)
-                        : alpha(theme.palette.text.secondary, 0.12),
-                      "& .MuiLinearProgress-bar": { bgcolor: accent.main, borderRadius: 2 },
-                    }}
-                  />
-                )}
-              </Box>
+                {num(i)}
+              </Typography>
+              <Typography
+                noWrap
+                sx={{
+                  fontSize: 13,
+                  fontWeight: selected ? 700 : 500,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: selected ? "text.primary" : "text.secondary",
+                }}
+              >
+                {f.name}
+              </Typography>
             </Box>
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                color: complete ? accent.main : "text.secondary",
+                fontWeight: complete ? 700 : 400,
+                flexShrink: 0,
+              }}
+            >
+              {p.done > 0 ? `${p.done}/${p.total}` : p.total}
+            </Typography>
           </ButtonBase>
         );
       })}

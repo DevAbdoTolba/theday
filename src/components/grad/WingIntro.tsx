@@ -68,8 +68,10 @@ function Caption({ text }: { text: string }) {
           style={{
             color: "rgba(255,255,255,0.92)",
             fontSize: "clamp(1.15rem, 3.4vw, 1.7rem)",
-            fontWeight: 600,
+            fontWeight: 500,
             letterSpacing: "0.01em",
+            fontFamily: "var(--wing-display), Georgia, serif",
+            fontStyle: "italic",
           }}
         >
           {w}
@@ -369,14 +371,18 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                   >
                     <Typography
                       sx={{
-                        color: "#EDEDF0",
-                        fontWeight: 800,
-                        letterSpacing: "-0.02em",
-                        fontSize: "clamp(2.1rem, 7vw, 3.6rem)",
-                        lineHeight: 1.08,
+                        color: "#F0EDE6",
+                        fontFamily: "var(--wing-display), Georgia, serif",
+                        fontWeight: 700,
+                        letterSpacing: "-0.015em",
+                        fontSize: "clamp(2.2rem, 7vw, 3.8rem)",
+                        lineHeight: 1.05,
                       }}
                     >
                       {title}
+                      <Box component="span" sx={{ color: CRIMSON_SOFT }}>
+                        .
+                      </Box>
                     </Typography>
                   </motion.div>
                   <motion.div
@@ -384,7 +390,17 @@ export default function WingIntro({ sectionKey, title, tagline, onFinished }: Pr
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.7, duration: 0.7 }}
                   >
-                    <Typography sx={{ color: GOLD, mt: 1.5, fontSize: 16, fontWeight: 600, letterSpacing: "0.04em" }}>
+                    <Typography
+                      sx={{
+                        color: GOLD,
+                        mt: 1.5,
+                        fontSize: 16.5,
+                        fontWeight: 400,
+                        fontStyle: "italic",
+                        fontFamily: "var(--wing-display), Georgia, serif",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
                       {tagline}
                     </Typography>
                   </motion.div>
