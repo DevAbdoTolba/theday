@@ -10,6 +10,7 @@ import type { ShapeName } from "./expressiveShapes";
 
 export const WING_DISPLAY = "var(--wing-display), Georgia, serif";
 export const WING_SANS = "var(--wing-sans), Roboto, sans-serif";
+export const WING_MARK = "var(--wing-mark), var(--wing-sans), sans-serif";
 
 export interface WingAccent {
   /** the red */

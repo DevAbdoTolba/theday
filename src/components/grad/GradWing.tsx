@@ -27,7 +27,7 @@ import ExpressiveShape from "./ExpressiveShape";
 import WingRail, { FolderProgress } from "./WingRail";
 import WingFiles from "./WingFiles";
 import WingIntro from "./WingIntro";
-import { createWingTheme, wingAccent, WING_DISPLAY } from "./gradTheme";
+import { createWingTheme, wingAccent, WING_DISPLAY, WING_MARK } from "./gradTheme";
 import { GRAD_PASS_EVENT } from "./GradSeal";
 import {
   getCachedTree,
@@ -275,17 +275,17 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
               >
                 <Typography
                   sx={{
-                    fontFamily: WING_DISPLAY,
+                    fontFamily: WING_MARK,
                     fontWeight: 700,
-                    fontSize: isMobile ? 20 : 28,
-                    letterSpacing: "0.06em",
+                    fontSize: isMobile ? 17 : 23,
+                    letterSpacing: "-0.01em",
                     color: accent.onMain,
                     lineHeight: 1,
-                    // optically center the monogram against its tracking
-                    pl: "0.06em",
+                    // lowercase wordmark sits low — nudge up to optical center
+                    mt: "-0.06em",
                   }}
                 >
-                  ITI
+                  iti
                 </Typography>
               </ExpressiveShape>
             </Box>
