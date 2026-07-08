@@ -19,15 +19,16 @@ import {
   useTheme,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import LightModeRounded from "@mui/icons-material/LightModeRounded";
 import DarkModeRounded from "@mui/icons-material/DarkModeRounded";
 import { ColorModeContext } from "../../pages/_app";
 import ExpressiveShape from "./ExpressiveShape";
+import { SHAPES, SHAPE_VIEWBOX } from "./expressiveShapes";
 import WingRail, { FolderProgress } from "./WingRail";
 import WingFiles from "./WingFiles";
 import WingIntro from "./WingIntro";
-import { createWingTheme, wingAccent, WING_DISPLAY, WING_MARK } from "./gradTheme";
+import { createWingTheme, wingAccent, WingAccent, WING_DISPLAY, WING_MARK } from "./gradTheme";
 import { GRAD_PASS_EVENT } from "./GradSeal";
 import {
   getCachedTree,
@@ -60,6 +61,97 @@ function collectFileIds(node: GradFolder, into: string[] = []): string[] {
   node.files.forEach((f) => into.push(f.id));
   node.folders.forEach((f) => collectFileIds(f, into));
   return into;
+}
+
+/**
+ * The living seal: "iTi" in chunky rounded letterforms, riding a scallop
+ * that spins and morphs beneath the (stationary) letters while the whole
+ * stamp floats and sways. Hover excites it; a click pops a little burst
+ * of shape confetti. Pure transform/opacity — cheap on any machine.
+ */
+function WingStamp({ accent, isMobile, ink }: { accent: WingAccent; isMobile: boolean; ink: string }) {
+  const [burst, setBurst] = useState(0);
+  const reduced = useReducedMotion();
+
+  const confetti = useMemo(() => {
+    const shapeNames = ["scallop", "burst", "flower", "clover"] as const;
+    return Array.from({ length: 10 }, (_, i) => {
+      const angle = (i / 10) * Math.PI * 2 + 0.6;
+      const dist = 54 + (i % 3) * 24;
+      return {
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        size: 9 + (i % 3) * 5,
+        rotate: (i * 137) % 360,
+        color: [accent.main, "#F6CE6B", ink][i % 3],
+        d: SHAPES[shapeNames[i % 4]],
+        delay: (i % 5) * 0.025,
+      };
+    });
+  }, [accent, ink]);
+
+  return (
+    <motion.div
+      animate={reduced ? undefined : { rotate: [-5, 6, -5], y: [0, -7, 0] }}
+      transition={{
+        rotate: { duration: 5.2, repeat: Infinity, ease: "easeInOut" },
+        y: { duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.3 },
+      }}
+      whileHover={{ scale: 1.12 }}
+      whileTap={{ scale: 0.82 }}
+      onClick={() => setBurst((b) => b + 1)}
+      style={{ position: "relative", display: "inline-flex", cursor: "pointer" }}
+    >
+      <ExpressiveShape
+        shape={["scallop", "burst", "flower", "clover"]}
+        morphDuration={9}
+        rotateDuration={reduced ? 0 : 26}
+        size={isMobile ? 70 : 94}
+        fill={accent.main}
+      >
+        <Typography
+          sx={{
+            fontFamily: WING_MARK,
+            fontWeight: 800,
+            fontSize: isMobile ? 21 : 28,
+            letterSpacing: "0.01em",
+            color: accent.onMain,
+            lineHeight: 1,
+            mt: "-0.05em",
+          }}
+        >
+          iTi
+        </Typography>
+      </ExpressiveShape>
+
+      {burst > 0 && (
+        <Box
+          key={burst}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          {confetti.map((c, i) => (
+            <motion.svg
+              key={i}
+              viewBox={SHAPE_VIEWBOX}
+              initial={{ x: 0, y: 0, scale: 0, rotate: 0, opacity: 1 }}
+              animate={{ x: c.x, y: c.y, scale: [0, 1, 0.7], rotate: c.rotate, opacity: [1, 1, 0] }}
+              transition={{ delay: c.delay, duration: 0.9, ease: [0.16, 0.84, 0.3, 1] }}
+              style={{ position: "absolute", width: c.size * 2, height: c.size * 2 }}
+            >
+              <path d={c.d} fill={c.color} />
+            </motion.svg>
+          ))}
+        </Box>
+      )}
+    </motion.div>
+  );
 }
 
 export default function GradWing({ gradKey, title, tagline }: Props) {
@@ -256,7 +348,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
               {tagline}
             </Typography>
 
-            {/* the intake stamp — the page's one expressive object */}
+            {/* the seal — the page's one expressive object, and a small toy */}
             <Box
               aria-hidden
               sx={{
@@ -266,28 +358,7 @@ export default function GradWing({ gradKey, title, tagline }: Props) {
                 transform: "rotate(-7deg)",
               }}
             >
-              <ExpressiveShape
-                shape={["scallop", "flower"]}
-                morphDuration={18}
-                rotateDuration={140}
-                size={isMobile ? 68 : 92}
-                fill={accent.main}
-              >
-                <Typography
-                  sx={{
-                    fontFamily: WING_MARK,
-                    fontWeight: 700,
-                    fontSize: isMobile ? 17 : 23,
-                    letterSpacing: "-0.01em",
-                    color: accent.onMain,
-                    lineHeight: 1,
-                    // lowercase wordmark sits low — nudge up to optical center
-                    mt: "-0.06em",
-                  }}
-                >
-                  iti
-                </Typography>
-              </ExpressiveShape>
+              <WingStamp accent={accent} isMobile={isMobile} ink={theme.palette.text.primary} />
             </Box>
           </Box>
 
