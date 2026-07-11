@@ -102,7 +102,7 @@ export default function NameHref({ name, dataName, dataHref, variant }: Props) {
               onClick={handleClose}
               sx={{
                 textDecoration: "none",
-                color: "#fff",
+                color: "text.primary",
                 "&:hover": {
                   textDecoration: "underline",
                 },
