@@ -25,14 +25,14 @@
 - Fine-pointer hover or keyboard focus moves `closed → preview`.
 - Pointer/focus leaving the connected trigger-and-panel region moves `preview → closed`.
 - Trigger click, Enter, Space, or a touch tap moves `closed|preview → pinned`.
-- Escape, explicit close, or outside interaction moves `pinned → closed`.
+- Escape, a second trigger activation, or outside interaction moves `pinned → closed`.
 - Opening the reviewer dialog preserves a stable underlying pinned surface while the modal owns focus and Escape handling.
 
 **Rationale**:
 
 - The model directly represents the clarified behavior instead of combining several booleans that can contradict one another.
 - Keeping trigger and panel inside one connected wrapper makes the revealed content hoverable.
-- Explicit Escape and close behavior makes hover/focus content dismissible.
+- Escape and trigger-toggle behavior make hover/focus content dismissible without adding a second close control.
 - Preview remains visible while the trigger or panel retains pointer/focus, making it persistent.
 
 These behaviors follow WCAG's requirements that hover/focus content be dismissible, hoverable, and persistent. [W3C: Understanding Content on Hover or Focus](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus)
@@ -54,8 +54,8 @@ The visual shell will:
 
 - remain absolutely positioned and right-anchored inside a fixed-size header slot;
 - transition explicit inline size, block size, and asymmetric border radii from a compact near-circle to an organic panel;
-- use pseudo-elements for the soft halo and curved connector/neck;
-- use opacity and small transforms for halo and content arrival;
+- keep one real bordered shell for both compact and expanded states, with no second outlined pseudo-element;
+- use opacity and small transforms for content arrival;
 - hide inactive content with `visibility`, `opacity`, and pointer-event control so closed controls cannot receive focus;
 - transition only named properties, never `all`;
 - reverse from its current computed state without JavaScript animation timers;
@@ -82,8 +82,8 @@ For reduced motion, remove spatial scaling/morph emphasis, stop decorative halo 
 **Decision**: Render one responsive surface on all devices.
 
 - Closed slot: approximately the same footprint as the existing small header actions.
-- Open inline size: `min(22rem, calc(100vw - 1rem))`.
-- Open block size: bounded by the available dynamic viewport height, with an internal scroll area if 200% zoom increases content height.
+- Open inline size: `min(20rem, calc(100vw - 1rem))`.
+- Open block size: a short fixed invitation that fits the approved three-line ad without a normal-layout scrollbar.
 - Desktop alignment: surface grows leftward and downward from the right-side "CV" mark.
 - Phone alignment: the same connected organic surface expands leftward within 0.5rem viewport gutters.
 - Modal: render through MUI's portal above the sticky AppBar.
@@ -94,7 +94,7 @@ Use CSS/input behavior rather than server-render branching to avoid desktop/mobi
 
 - One DOM structure keeps semantics and focus behavior identical.
 - Viewport-relative bounds make 320px and text-zoom testing deterministic.
-- Internal scrolling is preferable to clipping essential actions.
+- The shortened content removes the previous need for internal scrolling at supported normal layouts.
 
 **Alternatives considered**:
 
@@ -104,14 +104,16 @@ Use CSS/input behavior rather than server-render branching to avoid desktop/mobi
 
 ## R5: Reviewer Dialog and Selection Semantics
 
-**Decision**: Use MUI `Dialog` with a labeled `RadioGroup` of three reviewer cards and one shared booking action.
+**Decision**: Use MUI `Dialog` with a labeled `RadioGroup`, three equal fighter panels, and one shared Select action.
 
 - No reviewer is selected initially.
 - Only validated, available profiles participate in selection.
 - Arrow keys and Space use native radio-group behavior.
-- The booking action remains disabled until exactly one available reviewer is selected.
+- The Select action stays disabled and translated below the clipped dialog until exactly one available reviewer is selected.
 - Closing and reopening the dialog resets selection to avoid accidental booking with a stale choice.
-- A visible close control is always present; Escape closes the dialog; focus returns to the invoking panel action.
+- Desktop uses three horizontal panels with gently diagonal vertical dividers; phones stack the panels with slightly tilted horizontal dividers.
+- Portraits start dimmed and brighten while the reviewer name appears on hover, focus, or selection.
+- A visible close control appears only on phones; Escape and backdrop dismissal remain available, and focus returns to the invoking panel action.
 
 MUI Dialog supplies the existing modal/focus infrastructure. [MUI Dialog](https://mui.com/material-ui/react-dialog/)
 
@@ -161,7 +163,7 @@ Validate any supplied booking URL with the browser `URL` parser. Accept only can
 
 ## R7: Calendly Handoff, Failure, Security, and Privacy
 
-**Decision**: Render the shared booking action as a real MUI anchor button using the validated URL, `target="_blank"`, and `rel="noopener noreferrer"`.
+**Decision**: Render the shared Select action as a real MUI anchor button using the validated URL, `target="_blank"`, and `rel="noopener noreferrer"`.
 
 The visible/accessibility label will identify the reviewer and state that Calendly opens in a new tab or window. The original TheDay page remains available.
 

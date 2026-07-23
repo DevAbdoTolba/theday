@@ -150,6 +150,24 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 
 ---
 
+## Phase 9: Revised One-Surface Ad and Fighter Selection
+
+**Purpose**: Apply the approved visual revision without changing reviewer data, routing, or feature scope.
+
+- [X] T030 [US1] Remove the extra outlined connector/bubble and make the compact CV circle itself morph into one continuously bordered expanded surface in `src/components/cv-review/CVReviewHeaderItem.tsx` (FR-006, SC-010)
+- [X] T031 [US2] Replace the long invitation, grey overline, top gap, scrollbar, and panel X with the compact “Get hired!” ad, meeting line, and “Now!” action in `src/components/cv-review/CVReviewHeaderItem.tsx` (FR-009, FR-011, FR-024)
+- [X] T032 [US3] Rebuild the desktop reviewer dialog as three equal horizontal fighter panels with dim-to-bright portraits, hover/focus/selected names, diagonal separators, and restrained gold treatment for Nairah in `src/components/cv-review/CVReviewerDialog.tsx` (FR-016, FR-026, FR-027)
+- [X] T033 [US3] Add the phone-only stacked fighter layout with slightly tilted horizontal separators and a mobile-only X in `src/components/cv-review/CVReviewerDialog.tsx` (FR-020, FR-024, FR-026)
+- [X] T034 [US3] Keep Select hidden and non-operable below the clipped dialog until a valid reviewer choice makes it rise into the lower quarter in `src/components/cv-review/CVReviewerDialog.tsx` (FR-017)
+- [X] T035 [P] Update Storybook interactions and assertions for the short ad, fighter title, responsive selection layout, hidden Select state, and external selection link in `src/stories/CVReviewHeaderItem.stories.tsx`
+- [X] T036 Run strict TypeScript, direct ESLint, and Git whitespace checks for the revised files
+- [X] T037 Run the Storybook production build and inspect all generated story states
+- [X] T038 Run the Next.js production build, preserving unrelated PWA/service-worker worktree changes
+
+**Checkpoint**: The revision matches the one-surface header and responsive fighter-selection contract, all gates pass, and unrelated worktree files remain outside the feature.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

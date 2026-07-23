@@ -92,9 +92,9 @@ export interface CVReviewInvitationContent {
 
 Initial direction:
 
-- Hook: `Your CV says "hire me." Does it, though?`
-- Body: `Let someone who actually studies this stuff catch the bits recruiters politely pretend not to see. Pick your reviewer before your CV develops trust issues.`
-- Action: `Choose your reviewer`
+- Hook: `Get hired!`
+- Body: `Book a 1:1 meeting to enhance your CV/Resume`
+- Action: `Now!`
 
 This content can be refined without changing interaction state or reviewer configuration.
 
@@ -127,7 +127,7 @@ Invariants:
 - A selected ID must resolve to an `available` reviewer.
 - Exactly one reviewer can be selected at a time.
 - Closing the dialog clears the selection.
-- The shared booking action is disabled when selection is `null`.
+- The shared Select action is hidden below the clipped dialog and non-operable when selection is `null`.
 - Component state is not written to local storage, session storage, the URL, or a global store.
 
 ## State Transitions
@@ -164,7 +164,7 @@ CVReviewHeaderItem ---- opens ----> ReviewerDialogState
 Derived presentation values include:
 
 - availability label: `Coming soon` when `booking.status === 'coming-soon'`;
-- booking label: `Book with {displayName} on Calendly — opens in a new tab`;
+- booking label: `Select {displayName} on Calendly — opens in a new tab`;
 - avatar fallback: `initials` when no portrait is supplied or image loading fails;
 - premium styling: enabled only when `visualTier === 'premium-gold'`.
 

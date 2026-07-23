@@ -1,13 +1,6 @@
 import React, { useRef, useState } from "react";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
-import CloseRounded from "@mui/icons-material/CloseRounded";
-import {
-  Box,
-  Button,
-  ClickAwayListener,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, ClickAwayListener, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CVReviewerDialog from "./CVReviewerDialog";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
@@ -31,97 +24,55 @@ const HeaderSlot = styled(Box)({
   zIndex: 2,
 });
 
+/*
+ * This is deliberately one bordered element in both states. The compact circle
+ * grows into the invitation instead of sitting on top of a second panel.
+ */
 const OrganicSurface = styled(Box)({
   position: "absolute",
   insetBlockStart: 0,
   insetInlineEnd: 0,
   width: SLOT_SIZE,
   height: SLOT_SIZE,
-  maxWidth: "calc(100vw - 2rem)",
-  maxHeight: "calc(100dvh - 5rem)",
-  overflow: "visible",
+  maxWidth: "calc(100vw - 1rem)",
+  overflow: "hidden",
   color: "#fff",
   backgroundColor: "#000",
   backgroundImage:
-    "radial-gradient(circle at 82% 4%, rgba(255,255,255,0.15), transparent 31%)",
+    "radial-gradient(circle at 88% 8%, rgba(255,255,255,0.14), transparent 34%)",
   border: "1px solid #fff",
-  borderRadius: "49% 51% 46% 54% / 45% 48% 52% 55%",
+  borderRadius: "50%",
   boxShadow:
     "0 8px 24px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.14)",
   transformOrigin: "top right",
   transition:
-    "width 460ms cubic-bezier(0.22, 0.8, 0.22, 1), height 460ms cubic-bezier(0.22, 0.8, 0.22, 1), border-radius 440ms cubic-bezier(0.22, 0.8, 0.22, 1), box-shadow 300ms ease",
+    "width 440ms cubic-bezier(0.2, 0.82, 0.2, 1), height 440ms cubic-bezier(0.2, 0.82, 0.2, 1), border-radius 420ms cubic-bezier(0.2, 0.82, 0.2, 1), box-shadow 260ms ease",
   willChange: "width, height, border-radius",
   zIndex: 0,
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    inset: -22,
-    zIndex: 0,
-    pointerEvents: "none",
-    borderRadius: "50%",
-    background:
-      "radial-gradient(circle, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 44%, transparent 70%)",
-    opacity: 0,
-    transform: "scale(0.72)",
-    transition: "opacity 220ms ease, transform 420ms cubic-bezier(0.22, 0.8, 0.22, 1)",
-  },
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    insetBlockStart: -8,
-    insetInlineEnd: -7,
-    width: 66,
-    height: 58,
-    zIndex: 0,
-    pointerEvents: "none",
-    border: "1px solid rgba(255,255,255,0.88)",
-    borderRadius: "48% 52% 44% 56% / 54% 46% 54% 46%",
-    background: "#000",
-    opacity: 0,
-    transform: "scale(0.72)",
-    transition: "opacity 160ms ease, transform 420ms cubic-bezier(0.22, 0.8, 0.22, 1)",
-  },
   '&[data-state="preview"], &[data-state="pinned"]': {
-    width: "min(22rem, calc(100vw - 2rem))",
-    height: "min(18.5rem, calc(100dvh - 5rem))",
-    borderRadius: "24px 31px 34px 27px / 28px 23px 37px 31px",
+    width: "min(20rem, calc(100vw - 1rem))",
+    height: "11.25rem",
+    borderRadius: "30px 42px 28px 34px / 34px 38px 30px 28px",
     boxShadow:
-      "0 28px 72px rgba(0,0,0,0.64), 0 0 34px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.18)",
-    "&::before": {
-      opacity: 1,
-      transform: "scale(1)",
-    },
-    "&::after": {
-      opacity: 1,
-      transform: "scale(1)",
-    },
+      "0 26px 68px rgba(0,0,0,0.62), 0 0 28px rgba(255,255,255,0.09), inset 0 1px 0 rgba(255,255,255,0.18)",
   },
   "@media (max-width: 420px)": {
     '&[data-state="preview"], &[data-state="pinned"]': {
-      width: "calc(100vw - 2rem)",
-      height: "min(19rem, calc(100dvh - 4.5rem))",
-      borderRadius: "22px 27px 31px 24px / 25px 21px 34px 29px",
+      width: "calc(100vw - 1rem)",
+      height: "11.5rem",
+      borderRadius: "27px 40px 30px 33px / 31px 37px 32px 29px",
     },
   },
   "@media (prefers-reduced-motion: reduce)": {
     willChange: "auto",
     transition:
-      "opacity 110ms ease, width 110ms ease, height 110ms ease, border-radius 110ms ease",
-    "&::before, &::after": {
-      transition: "opacity 100ms ease",
-      transform: "none !important",
-    },
+      "width 110ms ease, height 110ms ease, border-radius 110ms ease, box-shadow 110ms ease",
   },
   "@media (forced-colors: active)": {
     borderColor: "CanvasText",
     background: "Canvas",
     color: "CanvasText",
     boxShadow: "none",
-    "&::before, &::after": {
-      background: "Canvas",
-      borderColor: "CanvasText",
-    },
   },
 });
 
@@ -145,7 +96,8 @@ const CVTrigger = styled(Button)({
   letterSpacing: "-0.055em",
   textTransform: "none",
   textShadow: "0 1px 10px rgba(255,255,255,0.25)",
-  transition: "letter-spacing 180ms ease, text-shadow 180ms ease, transform 180ms ease",
+  transition:
+    "letter-spacing 180ms ease, text-shadow 180ms ease, transform 180ms ease",
   "&:hover": {
     color: "#fff",
     background: "transparent",
@@ -170,29 +122,28 @@ const CVTrigger = styled(Button)({
 const InvitationContent = styled(Box)({
   position: "absolute",
   zIndex: 1,
-  insetBlockStart: 54,
-  insetInline: 0,
-  insetBlockEnd: 0,
+  inset: 0,
   display: "flex",
   flexDirection: "column",
-  overflowY: "auto",
-  padding: "4px 20px 20px",
+  alignItems: "flex-start",
+  justifyContent: "center",
+  padding: "14px 62px 14px 18px",
   opacity: 0,
   visibility: "hidden",
   pointerEvents: "none",
-  transform: "translateY(-9px)",
+  transform: "translateX(9px)",
   transition:
-    "opacity 170ms ease, transform 240ms cubic-bezier(0.22, 0.8, 0.22, 1), visibility 0s linear 240ms",
+    "opacity 170ms ease, transform 230ms cubic-bezier(0.2, 0.82, 0.2, 1), visibility 0s linear 230ms",
   '&[data-visible="true"]': {
     opacity: 1,
     visibility: "visible",
     pointerEvents: "auto",
-    transform: "translateY(0)",
-    transitionDelay: "170ms, 150ms, 0s",
+    transform: "translateX(0)",
+    transitionDelay: "150ms, 130ms, 0s",
   },
   "@media (max-width: 420px)": {
-    paddingInline: 17,
-    paddingBlockEnd: 17,
+    paddingInlineStart: 16,
+    paddingBlock: 13,
   },
   "@media (prefers-reduced-motion: reduce)": {
     transform: "none",
@@ -315,7 +266,7 @@ export default function CVReviewHeaderItem({
 
   const triggerLabel =
     invitationState === "pinned"
-      ? "Close CV review invitation"
+      ? "Collapse CV review invitation"
       : invitationState === "preview"
         ? "Pin CV review invitation open"
         : "Open CV review invitation";
@@ -346,75 +297,31 @@ export default function CVReviewHeaderItem({
             data-state={invitationState}
           >
             <InvitationContent data-visible={isOpen ? "true" : "false"}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  minHeight: 34,
-                  mb: 1,
-                }}
-              >
-                <Typography
-                  variant="overline"
-                  sx={{
-                    color: "rgba(255,255,255,0.62)",
-                    fontSize: "0.68rem",
-                    fontWeight: 850,
-                    letterSpacing: "0.12em",
-                    lineHeight: 1,
-                  }}
-                >
-                  Live 1:1 CV review
-                </Typography>
-                <IconButton
-                  onClick={() => closeInvitation(true)}
-                  tabIndex={isOpen ? 0 : -1}
-                  aria-label="Close CV review invitation"
-                  size="small"
-                  sx={{
-                    mr: -0.5,
-                    color: "#fff",
-                    border: "1px solid rgba(255,255,255,0.42)",
-                    "&:hover": {
-                      bgcolor: "rgba(255,255,255,0.12)",
-                      borderColor: "#fff",
-                    },
-                    "&:focus-visible": {
-                      outline: "3px solid #fff",
-                      outlineOffset: 2,
-                    },
-                  }}
-                >
-                  <CloseRounded fontSize="small" />
-                </IconButton>
-              </Box>
-
               <Typography
                 component="h2"
                 sx={{
-                  maxWidth: "18rem",
+                  m: 0,
                   color: "#fff",
-                  fontSize: { xs: "1.28rem", sm: "1.42rem" },
+                  fontSize: { xs: "1.62rem", sm: "1.74rem" },
                   fontWeight: 950,
-                  lineHeight: 1.08,
-                  letterSpacing: "-0.045em",
+                  lineHeight: 1,
+                  letterSpacing: "-0.05em",
                 }}
               >
-                Your CV says “hire me.” Does it, though?
+                Get hired!
               </Typography>
 
               <Typography
-                variant="body2"
                 sx={{
-                  mt: 1.15,
-                  color: "rgba(255,255,255,0.72)",
-                  lineHeight: 1.55,
+                  mt: 0.8,
+                  maxWidth: "14rem",
+                  color: "rgba(255,255,255,0.78)",
+                  fontSize: "0.88rem",
+                  fontWeight: 650,
+                  lineHeight: 1.35,
                 }}
               >
-                Let someone who actually studies this stuff catch the bits
-                recruiters politely pretend not to see. Pick your reviewer
-                before your CV develops trust issues.
+                Book a 1:1 meeting to enhance your CV/Resume.
               </Typography>
 
               <Button
@@ -423,18 +330,20 @@ export default function CVReviewHeaderItem({
                 variant="contained"
                 endIcon={<ArrowForwardRounded />}
                 sx={{
-                  mt: "auto",
-                  minHeight: 45,
+                  mt: 1.3,
+                  minWidth: 108,
+                  minHeight: 38,
+                  px: 2,
                   color: "#000",
                   bgcolor: "#fff",
-                  borderRadius: "15px 18px 14px 17px",
+                  borderRadius: "13px 16px 12px 15px",
                   fontWeight: 950,
                   textTransform: "none",
-                  boxShadow: "0 10px 28px rgba(255,255,255,0.13)",
+                  boxShadow: "0 8px 22px rgba(255,255,255,0.13)",
                   "&:hover": {
                     color: "#000",
                     bgcolor: "#f1f1f1",
-                    boxShadow: "0 13px 34px rgba(255,255,255,0.20)",
+                    boxShadow: "0 11px 28px rgba(255,255,255,0.20)",
                   },
                   "&:focus-visible": {
                     outline: "3px solid #fff",
@@ -442,7 +351,7 @@ export default function CVReviewHeaderItem({
                   },
                 }}
               >
-                Choose your reviewer
+                Now!
               </Button>
             </InvitationContent>
           </OrganicSurface>

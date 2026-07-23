@@ -6,18 +6,11 @@ import {
   Box,
   Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
   IconButton,
-  Radio,
   RadioGroup,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
 
 export interface CVReviewerDialogProps {
@@ -30,9 +23,19 @@ export interface CVReviewerDialogProps {
 
 interface ReviewerAvatarProps {
   readonly reviewer: ReviewerProfile;
+  readonly isPremium: boolean;
 }
 
-function ReviewerAvatar({ reviewer }: ReviewerAvatarProps) {
+const REVIEWER_ORDER: readonly ReviewerId[] = [
+  "nairah",
+  "abdo-tolba",
+  "omar-shawky",
+];
+
+function ReviewerAvatar({
+  reviewer,
+  isPremium,
+}: ReviewerAvatarProps) {
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
@@ -44,19 +47,31 @@ function ReviewerAvatar({ reviewer }: ReviewerAvatarProps) {
 
   return (
     <Avatar
+      className="cv-fighter-avatar"
       src={portraitSrc}
       alt={portraitSrc ? `${reviewer.displayName} portrait` : undefined}
       imgProps={{ onError: () => setImageFailed(true) }}
+      variant="rounded"
       sx={{
-        width: 50,
-        height: 50,
+        width: { xs: 92, sm: "clamp(7rem, 13vw, 9.5rem)" },
+        height: { xs: 92, sm: "clamp(9rem, 18vw, 12.5rem)" },
         flexShrink: 0,
-        border: "1px solid rgba(255,255,255,0.72)",
-        bgcolor: "#111",
-        color: "#fff",
-        fontSize: "0.82rem",
-        fontWeight: 900,
-        letterSpacing: "0.06em",
+        border: `1px solid ${
+          isPremium ? "rgba(231,190,82,0.85)" : "rgba(255,255,255,0.72)"
+        }`,
+        borderRadius: "6px 10px 7px 9px",
+        bgcolor: "#080808",
+        backgroundImage: isPremium
+          ? "radial-gradient(circle at 50% 32%, rgba(231,190,82,0.22), transparent 58%)"
+          : "radial-gradient(circle at 50% 32%, rgba(255,255,255,0.15), transparent 58%)",
+        color: isPremium ? "#f1cf74" : "#fff",
+        fontSize: { xs: "1.1rem", sm: "1.4rem" },
+        fontWeight: 950,
+        letterSpacing: "0.08em",
+        filter: "brightness(0.46) saturate(0.72)",
+        transform: "scale(0.96)",
+        transition:
+          "filter 220ms ease, transform 260ms cubic-bezier(0.2, 0.82, 0.2, 1), box-shadow 220ms ease",
       }}
     >
       {reviewer.initials}
@@ -71,30 +86,26 @@ export default function CVReviewerDialog({
   onSelect,
   onClose,
 }: CVReviewerDialogProps) {
+  const orderedReviewers = useMemo(
+    () =>
+      REVIEWER_ORDER.map((id) =>
+        reviewers.find((reviewer) => reviewer.id === id),
+      ).filter((reviewer): reviewer is ReviewerProfile => Boolean(reviewer)),
+    [reviewers],
+  );
+
   const selectedReviewer = useMemo(
     () =>
-      reviewers.find(
+      orderedReviewers.find(
         (reviewer) =>
           reviewer.id === selectedReviewerId &&
           reviewer.booking.status === "available",
       ) ?? null,
-    [reviewers, selectedReviewerId],
+    [orderedReviewers, selectedReviewerId],
   );
 
-  const firstAvailableId =
-    reviewers.find((reviewer) => reviewer.booking.status === "available")?.id ??
-    null;
-
-  const handleSelection = (
-    _event: React.ChangeEvent<HTMLInputElement>,
-    value: string,
-  ) => {
-    const reviewer = reviewers.find(
-      (candidate) =>
-        candidate.id === value && candidate.booking.status === "available",
-    );
-
-    if (reviewer) {
+  const handleSelection = (reviewer: ReviewerProfile) => {
+    if (reviewer.booking.status === "available") {
       onSelect(reviewer.id);
     }
   };
@@ -104,31 +115,38 @@ export default function CVReviewerDialog({
       open={open}
       onClose={onClose}
       aria-labelledby="cv-reviewer-dialog-title"
-      aria-describedby="cv-reviewer-dialog-description"
-      maxWidth="sm"
-      fullWidth
+      maxWidth={false}
       slotProps={{
         backdrop: {
           sx: {
-            bgcolor: "rgba(0,0,0,0.74)",
-            backdropFilter: "blur(7px)",
+            bgcolor: "rgba(0,0,0,0.82)",
+            backdropFilter: "blur(8px)",
           },
         },
       }}
       PaperProps={{
         sx: {
-          width: "min(34rem, calc(100vw - 1rem))",
-          maxHeight: "min(42rem, calc(100dvh - 1rem))",
-          m: 0.5,
+          position: "relative",
+          width: {
+            xs: "calc(100vw - 0.75rem)",
+            sm: "min(56rem, calc(100vw - 2rem))",
+          },
+          height: {
+            xs: "calc(100dvh - 0.75rem)",
+            sm: "min(31rem, calc(100dvh - 2rem))",
+          },
+          maxWidth: "none",
+          maxHeight: "none",
+          m: { xs: 0.375, sm: 1 },
           overflow: "hidden",
           color: "#fff",
           bgcolor: "#000",
           backgroundImage:
-            "radial-gradient(circle at 50% -20%, rgba(255,255,255,0.15), transparent 42%)",
+            "radial-gradient(circle at 50% -18%, rgba(255,255,255,0.15), transparent 40%)",
           border: "1px solid #fff",
-          borderRadius: { xs: "24px 24px 29px 22px", sm: "30px 27px 34px 25px" },
+          borderRadius: { xs: "18px", sm: "28px 31px 26px 30px" },
           boxShadow:
-            "0 32px 90px rgba(0,0,0,0.72), 0 0 42px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.16)",
+            "0 36px 100px rgba(0,0,0,0.82), 0 0 46px rgba(255,255,255,0.09), inset 0 1px 0 rgba(255,255,255,0.16)",
           "@media (prefers-reduced-motion: reduce)": {
             transitionDuration: "100ms !important",
           },
@@ -142,43 +160,41 @@ export default function CVReviewerDialog({
       <DialogTitle
         id="cv-reviewer-dialog-title"
         sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 2,
-          px: { xs: 2, sm: 3 },
-          pt: { xs: 2, sm: 2.5 },
-          pb: 1,
+          position: "relative",
+          zIndex: 4,
+          flex: "0 0 auto",
+          px: { xs: 6, sm: 3 },
+          py: { xs: 1.5, sm: 2.1 },
+          textAlign: "center",
+          borderBottom: "1px solid rgba(255,255,255,0.24)",
         }}
       >
-        <Box>
-          <Typography
-            component="span"
-            variant="h5"
-            sx={{ display: "block", fontWeight: 950, letterSpacing: "-0.04em" }}
-          >
-            Pick your CV person
-          </Typography>
-          <Typography
-            id="cv-reviewer-dialog-description"
-            component="span"
-            variant="body2"
-            sx={{ display: "block", mt: 0.5, color: "rgba(255,255,255,0.68)" }}
-          >
-            One human, one live review, significantly fewer suspicious bullet
-            points.
-          </Typography>
-        </Box>
+        <Typography
+          component="span"
+          sx={{
+            display: "block",
+            color: "#fff",
+            fontSize: { xs: "1.25rem", sm: "1.75rem" },
+            fontWeight: 950,
+            letterSpacing: "-0.04em",
+            textTransform: "uppercase",
+            textShadow: "0 0 18px rgba(255,255,255,0.22)",
+          }}
+        >
+          Choose your fighter
+        </Typography>
 
         <IconButton
-          autoFocus={!firstAvailableId}
           onClick={onClose}
           aria-label="Close reviewer selection"
           sx={{
-            mt: -0.5,
-            mr: -0.75,
+            display: { xs: "inline-flex", sm: "none" },
+            position: "absolute",
+            insetBlockStart: "50%",
+            insetInlineEnd: 10,
+            transform: "translateY(-50%)",
             color: "#fff",
-            border: "1px solid rgba(255,255,255,0.48)",
+            border: "1px solid rgba(255,255,255,0.55)",
             "&:hover": {
               bgcolor: "rgba(255,255,255,0.12)",
               borderColor: "#fff",
@@ -193,303 +209,271 @@ export default function CVReviewerDialog({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent
-        dividers
+      <Box
         sx={{
-          px: { xs: 1.5, sm: 2.5 },
-          py: 2,
-          borderColor: "rgba(255,255,255,0.16)",
-          overflowY: "auto",
+          position: "relative",
+          flex: "1 1 auto",
+          minHeight: 0,
+          overflow: "hidden",
         }}
       >
-        <FormControl component="fieldset" fullWidth>
-          <FormLabel
-            component="legend"
-            sx={{
-              mb: 1.25,
-              color: "rgba(255,255,255,0.76)",
-              fontSize: "0.78rem",
-              fontWeight: 800,
-              letterSpacing: "0.09em",
-              textTransform: "uppercase",
-              "&.Mui-focused": { color: "#fff" },
-            }}
-          >
-            Choose one reviewer
-          </FormLabel>
+        <RadioGroup
+          aria-label="CV reviewer"
+          name="cv-reviewer"
+          value={selectedReviewerId ?? ""}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+            gridTemplateRows: { xs: "repeat(3, minmax(0, 1fr))", sm: "1fr" },
+          }}
+        >
+          {orderedReviewers.map((reviewer, index) => {
+            const isAvailable = reviewer.booking.status === "available";
+            const isPremium = reviewer.visualTier === "premium-gold";
+            const isSelected = reviewer.id === selectedReviewerId;
 
-          <RadioGroup
-            aria-label="CV reviewer"
-            name="cv-reviewer"
-            value={selectedReviewerId ?? ""}
-            onChange={handleSelection}
-            sx={{ gap: 1.25 }}
-          >
-            {reviewers.map((reviewer) => {
-              const isAvailable = reviewer.booking.status === "available";
-              const isPremium = reviewer.visualTier === "premium-gold";
-              const isSelected = reviewer.id === selectedReviewerId;
-
-              return (
-                <FormControlLabel
-                  key={reviewer.id}
-                  value={reviewer.id}
-                  disabled={!isAvailable}
-                  control={
-                    <Radio
-                      autoFocus={reviewer.id === firstAvailableId}
-                      inputProps={{
-                        "aria-describedby": `cv-reviewer-${reviewer.id}-description`,
-                      }}
-                    />
-                  }
-                  label={
-                    <Box
-                      sx={{
-                        minWidth: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1.4,
-                        py: 0.2,
-                      }}
-                    >
-                      <ReviewerAvatar reviewer={reviewer} />
-
-                      <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: 0.75,
-                          }}
-                        >
-                          <Typography
-                            component="span"
-                            sx={{
-                              color: "#fff",
-                              fontWeight: 900,
-                              letterSpacing: "-0.02em",
-                            }}
-                          >
-                            {reviewer.displayName}
-                          </Typography>
-                          {isPremium && (
-                            <Typography
-                              component="span"
-                              variant="caption"
-                              sx={{
-                                px: 0.7,
-                                py: 0.1,
-                                color: "#ffe08a",
-                                border: "1px solid rgba(231,190,82,0.72)",
-                                borderRadius: 999,
-                                fontWeight: 850,
-                                letterSpacing: "0.05em",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              Premium touch
-                            </Typography>
-                          )}
-                        </Box>
-
-                        <Typography
-                          id={`cv-reviewer-${reviewer.id}-description`}
-                          variant="body2"
-                          sx={{
-                            mt: 0.35,
-                            color: isAvailable
-                              ? "rgba(255,255,255,0.68)"
-                              : "rgba(255,255,255,0.48)",
-                            lineHeight: 1.45,
-                          }}
-                        >
-                          {reviewer.reviewFocus}
-                        </Typography>
-
-                        {!isAvailable && (
-                          <Typography
-                            component="span"
-                            variant="caption"
-                            sx={{
-                              display: "inline-block",
-                              mt: 0.6,
-                              color: "#fff",
-                              fontWeight: 850,
-                              letterSpacing: "0.04em",
-                            }}
-                          >
-                            Coming soon
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  }
-                  sx={{
-                    position: "relative",
-                    isolation: "isolate",
-                    overflow: "hidden",
-                    width: "100%",
-                    minHeight: 86,
-                    m: 0,
-                    px: { xs: 1, sm: 1.3 },
-                    py: 0.9,
-                    alignItems: "center",
-                    color: "#fff",
+            return (
+              <Box
+                component="label"
+                key={reviewer.id}
+                data-selected={isSelected ? "true" : "false"}
+                data-available={isAvailable ? "true" : "false"}
+                sx={{
+                  position: "relative",
+                  isolation: "isolate",
+                  minWidth: 0,
+                  minHeight: 0,
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  color: "#fff",
+                  opacity: isAvailable ? 1 : 0.58,
+                  backgroundColor: "#030303",
+                  backgroundImage: isPremium
+                    ? "radial-gradient(circle at 50% 42%, rgba(173,119,11,0.20), transparent 58%)"
+                    : "radial-gradient(circle at 50% 42%, rgba(255,255,255,0.075), transparent 60%)",
+                  transition:
+                    "background-color 180ms ease, box-shadow 220ms ease, opacity 180ms ease",
+                  "&::after": {
+                    content: index === orderedReviewers.length - 1 ? "none" : '""',
+                    position: "absolute",
+                    zIndex: 3,
+                    pointerEvents: "none",
                     bgcolor: isPremium
-                      ? "rgba(119,82,10,0.13)"
-                      : "rgba(255,255,255,0.035)",
-                    backgroundImage: isPremium
-                      ? "radial-gradient(circle at 88% 12%, rgba(231,190,82,0.19), transparent 38%)"
-                      : "none",
-                    border: `1px solid ${
-                      isPremium ? "rgba(231,190,82,0.78)" : "rgba(255,255,255,0.30)"
-                    }`,
-                    borderRadius: isPremium
-                      ? "18px 22px 19px 25px"
-                      : "20px 17px 23px 18px",
-                    opacity: isAvailable ? 1 : 0.62,
-                    transition:
-                      "border-color 180ms ease, background-color 180ms ease, box-shadow 220ms ease, transform 180ms ease",
-                    "& .MuiRadio-root": {
-                      flexShrink: 0,
-                      color: isPremium
-                        ? "rgba(231,190,82,0.78)"
-                        : "rgba(255,255,255,0.58)",
-                    },
-                    "& .MuiRadio-root.Mui-checked": {
-                      color: isPremium ? "#e7be52" : "#fff",
-                    },
-                    "& .MuiFormControlLabel-label": {
-                      minWidth: 0,
-                      flex: 1,
-                    },
-                    "&:hover": isAvailable
-                      ? {
-                          transform: "translateY(-1px)",
-                          borderColor: isPremium ? "#e7be52" : "#fff",
-                          bgcolor: isPremium
-                            ? "rgba(119,82,10,0.22)"
-                            : "rgba(255,255,255,0.08)",
-                          boxShadow: isPremium
-                            ? "0 12px 34px rgba(231,190,82,0.17)"
-                            : "0 12px 30px rgba(255,255,255,0.08)",
-                        }
-                      : undefined,
-                    "&:focus-within": {
-                      outline: `3px solid ${isPremium ? "#e7be52" : "#fff"}`,
-                      outlineOffset: 2,
-                    },
-                    ...(isSelected && {
-                      borderColor: isPremium ? "#f4cf6d" : "#fff",
-                      bgcolor: isPremium
-                        ? "rgba(119,82,10,0.27)"
-                        : "rgba(255,255,255,0.11)",
+                      ? "rgba(231,190,82,0.82)"
+                      : "rgba(255,255,255,0.72)",
+                    insetBlockStart: { xs: "auto", sm: "-10%" },
+                    insetInlineEnd: { xs: "-5%", sm: -1 },
+                    insetBlockEnd: { xs: -1, sm: "auto" },
+                    width: { xs: "110%", sm: "1px" },
+                    height: { xs: "1px", sm: "120%" },
+                    transform: { xs: "rotate(-2.5deg)", sm: "rotate(7deg)" },
+                    transformOrigin: "center",
+                    boxShadow: "0 0 10px rgba(255,255,255,0.14)",
+                  },
+                  "&:hover": isAvailable
+                    ? {
+                        bgcolor: isPremium
+                          ? "rgba(72,49,5,0.34)"
+                          : "rgba(255,255,255,0.055)",
+                        boxShadow: isPremium
+                          ? "inset 0 0 54px rgba(231,190,82,0.12)"
+                          : "inset 0 0 54px rgba(255,255,255,0.07)",
+                      }
+                    : undefined,
+                  "&:hover .cv-fighter-avatar, &:focus-within .cv-fighter-avatar, &[data-selected='true'] .cv-fighter-avatar":
+                    {
+                      filter: "brightness(1) saturate(1)",
+                      transform: "scale(1)",
                       boxShadow: isPremium
-                        ? "0 0 0 1px rgba(244,207,109,0.38), 0 16px 38px rgba(231,190,82,0.21)"
-                        : "0 0 0 1px rgba(255,255,255,0.26), 0 16px 36px rgba(255,255,255,0.09)",
-                    }),
-                    ...(isPremium && {
-                      "&::after": {
-                        content: '""',
-                        position: "absolute",
-                        inset: "-45% auto -45% -28%",
-                        width: "20%",
-                        zIndex: -1,
-                        pointerEvents: "none",
-                        background:
-                          "linear-gradient(100deg, transparent, rgba(255,238,170,0.28), transparent)",
-                        transform: "translateX(-180%) rotate(12deg)",
-                      },
-                      "&:hover::after, &:focus-within::after": {
-                        animation:
-                          "cvPremiumSweep 620ms cubic-bezier(0.2, 0.75, 0.25, 1) 1",
-                      },
-                      "@keyframes cvPremiumSweep": {
-                        from: { transform: "translateX(-180%) rotate(12deg)" },
-                        to: { transform: "translateX(760%) rotate(12deg)" },
-                      },
-                    }),
-                    "@media (prefers-reduced-motion: reduce)": {
+                        ? "0 0 0 1px rgba(231,190,82,0.45), 0 18px 42px rgba(231,190,82,0.18)"
+                        : "0 18px 42px rgba(255,255,255,0.12)",
+                    },
+                  "&:hover .cv-fighter-name, &:focus-within .cv-fighter-name, &[data-selected='true'] .cv-fighter-name":
+                    {
+                      opacity: 1,
+                      transform: "translateY(0)",
+                    },
+                  "&:focus-within": {
+                    outline: `3px solid ${isPremium ? "#e7be52" : "#fff"}`,
+                    outlineOffset: -4,
+                  },
+                  "&[data-selected='true']": {
+                    bgcolor: isPremium
+                      ? "rgba(85,58,8,0.40)"
+                      : "rgba(255,255,255,0.075)",
+                    boxShadow: isPremium
+                      ? "inset 0 0 0 1px rgba(231,190,82,0.58), inset 0 0 62px rgba(231,190,82,0.13)"
+                      : "inset 0 0 0 1px rgba(255,255,255,0.72), inset 0 0 62px rgba(255,255,255,0.08)",
+                  },
+                  "@media (prefers-reduced-motion: reduce)": {
+                    transitionDuration: "100ms",
+                    "& .cv-fighter-avatar, & .cv-fighter-name": {
                       transitionDuration: "100ms",
-                      transform: "none",
-                      "&:hover": { transform: "none" },
-                      "&::after": { animation: "none !important" },
                     },
-                    "@media (forced-colors: active)": {
-                      borderColor: "CanvasText",
-                      backgroundImage: "none",
-                      boxShadow: "none",
-                      "&:focus-within": {
-                        outlineColor: "Highlight",
-                      },
+                  },
+                  "@media (forced-colors: active)": {
+                    backgroundImage: "none",
+                    "&:focus-within": {
+                      outlineColor: "Highlight",
                     },
+                  },
+                }}
+              >
+                <Box
+                  component="input"
+                  type="radio"
+                  name="cv-reviewer"
+                  value={reviewer.id}
+                  checked={isSelected}
+                  disabled={!isAvailable}
+                  onChange={() => handleSelection(reviewer)}
+                  aria-label={reviewer.displayName}
+                  sx={{
+                    position: "absolute",
+                    width: 1,
+                    height: 1,
+                    p: 0,
+                    m: -1,
+                    overflow: "hidden",
+                    clip: "rect(0 0 0 0)",
+                    whiteSpace: "nowrap",
+                    border: 0,
                   }}
                 />
-              );
-            })}
-          </RadioGroup>
-        </FormControl>
-      </DialogContent>
 
-      <DialogActions
-        sx={{
-          display: "block",
-          px: { xs: 1.5, sm: 2.5 },
-          py: 2,
-          borderTop: "1px solid rgba(255,255,255,0.16)",
-        }}
-      >
-        {selectedReviewer?.booking.status === "available" ? (
-          <Button
-            component="a"
-            href={selectedReviewer.booking.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            fullWidth
-            variant="contained"
-            endIcon={<LaunchRounded />}
-            aria-label={`Book with ${selectedReviewer.displayName} on Calendly — opens in a new tab`}
-            sx={{
-              minHeight: 48,
+                <Box
+                  sx={{
+                    position: "relative",
+                    zIndex: 2,
+                    display: "flex",
+                    flexDirection: { xs: "row", sm: "column" },
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: { xs: 2, sm: 1.5 },
+                    px: { xs: 2, sm: 1 },
+                    pb: { xs: 0, sm: 4 },
+                  }}
+                >
+                  <Box>
+                    <ReviewerAvatar
+                      reviewer={reviewer}
+                      isPremium={isPremium}
+                    />
+                  </Box>
+
+                  <Box
+                    className="cv-fighter-name"
+                    sx={{
+                      minWidth: 0,
+                      textAlign: { xs: "left", sm: "center" },
+                      opacity: 0,
+                      transform: { xs: "translateX(-8px)", sm: "translateY(8px)" },
+                      transition:
+                        "opacity 180ms ease, transform 220ms cubic-bezier(0.2, 0.82, 0.2, 1)",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: isPremium ? "#f1cf74" : "#fff",
+                        fontSize: { xs: "1rem", sm: "1.08rem" },
+                        fontWeight: 950,
+                        lineHeight: 1.1,
+                        letterSpacing: "-0.025em",
+                        textShadow: "0 2px 12px #000",
+                      }}
+                    >
+                      {reviewer.displayName}
+                    </Typography>
+                    {!isAvailable && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          mt: 0.45,
+                          color: "rgba(255,255,255,0.68)",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        Coming soon
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })}
+        </RadioGroup>
+
+        <Button
+          component="a"
+          href={
+            selectedReviewer?.booking.status === "available"
+              ? selectedReviewer.booking.url
+              : undefined
+          }
+          target={selectedReviewer ? "_blank" : undefined}
+          rel={selectedReviewer ? "noopener noreferrer" : undefined}
+          aria-label={
+            selectedReviewer
+              ? `Select ${selectedReviewer.displayName} on Calendly — opens in a new tab`
+              : "Select a reviewer first"
+          }
+          aria-disabled={!selectedReviewer}
+          aria-hidden={!selectedReviewer}
+          tabIndex={selectedReviewer ? 0 : -1}
+          onClick={(event) => {
+            if (!selectedReviewer) {
+              event.preventDefault();
+            }
+          }}
+          variant="contained"
+          endIcon={<LaunchRounded />}
+          sx={{
+            position: "absolute",
+            zIndex: 8,
+            insetInlineStart: "50%",
+            insetBlockEnd: { xs: "3.5%", sm: "7%" },
+            minWidth: { xs: 150, sm: 190 },
+            minHeight: 46,
+            px: 3,
+            color: "#000",
+            bgcolor: "#fff",
+            borderRadius: "13px 16px 12px 15px",
+            fontWeight: 950,
+            textTransform: "none",
+            opacity: selectedReviewer ? 1 : 0,
+            pointerEvents: selectedReviewer ? "auto" : "none",
+            transform: selectedReviewer
+              ? "translate(-50%, 0)"
+              : "translate(-50%, 220%)",
+            transition:
+              "transform 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease",
+            boxShadow:
+              "0 14px 38px rgba(0,0,0,0.72), 0 0 22px rgba(255,255,255,0.18)",
+            "&:hover": {
               color: "#000",
-              bgcolor: "#fff",
-              borderRadius: "15px 17px 14px 18px",
-              fontWeight: 950,
-              textTransform: "none",
-              boxShadow: "0 9px 24px rgba(255,255,255,0.14)",
-              "&:hover": {
-                color: "#000",
-                bgcolor: "#f2f2f2",
-                boxShadow: "0 12px 30px rgba(255,255,255,0.20)",
-              },
-              "&:focus-visible": {
-                outline: "3px solid #fff",
-                outlineOffset: 3,
-              },
-            }}
-          >
-            Book with {selectedReviewer.displayName}
-          </Button>
-        ) : (
-          <Button
-            fullWidth
-            disabled
-            variant="contained"
-            sx={{
-              minHeight: 48,
-              borderRadius: "15px 17px 14px 18px",
-              bgcolor: `${alpha("#fff", 0.14)} !important`,
-              color: "rgba(255,255,255,0.52) !important",
-              fontWeight: 850,
-              textTransform: "none",
-            }}
-          >
-            Choose an available reviewer
-          </Button>
-        )}
-      </DialogActions>
+              bgcolor: "#f1f1f1",
+              transform: "translate(-50%, -2px)",
+            },
+            "&:focus-visible": {
+              outline: "3px solid #fff",
+              outlineOffset: 3,
+            },
+            "@media (prefers-reduced-motion: reduce)": {
+              transitionDuration: "100ms",
+            },
+          }}
+        >
+          Select
+        </Button>
+      </Box>
     </Dialog>
   );
 }
