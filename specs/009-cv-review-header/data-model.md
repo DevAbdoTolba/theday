@@ -21,6 +21,7 @@ export interface ReviewerProfile {
   id: ReviewerId;
   displayName: string;
   portraitSrc: string;
+  visualTier: "standard" | "premium-gold";
   booking: BookingDestination;
 }
 ```
@@ -58,8 +59,9 @@ Dialog invariants:
 - Exactly one reviewer can be selected.
 - No visible title, name, description, status, or Meet action appears before selection.
 - Hover/focus changes only the photo brightness.
-- Selection reveals only the selected name in black.
+- Selection reveals only the selected name in high-contrast white.
 - Changing selection hides the previous name.
+- `premium-gold` adds a restrained warm image overlay only; it does not add a border.
 - Meet remains translated below the clipped dialog when selection is `null`.
 - Meet rises into view when selection is non-null and opens the configured URL in a new tab.
 - Closing clears selection.

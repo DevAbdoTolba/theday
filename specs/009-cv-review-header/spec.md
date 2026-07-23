@@ -20,6 +20,7 @@
 - Q: Where should dialog close controls appear? → A: A visible X is mobile-only; desktop dismissal uses Escape or the backdrop.
 - Q: What exactly forms each reviewer section? → A: The image is the complete clipped section; there are no cards, avatars, divider lines, titles, or idle names.
 - Q: What temporary content makes the flow fully usable? → A: Each section uses a Picsum placeholder image and every Meet action opens `example.com` in a new tab.
+- Q: What final polish is required after the image-section review? → A: Give the CV mark more internal breathing room, keep the phone invitation fully inside the viewport, use readable light reviewer names, remove normal selection/focus outlines from photos, and give Nairah a subtle warm premium glow.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -38,6 +39,8 @@ As a visitor, I notice a compact, bold "CV" item in the main header without it c
 3. **Given** the header is visible on a touch device, **When** the visitor taps the "CV" item, **Then** an organic panel expands from and remains visually attached to the item, adapts to the available phone width, and stays usable until dismissed or another destination is chosen.
 4. **Given** the desktop invitation is showing as an unpinned preview, **When** the pointer and focus leave the connected trigger-and-panel area, **Then** it returns smoothly to the compact "CV" state without flicker or a sudden layout jump.
 5. **Given** the desktop invitation has been pinned by click or keyboard activation, **When** the pointer leaves it, **Then** it remains open until the visitor uses Escape, activates the CV mark again, or uses an outside interaction.
+6. **Given** the compact CV mark is visible, **When** it is viewed at rest, **Then** the label has comfortable internal space from the circular edge.
+7. **Given** the invitation opens at 320px, **When** it reaches its expanded state, **Then** its complete shape and content stay inside the viewport without horizontal overflow.
 
 **Required Shape Journey**:
 
@@ -90,9 +93,11 @@ As a visitor who wants help, I open a focused dialog showing all three reviewers
 6. **Given** the dialog is open on a phone, **When** the visitor views the choices, **Then** three full-width photo sections stack and meet through their own slightly tilted cut edges.
 7. **Given** a reviewer is idle, **When** the visitor hovers or focuses that photo section, **Then** only the photo brightens slightly and no reviewer name appears.
 8. **Given** no reviewer has been selected, **When** the dialog opens, **Then** the yellow Meet action is non-operable and visually held completely below the dialog.
-9. **Given** the visitor selects a reviewer, **When** selection completes, **Then** only that reviewer's name appears in black inside the photo and the yellow Meet action smoothly rises into the lower quarter of the dialog.
+9. **Given** the visitor selects a reviewer, **When** selection completes, **Then** only that reviewer's high-contrast light name appears inside the photo and the readable yellow Meet action smoothly rises into the lower quarter of the dialog.
 10. **Given** a different reviewer is selected, **When** selection changes, **Then** the previous name hides and only the newly selected reviewer name appears.
 11. **Given** the dialog is open, **When** viewed on desktop, **Then** no visible X is shown; on a phone, a visible X is available.
+12. **Given** a photo is focused or selected, **When** its visual state changes, **Then** brightness and a slight zoom communicate the state without adding a normal border or outline around the photo.
+13. **Given** Nairah's photo is visible, **When** compared with the other choices, **Then** a restrained warm premium glow is noticeable without becoming a border or dominating the dialog.
 
 ---
 
@@ -144,10 +149,10 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 ### Functional Requirements
 
 - **FR-001**: The system MUST add a clearly labeled "CV" item to the student dashboard and subject browsing headers on desktop and mobile.
-- **FR-002**: The collapsed item MUST display the word "CV" in a bold, readable style inside a compact circular or organically rounded notch-like background.
+- **FR-002**: The collapsed item MUST display the word "CV" in a bold, readable style with comfortable internal breathing room inside a compact circular or organically rounded notch-like background.
 - **FR-003**: The collapsed treatment MUST be noticeable without visually overpowering the main navigation or page title.
 - **FR-004**: On devices with precise pointing input, hover or keyboard focus MUST open an unpinned preview; click or keyboard activation MUST pin it open until the visitor uses Escape, toggles the CV mark, or uses an outside interaction.
-- **FR-005**: On touch devices, a deliberate tap MUST expand a persistent organic panel that remains visually attached to the "CV" item and adapts to the available phone width.
+- **FR-005**: On touch devices, a deliberate tap MUST expand a persistent organic panel that remains visually attached to the "CV" item, adapts to the available phone width, and never overflows horizontally.
 - **FR-006**: The compact mark and expanded invitation MUST be the same continuously morphing surface with one continuous white outline; overlapping outlined circles, doubled borders, detached connectors, and plain rectangular menus are prohibited.
 - **FR-007**: The transition between collapsed and expanded states MUST coordinate the container shape, subtle background/glow treatment, and content reveal as a continuous movement.
 - **FR-008**: Expanding or collapsing the item MUST NOT cause a disruptive shift in the surrounding header or main page content.
@@ -159,7 +164,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-014**: Each reviewer profile MUST provide one full-surface photo, one name revealed only when selected, and one scheduling destination.
 - **FR-015**: Until final portraits are supplied, the three full-surface sections MUST use distinct Picsum placeholder photos.
 - **FR-016**: The dialog MUST show no visible title, reviewer name, description, availability label, or action before selection.
-- **FR-017**: Selecting a reviewer MUST reveal only that reviewer's black name inside the photo; changing selection MUST hide the previous name and reveal only the new name.
+- **FR-017**: Selecting a reviewer MUST reveal only that reviewer's light high-contrast name with dark separation from the photo; changing selection MUST hide the previous name and reveal only the new name.
 - **FR-018**: Every initial reviewer MUST be selectable and MUST use `https://example.com/` as the temporary functional destination.
 - **FR-019**: The first release MUST keep reviewer comparison inside TheDay limited to profile information; it MUST NOT embed or aggregate all three live calendars.
 - **FR-020**: The modal MUST be dismissible by Escape and an appropriate outside interaction on desktop; phones MUST additionally show a visible X close control. A visible X MUST NOT appear in the desktop dialog.
@@ -172,6 +177,9 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-027**: Every full-surface photo MUST begin dimmed and brighten slightly on hover or focus without revealing any visible text.
 - **FR-028**: One yellow Meet action MUST remain non-operable and translated completely below the clipped dialog until selection, then rise into the lower quarter.
 - **FR-029**: Meet MUST open `https://example.com/` in a new tab using a secure external-link handoff.
+- **FR-030**: Normal hover, focus, and selected photo states MUST use only brightness and slight zoom; they MUST NOT add a visible border or outline around the photo.
+- **FR-031**: Nairah's photo MUST receive a subtle warm premium glow that does not form a border, change panel size, or obscure the photo or selected name.
+- **FR-032**: The yellow Meet action MUST keep strong text/background contrast in every selected state.
 
 ### Key Entities
 
@@ -193,6 +201,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **SC-008**: With reduced motion enabled, 100% of the same information and actions remain available without the full morphing animation.
 - **SC-009**: In moderated copy testing, at least 80% of participants describe the message as clear and playful, and fewer than 10% describe it as insulting or confusing.
 - **SC-010**: In visual review at desktop and phone sizes, the compact-to-expanded invitation shows exactly one continuous external outline with no intersecting circle border.
+- **SC-011**: At 320px, the expanded invitation produces no horizontal page overflow and keeps at least 0.75rem of total viewport gutter.
 
 ## Assumptions
 

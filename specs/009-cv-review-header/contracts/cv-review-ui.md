@@ -11,9 +11,11 @@
 ## Header Contract
 
 - The compact CV circle and expanded ad are one continuously bordered surface.
+- The CV label sits within an inset trigger area so the compact circle keeps visible internal breathing room.
 - The approved ad is “Get hired!”, “Book a 1:1 meeting to enhance your
   CV/Resume”, and “Now!”.
 - There is no invitation scrollbar, overline, or separate X.
+- On phones the CV item occupies the safe right edge of the header and the open surface stays within viewport gutters.
 - Fine-pointer hover/focus previews; activation pins; Escape, outside
   interaction, or toggling CV dismisses.
 
@@ -35,16 +37,19 @@
 - Photos begin dimmed.
 - Hover or keyboard focus brightens only the targeted photo slightly.
 - Hover and focus do not reveal a visible reviewer name.
-- Selection brightens the selected photo and reveals only its black name inside
-  the photo.
+- Selection brightens and slightly zooms the selected photo and reveals only its
+  light name with strong dark shadow separation.
+- Normal focus and selection add no border or outline around a photo.
 - Selecting another reviewer hides the previous name and reveals the new name.
 - Selection resets whenever the dialog is reopened.
+- Nairah receives a restrained warm overlay glow without a border or size change.
 
 ## Meet Contract
 
 - The yellow Meet action exists below the clipped dialog and is non-operable
   before selection.
 - Selection moves Meet into the dialog's lower quarter.
+- Meet keeps black text on a strong yellow surface with clear separation from the photos.
 - Meet uses the selected record's configured `https://example.com/` URL.
 - It renders as a real anchor with `target="_blank"` and
   `rel="noopener noreferrer"`.
