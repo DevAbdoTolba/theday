@@ -201,6 +201,20 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 
 ---
 
+## Phase 12: Stable CV Inset and Premium Motion
+
+**Purpose**: Correct the compact-label morph and replace the static premium overlay with the requested interaction motion.
+
+- [X] T054 [US1] Preserve the CV label position, letter spacing, and compact top-right circular radius throughout preview and pinned expansion in `src/components/cv-review/CVReviewHeaderItem.tsx` (FR-002, SC-012)
+- [X] T055 [US3] Replace Nairah's static overlay with an immediate native-CSS photo shimmer that repeats on a six-second hover/focus cadence in `src/components/cv-review/CVReviewerDialog.tsx` (FR-031)
+- [X] T056 [US3] Add a selected-only gold premium badge that drops from above and performs a restrained six-second dance, including a low-motion equivalent, in `src/components/cv-review/CVReviewerDialog.tsx` (FR-022, FR-031)
+- [X] T057 Update specification, contract, model, research, plan, and quickstart acceptance coverage for stable label clearance and the premium shimmer/badge behavior
+- [X] T058 Run TypeScript, ESLint, whitespace, and production build validation while preserving unrelated service-worker files
+
+**Checkpoint**: Expansion never crowds the CV label, Nairah shines only during interaction, her badge appears only after selection, and reduced-motion users receive a calm equivalent.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

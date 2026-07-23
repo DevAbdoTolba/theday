@@ -15,8 +15,14 @@
 7. Change selection and confirm the previous name disappears.
 8. Confirm the yellow Meet action rises from below only after selection.
 9. Confirm focus and selection use brightness/zoom without drawing an outline around a photo.
-10. Confirm Nairah has a subtle warm glow without a gold border.
-11. At 320px, confirm the CV invitation stays inside the viewport and does not create horizontal page overflow.
+10. Hover/focus Nairah and confirm a warm shine crosses her photo immediately,
+    then repeats after about six seconds while interaction remains active.
+11. Select Nairah and confirm a small gold badge drops from above, remains clear
+    of her name, and performs only a restrained recurring dance.
+12. Confirm neither premium state adds a photo border or changes panel size.
+13. At 320px, confirm the CV invitation stays inside the viewport and does not create horizontal page overflow.
+14. Expand and collapse the invitation repeatedly and confirm the CV letters do
+    not move, widen, or lose their compact circular edge clearance.
 
 ## Functional Checks
 

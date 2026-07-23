@@ -21,6 +21,7 @@
 - Q: What exactly forms each reviewer section? → A: The image is the complete clipped section; there are no cards, avatars, divider lines, titles, or idle names.
 - Q: What temporary content makes the flow fully usable? → A: Each section uses a Picsum placeholder image and every Meet action opens `example.com` in a new tab.
 - Q: What final polish is required after the image-section review? → A: Give the CV mark more internal breathing room, keep the phone invitation fully inside the viewport, use readable light reviewer names, remove normal selection/focus outlines from photos, and give Nairah a subtle warm premium glow.
+- Q: How should the compact label and Nairah premium treatment behave in the final interaction? → A: The CV label must keep its resting inset and circular corner space throughout expansion. Nairah receives an immediate photo shimmer that repeats about every six seconds while hovered or focused, and selection drops a small gold premium badge from above with a restrained recurring dance.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -41,6 +42,7 @@ As a visitor, I notice a compact, bold "CV" item in the main header without it c
 5. **Given** the desktop invitation has been pinned by click or keyboard activation, **When** the pointer leaves it, **Then** it remains open until the visitor uses Escape, activates the CV mark again, or uses an outside interaction.
 6. **Given** the compact CV mark is visible, **When** it is viewed at rest, **Then** the label has comfortable internal space from the circular edge.
 7. **Given** the invitation opens at 320px, **When** it reaches its expanded state, **Then** its complete shape and content stay inside the viewport without horizontal overflow.
+8. **Given** the compact mark expands, **When** its top-right corner changes into the invitation, **Then** the CV label keeps the same comfortable inset and does not move or widen toward the outline.
 
 **Required Shape Journey**:
 
@@ -97,7 +99,8 @@ As a visitor who wants help, I open a focused dialog showing all three reviewers
 10. **Given** a different reviewer is selected, **When** selection changes, **Then** the previous name hides and only the newly selected reviewer name appears.
 11. **Given** the dialog is open, **When** viewed on desktop, **Then** no visible X is shown; on a phone, a visible X is available.
 12. **Given** a photo is focused or selected, **When** its visual state changes, **Then** brightness and a slight zoom communicate the state without adding a normal border or outline around the photo.
-13. **Given** Nairah's photo is visible, **When** compared with the other choices, **Then** a restrained warm premium glow is noticeable without becoming a border or dominating the dialog.
+13. **Given** Nairah's photo is visible, **When** it is hovered or focused, **Then** a restrained warm shine crosses the photo immediately and repeats roughly every six seconds while the interaction remains active.
+14. **Given** Nairah is selected, **When** selection completes, **Then** a small gold premium badge drops into the upper photo area and performs a restrained recurring dance without covering her name or changing the panel size.
 
 ---
 
@@ -149,7 +152,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 ### Functional Requirements
 
 - **FR-001**: The system MUST add a clearly labeled "CV" item to the student dashboard and subject browsing headers on desktop and mobile.
-- **FR-002**: The collapsed item MUST display the word "CV" in a bold, readable style with comfortable internal breathing room inside a compact circular or organically rounded notch-like background.
+- **FR-002**: The item MUST display the word "CV" in a bold, readable style with comfortable internal breathing room, and expansion MUST preserve the label's position, width, and circular corner inset.
 - **FR-003**: The collapsed treatment MUST be noticeable without visually overpowering the main navigation or page title.
 - **FR-004**: On devices with precise pointing input, hover or keyboard focus MUST open an unpinned preview; click or keyboard activation MUST pin it open until the visitor uses Escape, toggles the CV mark, or uses an outside interaction.
 - **FR-005**: On touch devices, a deliberate tap MUST expand a persistent organic panel that remains visually attached to the "CV" item, adapts to the available phone width, and never overflows horizontally.
@@ -178,7 +181,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-028**: One yellow Meet action MUST remain non-operable and translated completely below the clipped dialog until selection, then rise into the lower quarter.
 - **FR-029**: Meet MUST open `https://example.com/` in a new tab using a secure external-link handoff.
 - **FR-030**: Normal hover, focus, and selected photo states MUST use only brightness and slight zoom; they MUST NOT add a visible border or outline around the photo.
-- **FR-031**: Nairah's photo MUST receive a subtle warm premium glow that does not form a border, change panel size, or obscure the photo or selected name.
+- **FR-031**: Nairah's photo MUST receive a restrained premium treatment: an immediate warm shine repeated at roughly six-second intervals while hovered or focused, plus a small gold badge that drops from above only after selection and then performs a subtle recurring dance. The treatment MUST NOT form a border, change panel size, or obscure the photo or selected name.
 - **FR-032**: The yellow Meet action MUST keep strong text/background contrast in every selected state.
 
 ### Key Entities
@@ -202,6 +205,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **SC-009**: In moderated copy testing, at least 80% of participants describe the message as clear and playful, and fewer than 10% describe it as insulting or confusing.
 - **SC-010**: In visual review at desktop and phone sizes, the compact-to-expanded invitation shows exactly one continuous external outline with no intersecting circle border.
 - **SC-011**: At 320px, the expanded invitation produces no horizontal page overflow and keeps at least 0.75rem of total viewport gutter.
+- **SC-012**: Across resting, preview, and pinned states, the CV label retains at least the same visible edge clearance it has in the compact mark; Nairah's premium motion remains confined to her photo and repeats no more than once per six-second cycle.
 
 ## Assumptions
 

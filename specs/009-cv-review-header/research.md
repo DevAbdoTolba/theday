@@ -196,10 +196,10 @@ Calendly supports sharing a normal event-type scheduling link, so no embed or SD
 
 The tier provides:
 
-- a thin gold border/accent;
-- a restrained warm radial background;
-- a richer focus/hover/selected shadow;
-- an optional single-pass shimmer on interaction;
+- an immediate warm photo shimmer on hover/focus with a roughly six-second
+  recurrence while interaction remains active;
+- a small gold premium badge that drops from above only after selection;
+- a restrained badge dance on the same long cadence;
 - the same radio indicator, disabled behavior, type scale, dimensions, and booking semantics as every other profile.
 
 All decorative movement is removed or reduced under `prefers-reduced-motion`.
@@ -213,6 +213,8 @@ All decorative movement is removed or reduced under `prefers-reduced-motion`.
 
 - Hard-code `name === "Nairah"`: rejected because it mixes identity with style logic.
 - Animated gold border continuously: rejected because it steals attention and wastes motion budget.
+- Always-visible premium badge: rejected because the dialog must remain
+  image-only before selection.
 - Larger card/avatar: rejected because it changes choice hierarchy and mobile fit.
 
 ## R9: Validation Strategy

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import CloseRounded from "@mui/icons-material/CloseRounded";
+import WorkspacePremiumRounded from "@mui/icons-material/WorkspacePremiumRounded";
 import {
   Box,
   Button,
@@ -8,6 +9,7 @@ import {
   RadioGroup,
   Typography,
 } from "@mui/material";
+import { keyframes } from "@mui/material/styles";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
 
 export interface CVReviewerDialogProps {
@@ -35,6 +37,39 @@ const MOBILE_CLIPS = [
   "polygon(0 25%, 100% 0, 100% 75%, 0 100%)",
   "polygon(0 25%, 100% 0, 100% 100%, 0 100%)",
 ] as const;
+
+const premiumShimmer = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateX(-145%) skewX(-14deg);
+  }
+  3% {
+    opacity: 0.72;
+  }
+  14% {
+    opacity: 0;
+    transform: translateX(145%) skewX(-14deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(145%) skewX(-14deg);
+  }
+`;
+
+const premiumBadgeDance = keyframes`
+  0%, 16%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  4% {
+    transform: translateY(-3px) rotate(-7deg) scale(1.04);
+  }
+  8% {
+    transform: translateY(1px) rotate(6deg) scale(0.98);
+  }
+  12% {
+    transform: translateY(-2px) rotate(-4deg) scale(1.03);
+  }
+`;
 
 export default function CVReviewerDialog({
   open,
@@ -169,21 +204,27 @@ export default function CVReviewerDialog({
                 "&::after": {
                   content: isPremium ? '""' : "none",
                   position: "absolute",
-                  inset: 0,
+                  inset: "-18% -58%",
                   zIndex: 0,
                   pointerEvents: "none",
                   background:
-                    "radial-gradient(circle at 38% 34%, rgba(255,224,122,0.20), transparent 38%), linear-gradient(135deg, rgba(231,190,82,0.10), transparent 48%)",
-                  opacity: isSelected ? 0.72 : 0.34,
-                  transition: "opacity 220ms ease",
+                    "linear-gradient(105deg, transparent 42%, rgba(255,222,107,0.12) 46%, rgba(255,252,225,0.72) 50%, rgba(255,222,107,0.16) 54%, transparent 58%)",
+                  opacity: 0,
+                  transform: "translateX(-145%) skewX(-14deg)",
                 },
                 "&:hover::after, &:focus-within::after": {
-                  opacity: isSelected ? 0.78 : 0.5,
+                  animation: isPremium
+                    ? `${premiumShimmer} 6s ease-in-out infinite`
+                    : "none",
                 },
                 "@media (prefers-reduced-motion: reduce)": {
                   "&::before": {
                     transitionDuration: "100ms",
                     transform: "none",
+                  },
+                  "&::after": {
+                    animation: "none !important",
+                    opacity: 0,
                   },
                 },
                 "@media (forced-colors: active)": {
@@ -222,6 +263,51 @@ export default function CVReviewerDialog({
                   border: 0,
                 }}
               />
+
+              {isPremium && (
+                <Box
+                  aria-hidden
+                  sx={{
+                    position: "absolute",
+                    zIndex: 3,
+                    insetBlockStart: { xs: "13%", sm: "12%" },
+                    insetInlineStart: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    width: { xs: 38, sm: 46 },
+                    height: { xs: 38, sm: 46 },
+                    color: "#ffe27a",
+                    opacity: isSelected ? 1 : 0,
+                    transform: isSelected
+                      ? "translate(-50%, 0)"
+                      : "translate(-50%, -220%)",
+                    transition:
+                      "transform 620ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease",
+                    filter:
+                      "drop-shadow(0 4px 8px rgba(0,0,0,0.78)) drop-shadow(0 0 9px rgba(255,218,92,0.38))",
+                    pointerEvents: "none",
+                    "@media (prefers-reduced-motion: reduce)": {
+                      transform: isSelected
+                        ? "translate(-50%, 0)"
+                        : "translate(-50%, -20%)",
+                      transitionDuration: "100ms",
+                    },
+                  }}
+                >
+                  <WorkspacePremiumRounded
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      animation: isSelected
+                        ? `${premiumBadgeDance} 6s 620ms ease-in-out infinite`
+                        : "none",
+                      "@media (prefers-reduced-motion: reduce)": {
+                        animation: "none",
+                      },
+                    }}
+                  />
+                </Box>
+              )}
 
               <Typography
                 aria-hidden={!isSelected}
