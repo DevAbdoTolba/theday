@@ -11,9 +11,12 @@
    rendered separator line.
 4. At 320px, confirm the photos stack and meet at mildly tilted cut edges.
 5. Hover/focus each photo and confirm only its brightness changes.
-6. Select each reviewer and confirm only the selected black name appears.
+6. Select each reviewer and confirm only the selected white name appears with readable dark separation.
 7. Change selection and confirm the previous name disappears.
 8. Confirm the yellow Meet action rises from below only after selection.
+9. Confirm focus and selection use brightness/zoom without drawing an outline around a photo.
+10. Confirm Nairah has a subtle warm glow without a gold border.
+11. At 320px, confirm the CV invitation stays inside the viewport and does not create horizontal page overflow.
 
 ## Functional Checks
 

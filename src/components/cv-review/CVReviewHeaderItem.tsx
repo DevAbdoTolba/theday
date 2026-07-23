@@ -11,7 +11,8 @@ export interface CVReviewHeaderItemProps {
   readonly reviewers: readonly ReviewerProfile[];
 }
 
-const SLOT_SIZE = 44;
+const SLOT_SIZE = 48;
+const TRIGGER_SIZE = 40;
 const PANEL_ID = "cv-review-invitation-panel";
 
 const HeaderSlot = styled(Box)({
@@ -20,6 +21,7 @@ const HeaderSlot = styled(Box)({
   width: SLOT_SIZE,
   height: SLOT_SIZE,
   flex: `0 0 ${SLOT_SIZE}px`,
+  marginInline: 3,
   overflow: "visible",
   zIndex: 2,
 });
@@ -58,8 +60,8 @@ const OrganicSurface = styled(Box)({
   },
   "@media (max-width: 420px)": {
     '&[data-state="preview"], &[data-state="pinned"]': {
-      width: "calc(100vw - 1rem)",
-      height: "11.5rem",
+      width: "min(18.5rem, calc(100vw - 1.5rem))",
+      height: "10.75rem",
       borderRadius: "27px 40px 30px 33px / 31px 37px 32px 29px",
     },
   },
@@ -78,19 +80,19 @@ const OrganicSurface = styled(Box)({
 
 const CVTrigger = styled(Button)({
   position: "absolute",
-  insetBlockStart: 0,
-  insetInlineEnd: 0,
+  insetBlockStart: 4,
+  insetInlineEnd: 4,
   zIndex: 3,
-  width: SLOT_SIZE,
-  minWidth: SLOT_SIZE,
-  height: SLOT_SIZE,
+  width: TRIGGER_SIZE,
+  minWidth: TRIGGER_SIZE,
+  height: TRIGGER_SIZE,
   padding: 0,
   color: "#fff",
   background: "transparent",
   border: 0,
   borderRadius: "50%",
   fontFamily: "Inter, ui-rounded, system-ui, sans-serif",
-  fontSize: "0.88rem",
+  fontSize: "0.92rem",
   fontWeight: 950,
   lineHeight: 1,
   letterSpacing: "-0.055em",

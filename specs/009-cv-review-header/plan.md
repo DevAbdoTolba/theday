@@ -12,8 +12,13 @@ The short ad opens an image-only reviewer-selection dialog backed by a strict,
 static three-reviewer configuration. Each photo is the complete clipped
 selection section. Complementary polygon cuts create the diagonal joins without
 rendered divider lines, cards, or avatars. Hover only brightens a photo;
-selection reveals one black name and raises one yellow Meet link. All temporary
+selection reveals one light high-contrast name and raises one yellow Meet link. All temporary
 records use Picsum photos and open `https://example.com/` in a new tab.
+
+Final polish keeps the CV mark comfortably inset, moves it to the safe right
+edge so the phone invitation grows inside the viewport, uses light selected
+names with dark separation, removes normal photo outlines, and applies a
+data-driven low-opacity warm overlay to Nairah.
 
 The feature is client-only. It adds no API route, database model, persistence, Calendly embed, Calendly SDK, preflight request, analytics integration, or npm dependency.
 

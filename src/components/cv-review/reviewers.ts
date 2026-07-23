@@ -1,4 +1,5 @@
 export type ReviewerId = "abdo-tolba" | "omar-shawky" | "nairah";
+export type ReviewerVisualTier = "standard" | "premium-gold";
 
 export interface BookingDestination {
   readonly status: "available";
@@ -9,6 +10,7 @@ export interface ReviewerProfile {
   readonly id: ReviewerId;
   readonly displayName: string;
   readonly portraitSrc: string;
+  readonly visualTier: ReviewerVisualTier;
   readonly booking: BookingDestination;
 }
 
@@ -43,18 +45,21 @@ export const CV_REVIEWERS = [
     id: "abdo-tolba",
     displayName: "Abdo Tolba",
     portraitSrc: "https://picsum.photos/seed/abdo-tolba/900/1200",
+    visualTier: "standard",
     booking: PLACEHOLDER_DESTINATION,
   },
   {
     id: "omar-shawky",
     displayName: "Omar Shawky",
     portraitSrc: "https://picsum.photos/seed/omar-shawky/900/1200",
+    visualTier: "standard",
     booking: PLACEHOLDER_DESTINATION,
   },
   {
     id: "nairah",
     displayName: "Nairah",
     portraitSrc: "https://picsum.photos/seed/nairah/900/1200",
+    visualTier: "premium-gold",
     booking: PLACEHOLDER_DESTINATION,
   },
 ] as const satisfies readonly ReviewerProfile[];

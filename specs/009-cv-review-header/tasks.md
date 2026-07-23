@@ -185,6 +185,22 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 
 ---
 
+## Phase 11: Responsive and Contrast Polish
+
+**Purpose**: Resolve the final compact-mark, phone overflow, contrast, focus, and premium-treatment issues.
+
+- [X] T047 [US1] Increase the compact CV surface, inset the trigger label, and add small slot breathing room in `src/components/cv-review/CVReviewHeaderItem.tsx` (FR-002)
+- [X] T048 [US1] Move the CV item to the safe right edge of `ModernHeader` and bound the 320px expanded geometry inside viewport gutters in `src/components/ModernHeader.tsx` and `src/components/cv-review/CVReviewHeaderItem.tsx` (FR-005, SC-011)
+- [X] T049 [US3] Replace black selected names with high-contrast light names and dark text separation in `src/components/cv-review/CVReviewerDialog.tsx` (FR-017)
+- [X] T050 [US3] Remove normal selected/focus outlines while retaining brightness and zoom feedback in `src/components/cv-review/CVReviewerDialog.tsx` (FR-030)
+- [X] T051 [US3] Restore a data-driven, low-opacity warm overlay for Nairah without a border or size change in `src/components/cv-review/reviewers.ts` and `src/components/cv-review/CVReviewerDialog.tsx` (FR-031)
+- [X] T052 [US4] Strengthen yellow Meet contrast and remove its decorative border in `src/components/cv-review/CVReviewerDialog.tsx` (FR-032)
+- [X] T053 Run TypeScript, ESLint, whitespace, and production build validation while preserving unrelated service-worker files
+
+**Checkpoint**: The CV mark is comfortable, phone geometry is bounded, selected text is readable, photo states have no normal outline, and Nairah remains subtly premium.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

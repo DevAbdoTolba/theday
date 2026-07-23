@@ -167,8 +167,6 @@ export default function ModernHeader({
 
           <Box display="flex" alignItems="center" gap={{ xs: 0.25, sm: 1 }}>
 
-            <CVReviewHeaderItem reviewers={CV_REVIEWERS} />
-
             {/* CLASS SWITCHER CONTROL */}
             {classes.length > 1 && (
               <>
@@ -291,6 +289,8 @@ export default function ModernHeader({
                 </Menu>
               </>
             )}
+
+            <CVReviewHeaderItem reviewers={CV_REVIEWERS} />
           </Box>
         </Toolbar>
       </AppBar>

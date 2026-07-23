@@ -112,6 +112,7 @@ export default function CVReviewerDialog({
       >
         {orderedReviewers.map((reviewer, index) => {
           const isSelected = reviewer.id === selectedReviewerId;
+          const isPremium = reviewer.visualTier === "premium-gold";
 
           return (
             <Box
@@ -143,7 +144,7 @@ export default function CVReviewerDialog({
                   xs: MOBILE_CLIPS[index],
                   sm: DESKTOP_CLIPS[index],
                 },
-                zIndex: isSelected ? 4 : index + 1,
+                zIndex: index + 1,
                 "&::before": {
                   content: '""',
                   position: "absolute",
@@ -165,9 +166,19 @@ export default function CVReviewerDialog({
                     : "brightness(0.68) saturate(0.9)",
                   transform: "scale(1.025)",
                 },
-                "&:focus-within": {
-                  outline: "3px solid #fff",
-                  outlineOffset: -6,
+                "&::after": {
+                  content: isPremium ? '""' : "none",
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 0,
+                  pointerEvents: "none",
+                  background:
+                    "radial-gradient(circle at 38% 34%, rgba(255,224,122,0.20), transparent 38%), linear-gradient(135deg, rgba(231,190,82,0.10), transparent 48%)",
+                  opacity: isSelected ? 0.72 : 0.34,
+                  transition: "opacity 220ms ease",
+                },
+                "&:hover::after, &:focus-within::after": {
+                  opacity: isSelected ? 0.78 : 0.5,
                 },
                 "@media (prefers-reduced-motion: reduce)": {
                   "&::before": {
@@ -185,6 +196,8 @@ export default function CVReviewerDialog({
                   },
                   "&:focus-within": {
                     outlineColor: "Highlight",
+                    outlineStyle: "solid",
+                    outlineWidth: 2,
                   },
                 },
               }}
@@ -219,7 +232,7 @@ export default function CVReviewerDialog({
                   insetBlockStart: { xs: "48%", sm: "54%" },
                   width: "max-content",
                   maxWidth: "82%",
-                  color: "#000",
+                  color: "#fff",
                   fontSize: {
                     xs: "clamp(1.45rem, 8vw, 2.2rem)",
                     sm: "clamp(2rem, 4.4vw, 4rem)",
@@ -229,6 +242,8 @@ export default function CVReviewerDialog({
                   letterSpacing: "-0.07em",
                   textAlign: "center",
                   textTransform: "uppercase",
+                  textShadow:
+                    "0 2px 7px rgba(0,0,0,0.98), 0 0 22px rgba(0,0,0,0.86)",
                   opacity: isSelected ? 1 : 0,
                   transform: isSelected
                     ? "translate(-50%, -50%)"
@@ -304,8 +319,8 @@ export default function CVReviewerDialog({
           minHeight: { xs: 48, sm: 58 },
           px: 3.5,
           color: "#000",
-          bgcolor: "#f2ff00",
-          border: "2px solid #000",
+          bgcolor: "#ffe600",
+          border: 0,
           borderRadius: "8px 13px 7px 11px",
           fontSize: { xs: "1.2rem", sm: "1.5rem" },
           fontStyle: "italic",
@@ -320,10 +335,10 @@ export default function CVReviewerDialog({
           transition:
             "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease",
           boxShadow:
-            "0 16px 42px rgba(0,0,0,0.70), 0 0 24px rgba(242,255,0,0.24)",
+            "0 16px 42px rgba(0,0,0,0.78), 0 0 26px rgba(255,230,0,0.30)",
           "&:hover": {
             color: "#000",
-            bgcolor: "#fbff52",
+            bgcolor: "#ffef4d",
             transform: "translate(-50%, -2px)",
           },
           "&:focus-visible": {
@@ -336,7 +351,6 @@ export default function CVReviewerDialog({
           "@media (forced-colors: active)": {
             color: "ButtonText",
             bgcolor: "ButtonFace",
-            borderColor: "ButtonText",
           },
         }}
       >
