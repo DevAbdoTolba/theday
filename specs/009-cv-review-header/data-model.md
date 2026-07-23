@@ -61,7 +61,8 @@ Dialog invariants:
 - Hover/focus changes only the photo brightness.
 - Selection reveals only the selected name in high-contrast white.
 - Changing selection hides the previous name.
-- `premium-gold` adds a restrained warm image overlay only; it does not add a border.
+- `premium-gold` adds an interaction-only warm photo shimmer and a
+  selected-only gold badge; it does not add a border or change panel size.
 - Meet remains translated below the clipped dialog when selection is `null`.
 - Meet rises into view when selection is non-null and opens the configured URL in a new tab.
 - Closing clears selection.

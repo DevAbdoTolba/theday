@@ -54,7 +54,7 @@ const OrganicSurface = styled(Box)({
   '&[data-state="preview"], &[data-state="pinned"]': {
     width: "min(20rem, calc(100vw - 1rem))",
     height: "11.25rem",
-    borderRadius: "30px 42px 28px 34px / 34px 38px 30px 28px",
+    borderRadius: "30px 24px 28px 34px / 34px 24px 30px 28px",
     boxShadow:
       "0 26px 68px rgba(0,0,0,0.62), 0 0 28px rgba(255,255,255,0.09), inset 0 1px 0 rgba(255,255,255,0.18)",
   },
@@ -62,7 +62,7 @@ const OrganicSurface = styled(Box)({
     '&[data-state="preview"], &[data-state="pinned"]': {
       width: "min(18.5rem, calc(100vw - 1.5rem))",
       height: "10.75rem",
-      borderRadius: "27px 40px 30px 33px / 31px 37px 32px 29px",
+      borderRadius: "27px 24px 30px 33px / 31px 24px 32px 29px",
     },
   },
   "@media (prefers-reduced-motion: reduce)": {
@@ -98,14 +98,11 @@ const CVTrigger = styled(Button)({
   letterSpacing: "-0.055em",
   textTransform: "none",
   textShadow: "0 1px 10px rgba(255,255,255,0.25)",
-  transition:
-    "letter-spacing 180ms ease, text-shadow 180ms ease, transform 180ms ease",
+  transition: "text-shadow 180ms ease",
   "&:hover": {
     color: "#fff",
     background: "transparent",
-    letterSpacing: "-0.015em",
     textShadow: "0 0 15px rgba(255,255,255,0.55)",
-    transform: "translateY(-1px)",
   },
   "&:focus-visible": {
     outline: "3px solid #fff",

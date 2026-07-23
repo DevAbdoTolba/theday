@@ -15,10 +15,11 @@ rendered divider lines, cards, or avatars. Hover only brightens a photo;
 selection reveals one light high-contrast name and raises one yellow Meet link. All temporary
 records use Picsum photos and open `https://example.com/` in a new tab.
 
-Final polish keeps the CV mark comfortably inset, moves it to the safe right
-edge so the phone invitation grows inside the viewport, uses light selected
-names with dark separation, removes normal photo outlines, and applies a
-data-driven low-opacity warm overlay to Nairah.
+Final polish keeps the CV mark comfortably inset throughout its expansion and
+keeps the phone invitation inside the viewport. Selected names use light text
+with dark separation, normal photo outlines remain absent, and Nairah's
+data-driven premium tier adds a six-second interaction shimmer plus a
+selected-only dropping gold badge with restrained motion.
 
 The feature is client-only. It adds no API route, database model, persistence, Calendly embed, Calendly SDK, preflight request, analytics integration, or npm dependency.
 
@@ -101,7 +102,9 @@ Research decisions are consolidated in [research.md](./research.md):
 6. Keep exactly three reviewer records in a typed static configuration.
 7. Configure clean HTTPS temporary destinations and keep all three choices functional.
 8. Use a real external anchor rather than `window.open`, an iframe, or a Calendly SDK.
-9. Validate with existing Storybook and build tools instead of introducing a test framework.
+9. Implement Nairah's shimmer and badge as native CSS animation emitted through
+   the existing MUI styling layer, with reduced-motion fallbacks.
+10. Validate with existing Storybook and build tools instead of introducing a test framework.
 
 All technical unknowns are resolved. No clarification markers remain.
 

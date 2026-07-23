@@ -11,7 +11,9 @@
 ## Header Contract
 
 - The compact CV circle and expanded ad are one continuously bordered surface.
-- The CV label sits within an inset trigger area so the compact circle keeps visible internal breathing room.
+- The CV label sits within an inset trigger area so the compact circle keeps
+  visible internal breathing room. Its position, width, and top-right corner
+  clearance remain unchanged while the surrounding surface expands.
 - The approved ad is “Get hired!”, “Book a 1:1 meeting to enhance your
   CV/Resume”, and “Now!”.
 - There is no invitation scrollbar, overline, or separate X.
@@ -42,7 +44,11 @@
 - Normal focus and selection add no border or outline around a photo.
 - Selecting another reviewer hides the previous name and reveals the new name.
 - Selection resets whenever the dialog is reopened.
-- Nairah receives a restrained warm overlay glow without a border or size change.
+- Nairah receives a warm photo shimmer immediately on hover/focus and again
+  roughly every six seconds while interaction remains active.
+- Selecting Nairah drops a small gold premium badge from above; the badge uses a
+  restrained recurring dance and never covers the selected name.
+- Premium decoration adds no border, outline, or size change.
 
 ## Meet Contract
 
