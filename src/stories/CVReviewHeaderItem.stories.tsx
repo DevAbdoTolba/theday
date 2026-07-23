@@ -3,38 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { expect, userEvent, within } from "@storybook/test";
 import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
 import CVReviewHeaderItem from "@/components/cv-review/CVReviewHeaderItem";
-import {
-  CV_REVIEWERS,
-  normalizeCalendlyUrl,
-} from "@/components/cv-review/reviewers";
-import type { ReviewerProfile } from "@/components/cv-review/reviewers";
-
-const testUrls = [
-  "https://calendly.com/abdo-tolba/cv-review",
-  "https://calendly.com/omar-shawky/cv-review",
-  "https://calendly.com/nairah/cv-review",
-] as const;
-
-const availableReviewers: readonly ReviewerProfile[] = CV_REVIEWERS.map(
-  (reviewer, index) => ({
-    ...reviewer,
-    booking: normalizeCalendlyUrl(testUrls[index]),
-  }),
-);
-
-const oneUnavailableReviewer: readonly ReviewerProfile[] =
-  availableReviewers.map((reviewer) =>
-    reviewer.id === "omar-shawky"
-      ? { ...reviewer, booking: normalizeCalendlyUrl(null) }
-      : reviewer,
-  );
-
-const failedPortraitReviewers: readonly ReviewerProfile[] =
-  availableReviewers.map((reviewer) =>
-    reviewer.id === "abdo-tolba"
-      ? { ...reviewer, portraitSrc: "/missing-cv-reviewer-photo.jpg" }
-      : reviewer,
-  );
+import { CV_REVIEWERS } from "@/components/cv-review/reviewers";
 
 interface StoryFrameProps {
   readonly children: React.ReactNode;
@@ -104,7 +73,7 @@ const meta = {
     },
   },
   args: {
-    reviewers: availableReviewers,
+    reviewers: CV_REVIEWERS,
   },
 } satisfies Meta<typeof CVReviewHeaderItem>;
 
@@ -212,7 +181,7 @@ export const MobileFighterSelection320: Story = {
 
     const body = within(document.body);
     await expect(
-      body.getByRole("dialog", { name: /choose your fighter/i }),
+      body.getByRole("dialog", { name: /choose a cv reviewer/i }),
     ).toBeVisible();
     await expect(
       body.getByRole("button", { name: /close reviewer selection/i }),
@@ -220,10 +189,7 @@ export const MobileFighterSelection320: Story = {
   },
 };
 
-export const DialogOpenAllUnavailable: Story = {
-  args: {
-    reviewers: CV_REVIEWERS,
-  },
+export const DialogOpenUnselected: Story = {
   render: (args) => (
     <StoryFrame>
       <CVReviewHeaderItem {...args} />
@@ -239,13 +205,13 @@ export const DialogOpenAllUnavailable: Story = {
     );
     const body = within(document.body);
     await expect(
-      body.getByRole("dialog", { name: /choose your fighter/i }),
+      body.getByRole("dialog", { name: /choose a cv reviewer/i }),
     ).toBeVisible();
-    await expect(body.queryByRole("link", { name: /select/i })).toBeNull();
+    await expect(body.queryByRole("link", { name: /meet/i })).toBeNull();
   },
 };
 
-export const NairahSelectedPremium: Story = {
+export const NairahSelected: Story = {
   render: (args) => (
     <StoryFrame>
       <CVReviewHeaderItem {...args} />
@@ -264,11 +230,11 @@ export const NairahSelectedPremium: Story = {
     await userEvent.click(body.getByRole("radio", { name: /nairah/i }));
 
     const bookingLink = body.getByRole("link", {
-      name: /select nairah on calendly/i,
+      name: /meet nairah/i,
     });
     await expect(bookingLink).toHaveAttribute(
       "href",
-      "https://calendly.com/nairah/cv-review",
+      "https://example.com/",
     );
     await expect(bookingLink).toHaveAttribute("target", "_blank");
     await expect(bookingLink).toHaveAttribute(
@@ -278,10 +244,7 @@ export const NairahSelectedPremium: Story = {
   },
 };
 
-export const OneReviewerComingSoon: Story = {
-  args: {
-    reviewers: oneUnavailableReviewer,
-  },
+export const OmarSelected: Story = {
   render: (args) => (
     <StoryFrame>
       <CVReviewHeaderItem {...args} />
@@ -295,30 +258,13 @@ export const OneReviewerComingSoon: Story = {
     await userEvent.click(
       canvas.getByRole("button", { name: /now/i }),
     );
-    await expect(
-      within(document.body).getByRole("radio", { name: /omar shawky/i }),
-    ).toBeDisabled();
-  },
-};
-
-export const FailedPortraitFallback: Story = {
-  args: {
-    reviewers: failedPortraitReviewers,
-  },
-  render: (args) => (
-    <StoryFrame>
-      <CVReviewHeaderItem {...args} />
-    </StoryFrame>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole("button", { name: /open cv review invitation/i }),
+    const body = within(document.body);
+    await userEvent.click(body.getByRole("radio", { name: /omar shawky/i }));
+    await expect(body.getByText("Omar Shawky")).toBeVisible();
+    await expect(body.getByRole("link", { name: /meet omar shawky/i })).toHaveAttribute(
+      "href",
+      "https://example.com/",
     );
-    await userEvent.click(
-      canvas.getByRole("button", { name: /now/i }),
-    );
-    await expect(await within(document.body).findByText("AT")).toBeVisible();
   },
 };
 

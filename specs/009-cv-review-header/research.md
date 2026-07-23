@@ -247,3 +247,22 @@ Storybook/manual coverage:
 
 - Add a unit/E2E stack now: rejected as disproportionate to this feature.
 - Rely only on `next build`: rejected because builds cannot validate hover, focus, touch, motion, and external-link semantics.
+
+## R10: Full-Surface Photo Revision
+
+**Decision**: The visual reference `D:\windows\Pictures\codex\New Project
+(1).png` supersedes the earlier card/avatar/divider interpretation.
+
+- Each photo is the entire selection section.
+- Three 40% surfaces overlap at 30% intervals.
+- Complementary `clip-path` polygons make adjacent photo edges meet exactly,
+  creating diagonal desktop and mildly tilted mobile cuts without drawing lines.
+- The idle dialog has no visible text.
+- Hover/focus only raises photo brightness.
+- Selection reveals one black name and raises one yellow Meet action.
+- All placeholder records use Picsum photos and a clean
+  `https://example.com/` destination.
+
+**Rationale**: This matches the supplied reference directly, removes decorative
+layers, and keeps the effect native, responsive, and easy to replace with final
+photos later.
