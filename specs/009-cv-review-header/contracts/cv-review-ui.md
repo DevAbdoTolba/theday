@@ -24,7 +24,7 @@ Responsibilities:
 - own the `closed | preview | pinned` invitation state;
 - render the compact CV trigger and attached invitation panel;
 - distinguish a fine-pointer preview from deliberate activation;
-- provide explicit close, Escape, and click-away dismissal;
+- provide trigger-toggle, Escape, and click-away dismissal;
 - keep the connected trigger and panel as one pointer/focus interaction region;
 - open the reviewer dialog and return focus correctly when it closes;
 - expose stable state attributes for CSS and Storybook without performing animation in JavaScript.
@@ -44,11 +44,11 @@ export interface CVReviewerDialogProps {
 Responsibilities:
 
 - render a labeled MUI `Dialog`;
-- show exactly three reviewer cards in configuration order;
+- show exactly three reviewer fighter panels in the presentation order Nairah, Abdo Tolba, and Omar Shawky;
 - use one semantic radio group for selection;
 - render portraits with initials fallback;
 - keep `coming-soon` reviewers visible but disabled;
-- provide one shared booking action for the current selection;
+- keep one shared Select action below the visible dialog until a valid selection makes it rise into the lower quarter;
 - render the validated booking destination as a real external anchor.
 
 The parent resets `selectedReviewerId` to `null` each time the dialog opens and after it closes.
@@ -71,7 +71,7 @@ The parent resets `selectedReviewerId` to `null` each time the dialog opens and 
 | Click, Enter, or Space on CV trigger | Pinned | Pinned | Closed |
 | Touch tap on CV trigger | Pinned | Pinned | Closed |
 | Escape | No change | Closed | Closed |
-| Explicit close | No change | Closed | Closed |
+| CV trigger toggled | Preview | Pinned | Closed |
 | Outside interaction | No change | Closed | Closed |
 | Choose-reviewer action | — | Open dialog | Open dialog |
 
@@ -91,7 +91,7 @@ Rules:
 - It exposes `aria-expanded` and `aria-controls` whenever the invitation region can be revealed.
 - The expanded panel is a labeled region associated with the trigger.
 - Hidden content is not focusable or pointer-operable.
-- A visible close button is available in the expanded state.
+- The CV trigger itself collapses a pinned invitation; no separate X appears on the invitation.
 - Keyboard focus is always visible in light and dark themes.
 - Escape and click-away dismiss only the active non-modal invitation layer.
 
@@ -102,7 +102,7 @@ Rules:
 - Initial focus lands on a useful dialog control without preselecting a reviewer.
 - Reviewer options use radio semantics and standard arrow-key and Space behavior.
 - Name, review focus, availability, selected state, and premium decoration never depend on color alone.
-- The close control has an explicit accessible name.
+- A visible, explicitly named close control appears on phones only; desktop users dismiss with Escape or the backdrop.
 - Closing by button, Escape, or backdrop invokes the same state cleanup.
 - The shared action stays disabled until an available reviewer is selected.
 - Its accessible label names the reviewer, identifies Calendly, and warns that a new tab or window opens.
@@ -110,21 +110,25 @@ Rules:
 ## Shape and Motion Contract
 
 - The closed header slot remains fixed so opening the surface causes no header or page-flow shift.
-- The organic shell is absolutely positioned, aligned to the right, and grows leftward/downward.
-- Open inline size is no larger than `min(22rem, calc(100vw - 1rem))`.
-- Open block size is bounded by the dynamic viewport; content scrolls internally when zoom or text size requires it.
-- The shell transitions named size and asymmetric-radius properties; pseudo-elements form the halo and curved neck.
+- One bordered organic shell is absolutely positioned, aligned to the right, and grows leftward/downward from the compact circle.
+- No second outlined pseudo-element, detached connector, or intersecting circular border may appear during or after the morph.
+- Open inline size is no larger than `min(20rem, calc(100vw - 1rem))`.
+- The short ad content fits the normal supported layout without an internal scrollbar.
+- The shell transitions named size and asymmetric-radius properties as one surface.
 - Content opacity/transform begins only after the shell creates usable space.
 - Opening and closing are reversible from their current computed values.
 - No `transition: all`, JavaScript animation loop, delayed state timer, Framer Motion call, or new motion package is permitted.
 - Normal-motion target: visible response within 100 ms, shell motion around 420–480 ms, stable readable content no later than 600 ms.
 - `prefers-reduced-motion: reduce` removes decorative travel, morph emphasis, and shimmer; it uses a brief opacity/state change around 100–120 ms.
-- At 320 CSS pixels and 200% text zoom, essential copy, close controls, reviewer identities, and actions remain reachable.
+- At 320 CSS pixels, essential copy, mobile close control, reviewer identities, and actions remain reachable without normal-layout scrolling.
 
 ## Reviewer Presentation Contract
 
-- Every card has equal structural dimensions, type hierarchy, radio behavior, and selection affordance.
+- Desktop renders three equal horizontal panels with gently diagonal vertical dividers.
+- Phones render three equal stacked panels with horizontal dividers tilted slightly from top-right toward bottom-left.
+- Every panel has equal structural dimensions, radio behavior, and selection affordance.
 - All profiles support a local portrait path and deliberately styled initials fallback.
+- Portraits begin deliberately dimmed, brighten on hover/focus/selection, and reveal the name without moving the layout.
 - Nairah receives the data-driven `premium-gold` treatment:
   - thin gold outline/accent;
   - restrained warm radial background;
@@ -132,6 +136,7 @@ Rules:
   - at most one short interaction shimmer when normal motion is allowed.
 - The premium tier must not enlarge Nairah's card/avatar, hide another reviewer, run continuously, or change booking priority.
 - A missing or failed portrait must never show a broken image.
+- The shared Select action is visually below the clipped dialog and non-operable by default; selection moves it into the lower quarter and enables only the chosen reviewer destination.
 
 ## Booking Handoff Contract
 

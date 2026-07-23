@@ -46,7 +46,7 @@ Verify that both show one CV item in `ModernHeader`. Check that the item does no
 2. Move into the revealed content and confirm it remains open.
 3. Leave both trigger and panel and confirm an unpinned preview reverses smoothly.
 4. Click the trigger and confirm the panel stays pinned after the pointer leaves.
-5. Dismiss it with its close control, Escape, and an outside click.
+5. Dismiss it by activating CV again, pressing Escape, and using an outside click; confirm there is no separate X in the invitation.
 6. Repeat using Tab, Enter, Space, arrow keys in the reviewer radio group, and Escape.
 7. Rapidly enter, leave, activate, and dismiss; confirm no snap, flicker, or queued animation.
 
@@ -54,22 +54,27 @@ Verify that both show one CV item in `ModernHeader`. Check that the item does no
 
 1. Emulate touch at 320px and 375px widths.
 2. Tap the CV mark and confirm a persistent attached panel grows within 0.5rem viewport gutters.
-3. Confirm invitation content, close control, and primary action are reachable.
-4. Open the reviewer dialog and scroll if necessary; all three profiles and the shared action must remain usable.
-5. Confirm no accidental transient hover state blocks touch activation.
+3. Confirm “Get hired!”, the one-line meeting message, and “Now!” fit without an invitation scrollbar.
+4. Open the reviewer dialog and confirm all three stacked panels fit without a dialog scrollbar.
+5. Confirm the mobile dialog has an X and the desktop dialog does not.
+6. Confirm no accidental transient hover state blocks touch activation.
 
 ## Reviewer and Booking Checks
 
-1. Open the dialog and confirm the exact names Abdo Tolba, Omar Shawky, and Nairah.
+1. Open the dialog and confirm the title “Choose your fighter” and the display order Nairah, Abdo Tolba, Omar Shawky.
 2. Confirm no reviewer is selected initially.
 3. Confirm absent or failed portraits show AT, OS, and N initials.
-4. Confirm Nairah has the more visible gold premium treatment without a larger card or continuous animation.
-5. Select each available reviewer and confirm exactly one card is selected.
-6. Confirm the shared button names the current reviewer and explains that Calendly opens in a new tab/window.
-7. Inspect the link and confirm the exact reviewer URL, `target="_blank"`, and `rel="noopener noreferrer"`.
-8. Close and reopen the dialog; selection must reset.
-9. Remove or invalidate one test URL; that profile must display `Coming soon` and be non-selectable.
-10. Remove all test URLs; all profiles must remain visible and the shared action must remain disabled.
+4. Confirm Nairah has the small gold premium treatment without a larger panel or continuous animation.
+5. On desktop, confirm three equal horizontal panels have gently diagonal vertical separators.
+6. On a phone, confirm three equal stacked panels have slightly tilted horizontal separators.
+7. Confirm each portrait starts dim, brightens on hover/focus/selection, and reveals its name.
+8. Confirm Select begins non-operable below the clipped dialog, then rises into the lower quarter after selecting an available reviewer.
+9. Select each available reviewer and confirm exactly one panel is selected.
+10. Confirm Select identifies the current reviewer accessibly and explains that Calendly opens in a new tab/window.
+11. Inspect the link and confirm the exact reviewer URL, `target="_blank"`, and `rel="noopener noreferrer"`.
+12. Close and reopen the dialog; selection must reset.
+13. Remove or invalidate one test URL; that profile must display `Coming soon` and be non-selectable.
+14. Remove all test URLs; all profiles must remain visible and Select must remain hidden and non-operable.
 
 Use browser network tools to confirm that TheDay makes no request to Calendly until the external booking link is deliberately activated.
 

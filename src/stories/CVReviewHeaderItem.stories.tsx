@@ -139,7 +139,7 @@ export const HoverPreview: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await expect(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     ).toBeVisible();
   },
 };
@@ -156,7 +156,7 @@ export const PinnedOpen: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await expect(
-      canvas.getByRole("button", { name: /close cv review invitation/i }),
+      canvas.getByRole("button", { name: /collapse cv review invitation/i }),
     ).toBeVisible();
   },
 };
@@ -186,6 +186,40 @@ export const MobilePinned320: Story = {
   },
 };
 
+export const MobileFighterSelection320: Story = {
+  render: (args) => (
+    <StoryFrame>
+      <CVReviewHeaderItem {...args} />
+    </StoryFrame>
+  ),
+  parameters: {
+    viewport: {
+      defaultViewport: "mobile320",
+      viewports: {
+        mobile320: {
+          name: "Small phone (320px)",
+          styles: { width: "320px", height: "640px" },
+        },
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("button", { name: /open cv review invitation/i }),
+    );
+    await userEvent.click(canvas.getByRole("button", { name: /now/i }));
+
+    const body = within(document.body);
+    await expect(
+      body.getByRole("dialog", { name: /choose your fighter/i }),
+    ).toBeVisible();
+    await expect(
+      body.getByRole("button", { name: /close reviewer selection/i }),
+    ).toBeVisible();
+  },
+};
+
 export const DialogOpenAllUnavailable: Story = {
   args: {
     reviewers: CV_REVIEWERS,
@@ -201,15 +235,13 @@ export const DialogOpenAllUnavailable: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     );
     const body = within(document.body);
     await expect(
-      body.getByRole("dialog", { name: /pick your cv person/i }),
+      body.getByRole("dialog", { name: /choose your fighter/i }),
     ).toBeVisible();
-    await expect(
-      body.getByRole("button", { name: /choose an available reviewer/i }),
-    ).toBeDisabled();
+    await expect(body.queryByRole("link", { name: /select/i })).toBeNull();
   },
 };
 
@@ -225,14 +257,14 @@ export const NairahSelectedPremium: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     );
 
     const body = within(document.body);
     await userEvent.click(body.getByRole("radio", { name: /nairah/i }));
 
     const bookingLink = body.getByRole("link", {
-      name: /book with nairah on calendly/i,
+      name: /select nairah on calendly/i,
     });
     await expect(bookingLink).toHaveAttribute(
       "href",
@@ -261,7 +293,7 @@ export const OneReviewerComingSoon: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     );
     await expect(
       within(document.body).getByRole("radio", { name: /omar shawky/i }),
@@ -284,7 +316,7 @@ export const FailedPortraitFallback: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     );
     await expect(await within(document.body).findByText("AT")).toBeVisible();
   },
@@ -306,7 +338,7 @@ export const RapidReversal: Story = {
     await userEvent.hover(trigger);
     await userEvent.click(trigger);
     await expect(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     ).toBeVisible();
   },
 };
@@ -337,7 +369,7 @@ export const LightThemeDialog: Story = {
       canvas.getByRole("button", { name: /open cv review invitation/i }),
     );
     await userEvent.click(
-      canvas.getByRole("button", { name: /choose your reviewer/i }),
+      canvas.getByRole("button", { name: /now/i }),
     );
   },
 };
