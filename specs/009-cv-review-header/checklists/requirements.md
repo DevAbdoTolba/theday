@@ -33,6 +33,7 @@
 
 - Validation passed on the first review.
 - Revision validation passed for the one-surface morph, short ad, responsive fighter layouts, mobile-only X, and delayed Select action.
+- Full-surface photo revision validated: all choices are functional, idle visible text is empty, cut edges come from the photos, and selected-only name/Meet behavior is testable.
 - The native browser animation constraint is retained because it is an explicit product requirement and supports the project's performance and simplicity principles.
 - Final reviewer portraits, short profile descriptions, and Calendly URLs are intentionally treated as replaceable launch inputs rather than specification blockers.
 - The first release intentionally uses external booking pages instead of embedding or aggregating three live calendars.

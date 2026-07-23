@@ -168,6 +168,23 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 
 ---
 
+## Phase 10: Full-Surface Photo Selection
+
+**Purpose**: Match the supplied visual reference exactly and make every temporary reviewer path functional.
+
+- [X] T039 Replace unavailable reviewer records with three Picsum full-surface photos and functional `https://example.com/` destinations in `src/components/cv-review/reviewers.ts` (FR-014, FR-015, FR-018)
+- [X] T040 [US3] Remove the visible dialog title, descriptions, statuses, avatar containers, premium decoration, and rendered separator lines in `src/components/cv-review/CVReviewerDialog.tsx` (FR-016, FR-026)
+- [X] T041 [US3] Make the photos themselves complementary clipped desktop and mobile sections with dim idle and brightness-only hover/focus states in `src/components/cv-review/CVReviewerDialog.tsx` (FR-026, FR-027)
+- [X] T042 [US3] Reveal only the selected reviewer name in black and hide it again when selection changes in `src/components/cv-review/CVReviewerDialog.tsx` (FR-017)
+- [X] T043 [US4] Replace Select with a yellow Meet link that remains fully below the clipped dialog until selection and then opens `example.com` securely in a new tab in `src/components/cv-review/CVReviewerDialog.tsx` (FR-028, FR-029)
+- [X] T044 Update Storybook fixtures and interactions for the untitled idle dialog, selected-only names, Picsum sections, and shared example.com link in `src/stories/CVReviewHeaderItem.stories.tsx`
+- [X] T045 Run TypeScript, ESLint, whitespace, and static contract checks
+- [X] T046 Run Storybook and Next.js production builds while preserving unrelated service-worker files
+
+**Checkpoint**: The dialog is photo-only while idle, uses real clipped image boundaries, and every reviewer completes the temporary Meet flow.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

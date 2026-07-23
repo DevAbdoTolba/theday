@@ -12,12 +12,14 @@
 - Q: Which pages should show the CV header item in the first release? → A: Student dashboard and subject pages only.
 - Q: How should the CV invitation behave on desktop after hover? → A: Hover or focus opens a preview; clicking pins it open until dismissed.
 - Q: How should the CV invitation present itself on phones? → A: Tapping expands an attached organic panel adapted to the phone width.
-- Q: How should a visitor confirm their reviewer choice? → A: Select one reviewer profile, then use the shared Select action; Nairah's profile may use a more visibly premium but tasteful selection effect.
+- Q: How should a visitor confirm their reviewer choice? → A: Select one reviewer photo, then use the shared yellow Meet action.
 - Q: What service does a reviewer booking provide? → A: A live one-to-one CV review call.
 - Q: How should the compact mark connect to the expanded invitation? → A: The compact circle itself must morph into one continuous outlined surface; no second outlined circle, overlapping border, or bubble may remain visible.
 - Q: What content should appear in the expanded invitation? → A: A short ad only: “Get hired!”, “Book a 1:1 meeting to enhance your CV/Resume”, and a “Now!” action.
 - Q: How should reviewer selection adapt by screen size? → A: Desktop uses three equal horizontal fighter panels with diagonal separators; phones stack the same panels vertically with slightly tilted horizontal separators.
 - Q: Where should dialog close controls appear? → A: A visible X is mobile-only; desktop dismissal uses Escape or the backdrop.
+- Q: What exactly forms each reviewer section? → A: The image is the complete clipped section; there are no cards, avatars, divider lines, titles, or idle names.
+- Q: What temporary content makes the flow fully usable? → A: Each section uses a Picsum placeholder image and every Meet action opens `example.com` in a new tab.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -80,33 +82,33 @@ As a visitor who wants help, I open a focused dialog showing all three reviewers
 
 **Acceptance Scenarios**:
 
-1. **Given** the invitation is expanded, **When** the visitor activates “Now!”, **Then** a dialog titled “Choose your fighter” opens containing Nairah, Abdo Tolba, and Omar Shawky.
-2. **Given** final portraits have not yet been supplied, **When** the dialog opens, **Then** each reviewer has a polished fallback avatar using their initials rather than a broken or empty image.
-3. **Given** all reviewer choices are visible, **When** the visitor views or selects Nairah's profile, **Then** it has a small gold-accented premium effect that remains tasteful and does not interfere with the other choices.
-4. **Given** the dialog is open, **When** the visitor uses a keyboard or assistive technology, **Then** the dialog has a clear title, predictable focus order, descriptive reviewer controls, and reliable Escape dismissal.
-5. **Given** the dialog is open on desktop, **When** the visitor views the choices, **Then** three equal horizontal character panels fill the selection area and their boundaries use slightly diagonal dividers.
-6. **Given** the dialog is open on a phone, **When** the visitor views the choices, **Then** the panels stack vertically and each horizontal divider tilts slightly from top-right toward bottom-left without using a sharp 45-degree angle.
-7. **Given** a reviewer is idle, **When** the visitor views the panel, **Then** its portrait is deliberately dimmed and its name appears when hovered, focused, or selected as the portrait brightens.
-8. **Given** no reviewer has been selected, **When** the dialog opens, **Then** the shared Select action is disabled and visually held below the dialog.
-9. **Given** the visitor selects an available reviewer, **When** selection completes, **Then** that profile gains a clear selected state and the active Select action smoothly rises into the lower quarter of the dialog.
-10. **Given** the dialog is open, **When** viewed on desktop, **Then** no visible X is shown; on a phone, a visible X is available.
+1. **Given** the invitation is expanded, **When** the visitor activates “Now!”, **Then** an untitled image-only dialog opens with Nairah, Abdo Tolba, and Omar Shawky represented by three full-surface photos.
+2. **Given** final portraits have not yet been supplied, **When** the dialog opens, **Then** each full section uses its own Picsum placeholder photo.
+3. **Given** no reviewer is selected, **When** the dialog opens, **Then** it displays no visible title, reviewer name, description, status, or action text.
+4. **Given** the dialog is open, **When** the visitor uses a keyboard or assistive technology, **Then** the dialog has an accessible name without a visible title, predictable focus order, descriptive reviewer controls, and reliable Escape dismissal.
+5. **Given** the dialog is open on desktop, **When** the visitor views the choices, **Then** three full-height photo sections meet through their own diagonal cut edges without rendered divider lines or separate image containers.
+6. **Given** the dialog is open on a phone, **When** the visitor views the choices, **Then** three full-width photo sections stack and meet through their own slightly tilted cut edges.
+7. **Given** a reviewer is idle, **When** the visitor hovers or focuses that photo section, **Then** only the photo brightens slightly and no reviewer name appears.
+8. **Given** no reviewer has been selected, **When** the dialog opens, **Then** the yellow Meet action is non-operable and visually held completely below the dialog.
+9. **Given** the visitor selects a reviewer, **When** selection completes, **Then** only that reviewer's name appears in black inside the photo and the yellow Meet action smoothly rises into the lower quarter of the dialog.
+10. **Given** a different reviewer is selected, **When** selection changes, **Then** the previous name hides and only the newly selected reviewer name appears.
+11. **Given** the dialog is open, **When** viewed on desktop, **Then** no visible X is shown; on a phone, a visible X is available.
 
 ---
 
 ### User Story 4 - Book with the Selected Reviewer (Priority: P1)
 
-As a visitor, I choose a reviewer, confirm that choice with the shared Select action, and open that person's scheduling page in a new browser tab so I can see their current availability and book without losing my place on TheDay.
+As a visitor, I choose a reviewer, confirm that choice with the shared yellow Meet action, and open the configured page in a new browser tab without losing my place on TheDay.
 
 **Why this priority**: A successful handoff to scheduling is the feature's main outcome.
 
-**Independent Test**: Configure three test scheduling destinations, select each reviewer in turn, activate Select, and verify the correct destination opens in a new tab while the original page remains available.
+**Independent Test**: Select each reviewer in turn, activate Meet, and verify `example.com` opens in a new tab while the original page remains available.
 
 **Acceptance Scenarios**:
 
-1. **Given** a reviewer with a valid scheduling destination is selected, **When** the visitor activates Select, **Then** the matching booking page opens in a new tab and the original site remains open.
-2. **Given** a reviewer does not yet have a scheduling destination, **When** the dialog renders, **Then** that reviewer is clearly marked "Coming soon" and cannot open an empty or incorrect page.
-3. **Given** the scheduling service is unavailable, **When** the external page fails to load, **Then** the original TheDay page remains intact so the visitor can return and choose another reviewer.
-4. **Given** the visitor returns from a booking page, **When** they reopen the invitation, **Then** all three reviewer choices remain available.
+1. **Given** any reviewer is selected, **When** the visitor activates Meet, **Then** `example.com` opens in a new tab and the original site remains open.
+2. **Given** the external page is unavailable, **When** the new tab fails to load, **Then** the original TheDay page remains intact so the visitor can return and choose another reviewer.
+3. **Given** the visitor returns from the external page, **When** they reopen the invitation, **Then** all three reviewer choices remain available.
 
 ---
 
@@ -154,25 +156,27 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-011**: The expanded invitation MUST include one clear primary action labeled “Now!” that opens reviewer selection.
 - **FR-012**: Activating the primary action MUST open a modal dialog without navigating away from the current page.
 - **FR-013**: The dialog MUST present exactly three initial reviewer profiles: Abdo Tolba, Omar Shawky, and Nairah.
-- **FR-014**: Each reviewer profile MUST support a portrait, a readable name, and an individual scheduling destination.
-- **FR-015**: Until final portraits are supplied, each profile MUST show a deliberate initials-based fallback.
-- **FR-016**: Nairah's profile MUST have a clearly visible but tasteful premium treatment using a thin gold accent and a richer hover, focus, and selected-state response without obscuring names, controls, or the shared Select action.
-- **FR-017**: Selecting an available reviewer MUST mark exactly that profile as the current choice without opening a new page; one shared Select action MUST remain disabled and visually below the dialog until selection, then rise into the lower quarter and open only that reviewer's configured scheduling destination in a new browser tab.
-- **FR-018**: A reviewer without a valid scheduling destination MUST be shown as unavailable or "Coming soon" and MUST NOT open a blank, placeholder, or shared fallback link.
+- **FR-014**: Each reviewer profile MUST provide one full-surface photo, one name revealed only when selected, and one scheduling destination.
+- **FR-015**: Until final portraits are supplied, the three full-surface sections MUST use distinct Picsum placeholder photos.
+- **FR-016**: The dialog MUST show no visible title, reviewer name, description, availability label, or action before selection.
+- **FR-017**: Selecting a reviewer MUST reveal only that reviewer's black name inside the photo; changing selection MUST hide the previous name and reveal only the new name.
+- **FR-018**: Every initial reviewer MUST be selectable and MUST use `https://example.com/` as the temporary functional destination.
 - **FR-019**: The first release MUST keep reviewer comparison inside TheDay limited to profile information; it MUST NOT embed or aggregate all three live calendars.
 - **FR-020**: The modal MUST be dismissible by Escape and an appropriate outside interaction on desktop; phones MUST additionally show a visible X close control. A visible X MUST NOT appear in the desktop dialog.
 - **FR-021**: All interactions and content MUST remain usable with mouse, keyboard, touch, screen readers, 200% text zoom, and both light and dark themes.
 - **FR-022**: The experience MUST honor reduced-motion preferences and provide a low-motion equivalent that preserves state clarity.
 - **FR-023**: Motion MUST remain lightweight and device-friendly, MUST rely on native browser styling and animation capabilities, and MUST NOT require a new animation dependency.
 - **FR-024**: The expanded invitation and reviewer dialog MUST remain within the viewport and usable at widths down to 320 pixels. Their normal supported layouts MUST fit without visible internal scrollbars.
-- **FR-025**: Reviewer portraits and scheduling destinations MUST be replaceable without changing the feature's interaction or layout.
-- **FR-026**: The reviewer dialog MUST use three equal horizontal character panels with slightly diagonal separators on desktop and three equal vertically stacked panels with slightly tilted horizontal separators on phones.
-- **FR-027**: Every reviewer portrait MUST begin dimmed, brighten on hover, focus, or selection, and reveal the reviewer name beneath or beside the portrait without causing layout movement.
+- **FR-025**: Reviewer photos and scheduling destinations MUST be replaceable without changing the feature's interaction or layout.
+- **FR-026**: The reviewer dialog MUST use three equal photo sections whose clipped edges create the diagonal desktop and tilted phone boundaries; separate divider lines and nested image cards are prohibited.
+- **FR-027**: Every full-surface photo MUST begin dimmed and brighten slightly on hover or focus without revealing any visible text.
+- **FR-028**: One yellow Meet action MUST remain non-operable and translated completely below the clipped dialog until selection, then rise into the lower quarter.
+- **FR-029**: Meet MUST open `https://example.com/` in a new tab using a secure external-link handoff.
 
 ### Key Entities
 
 - **CV Invitation**: The header entry point and its collapsed/expanded state, including its label, promotional copy, and reviewer-selection action.
-- **Reviewer Profile**: A selectable person who can review a CV. Contains a display name, portrait or initials fallback, short review-focus description, visual treatment, selection state, availability state, and scheduling destination.
+- **Reviewer Profile**: A selectable person represented by a full-surface photo, a name visible only while selected, selection state, and a scheduling destination.
 - **Booking Destination**: The external scheduling page associated with one reviewer. It may be configured, missing, or temporarily unavailable.
 
 ## Success Criteria *(mandatory)*
@@ -181,11 +185,11 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 
 - **SC-001**: At least 90% of first-time test participants can identify that the "CV" header item offers CV-review help without instructions.
 - **SC-002**: At least 90% of test participants can open the invitation, choose a reviewer, confirm the choice, and reach the correct scheduling page in no more than four deliberate actions after locating the "CV" item.
-- **SC-003**: In 100% of reviewer-routing tests, Abdo Tolba, Omar Shawky, and Nairah open only their individually configured scheduling destinations.
+- **SC-003**: In 100% of temporary routing tests, Abdo Tolba, Omar Shawky, and Nairah open `https://example.com/` in a new tab.
 - **SC-004**: The invitation begins responding within 100 milliseconds of hover, focus, or tap and reaches a stable readable state within 600 milliseconds on supported representative devices.
 - **SC-005**: At least 95% of repeated open/close interactions complete without visible snapping, flicker, queued motion, or accidental activation.
 - **SC-006**: All invitation, modal, reviewer-selection, and dismissal tasks can be completed using keyboard alone and using touch alone.
-- **SC-007**: At a 320-pixel viewport width, all three stacked reviewer panels, the mobile close control, selected identity, and active Select action remain inside the viewport without a visible internal scrollbar at normal text scale.
+- **SC-007**: At a 320-pixel viewport width, all three stacked reviewer photos, the mobile close control, selected identity, and active Meet action remain inside the viewport without a visible internal scrollbar at normal text scale.
 - **SC-008**: With reduced motion enabled, 100% of the same information and actions remain available without the full morphing animation.
 - **SC-009**: In moderated copy testing, at least 80% of participants describe the message as clear and playful, and fewer than 10% describe it as insulting or confusing.
 - **SC-010**: In visual review at desktop and phone sizes, the compact-to-expanded invitation shows exactly one continuous external outline with no intersecting circle border.
@@ -193,9 +197,9 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 ## Assumptions
 
 - "Header" means the student dashboard and subject browsing header variants on phone and desktop.
-- The first release uses the reviewer modal to compare people, then opens a selected reviewer's Calendly page in a new tab.
+- The temporary release uses Picsum photos and opens `example.com` until final portraits and scheduling pages are supplied.
 - Every available booking represents a live one-to-one CV review call; its duration and meeting platform may be defined on the selected reviewer's scheduling page.
-- The three live scheduling URLs and final portraits will be supplied later and may remain unavailable placeholders until then.
+- The three final scheduling URLs and portraits will replace functional placeholders later.
 - Reviewer-focus descriptions may remain in configuration for future use but are not displayed in this compact fighter-selection release.
 - Live schedule comparison, availability aggregation, and embedded calendars are outside the first release.
 - The exact final marketing copy may change, but it will preserve the approved playful, persuasive, non-hostile tone.
@@ -208,8 +212,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - Organic collapsed, expanded, hover, focus, tap, and dismissal states.
 - Playful CV-review invitation copy and one reviewer-selection action.
 - An accessible modal with three reviewer profiles.
-- Placeholder handling for missing portraits and scheduling URLs.
-- A clearly visible but tasteful premium treatment for Nairah's profile.
+- Distinct Picsum placeholder photos and a shared functional `example.com` destination.
 - External booking handoff to each reviewer's configured scheduling page.
 - Reduced-motion, keyboard, touch, theme, and small-screen behavior.
 

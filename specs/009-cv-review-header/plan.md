@@ -8,7 +8,12 @@
 
 Add one reusable CV-review invitation to `ModernHeader`, which already serves both in-scope page families: the student dashboard and subject browsing pages. The invitation starts as a compact "CV" mark, previews on fine-pointer hover or keyboard focus, pins on activation, and uses a browser-native CSS transition to form an organic panel without shifting the header or page.
 
-The short ad opens a MUI reviewer-selection dialog backed by a strict, static three-reviewer configuration. Desktop presents three equal horizontal fighter panels with diagonal dividers; phones stack them with slightly tilted dividers. Exactly one available reviewer can be selected. A shared anchor-backed Select action rises into view and opens that reviewer's validated Calendly event link in a new browsing context. Missing or invalid links become non-selectable "Coming soon" profiles.
+The short ad opens an image-only reviewer-selection dialog backed by a strict,
+static three-reviewer configuration. Each photo is the complete clipped
+selection section. Complementary polygon cuts create the diagonal joins without
+rendered divider lines, cards, or avatars. Hover only brightens a photo;
+selection reveals one black name and raises one yellow Meet link. All temporary
+records use Picsum photos and open `https://example.com/` in a new tab.
 
 The feature is client-only. It adds no API route, database model, persistence, Calendly embed, Calendly SDK, preflight request, analytics integration, or npm dependency.
 
@@ -16,7 +21,7 @@ The feature is client-only. It adds no API route, database model, persistence, C
 
 **Language/Version**: TypeScript 5.2.2 in strict mode; React 19.2.3; Next.js 15.5.9 Pages Router
 
-**Primary Dependencies**: MUI v6, Emotion, React; existing `ClickAwayListener`, `Dialog`, `RadioGroup`, `Avatar`, `Button`, and theme utilities. Framer Motion is installed but intentionally not used by this feature.
+**Primary Dependencies**: MUI v6, Emotion, React; existing `ClickAwayListener`, `Dialog`, `RadioGroup`, `Button`, and theme utilities. Framer Motion is installed but intentionally not used by this feature.
 
 **Storage**: N/A. Reviewer configuration is static and public; invitation, dialog, and selection state live only in component memory.
 
@@ -26,9 +31,9 @@ The feature is client-only. It adds no API route, database model, persistence, C
 
 **Project Type**: Client-side UI feature in an existing Next.js web application
 
-**Performance Goals**: Visible response within 100 ms; stable readable panel within 600 ms; no header/page layout shift; no queued animations during rapid reversal; no Calendly request before deliberate booking handoff
+**Performance Goals**: Visible response within 100 ms; stable readable panel within 600 ms; no header/page layout shift; no queued animations during rapid reversal; no external request before deliberate Meet handoff other than loading the requested Picsum placeholders
 
-**Constraints**: Dashboard and subject pages only; one continuously outlined invitation surface; native browser CSS motion; no new dependency; no iframe or live availability aggregation; three reviewer profiles; responsive horizontal/vertical fighter layouts; one shared Select action; external Calendly page opens in a new browsing context; incomplete reviewer inputs must fail closed as "Coming soon"
+**Constraints**: Dashboard and subject pages only; one continuously outlined invitation surface; native browser CSS motion; no new dependency; image-only idle dialog; three full-surface clipped photo sections; no rendered divider lines/cards/avatars; one yellow Meet action; temporary `example.com` destination opens in a new browsing context
 
 **Scale/Scope**: One shared header integration, one invitation panel and dialog per rendered page, three fixed reviewer records, one in-memory selection, and three eventual public Calendly links
 
@@ -89,7 +94,7 @@ Research decisions are consolidated in [research.md](./research.md):
 4. Use an absolute, right-anchored shell with a connected trigger/panel hover region.
 5. Use MUI Dialog and radio-group semantics for one reviewer selection.
 6. Keep exactly three reviewer records in a typed static configuration.
-7. Strictly validate Calendly destinations and degrade invalid or missing values to "Coming soon".
+7. Configure clean HTTPS temporary destinations and keep all three choices functional.
 8. Use a real external anchor rather than `window.open`, an iframe, or a Calendly SDK.
 9. Validate with existing Storybook and build tools instead of introducing a test framework.
 
@@ -103,8 +108,8 @@ All technical unknowns are resolved. No clarification markers remain.
 
 ## Implementation Sequence
 
-1. Define strict reviewer types, the three stable reviewer records, and the pure Calendly URL validator.
-2. Build the responsive fighter-selection dialog with radio-group semantics, unavailable states, initials fallback, Nairah's premium tier, and the rising shared Select action.
+1. Define strict reviewer types and three functional placeholder records.
+2. Build the responsive image-section dialog with radio semantics, complementary clip paths, selected-only names, and the rising yellow Meet action.
 3. Build the header item's interaction state machine and one-surface native-CSS organic morph with the short approved ad.
 4. Mount the item once in `ModernHeader` and verify both dashboard and subject variants.
 5. Add Storybook state/viewport/theme coverage and run the quickstart validation matrix.
