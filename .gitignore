@@ -129,3 +129,11 @@ dist
 # Storybook build output
 .storybook-build
 storybook-static/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
