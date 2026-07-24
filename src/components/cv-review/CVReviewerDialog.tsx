@@ -43,18 +43,21 @@ const MOBILE_CLIP_REST = "polygon(0 3.5rem, 100% 0, 100% 100%, 0 100%)";
 const premiumShimmer = keyframes`
   0% {
     opacity: 0;
-    transform: translateX(-145%) skewX(-14deg);
+    transform: translateX(-100%) skewX(-14deg);
   }
-  3% {
-    opacity: 0.72;
+  5% {
+    opacity: 1;
   }
-  14% {
+  15% {
+    opacity: 1;
+  }
+  20% {
     opacity: 0;
-    transform: translateX(145%) skewX(-14deg);
+    transform: translateX(150%) skewX(-14deg);
   }
   100% {
     opacity: 0;
-    transform: translateX(145%) skewX(-14deg);
+    transform: translateX(150%) skewX(-14deg);
   }
 `;
 
@@ -203,6 +206,7 @@ export default function CVReviewerDialog({
               sx={{
                 position: "relative",
                 flex: isSelected ? { xs: "2.2 1 0", sm: "2.8 1 0" } : "1 1 0",
+                willChange: "flex",
                 transition: "flex 500ms cubic-bezier(0.2, 0.82, 0.2, 1)",
                 isolation: "isolate",
                 overflow: "hidden",
@@ -214,11 +218,15 @@ export default function CVReviewerDialog({
                   sm: index === 0 ? DESKTOP_CLIP_FIRST : DESKTOP_CLIP_REST,
                 },
                 zIndex: index + 1,
+                "&:hover, &:focus-within": {
+                  flex: isSelected ? { xs: "2.2 1 0", sm: "2.8 1 0" } : "1.3 1 0",
+                },
                 "&::before": {
                   content: '""',
                   position: "absolute",
                   inset: 0,
                   zIndex: -1,
+                  willChange: "transform, filter",
                   backgroundImage: `linear-gradient(rgba(0,0,0,0.34), rgba(0,0,0,0.34)), url("${reviewer.portraitSrc}")`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
@@ -238,17 +246,18 @@ export default function CVReviewerDialog({
                 "&::after": {
                   content: isPremium ? '""' : "none",
                   position: "absolute",
-                  inset: "-18% -58%",
+                  inset: "-20% -60%",
                   zIndex: 0,
                   pointerEvents: "none",
+                  willChange: "transform, opacity",
                   background:
-                    "linear-gradient(105deg, transparent 42%, rgba(255,222,107,0.12) 46%, rgba(255,252,225,0.72) 50%, rgba(255,222,107,0.16) 54%, transparent 58%)",
+                    "linear-gradient(105deg, transparent 20%, rgba(255,230,100,0.15) 35%, rgba(255,250,180,0.65) 50%, rgba(255,230,100,0.15) 65%, transparent 80%)",
                   opacity: 0,
-                  transform: "translateX(-145%) skewX(-14deg)",
+                  transform: "translateX(-150%) skewX(-14deg)",
                 },
                 "&:hover::after, &:focus-within::after": {
                   animation: isPremium
-                    ? `${premiumShimmer} 6s ease-in-out infinite`
+                    ? `${premiumShimmer} 10s ease-in-out infinite`
                     : "none",
                 },
                 "@media (prefers-reduced-motion: reduce)": {
@@ -351,7 +360,7 @@ export default function CVReviewerDialog({
                   insetInlineStart: "50%",
                   insetBlockStart: { xs: "48%", sm: "54%" },
                   width: "max-content",
-                  maxWidth: "82%",
+                  whiteSpace: "nowrap",
                   color: "#fff",
                   fontSize: {
                     xs: "clamp(1.45rem, 8vw, 2.2rem)",
