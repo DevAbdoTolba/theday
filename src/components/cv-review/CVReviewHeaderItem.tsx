@@ -231,7 +231,7 @@ export default function CVReviewHeaderItem({
     }
 
     if (nextPath !== currentPath) {
-      router.replace(nextPath, undefined, { shallow: true });
+      window.history.replaceState(null, "", nextPath);
     }
   }, [dialogOpen, selectedReviewerId, invitationState, router.isReady, router.query.q, router.asPath]);
   const updateInvitationState = (nextState: InvitationState) => {
