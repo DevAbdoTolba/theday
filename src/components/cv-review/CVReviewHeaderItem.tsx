@@ -167,8 +167,17 @@ export default function CVReviewHeaderItem({
   const [invitationState, setInvitationState] =
     useState<InvitationState>("closed");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedReviewerId, setSelectedReviewerId] =
+  const [selectedReviewerIdState, _setSelectedReviewerId] =
     useState<ReviewerId | null>(null);
+  const selectedReviewerIdRef = useRef<ReviewerId | null>(null);
+
+  const setSelectedReviewerId = React.useCallback((id: ReviewerId | null) => {
+    selectedReviewerIdRef.current = id;
+    _setSelectedReviewerId(id);
+  }, []);
+
+  // Use the state variable for rendering
+  const selectedReviewerId = selectedReviewerIdState;
   const slotRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const invitationStateRef = useRef<InvitationState>("closed");
@@ -222,9 +231,11 @@ export default function CVReviewHeaderItem({
     const currentPath = router.asPath.split('?')[0];
     let nextPath = currentPath;
 
-    if (dialogOpen) {
-      nextPath = selectedReviewerId ? `${basePath}/cv-review/${selectedReviewerId}` : `${basePath}/cv-review`;
-    } else if (invitationState === "pinned") {
+    if (dialogOpenRef.current) {
+      nextPath = selectedReviewerIdRef.current 
+        ? `${basePath}/cv-review/${selectedReviewerIdRef.current}` 
+        : `${basePath}/cv-review`;
+    } else if (invitationStateRef.current === "pinned") {
       nextPath = `${basePath}/cv-panel`;
     } else if (currentPath.includes("/cv-review") || currentPath.endsWith("/cv-panel")) {
       nextPath = basePath;
