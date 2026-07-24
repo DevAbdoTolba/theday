@@ -249,6 +249,7 @@ export default function CVReviewHeaderItem({
     }
   };
 
+
   const handleDialogOpen = () => {
     updateInvitationState("pinned");
     dialogOpenRef.current = true;

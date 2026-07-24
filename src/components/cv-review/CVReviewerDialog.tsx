@@ -6,11 +6,19 @@ import {
   Button,
   Dialog,
   IconButton,
+  Popover,
   RadioGroup,
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/material/styles";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
+
+function hasFinePointer(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  );
+}
 
 export interface CVReviewerDialogProps {
   readonly open: boolean;
@@ -71,6 +79,29 @@ const premiumBadgeDance = keyframes`
   }
 `;
 
+const consentSlideIn = keyframes`
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+`;
+
+const readyPop = keyframes`
+  0% { transform: translate(-50%, 0) scale(1); }
+  40% { transform: translate(-50%, -4px) scale(1.06); }
+  100% { transform: translate(-50%, 0) scale(1); }
+`;
+
+const CONSENT_BRIGHT = "#FFB800";
+const CONSENT_GLOW = "rgba(255, 184, 0, 0.35)";
+
+const SIMPLE_TERMS_TEXT = [
+  "We record the meeting to help build",
+  "our CV system. Your identity is kept",
+  "completely anonymous.",
+  "",
+  "By continuing, you agree to let us",
+  "use this data.",
+].join("\n");
+
 export default function CVReviewerDialog({
   open,
   reviewers,
@@ -78,6 +109,25 @@ export default function CVReviewerDialog({
   onSelect,
   onClose,
 }: CVReviewerDialogProps) {
+  const [consentState, setConsentState] = React.useState<"idle" | "reading" | "ready">("idle");
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      setConsentState("idle");
+      setAnchorEl(null);
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (consentState === "reading") {
+      const timer = setTimeout(() => {
+        setConsentState("ready");
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [consentState]);
+
   const orderedReviewers = useMemo(
     () =>
       REVIEWER_ORDER.map((id) =>
@@ -390,9 +440,22 @@ export default function CVReviewerDialog({
         aria-disabled={!selectedReviewer}
         aria-hidden={!selectedReviewer}
         tabIndex={selectedReviewer ? 0 : -1}
+        onMouseEnter={() => {
+          if (hasFinePointer() && selectedReviewer && consentState === "idle") {
+            setConsentState("reading");
+          }
+        }}
+        onFocus={() => {
+          if (selectedReviewer && consentState === "idle") {
+            setConsentState("reading");
+          }
+        }}
         onClick={(event) => {
-          if (!selectedReviewer) {
+          if (!selectedReviewer || consentState !== "ready") {
             event.preventDefault();
+            if (consentState === "idle") {
+              setConsentState("reading");
+            }
           }
         }}
         variant="contained"
@@ -413,19 +476,20 @@ export default function CVReviewerDialog({
           fontWeight: 1000,
           letterSpacing: "-0.04em",
           textTransform: "none",
-          opacity: selectedReviewer ? 1 : 0,
+          opacity: selectedReviewer ? (consentState === "reading" ? 0.6 : 1) : 0,
           pointerEvents: selectedReviewer ? "auto" : "none",
           transform: selectedReviewer
             ? "translate(-50%, 0)"
             : "translate(-50%, calc(100% + 9rem))",
           transition:
-            "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease",
+            "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease, background-color 180ms ease",
           boxShadow:
             "0 16px 42px rgba(0,0,0,0.78), 0 0 26px rgba(255,230,0,0.30)",
+          animation: consentState === "ready" ? `${readyPop} 400ms ease-out` : "none",
           "&:hover": {
             color: "#000",
-            bgcolor: "#ffef4d",
-            transform: "translate(-50%, -2px)",
+            bgcolor: consentState === "reading" ? "#ffe600" : "#ffef4d",
+            transform: consentState === "reading" ? "translate(-50%, 0)" : "translate(-50%, -2px)",
           },
           "&:focus-visible": {
             outline: "3px solid #fff",
@@ -440,8 +504,146 @@ export default function CVReviewerDialog({
           },
         }}
       >
-        Meet
+        {consentState === "reading" ? "Please Wait..." : "Meet"}
       </Button>
+
+      {/* ── Consent notice ──────────────────────────── */}
+      {(consentState === "reading" || consentState === "ready") && selectedReviewer && (
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 30,
+            insetInlineStart: "50%",
+            insetBlockEnd: { xs: "calc(4% + 64px)", sm: "calc(8% + 74px)" },
+            display: "flex",
+            alignItems: "center",
+            gap: 0.8,
+            px: 2,
+            py: 1,
+            bgcolor: "rgba(0,0,0,0.65)",
+            backdropFilter: "blur(4px)",
+            borderRadius: "10px",
+            animation: `${consentSlideIn} 320ms cubic-bezier(0.2, 0.82, 0.2, 1) both`,
+            pointerEvents: "auto",
+          }}
+        >
+          <Typography
+            component="span"
+            role="button"
+            tabIndex={0}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setAnchorEl(e.currentTarget);
+              }
+            }}
+            aria-label="Important notice about rules"
+            sx={{
+              color: CONSENT_BRIGHT,
+              fontSize: "1rem",
+              fontWeight: 900,
+              cursor: "pointer",
+              textDecoration: "underline",
+              textDecorationStyle: "wavy",
+              textDecorationColor: CONSENT_BRIGHT,
+              textUnderlineOffset: "3px",
+              filter: `drop-shadow(0 0 5px ${CONSENT_GLOW})`,
+              "&:hover": {
+                filter: `drop-shadow(0 0 10px ${CONSENT_GLOW})`,
+              },
+            }}
+          >
+            ⚠
+          </Typography>
+
+          <Typography
+            component="span"
+            sx={{
+              color: "rgba(255,255,255,0.92)",
+              fontSize: { xs: "0.8rem", sm: "0.85rem" },
+              fontWeight: 600,
+              letterSpacing: "0.01em",
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Continuing means you accept{" "}
+          </Typography>
+
+          <Typography
+            component="span"
+            role="button"
+            tabIndex={0}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setAnchorEl(e.currentTarget);
+              }
+            }}
+            sx={{
+              color: CONSENT_BRIGHT,
+              fontSize: { xs: "0.8rem", sm: "0.85rem" },
+              fontWeight: 900,
+              cursor: "pointer",
+              textDecoration: "underline",
+              textDecorationStyle: "wavy",
+              textDecorationColor: CONSENT_BRIGHT,
+              textUnderlineOffset: "3px",
+              filter: `drop-shadow(0 0 5px ${CONSENT_GLOW})`,
+              "&:hover": {
+                filter: `drop-shadow(0 0 10px ${CONSENT_GLOW})`,
+                textDecorationStyle: "solid",
+              },
+            }}
+          >
+            rules
+          </Typography>
+        </Box>
+      )}
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              mb: 1.5,
+              maxWidth: 310,
+              bgcolor: "rgba(0,0,0,0.96)",
+              border: `1px solid ${CONSENT_BRIGHT}`,
+              borderRadius: "10px",
+              p: 2,
+              boxShadow: `0 12px 36px rgba(0,0,0,0.8), 0 0 22px ${CONSENT_GLOW}`,
+            },
+          },
+        }}
+      >
+        <Typography
+          component="pre"
+          sx={{
+            m: 0,
+            fontFamily: "inherit",
+            whiteSpace: "pre-wrap",
+            fontSize: "0.88rem",
+            lineHeight: 1.5,
+            color: "#fff",
+            fontWeight: 500,
+          }}
+        >
+          {SIMPLE_TERMS_TEXT}
+        </Typography>
+      </Popover>
     </Dialog>
   );
 }
