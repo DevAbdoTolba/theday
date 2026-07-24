@@ -187,48 +187,55 @@ export default function CVReviewHeaderItem({
   const isOpen = invitationState !== "closed";
   const router = useRouter();
 
-  // 1. Listen to router path changes (and initial mount)
+  // 1. Listen to initial mount and popstate events
   React.useEffect(() => {
-    if (!router.isReady) return;
+    if (typeof window === "undefined") return;
 
-    const path = router.asPath.split('?')[0];
+    const syncStateFromUrl = () => {
+      const path = window.location.pathname;
 
-    if (path.includes("/cv-review")) {
-      setDialogOpen(true);
-      dialogOpenRef.current = true;
-      updateInvitationState("pinned");
-      
-      const idMatch = path.match(/\/cv-review\/(.+)$/);
-      if (idMatch && idMatch[1] && reviewers.some((r) => r.id === idMatch[1])) {
-        setSelectedReviewerId(idMatch[1] as ReviewerId);
+      if (path.includes("/cv-review")) {
+        setDialogOpen(true);
+        dialogOpenRef.current = true;
+        updateInvitationState("pinned");
+        
+        const idMatch = path.match(/\/cv-review\/(.+)$/);
+        if (idMatch && idMatch[1] && reviewers.some((r) => r.id === idMatch[1])) {
+          setSelectedReviewerId(idMatch[1] as ReviewerId);
+        } else {
+          setSelectedReviewerId(null);
+        }
+      } else if (path.endsWith("/cv-panel")) {
+        if (dialogOpenRef.current) {
+          setDialogOpen(false);
+          dialogOpenRef.current = false;
+          setSelectedReviewerId(null);
+        }
+        updateInvitationState("pinned");
       } else {
-        setSelectedReviewerId(null);
+        if (dialogOpenRef.current) {
+          setDialogOpen(false);
+          dialogOpenRef.current = false;
+          setSelectedReviewerId(null);
+        }
+        if (invitationStateRef.current === "pinned") {
+          updateInvitationState("closed");
+        }
       }
-    } else if (path.endsWith("/cv-panel")) {
-      if (dialogOpenRef.current) {
-        setDialogOpen(false);
-        dialogOpenRef.current = false;
-        setSelectedReviewerId(null);
-      }
-      updateInvitationState("pinned");
-    } else {
-      if (dialogOpenRef.current) {
-        setDialogOpen(false);
-        dialogOpenRef.current = false;
-        setSelectedReviewerId(null);
-      }
-      if (invitationStateRef.current === "pinned") {
-        updateInvitationState("closed");
-      }
-    }
-  }, [router.asPath, router.isReady, reviewers]);
+    };
+
+    syncStateFromUrl();
+    window.addEventListener("popstate", syncStateFromUrl);
+    return () => window.removeEventListener("popstate", syncStateFromUrl);
+  }, [reviewers]);
 
   // 2. Sync state changes to URL
   React.useEffect(() => {
-    if (!router.isReady) return;
+    if (typeof window === "undefined") return;
 
-    const basePath = `/theday/q/${router.query.q || "default"}`;
-    const currentPath = router.asPath.split('?')[0];
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.replace(/\/cv-(panel|review).*$/, '');
+    
     let nextPath = currentPath;
 
     if (dialogOpenRef.current) {
@@ -242,13 +249,9 @@ export default function CVReviewHeaderItem({
     }
 
     if (nextPath !== currentPath) {
-      router.replace(
-        { pathname: '/theday/q/[q]', query: router.query },
-        nextPath,
-        { shallow: true }
-      );
+      window.history.replaceState(null, "", nextPath + window.location.search);
     }
-  }, [dialogOpen, selectedReviewerId, invitationState, router.isReady, router.query.q, router.asPath]);
+  }, [dialogOpen, selectedReviewerId, invitationState]);
   const updateInvitationState = (nextState: InvitationState) => {
     invitationStateRef.current = nextState;
     setInvitationState(nextState);

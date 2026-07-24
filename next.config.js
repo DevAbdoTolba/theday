@@ -6,16 +6,16 @@ const nextConfig = {
   },
   rewrites: async () => [
     {
-      source: '/theday/q/:q/cv-panel',
-      destination: '/theday/q/:q',
+      source: '/:path*/cv-panel',
+      destination: '/:path*',
     },
     {
-      source: '/theday/q/:q/cv-review',
-      destination: '/theday/q/:q',
+      source: '/:path*/cv-review',
+      destination: '/:path*',
     },
     {
-      source: '/theday/q/:q/cv-review/:reviewerId',
-      destination: '/theday/q/:q',
+      source: '/:path*/cv-review/:reviewerId',
+      destination: '/:path*',
     },
   ],
 };
