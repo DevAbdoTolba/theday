@@ -598,7 +598,10 @@ export default function CVReviewerDialog({
               },
             }}
           >
-            rules
+            rules {" "}
+          </Typography>
+          <Typography>
+            🙊
           </Typography>
         </Box>
       )}

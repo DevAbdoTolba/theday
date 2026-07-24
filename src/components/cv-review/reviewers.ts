@@ -58,7 +58,7 @@ export const CV_REVIEWERS = [
   {
     id: "nairah",
     displayName: "Nairah",
-    portraitSrc: "https://picsum.photos/seed/nairah/900/1200",
+    portraitSrc: "/nairah.webp",
     visualTier: "premium-gold",
     booking: PLACEHOLDER_DESTINATION,
   },
