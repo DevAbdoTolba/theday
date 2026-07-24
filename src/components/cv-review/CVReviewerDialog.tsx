@@ -34,17 +34,11 @@ const REVIEWER_ORDER: readonly ReviewerId[] = [
   "omar-shawky",
 ];
 
-const DESKTOP_CLIPS = [
-  "polygon(0 0, 100% 0, 75% 100%, 0 100%)",
-  "polygon(25% 0, 100% 0, 75% 100%, 0 100%)",
-  "polygon(25% 0, 100% 0, 100% 100%, 0 100%)",
-] as const;
+const DESKTOP_CLIP_FIRST = "polygon(0 0, 100% 0, 100% 100%, 0 100%)";
+const DESKTOP_CLIP_REST = "polygon(3.5rem 0, 100% 0, 100% 100%, 0 100%)";
 
-const MOBILE_CLIPS = [
-  "polygon(0 0, 100% 0, 100% 75%, 0 100%)",
-  "polygon(0 25%, 100% 0, 100% 75%, 0 100%)",
-  "polygon(0 25%, 100% 0, 100% 100%, 0 100%)",
-] as const;
+const MOBILE_CLIP_FIRST = "polygon(0 0, 100% 0, 100% 100%, 0 100%)";
+const MOBILE_CLIP_REST = "polygon(0 3.5rem, 100% 0, 100% 100%, 0 100%)";
 
 const premiumShimmer = keyframes`
   0% {
@@ -193,6 +187,8 @@ export default function CVReviewerDialog({
           position: "absolute",
           inset: 0,
           overflow: "hidden",
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
         }}
       >
         {orderedReviewers.map((reviewer, index) => {
@@ -205,29 +201,17 @@ export default function CVReviewerDialog({
               key={reviewer.id}
               data-selected={isSelected ? "true" : "false"}
               sx={{
-                position: "absolute",
+                position: "relative",
+                flex: isSelected ? { xs: "2.2 1 0", sm: "2.8 1 0" } : "1 1 0",
+                transition: "flex 500ms cubic-bezier(0.2, 0.82, 0.2, 1)",
                 isolation: "isolate",
                 overflow: "hidden",
                 cursor: "pointer",
-                insetInlineStart: {
-                  xs: 0,
-                  sm: `${index * 30}%`,
-                },
-                insetBlockStart: {
-                  xs: `${index * 30}%`,
-                  sm: 0,
-                },
-                width: {
-                  xs: "100%",
-                  sm: "40%",
-                },
-                height: {
-                  xs: "40%",
-                  sm: "100%",
-                },
+                ml: { xs: 0, sm: index > 0 ? "-3.5rem" : 0 },
+                mt: { xs: index > 0 ? "-3.5rem" : 0, sm: 0 },
                 clipPath: {
-                  xs: MOBILE_CLIPS[index],
-                  sm: DESKTOP_CLIPS[index],
+                  xs: index === 0 ? MOBILE_CLIP_FIRST : MOBILE_CLIP_REST,
+                  sm: index === 0 ? DESKTOP_CLIP_FIRST : DESKTOP_CLIP_REST,
                 },
                 zIndex: index + 1,
                 "&::before": {
