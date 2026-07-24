@@ -57,7 +57,7 @@ export const CV_REVIEWERS = [
   },
   {
     id: "nairah",
-    displayName: "Nairah",
+    displayName: "Nairah A.",
     portraitSrc: "/nairah.webp",
     visualTier: "premium-gold",
     booking: PLACEHOLDER_DESTINATION,
