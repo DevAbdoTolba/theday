@@ -443,6 +443,7 @@ export default function CVReviewerDialog({
             setConsentState("reading");
           }
         }}
+        disabled={consentState === "reading"}
         onClick={(event) => {
           if (!selectedReviewer || consentState !== "ready") {
             event.preventDefault();
@@ -469,7 +470,7 @@ export default function CVReviewerDialog({
           fontWeight: 1000,
           letterSpacing: "-0.04em",
           textTransform: "none",
-          opacity: selectedReviewer ? (consentState === "reading" ? 0.6 : 1) : 0,
+          opacity: selectedReviewer ? 1 : 0,
           pointerEvents: selectedReviewer ? "auto" : "none",
           transform: selectedReviewer
             ? "translate(-50%, 0)"
@@ -480,9 +481,14 @@ export default function CVReviewerDialog({
             "0 16px 42px rgba(0,0,0,0.78), 0 0 26px rgba(255,230,0,0.30)",
           animation: consentState === "ready" ? `${readyPop} 400ms ease-out` : "none",
           "&:hover": {
-            color: "#000",
-            bgcolor: consentState === "reading" ? "#ffe600" : "#ffef4d",
-            transform: consentState === "reading" ? "translate(-50%, 0)" : "translate(-50%, -2px)",
+            bgcolor: "#ffef4d",
+            transform: "translate(-50%, -2px)",
+          },
+          "&.Mui-disabled": {
+            bgcolor: "#ccb800",
+            color: "rgba(0,0,0,0.6)",
+            boxShadow: "none",
+            transform: "translate(-50%, 0)",
           },
           "&:focus-visible": {
             outline: "3px solid #fff",
