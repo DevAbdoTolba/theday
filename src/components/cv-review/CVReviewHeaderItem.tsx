@@ -176,6 +176,53 @@ export default function CVReviewHeaderItem({
 
   const isOpen = invitationState !== "closed";
 
+  // 1. Listen to hash changes and initial mount
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncStateFromHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith("#cv-review")) {
+        setDialogOpen(true);
+        dialogOpenRef.current = true;
+        updateInvitationState("pinned");
+        
+        const id = hash.replace("#cv-review", "").replace(/^-/, "");
+        if (id && reviewers.some((r) => r.id === id)) {
+          setSelectedReviewerId(id as ReviewerId);
+        } else {
+          setSelectedReviewerId(null);
+        }
+      } else if (dialogOpenRef.current) {
+        setDialogOpen(false);
+        dialogOpenRef.current = false;
+        setSelectedReviewerId(null);
+      }
+    };
+
+    syncStateFromHash();
+    window.addEventListener("hashchange", syncStateFromHash);
+    return () => window.removeEventListener("hashchange", syncStateFromHash);
+  }, [reviewers]);
+
+  // 2. Sync state changes to URL
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const currentHash = window.location.hash;
+    let nextHash = currentHash;
+
+    if (dialogOpen) {
+      nextHash = selectedReviewerId ? `#cv-review-${selectedReviewerId}` : "#cv-review";
+    } else if (currentHash.startsWith("#cv-review")) {
+      nextHash = "";
+    }
+
+    if (nextHash !== currentHash) {
+      const url = nextHash || window.location.pathname + window.location.search;
+      window.history.replaceState(null, "", url);
+    }
+  }, [dialogOpen, selectedReviewerId]);
   const updateInvitationState = (nextState: InvitationState) => {
     invitationStateRef.current = nextState;
     setInvitationState(nextState);
