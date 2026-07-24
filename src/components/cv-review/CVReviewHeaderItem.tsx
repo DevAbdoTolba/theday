@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import { Box, Button, ClickAwayListener, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useRouter } from "next/router";
 import CVReviewerDialog from "./CVReviewerDialog";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
 
@@ -175,68 +176,64 @@ export default function CVReviewHeaderItem({
   const suppressFocusPreviewRef = useRef(false);
 
   const isOpen = invitationState !== "closed";
+  const router = useRouter();
 
-  // 1. Listen to hash changes and initial mount
+  // 1. Listen to router path changes (and initial mount)
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!router.isReady) return;
 
-    const syncStateFromHash = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith("#cv-review")) {
-        setDialogOpen(true);
-        dialogOpenRef.current = true;
-        updateInvitationState("pinned");
-        
-        const id = hash.replace("#cv-review", "").replace(/^-/, "");
-        if (id && reviewers.some((r) => r.id === id)) {
-          setSelectedReviewerId(id as ReviewerId);
-        } else {
-          setSelectedReviewerId(null);
-        }
-      } else if (hash === "#cv-panel") {
-        if (dialogOpenRef.current) {
-          setDialogOpen(false);
-          dialogOpenRef.current = false;
-          setSelectedReviewerId(null);
-        }
-        updateInvitationState("pinned");
+    const path = router.asPath.split('?')[0];
+
+    if (path.includes("/cv-review")) {
+      setDialogOpen(true);
+      dialogOpenRef.current = true;
+      updateInvitationState("pinned");
+      
+      const idMatch = path.match(/\/cv-review\/(.+)$/);
+      if (idMatch && idMatch[1] && reviewers.some((r) => r.id === idMatch[1])) {
+        setSelectedReviewerId(idMatch[1] as ReviewerId);
       } else {
-        if (dialogOpenRef.current) {
-          setDialogOpen(false);
-          dialogOpenRef.current = false;
-          setSelectedReviewerId(null);
-        }
-        if (invitationStateRef.current === "pinned") {
-          updateInvitationState("closed");
-        }
+        setSelectedReviewerId(null);
       }
-    };
-
-    syncStateFromHash();
-    window.addEventListener("hashchange", syncStateFromHash);
-    return () => window.removeEventListener("hashchange", syncStateFromHash);
-  }, [reviewers]);
+    } else if (path.endsWith("/cv-panel")) {
+      if (dialogOpenRef.current) {
+        setDialogOpen(false);
+        dialogOpenRef.current = false;
+        setSelectedReviewerId(null);
+      }
+      updateInvitationState("pinned");
+    } else {
+      if (dialogOpenRef.current) {
+        setDialogOpen(false);
+        dialogOpenRef.current = false;
+        setSelectedReviewerId(null);
+      }
+      if (invitationStateRef.current === "pinned") {
+        updateInvitationState("closed");
+      }
+    }
+  }, [router.asPath, router.isReady, reviewers]);
 
   // 2. Sync state changes to URL
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!router.isReady) return;
 
-    const currentHash = window.location.hash;
-    let nextHash = currentHash;
+    const basePath = `/theday/q/${router.query.q || "default"}`;
+    const currentPath = router.asPath.split('?')[0];
+    let nextPath = currentPath;
 
     if (dialogOpen) {
-      nextHash = selectedReviewerId ? `#cv-review-${selectedReviewerId}` : "#cv-review";
+      nextPath = selectedReviewerId ? `${basePath}/cv-review/${selectedReviewerId}` : `${basePath}/cv-review`;
     } else if (invitationState === "pinned") {
-      nextHash = "#cv-panel";
-    } else if (currentHash.startsWith("#cv-review") || currentHash === "#cv-panel") {
-      nextHash = "";
+      nextPath = `${basePath}/cv-panel`;
+    } else if (currentPath.includes("/cv-review") || currentPath.endsWith("/cv-panel")) {
+      nextPath = basePath;
     }
 
-    if (nextHash !== currentHash) {
-      const url = nextHash || window.location.pathname + window.location.search;
-      window.history.replaceState(null, "", url);
+    if (nextPath !== currentPath) {
+      router.replace(nextPath, undefined, { shallow: true });
     }
-  }, [dialogOpen, selectedReviewerId, invitationState]);
+  }, [dialogOpen, selectedReviewerId, invitationState, router.isReady, router.query.q, router.asPath]);
   const updateInvitationState = (nextState: InvitationState) => {
     invitationStateRef.current = nextState;
     setInvitationState(nextState);

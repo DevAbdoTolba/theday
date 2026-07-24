@@ -4,6 +4,20 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV !== "development",
   },
+  rewrites: async () => [
+    {
+      source: '/theday/q/:q/cv-panel',
+      destination: '/theday/q/:q',
+    },
+    {
+      source: '/theday/q/:q/cv-review',
+      destination: '/theday/q/:q',
+    },
+    {
+      source: '/theday/q/:q/cv-review/:reviewerId',
+      destination: '/theday/q/:q',
+    },
+  ],
 };
 
 // The hidden /grad section responds with Cache-Control: no-store, but
