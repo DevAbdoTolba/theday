@@ -193,10 +193,22 @@ export default function CVReviewHeaderItem({
         } else {
           setSelectedReviewerId(null);
         }
-      } else if (dialogOpenRef.current) {
-        setDialogOpen(false);
-        dialogOpenRef.current = false;
-        setSelectedReviewerId(null);
+      } else if (hash === "#cv-panel") {
+        if (dialogOpenRef.current) {
+          setDialogOpen(false);
+          dialogOpenRef.current = false;
+          setSelectedReviewerId(null);
+        }
+        updateInvitationState("pinned");
+      } else {
+        if (dialogOpenRef.current) {
+          setDialogOpen(false);
+          dialogOpenRef.current = false;
+          setSelectedReviewerId(null);
+        }
+        if (invitationStateRef.current === "pinned") {
+          updateInvitationState("closed");
+        }
       }
     };
 
@@ -214,7 +226,9 @@ export default function CVReviewHeaderItem({
 
     if (dialogOpen) {
       nextHash = selectedReviewerId ? `#cv-review-${selectedReviewerId}` : "#cv-review";
-    } else if (currentHash.startsWith("#cv-review")) {
+    } else if (invitationState === "pinned") {
+      nextHash = "#cv-panel";
+    } else if (currentHash.startsWith("#cv-review") || currentHash === "#cv-panel") {
       nextHash = "";
     }
 
@@ -222,7 +236,7 @@ export default function CVReviewHeaderItem({
       const url = nextHash || window.location.pathname + window.location.search;
       window.history.replaceState(null, "", url);
     }
-  }, [dialogOpen, selectedReviewerId]);
+  }, [dialogOpen, selectedReviewerId, invitationState]);
   const updateInvitationState = (nextState: InvitationState) => {
     invitationStateRef.current = nextState;
     setInvitationState(nextState);
