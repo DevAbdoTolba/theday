@@ -44,14 +44,14 @@ export const CV_REVIEWERS = [
   {
     id: "abdo-tolba",
     displayName: "Abdo Tolba",
-    portraitSrc: "https://picsum.photos/seed/abdo-tolba/900/1200",
+    portraitSrc: "/abdo-tolba.webp",
     visualTier: "standard",
     booking: PLACEHOLDER_DESTINATION,
   },
   {
     id: "omar-shawky",
     displayName: "Omar Shawky",
-    portraitSrc: "https://picsum.photos/seed/omar-shawky/900/1200",
+    portraitSrc: "/grad-cv-leaf.webp",
     visualTier: "standard",
     booking: PLACEHOLDER_DESTINATION,
   },
