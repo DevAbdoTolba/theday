@@ -40,20 +40,28 @@ const PLACEHOLDER_DESTINATION = createBookingDestination(
   "https://example.com/",
 );
 
+const ABDO_DESTINATION = createBookingDestination(
+  "https://calendly.com/abdo_tolba/cv-review-meeting",
+);
+
+const OMAR_DESTINATION = createBookingDestination(
+  "https://calendly.com/omargenius2015/cv-review-meeting",
+);
+
 export const CV_REVIEWERS = [
   {
     id: "abdo-tolba",
     displayName: "Abdo Tolba",
     portraitSrc: "/abdo-tolba.webp",
     visualTier: "standard",
-    booking: PLACEHOLDER_DESTINATION,
+    booking: ABDO_DESTINATION,
   },
   {
     id: "omar-shawky",
     displayName: "Omar Shawky",
     portraitSrc: "/grad-cv-leaf.webp",
     visualTier: "standard",
-    booking: PLACEHOLDER_DESTINATION,
+    booking: OMAR_DESTINATION,
   },
   {
     id: "nairah",

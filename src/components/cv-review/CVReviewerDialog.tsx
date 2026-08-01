@@ -422,12 +422,10 @@ export default function CVReviewerDialog({
 
       <Button
         component="a"
-        href={selectedReviewer?.booking.url}
-        target={selectedReviewer ? "_blank" : undefined}
-        rel={selectedReviewer ? "noopener noreferrer" : undefined}
+        href={selectedReviewer ? `/grad/d/cv/meet/${selectedReviewer.id}` : undefined}
         aria-label={
           selectedReviewer
-            ? `Meet ${selectedReviewer.displayName} — opens example.com in a new tab`
+            ? `Meet ${selectedReviewer.displayName}`
             : "Select a reviewer first"
         }
         aria-disabled={!selectedReviewer}
