@@ -5,7 +5,7 @@ import type { GetServerSideProps } from "next";
 import { Box, CircularProgress, Typography, IconButton } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import Link from "next/link";
-import { CV_REVIEWERS } from "../../../../../../components/cv-review/reviewers";
+import { CV_REVIEWERS } from "../../../../../components/cv-review/reviewers";
 
 interface Props {
   reviewerId: string;
