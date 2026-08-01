@@ -193,15 +193,15 @@ export default function CVReviewHeaderItem({
 
     const syncStateFromUrl = () => {
       const path = window.location.pathname;
+      const hash = window.location.hash.replace(/^#/, '');
 
       if (path.includes("/cv-review")) {
         setDialogOpen(true);
         dialogOpenRef.current = true;
         updateInvitationState("pinned");
         
-        const idMatch = path.match(/\/cv-review\/(.+)$/);
-        if (idMatch && idMatch[1] && reviewers.some((r) => r.id === idMatch[1])) {
-          setSelectedReviewerId(idMatch[1] as ReviewerId);
+        if (hash && reviewers.some((r) => r.id === hash)) {
+          setSelectedReviewerId(hash as ReviewerId);
         } else {
           setSelectedReviewerId(null);
         }
@@ -226,7 +226,11 @@ export default function CVReviewHeaderItem({
 
     syncStateFromUrl();
     window.addEventListener("popstate", syncStateFromUrl);
-    return () => window.removeEventListener("popstate", syncStateFromUrl);
+    window.addEventListener("hashchange", syncStateFromUrl);
+    return () => {
+      window.removeEventListener("popstate", syncStateFromUrl);
+      window.removeEventListener("hashchange", syncStateFromUrl);
+    };
   }, [reviewers]);
 
   // 2. Sync state changes to URL
@@ -234,22 +238,25 @@ export default function CVReviewHeaderItem({
     if (typeof window === "undefined") return;
 
     const currentPath = window.location.pathname;
+    const currentHash = window.location.hash;
     const basePath = currentPath.replace(/\/cv-(panel|review).*$/, '');
     
     let nextPath = currentPath;
+    let nextHash = currentHash;
 
     if (dialogOpenRef.current) {
-      nextPath = selectedReviewerIdRef.current 
-        ? `${basePath}/cv-review/${selectedReviewerIdRef.current}` 
-        : `${basePath}/cv-review`;
+      nextPath = `${basePath}/cv-review`;
+      nextHash = selectedReviewerIdRef.current ? `#${selectedReviewerIdRef.current}` : "";
     } else if (invitationStateRef.current === "pinned") {
       nextPath = `${basePath}/cv-panel`;
+      nextHash = "";
     } else if (currentPath.includes("/cv-review") || currentPath.endsWith("/cv-panel")) {
       nextPath = basePath;
+      nextHash = "";
     }
 
-    if (nextPath !== currentPath) {
-      window.history.replaceState(null, "", nextPath + window.location.search);
+    if (nextPath !== currentPath || nextHash !== currentHash) {
+      window.history.replaceState(null, "", nextPath + window.location.search + nextHash);
     }
   }, [dialogOpen, selectedReviewerId, invitationState]);
   const updateInvitationState = (nextState: InvitationState) => {
