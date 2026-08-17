@@ -13,6 +13,7 @@ const Visibility = dynamic(() => import('@mui/icons-material/Visibility'), { ssr
 const PlayCircle = dynamic(() => import('@mui/icons-material/PlayCircle'), { ssr: false });
 const FolderOpen = dynamic(() => import('@mui/icons-material/FolderOpen'), { ssr: false });
 const CheckCircle = dynamic(() => import('@mui/icons-material/CheckCircle'), { ssr: false });
+const AddCircleOutline = dynamic(() => import('@mui/icons-material/AddCircleOutline'), { ssr: false });
 
 // Left-side File Type Icon
 const FileIcon = ({ type }: { type: ParsedFile['type'] }) => (
@@ -56,9 +57,17 @@ const FileListItemBase = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (studySelectable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onStudySelect?.(file);
+    }
+  };
+
   // Right-side Action Icon Logic
   const getActionIcon = () => {
     if (studySelectable && isSelected) return <CheckCircle fontSize="small" color="primary" />;
+    if (studySelectable) return <AddCircleOutline fontSize="small" color="primary" />;
     if (file.type === 'folder') return <FolderOpen fontSize="small" />;
     if (file.type === 'youtube' || file.type === 'video') return <PlayCircle fontSize="small" />;
     return <Visibility fontSize="small" />;
@@ -67,8 +76,13 @@ const FileListItemBase = ({
   return (
     <Paper
       component="a"
-      href={file.url}
+      href={studySelectable ? undefined : file.url}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role={studySelectable ? 'button' : undefined}
+      tabIndex={studySelectable ? 0 : undefined}
+      aria-pressed={studySelectable ? isSelected : undefined}
+      aria-label={studySelectable ? `Toggle ${file.name} in study set` : undefined}
       elevation={0}
       sx={{
         display: 'flex',
@@ -76,27 +90,41 @@ const FileListItemBase = ({
         p: 1.5,
         mb: 1,
         textDecoration: 'none',
+        width: '100%',
+        color: 'inherit',
+        font: 'inherit',
+        textAlign: 'left',
         borderRadius: 2,
         border: `1px solid ${
           isSelected
-            ? theme.palette.primary.main
+            ? '#7c3aed'
+            : studySelectable
+              ? alpha('#7c3aed', 0.3)
             : isNew
               ? theme.palette.success.main
               : theme.palette.divider
         }`,
-        transition: 'all 0.15s ease',
+        transition: 'transform 160ms ease-out, border-color 160ms ease-out, background-color 160ms ease-out, box-shadow 160ms ease-out',
         cursor: 'pointer',
         bgcolor: isSelected
-          ? alpha(theme.palette.primary.main, 0.06)
+          ? alpha('#7c3aed', 0.09)
+          : studySelectable
+            ? alpha('#7c3aed', 0.025)
           : isNew
             ? `${theme.palette.success.main}08`
             : 'transparent',
         '&:hover': {
           bgcolor: isSelected
-            ? alpha(theme.palette.primary.main, 0.10)
+            ? alpha('#7c3aed', 0.13)
+            : studySelectable
+              ? alpha('#7c3aed', 0.065)
             : theme.palette.action.hover,
-          borderColor: theme.palette.primary.main,
-          transform: 'translateX(4px)',
+          borderColor: studySelectable ? alpha('#7c3aed', 0.72) : theme.palette.primary.main,
+          transform: 'translateX(2px)',
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          transition: 'none',
+          '&:hover': { transform: 'none' },
         },
       }}
     >
@@ -136,7 +164,7 @@ const FileListItemBase = ({
       </Box>
 
       {/* Action Icon */}
-      <Tooltip title="Open">
+      <Tooltip title={studySelectable ? (isSelected ? 'Selected' : 'Add to study set') : 'Open'}>
         <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', opacity: 0.7 }}>
           {getActionIcon()}
         </Box>

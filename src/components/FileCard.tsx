@@ -154,14 +154,14 @@ const FileCardBase = ({
           }
         }}
         onClick={(e) => {
-          if (file.type === 'youtube') {
+          if (!studySelectable && file.type === 'youtube') {
             e.preventDefault();
             if (onClick) onClick();
           }
         }}
       >
         {/* Zoom icon - always visible on mobile, clickable */}
-        {!isDesktop && (
+        {!isDesktop && !studySelectable && (
           <Box
             onClick={handleMobileZoom}
             sx={{
@@ -189,23 +189,6 @@ const FileCardBase = ({
         )}
 
         {/* Click capture layer for study mode — must be on top of everything */}
-        {studySelectable && (
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 20,
-              cursor: 'pointer',
-              borderRadius: 'inherit',
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onStudySelect?.(file);
-            }}
-          />
-        )}
-
         {/* Study Mode selection overlay */}
         {studySelectable && (
           <SelectionOverlay isSelectable={studySelectable} fileId={file.id} />
@@ -214,7 +197,12 @@ const FileCardBase = ({
         <CardActionArea
           component={studySelectable ? 'div' : 'a'}
           {...(!studySelectable && { href: file.url, target: '_blank', rel: 'noopener noreferrer' })}
-          onClick={studySelectable ? (e: React.MouseEvent) => { e.preventDefault(); onStudySelect?.(file); } : undefined}
+          aria-label={studySelectable ? `Toggle ${file.name} in study set` : undefined}
+          onClick={studySelectable ? (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onStudySelect?.(file);
+          } : undefined}
           sx={{
             flexGrow: 1,
             display: 'flex',

@@ -1,15 +1,15 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { Box, Button, useTheme } from '@mui/material';
+import { Box, ButtonBase, alpha, useTheme } from '@mui/material';
 import { useStudySession } from '../../context/StudySessionContext';
 import { trackStudyToggle } from '../../utils/clarity';
 
 const AutoAwesome = dynamic(() => import('@mui/icons-material/AutoAwesome'), { ssr: false });
 
 export default function StudyModeToggle() {
-  const { isActive, toggleMode } = useStudySession();
+  const { isActive, itemCount, toggleMode } = useStudySession();
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const accent = theme.palette.primary.main;
 
   const handleToggle = () => {
     trackStudyToggle(!isActive);
@@ -17,70 +17,99 @@ export default function StudyModeToggle() {
   };
 
   return (
-    <Button
+    <ButtonBase
       onClick={handleToggle}
-      size="small"
-      disableRipple={false}
+      aria-pressed={isActive}
+      aria-label={`AI Study Mode ${isActive ? 'on' : 'off'}. ${itemCount} selected.`}
       data-study-toggle="true"
       sx={{
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        background: isActive
-          ? 'linear-gradient(135deg, #8b5cf6 0%, #3b82f6 60%, #06b6d4 100%)'
-          : isDark
-            ? 'rgba(139,92,246,0.13)'
-            : 'rgba(139,92,246,0.07)',
-        border: isActive
-          ? '1px solid rgba(139,92,246,0.75)'
-          : `1px solid rgba(139,92,246,${isDark ? '0.3' : '0.2'})`,
-        borderRadius: '20px',
-        px: 1.5,
-        py: 0.6,
-        minWidth: 0,
-        color: isActive
-          ? '#fff'
-          : isDark ? 'rgba(167,139,250,1)' : 'rgba(109,40,217,1)',
-        fontWeight: 700,
-        fontSize: '0.72rem',
-        letterSpacing: '0.3px',
-        textTransform: 'none',
-        lineHeight: 1,
-        boxShadow: isActive
-          ? '0 0 20px rgba(139,92,246,0.55), 0 0 40px rgba(59,130,246,0.25), 0 6px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.22)'
-          : isDark
-            ? '0 4px 12px rgba(139,92,246,0.18), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)'
-            : '0 4px 12px rgba(139,92,246,0.12), 0 2px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
-        transition: 'all 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: 'translateY(0px)',
-        willChange: 'transform, box-shadow',
+        position: 'relative',
+        width: 40,
+        height: 40,
+        flexShrink: 0,
+        border: `1px solid ${isActive ? alpha(accent, 0.46) : theme.palette.divider}`,
+        borderRadius: 2,
+        bgcolor: isActive ? alpha(accent, theme.palette.mode === 'dark' ? 0.15 : 0.08) : 'transparent',
+        boxShadow: isActive ? `inset 0 0 0 1px ${alpha(accent, 0.07)}` : 'none',
+        transition: 'background-color 160ms ease-out, border-color 160ms ease-out, transform 100ms ease-out',
         '&:hover': {
-          transform: 'translateY(-2px)',
-          background: isActive
-            ? 'linear-gradient(135deg, #7c3aed 0%, #2563eb 60%, #0891b2 100%)'
-            : isDark
-              ? 'rgba(139,92,246,0.22)'
-              : 'rgba(139,92,246,0.13)',
-          boxShadow: isActive
-            ? '0 0 28px rgba(139,92,246,0.7), 0 0 56px rgba(59,130,246,0.35), 0 10px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.25)'
-            : isDark
-              ? '0 6px 18px rgba(139,92,246,0.28), 0 4px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)'
-              : '0 6px 18px rgba(139,92,246,0.2), 0 4px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
+          bgcolor: isActive
+            ? alpha(accent, theme.palette.mode === 'dark' ? 0.2 : 0.12)
+            : alpha(theme.palette.text.primary, 0.045),
+          borderColor: isActive ? alpha(accent, 0.56) : alpha(theme.palette.text.primary, 0.2),
         },
-        '&:active': {
-          transform: 'translateY(0px)',
+        '&:active': { transform: 'scale(0.94)' },
+        '&.Mui-focusVisible': {
+          outline: `2px solid ${alpha(accent, 0.72)}`,
+          outlineOffset: 2,
         },
-        animation: isActive ? 'studyButtonPulse 2.5s ease-in-out infinite' : 'none',
         '@media (prefers-reduced-motion: reduce)': {
-          animation: 'none',
-          transform: 'none',
-          '&:hover': { transform: 'none' },
+          transition: 'none',
+          '&:active': { transform: 'none' },
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <AutoAwesome sx={{ fontSize: 13, opacity: isActive ? 1 : 0.75 }} />
-        <span>{isActive ? 'Studying' : 'Study'}</span>
+      <Box
+        sx={{
+          width: 28,
+          height: 28,
+          display: 'grid',
+          placeItems: 'center',
+          color: '#fff',
+          borderRadius: 1.6,
+          background: 'linear-gradient(145deg, #a855f7 0%, #6366f1 52%, #0ea5e9 100%)',
+          boxShadow: isActive
+            ? `0 0 0 2px ${theme.palette.background.paper}, 0 0 0 4px ${alpha(accent, 0.26)}`
+            : 'inset 0 1px 0 rgba(255,255,255,0.28)',
+          transition: 'box-shadow 160ms ease-out, transform 160ms ease-out',
+        }}
+      >
+        <AutoAwesome sx={{ fontSize: 17 }} />
       </Box>
-    </Button>
+
+      {itemCount > 0 && (
+        <Box
+          component="span"
+          aria-hidden="true"
+          sx={{
+            position: 'absolute',
+            top: -5,
+            right: -5,
+            minWidth: 19,
+            height: 19,
+            px: 0.45,
+            display: 'grid',
+            placeItems: 'center',
+            color: '#fff',
+            bgcolor: theme.palette.primary.main,
+            border: `2px solid ${theme.palette.background.paper}`,
+            borderRadius: '999px',
+            fontSize: '0.62rem',
+            fontWeight: 800,
+            fontVariantNumeric: 'tabular-nums',
+            lineHeight: 1,
+          }}
+        >
+          {itemCount}
+        </Box>
+      )}
+
+      <Box
+        component="span"
+        sx={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          p: 0,
+          m: -1,
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        AI Study
+      </Box>
+    </ButtonBase>
   );
 }

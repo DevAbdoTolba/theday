@@ -227,6 +227,41 @@ export default function FileBrowser({
             justifyContent: { xs: "space-between", md: "flex-end" },
           }}
         >
+          <Tooltip
+            open={showHint ? true : undefined}
+            title={studyModeActive
+              ? 'AI Study is on — select any source below'
+              : 'AI Study — build a source set for NotebookLM'}
+            arrow
+            placement="bottom-start"
+            disableHoverListener={showHint}
+            disableFocusListener={showHint}
+            disableTouchListener={showHint}
+            slotProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: alpha(theme.palette.primary.main, 0.94),
+                  color: '#fff',
+                  fontWeight: 650,
+                  fontSize: '0.75rem',
+                  px: 1.5,
+                  py: 0.85,
+                  borderRadius: 2,
+                },
+              },
+              arrow: { sx: { color: alpha(theme.palette.primary.main, 0.94) } },
+            }}
+          >
+            <Box sx={{ display: 'flex' }}>
+              <StudyModeToggle />
+            </Box>
+          </Tooltip>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ height: 24, alignSelf: 'center', mx: 0.5 }}
+          />
+
           {/* View Mode Toggle - Grid/List */}
           <ToggleButtonGroup
             value={viewMode}
@@ -235,10 +270,30 @@ export default function FileBrowser({
             size="small"
             sx={{
               height: 40,
+              overflow: 'hidden',
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: '999px',
               "& .MuiToggleButton-root": {
-                borderRadius: 2,
                 px: 2,
-                border: `1px solid ${theme.palette.divider}`,
+                m: '0 !important',
+                color: 'text.secondary',
+                border: '0 !important',
+                borderRadius: '0 !important',
+                transition: 'color 160ms ease-out, background-color 160ms ease-out',
+                '&:not(:first-of-type)': {
+                  borderLeft: `1px solid ${theme.palette.divider} !important`,
+                },
+                '&.Mui-selected': {
+                  color: theme.palette.primary.contrastText,
+                  bgcolor: theme.palette.primary.main,
+                },
+                '&.Mui-selected:hover': {
+                  color: theme.palette.primary.contrastText,
+                  bgcolor: theme.palette.primary.dark,
+                },
+                '@media (prefers-reduced-motion: reduce)': {
+                  transition: 'none',
+                },
               },
             }}
           >
@@ -274,40 +329,6 @@ export default function FileBrowser({
               </ToggleButton>
             </Tooltip>
           )}
-          <Divider
-            orientation="vertical"
-            flexItem
-            sx={{ height: 24, alignSelf: "center", mx: 0.5 }}
-          />
-          <Tooltip
-            open={showHint}
-            title="Tap any file to add it to your study list"
-            arrow
-            placement="bottom"
-            disableHoverListener
-            disableFocusListener
-            disableTouchListener
-            slotProps={{
-              tooltip: {
-                sx: {
-                  bgcolor: alpha(theme.palette.primary.main, 0.92),
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  px: 1.5,
-                  py: 0.75,
-                  borderRadius: 2,
-                },
-              },
-              arrow: {
-                sx: { color: alpha(theme.palette.primary.main, 0.92) },
-              },
-            }}
-          >
-            <Box sx={{ display: 'flex' }}>
-              <StudyModeToggle />
-            </Box>
-          </Tooltip>
           <Divider
             orientation="vertical"
             flexItem
