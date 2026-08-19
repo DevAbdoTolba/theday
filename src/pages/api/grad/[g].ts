@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getGradSection, fetchGradTree } from "../../../lib/grad-server";
+import { serverInvalidate } from "../../../lib/server-cache";
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,6 +20,15 @@ export default async function handler(
   }
 
   try {
+    // Owner lever: append ?fresh=1 after editing Drive to drop this
+    // instance's cached trees and rebuild immediately instead of waiting
+    // out the 10-minute TTL. (Per serverless instance, hence the prefix
+    // invalidation — trees are few and cheap to rebuild.)
+    if (req.query.fresh === "1") {
+      serverInvalidate("grad-tree:");
+      serverInvalidate("grad-thumb");
+    }
+
     const tree = await fetchGradTree(g);
     if (!tree) {
       return res.status(404).json({ message: "Not found" });
