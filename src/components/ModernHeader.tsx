@@ -12,6 +12,8 @@ import SearchDialog from "../components/SearchDialog";
 import { ColorModeContext, offlineContext } from "../pages/_app";
 import ModernKeyDialog from "./ModernKeyDialog";
 import { DataContext } from "../context/TranscriptContext";
+import CVReviewHeaderItem from "./cv-review/CVReviewHeaderItem";
+import { CV_REVIEWERS } from "./cv-review/reviewers";
 
 // Dynamic imports for MUI icons
 const Search = dynamic(() => import("@mui/icons-material/Search"), { ssr: false });
@@ -163,7 +165,7 @@ export default function ModernHeader({
             </Button>
           )}
 
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" alignItems="center" gap={{ xs: 0.25, sm: 1 }}>
 
             {/* CLASS SWITCHER CONTROL */}
             {classes.length > 1 && (
@@ -287,6 +289,8 @@ export default function ModernHeader({
                 </Menu>
               </>
             )}
+
+            <CVReviewHeaderItem reviewers={CV_REVIEWERS} />
           </Box>
         </Toolbar>
       </AppBar>
