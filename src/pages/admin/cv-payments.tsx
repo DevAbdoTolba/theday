@@ -21,15 +21,12 @@ import {
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import CheckRounded from "@mui/icons-material/CheckRounded";
-import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import AdminGuard from "../../components/admin/AdminGuard";
 import { useAuth } from "../../hooks/useAuth";
 
 interface PaymentSubmission {
   readonly id: string;
-  readonly fullName: string;
-  readonly email: string;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
   readonly status: "pending" | "confirmed";
@@ -86,15 +83,6 @@ function CvPaymentsContent() {
     void loadSubmissions();
   }, [loadSubmissions]);
 
-  const copyEmail = async (email: string) => {
-    try {
-      await navigator.clipboard.writeText(email);
-      setNotice("Email copied. Send Nairah’s Calendly link manually.");
-    } catch {
-      setNotice("Could not copy the email. Please copy it manually.");
-    }
-  };
-
   const confirmPayment = async (submissionId: string) => {
     setIsConfirming(submissionId);
     setError(null);
@@ -118,7 +106,7 @@ function CvPaymentsContent() {
           submission.id === body.submission.id ? body.submission : submission,
         ),
       );
-      setNotice("Payment marked confirmed. Copy the email and send the Calendly link manually.");
+      setNotice("Payment marked confirmed.");
     } catch (confirmError) {
       setError(confirmError instanceof Error ? confirmError.message : "Could not confirm payment.");
     } finally {
@@ -143,7 +131,7 @@ function CvPaymentsContent() {
               Nairah CV payments
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: "47rem" }}>
-              Confirm only after checking the InstaPay transfer. Then copy the email and send Nairah&apos;s Calendly link yourself.
+              Confirm only after checking the InstaPay transfer.
             </Typography>
           </Box>
           <Tooltip title="Refresh submissions">
@@ -170,8 +158,6 @@ function CvPaymentsContent() {
               <Table size="small" aria-label="Nairah CV payment submissions">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
                     <TableCell>Service</TableCell>
                     <TableCell>Price</TableCell>
                     <TableCell>Submitted</TableCell>
@@ -184,12 +170,6 @@ function CvPaymentsContent() {
                     const isPending = submission.status === "pending";
                     return (
                       <TableRow key={submission.id} hover>
-                        <TableCell sx={{ fontWeight: 750 }}>{submission.fullName}</TableCell>
-                        <TableCell sx={{ minWidth: 220 }}>
-                          <Button size="small" onClick={() => void copyEmail(submission.email)} startIcon={<ContentCopyRounded fontSize="small" />} sx={{ textTransform: "none", justifyContent: "start", maxWidth: "100%" }}>
-                            {submission.email}
-                          </Button>
-                        </TableCell>
                         <TableCell>{submission.serviceTitle}</TableCell>
                         <TableCell>{formatPrice(submission.priceEgp)}</TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>

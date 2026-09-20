@@ -227,6 +227,15 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T064 Update payment, manual-approval, routing, and transition requirements in the feature documents (FR-018, FR-029, FR-033–FR-037)
 - [X] T065 Run TypeScript, ESLint, whitespace, and production-build validation after the payment-flow implementation
 
+## Phase 14: Simplified Anonymous Nairah Payment Flow
+
+**Purpose**: Replace the dense email-based payment form with the approved two-step guide-image and QR journey.
+
+- [X] T066 [US6] Add a clean return route, make service-price configuration visibly explicit, and simplify payment into guide-image confirmation then QR in `src/pages/grad/d/cv/meet/[reviewer].tsx` and `src/components/cv-review/nairah-services.ts` (FR-033, FR-034, FR-037)
+- [X] T067 [US7] Remove name/email collection, storage, API output, and admin copying while retaining anonymous manual confirmation in `src/lib/models/cv-payment-submission.ts`, `src/pages/api/cv-payments/index.ts`, `src/pages/api/admin/cv-payments.ts`, and `src/pages/admin/cv-payments.tsx` (FR-035, FR-036)
+- [X] T068 [US4] Render the Nairah transition in a top-level portal and delay routing until the button-origin expansion is visible in `src/components/cv-review/CVReviewerDialog.tsx` (FR-029)
+- [X] T069 Update feature documentation and run TypeScript, ESLint, whitespace, and production-build validation (FR-033 through FR-037)
+
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 
 ---

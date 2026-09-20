@@ -3,13 +3,9 @@ import { connectMongo } from "../../../lib/mongo";
 import CvPaymentSubmissionModel from "../../../lib/models/cv-payment-submission";
 import { NAIRAH_SERVICES, type NairahServiceId } from "../../../components/cv-review/nairah-services";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 interface CreatePaymentSubmissionBody {
-  readonly name?: unknown;
-  readonly email?: unknown;
   readonly serviceId?: unknown;
-  readonly paymentNoteConfirmed?: unknown;
+  readonly paymentConfirmed?: unknown;
 }
 
 export default async function handler(
@@ -23,50 +19,27 @@ export default async function handler(
     return;
   }
 
-  const { name, email, serviceId, paymentNoteConfirmed } =
+  const { serviceId, paymentConfirmed } =
     req.body as CreatePaymentSubmissionBody;
-  const fullName = typeof name === "string" ? name.trim() : "";
-  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const selectedService = NAIRAH_SERVICES.find((service) => service.id === serviceId);
 
-  if (fullName.length < 2 || fullName.length > 100) {
-    res.status(400).json({ error: "Enter your full name." });
-    return;
-  }
-  if (!EMAIL_PATTERN.test(normalizedEmail) || normalizedEmail.length > 254) {
-    res.status(400).json({ error: "Enter a valid email address." });
-    return;
-  }
   if (!selectedService || typeof serviceId !== "string") {
     res.status(400).json({ error: "Choose a valid service." });
     return;
   }
-  if (paymentNoteConfirmed !== true) {
-    res.status(400).json({ error: "Confirm that your email is in the payment message." });
+  if (paymentConfirmed !== true) {
+    res.status(400).json({ error: "Confirm that the payment was sent." });
     return;
   }
 
   try {
     await connectMongo();
 
-    const recentPending = await CvPaymentSubmissionModel.findOne({
-      email: normalizedEmail,
-      serviceId,
-      status: "pending",
-      createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) },
-    }).lean();
-    if (recentPending) {
-      res.status(409).json({ error: "A payment confirmation for this service is already waiting for review." });
-      return;
-    }
-
     const submission = await CvPaymentSubmissionModel.create({
-      fullName,
-      email: normalizedEmail,
       serviceId: serviceId as NairahServiceId,
       serviceTitle: selectedService.title,
       priceEgp: selectedService.priceEgp,
-      paymentNoteConfirmedAt: new Date(),
+      paymentConfirmedAt: new Date(),
       status: "pending",
     });
 
