@@ -20,7 +20,7 @@ import { CV_REVIEWERS } from "../../../../../components/cv-review/reviewers";
 type PageStage = "services" | "details" | "guide" | "qr" | "complete";
 
 const pageReveal = keyframes`
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 `;
 
@@ -98,7 +98,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
     <>
       <Head><title>CV services with {reviewerName} | TheDay</title><meta name="robots" content="noindex, nofollow" /></Head>
       <Box sx={pageSx}>
-        <Box sx={{ width: "100%", maxWidth: "66rem", mx: "auto", animation: `${pageReveal} 460ms cubic-bezier(0.16, 1, 0.3, 1)` }}>
+        <Box sx={{ width: "100%", maxWidth: "66rem", mx: "auto", animation: `${pageReveal} 420ms cubic-bezier(0.22, 1, 0.36, 1) both`, "@media (prefers-reduced-motion: reduce)": { animation: "none" } }}>
           {stage === "services" ? <Button onClick={() => void router.push(cleanReturnPath())} startIcon={<ArrowBackRounded />} sx={{ mb: 3, color: "#fff", textTransform: "none", fontWeight: 850, "&:hover": { bgcolor: "rgba(255,255,255,0.09)" } }}>Back to dashboard</Button> : stage !== "complete" ? <Button onClick={goBack} startIcon={<ArrowBackRounded />} sx={{ mb: 3, color: "#fff", textTransform: "none", fontWeight: 850, "&:hover": { bgcolor: "rgba(255,255,255,0.09)" } }}>Back</Button> : null}
 
           {stage === "services" && <Box component="main">
