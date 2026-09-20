@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useRouter } from "next/router";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import WorkspacePremiumRounded from "@mui/icons-material/WorkspacePremiumRounded";
 import {
@@ -87,6 +88,17 @@ const readyPop = keyframes`
   100% { transform: translate(-50%, 0) scale(1); }
 `;
 
+const nairahPageTransition = keyframes`
+  from {
+    clip-path: circle(0% at 50% 90%);
+    opacity: 0.88;
+  }
+  to {
+    clip-path: circle(155% at 50% 90%);
+    opacity: 1;
+  }
+`;
+
 const CONSENT_BRIGHT = "#FFB800";
 const CONSENT_GLOW = "rgba(255, 184, 0, 0.35)";
 
@@ -106,13 +118,16 @@ export default function CVReviewerDialog({
   onSelect,
   onClose,
 }: CVReviewerDialogProps) {
+  const router = useRouter();
   const [consentState, setConsentState] = React.useState<"idle" | "reading" | "ready">("idle");
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [isNairahTransitioning, setIsNairahTransitioning] = React.useState(false);
 
   React.useEffect(() => {
     if (!open) {
       setConsentState("idle");
       setAnchorEl(null);
+      setIsNairahTransitioning(false);
     }
   }, [open]);
 
@@ -137,6 +152,24 @@ export default function CVReviewerDialog({
     orderedReviewers.find(
       (reviewer) => reviewer.id === selectedReviewerId,
     ) ?? null;
+  const isNairahPaymentFlow = selectedReviewer?.booking.flow === "nairah-payment";
+
+  const handleMeet = (event: React.MouseEvent<HTMLElement>) => {
+    if (!selectedReviewer) {
+      event.preventDefault();
+      return;
+    }
+
+    if (!isNairahPaymentFlow) {
+      return;
+    }
+
+    event.preventDefault();
+    setIsNairahTransitioning(true);
+    window.setTimeout(() => {
+      void router.push("/grad/d/cv/meet/nairah");
+    }, 460);
+  };
 
   return (
     <Dialog
@@ -421,8 +454,12 @@ export default function CVReviewerDialog({
       </IconButton>
 
       <Button
-        component="a"
-        href={selectedReviewer ? `/grad/d/cv/meet/${selectedReviewer.id}` : undefined}
+        component={isNairahPaymentFlow ? "button" : "a"}
+        href={
+          selectedReviewer && !isNairahPaymentFlow
+            ? selectedReviewer.booking.url
+            : undefined
+        }
         aria-label={
           selectedReviewer
             ? `Meet ${selectedReviewer.displayName}`
@@ -432,24 +469,21 @@ export default function CVReviewerDialog({
         aria-hidden={!selectedReviewer}
         tabIndex={selectedReviewer ? 0 : -1}
         onMouseEnter={() => {
-          if (hasFinePointer() && selectedReviewer && consentState === "idle") {
+          if (
+            hasFinePointer() &&
+            isNairahPaymentFlow &&
+            selectedReviewer &&
+            consentState === "idle"
+          ) {
             setConsentState("reading");
           }
         }}
         onFocus={() => {
-          if (selectedReviewer && consentState === "idle") {
+          if (isNairahPaymentFlow && selectedReviewer && consentState === "idle") {
             setConsentState("reading");
           }
         }}
-        disabled={consentState === "reading"}
-        onClick={(event) => {
-          if (!selectedReviewer || consentState !== "ready") {
-            event.preventDefault();
-            if (consentState === "idle") {
-              setConsentState("reading");
-            }
-          }
-        }}
+        onClick={handleMeet}
         variant="contained"
         sx={{
           position: "absolute",
@@ -477,7 +511,10 @@ export default function CVReviewerDialog({
             "transform 380ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease, background-color 180ms ease",
           boxShadow:
             "0 16px 42px rgba(0,0,0,0.78), 0 0 26px rgba(255,230,0,0.30)",
-          animation: consentState === "ready" ? `${readyPop} 400ms ease-out` : "none",
+          animation:
+            isNairahPaymentFlow && consentState === "ready"
+              ? `${readyPop} 400ms ease-out`
+              : "none",
           "&:hover": {
             bgcolor: "#ffef4d",
             transform: "translate(-50%, -2px)",
@@ -501,11 +538,31 @@ export default function CVReviewerDialog({
           },
         }}
       >
-        {consentState === "reading" ? "Please Wait..." : "Meet"}
+        Meet
       </Button>
 
+      {isNairahTransitioning && (
+        <Box
+          aria-hidden
+          sx={{
+            position: "fixed",
+            zIndex: 50,
+            inset: 0,
+            bgcolor: "#000",
+            border: "1px solid #fff",
+            pointerEvents: "none",
+            animation: `${nairahPageTransition} 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+            "@media (prefers-reduced-motion: reduce)": {
+              animationDuration: "120ms",
+            },
+          }}
+        />
+      )}
+
       {/* ── Consent notice ──────────────────────────── */}
-      {(consentState === "reading" || consentState === "ready") && selectedReviewer && (
+      {isNairahPaymentFlow &&
+        (consentState === "reading" || consentState === "ready") &&
+        selectedReviewer && (
         <Box
           sx={{
             position: "absolute",

@@ -1,9 +1,11 @@
 export type ReviewerId = "abdo-tolba" | "omar-shawky" | "nairah";
 export type ReviewerVisualTier = "standard" | "premium-gold";
+export type BookingFlow = "direct-calendly" | "nairah-payment";
 
 export interface BookingDestination {
   readonly status: "available";
   readonly url: string;
+  readonly flow: BookingFlow;
 }
 
 export interface ReviewerProfile {
@@ -16,6 +18,7 @@ export interface ReviewerProfile {
 
 export function createBookingDestination(
   candidate: string,
+  flow: BookingFlow = "direct-calendly",
 ): BookingDestination {
   const url = new URL(candidate);
   const isSafeExternalUrl =
@@ -33,12 +36,9 @@ export function createBookingDestination(
   return {
     status: "available",
     url: url.toString(),
+    flow,
   };
 }
-
-const PLACEHOLDER_DESTINATION = createBookingDestination(
-  "https://example.com/",
-);
 
 const ABDO_DESTINATION = createBookingDestination(
   "https://calendly.com/abdo_tolba/cv-review-meeting",
@@ -50,6 +50,7 @@ const OMAR_DESTINATION = createBookingDestination(
 
 const NAIRAH_DESTINATION = createBookingDestination(
   "https://calendly.com/qualified-resumes11/30min",
+  "nairah-payment",
 );
 
 export const CV_REVIEWERS = [

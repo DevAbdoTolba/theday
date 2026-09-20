@@ -21,7 +21,7 @@ with dark separation, normal photo outlines remain absent, and Nairah's
 data-driven premium tier adds a six-second interaction shimmer plus a
 selected-only dropping gold badge with restrained motion.
 
-The feature is client-only. It adds no API route, database model, persistence, Calendly embed, Calendly SDK, preflight request, analytics integration, or npm dependency.
+The Nairah payment route adds a small authenticated approval API and MongoDB model for manual payment-confirmation records. It still adds no payment processor, Calendly embed, Calendly SDK, automated email, preflight request, analytics integration, or npm dependency.
 
 ## Technical Context
 
@@ -29,7 +29,7 @@ The feature is client-only. It adds no API route, database model, persistence, C
 
 **Primary Dependencies**: MUI v6, Emotion, React; existing `ClickAwayListener`, `Dialog`, `RadioGroup`, `Button`, and theme utilities. Framer Motion is installed but intentionally not used by this feature.
 
-**Storage**: N/A. Reviewer configuration is static and public; invitation, dialog, and selection state live only in component memory.
+**Storage**: Reviewer configuration is static and public. Nairah payment requests are stored in MongoDB for authorised manual review; invitation, dialog, and selection state remain in component memory.
 
 **Testing**: TypeScript check, direct ESLint, Storybook 8.6 visual/a11y coverage, Storybook production build, Next.js production build, and manual acceptance scenarios. The repository has no configured unit or end-to-end test runner.
 
@@ -39,7 +39,7 @@ The feature is client-only. It adds no API route, database model, persistence, C
 
 **Performance Goals**: Visible response within 100 ms; stable readable panel within 600 ms; no header/page layout shift; no queued animations during rapid reversal; no external request before deliberate Meet handoff other than loading the requested Picsum placeholders
 
-**Constraints**: Dashboard and subject pages only; one continuously outlined invitation surface; native browser CSS motion; no new dependency; image-only idle dialog; three full-surface clipped photo sections; no rendered divider lines/cards/avatars; one yellow Meet action; temporary `example.com` destination opens in a new browsing context
+**Constraints**: Dashboard and subject pages only; one continuously outlined invitation surface; native browser CSS motion; no new dependency; image-only idle dialog; three full-surface clipped photo sections; no rendered divider lines/cards/avatars; direct Calendly navigation for Abdo/Omar; Nairah service and manual-payment journey; no automated payment verification or Calendly email
 
 **Scale/Scope**: One shared header integration, one invitation panel and dialog per rendered page, three fixed reviewer records, one in-memory selection, and three eventual public Calendly links
 
