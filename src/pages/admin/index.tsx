@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Alert,
   Box,
@@ -405,15 +406,20 @@ function AdminContent() {
           )}
         </Box>
         {!selectedSubject && (
-          <Tooltip title="Refresh subjects">
-            <IconButton
-              onClick={handleRefreshSubjects}
-              disabled={loading}
-              aria-label="Refresh subjects"
-            >
-              <RefreshOutlinedIcon />
-            </IconButton>
-          </Tooltip>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Button component={Link} href="/admin/cv-payments" size="small" sx={{ textTransform: "none" }}>
+              CV payments
+            </Button>
+            <Tooltip title="Refresh subjects">
+              <IconButton
+                onClick={handleRefreshSubjects}
+                disabled={loading}
+                aria-label="Refresh subjects"
+              >
+                <RefreshOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         )}
       </Box>
 

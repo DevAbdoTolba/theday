@@ -6,7 +6,8 @@
 
 - `ModernHeader` mounts one CV invitation on dashboard and subject pages.
 - The feature remains client-only and exposes no HTTP API or persistent state.
-- The dialog uses temporary Picsum photos and `https://example.com/`.
+- The dialog directs Abdo and Omar to their configured Calendly pages. Nairah
+  alone opens the internal service and manual-payment journey.
 
 ## Header Contract
 
@@ -56,11 +57,24 @@
   before selection.
 - Selection moves Meet into the dialog's lower quarter.
 - Meet keeps black text on a strong yellow surface with clear separation from the photos.
-- Meet uses the selected record's configured `https://example.com/` URL.
-- It renders as a real anchor with `target="_blank"` and
-  `rel="noopener noreferrer"`.
+- Abdo and Omar use normal direct navigation to their configured Calendly URLs.
+- Nairah&apos;s Meet action expands a black, white-bordered transaction surface
+  from behind the button, then routes to `/grad/d/cv/meet/nairah`.
+- Nairah&apos;s page has three services, separately editable prices, a required
+  email-in-transfer-message acknowledgement, payment instructions, and a QR
+  slot. Missing live payment configuration disables submission.
 - No iframe, SDK, `window.open`, preflight request, tracking parameter, or
-  personal-data prefill is allowed.
+  payment credential collection is allowed.
+
+## Manual Payment Approval Contract
+
+- A public Nairah payment confirmation records name, email, selected service,
+  displayed price, acknowledgement time, and `pending` state only.
+- An existing authorised admin sees the newest entries at `/admin/cv-payments`.
+- Confirming is manual and changes only `pending` to `confirmed` with a review
+  timestamp. It never emails or opens Calendly automatically.
+- The admin copies the requester&apos;s email, then sends the configured Nairah
+  Calendly URL manually.
 
 ## Accessibility and Motion
 
