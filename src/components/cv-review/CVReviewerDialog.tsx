@@ -91,17 +91,16 @@ const readyPop = keyframes`
 
 const nairahPageTransition = keyframes`
   from {
-    width: 0;
-    height: 0;
-    opacity: 0.94;
-    border-radius: 50%;
+    clip-path: inset(var(--meet-top) var(--meet-right) var(--meet-bottom) var(--meet-left) round 18px);
   }
   to {
-    width: 250vmax;
-    height: 250vmax;
-    opacity: 1;
-    border-radius: 72px;
+    clip-path: inset(0px 0px 0px 0px round 0px);
   }
+`;
+
+const quietPageTransition = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
 `;
 
 const CONSENT_BRIGHT = "#FFB800";
@@ -127,13 +126,21 @@ export default function CVReviewerDialog({
   const [consentState, setConsentState] = React.useState<"idle" | "reading" | "ready">("idle");
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [isNairahTransitioning, setIsNairahTransitioning] = React.useState(false);
-  const [transitionOrigin, setTransitionOrigin] = React.useState({ x: 0, y: 0 });
+  const [transitionOrigin, setTransitionOrigin] = React.useState({ top: 0, right: 0, bottom: 0, left: 0 });
+  const navigationStarted = React.useRef(false);
+
+  React.useEffect(() => {
+    if (open && selectedReviewerId === "nairah") {
+      void router.prefetch("/grad/d/cv/meet/nairah").catch(() => undefined);
+    }
+  }, [open, selectedReviewerId, router]);
 
   React.useEffect(() => {
     if (!open) {
       setConsentState("idle");
       setAnchorEl(null);
       setIsNairahTransitioning(false);
+      navigationStarted.current = false;
     }
   }, [open]);
 
@@ -171,25 +178,25 @@ export default function CVReviewerDialog({
     }
 
     event.preventDefault();
+    if (isNairahTransitioning) return;
     const buttonBounds = event.currentTarget.getBoundingClientRect();
     setTransitionOrigin({
-      x: buttonBounds.left + buttonBounds.width / 2,
-      y: buttonBounds.top + buttonBounds.height / 2,
+      top: buttonBounds.top,
+      right: Math.max(0, window.innerWidth - buttonBounds.right),
+      bottom: Math.max(0, window.innerHeight - buttonBounds.bottom),
+      left: buttonBounds.left,
     });
     const returnPath = window.location.pathname.replace(/\/cv-review$/, "") + window.location.search;
-    window.sessionStorage.setItem("cv-review-return-path", returnPath || "/");
+    try {
+      window.sessionStorage.setItem("cv-review-return-path", returnPath || "/");
+    } catch { /* Navigation remains available when storage is disabled. */ }
     setIsNairahTransitioning(true);
-    window.requestAnimationFrame(() => {
-      window.setTimeout(() => {
-        void router.push("/grad/d/cv/meet/nairah");
-      }, 720);
-    });
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={isNairahTransitioning ? undefined : onClose}
       aria-label="Choose a CV reviewer"
       maxWidth={false}
       slotProps={{
@@ -558,25 +565,41 @@ export default function CVReviewerDialog({
 
       {isNairahTransitioning && typeof document !== "undefined" && (
         <Portal>
+          <Box sx={{ position: "fixed", inset: 0, zIndex: (theme) => theme.zIndex.modal + 10, pointerEvents: "none", filter: "drop-shadow(0 0 1px rgba(255,255,255,0.9))" }}>
           <Box
           aria-hidden
+          onAnimationEnd={(event) => {
+            if (event.target !== event.currentTarget || navigationStarted.current) return;
+            navigationStarted.current = true;
+            void router.push("/grad/d/cv/meet/nairah").then((completed) => {
+              if (!completed) {
+                navigationStarted.current = false;
+                setIsNairahTransitioning(false);
+              }
+            }).catch(() => {
+              navigationStarted.current = false;
+              setIsNairahTransitioning(false);
+            });
+          }}
           sx={{
+            "--meet-top": `${transitionOrigin.top}px`,
+            "--meet-right": `${transitionOrigin.right}px`,
+            "--meet-bottom": `${transitionOrigin.bottom}px`,
+            "--meet-left": `${transitionOrigin.left}px`,
             position: "fixed",
             zIndex: (theme) => theme.zIndex.modal + 10,
-            left: transitionOrigin.x,
-            top: transitionOrigin.y,
-            width: 0,
-            height: 0,
-            transform: "translate(-50%, -50%)",
+            inset: 0,
             bgcolor: "#000",
-            border: "1px solid #fff",
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.28), 0 0 34px rgba(255,255,255,0.18)",
-            pointerEvents: "none",
-            willChange: "width, height, border-radius",
-            animation: `${nairahPageTransition} 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-            "@media (prefers-reduced-motion: reduce)": { animationDuration: "160ms" },
+            pointerEvents: "auto",
+            willChange: "clip-path",
+            animation: `${nairahPageTransition} 780ms cubic-bezier(0.76, 0, 0.24, 1) both`,
+            "@media (prefers-reduced-motion: reduce)": {
+              animation: `${quietPageTransition} 120ms ease-out both`,
+              willChange: "opacity",
+            },
           }}
           />
+          </Box>
         </Portal>
       )}
 
