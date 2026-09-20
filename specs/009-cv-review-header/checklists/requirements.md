@@ -37,6 +37,9 @@
 - Final polish validation passed for compact-mark spacing, phone overflow bounds, selected-name/Meet contrast, outline removal, and Nairah's restrained premium treatment.
 - Latest polish preserves the CV label's compact inset during expansion and
   defines Nairah's six-second photo shimmer plus selected-only dropping badge.
+- The Nairah service/payment revision is complete except for operator-supplied
+  prices, recipient label, and real InstaPay QR; payment is intentionally
+  disabled until those values exist.
 - The native browser animation constraint is retained because it is an explicit product requirement and supports the project's performance and simplicity principles.
 - Final reviewer portraits, short profile descriptions, and Calendly URLs are intentionally treated as replaceable launch inputs rather than specification blockers.
 - The first release intentionally uses external booking pages instead of embedding or aggregating three live calendars.

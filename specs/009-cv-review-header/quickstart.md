@@ -26,15 +26,22 @@
 
 ## Functional Checks
 
-For Nairah, Abdo Tolba, and Omar Shawky:
+For Abdo Tolba and Omar Shawky:
 
 1. Select the reviewer.
 2. Inspect Meet and confirm:
-   - `href="https://example.com/"`
-   - `target="_blank"`
-   - `rel="noopener noreferrer"`
-3. Confirm the original TheDay tab remains open.
+   - `href` is that reviewer&apos;s configured Calendly URL.
+3. Confirm the browser navigates directly to Calendly.
 4. Close and reopen the dialog; confirm selection and visible text reset.
+
+## Nairah Payment Checks
+
+1. Select Nairah and activate Meet. Confirm a black white-bordered surface grows from behind Meet before the service page appears.
+2. Confirm the page offers the three approved services and each selected service has a back action and distinct editable price slot.
+3. Confirm the payment page makes the visitor&apos;s email visible as the required InstaPay transfer message and requires acknowledgement.
+4. Until prices, recipient, and QR are configured, confirm submission is disabled and explains why.
+5. After configuration, submit a request and confirm `/admin/cv-payments` shows the name, email, service, price, and pending status for an admin.
+6. Confirm the admin can manually confirm a pending request and copy the email, without any automatic Calendly message.
 
 ## Accessibility Checks
 

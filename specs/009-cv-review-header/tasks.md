@@ -215,6 +215,22 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 
 ---
 
+## Phase 13: Nairah Service and Manual Payment Journey
+
+**Purpose**: Route direct reviewers to Calendly while giving Nairah a cinematic service-choice, manual-payment, and manual-approval flow.
+
+- [X] T059 [US4] Model direct Calendly and Nairah-payment booking flows, route Abdo/Omar directly, and animate Nairah&apos;s Meet action into the internal service page in `src/components/cv-review/reviewers.ts` and `src/components/cv-review/CVReviewerDialog.tsx` (FR-018, FR-029)
+- [X] T060 [US6] Build the Nairah service choice, selected-service detail, required transfer-message acknowledgement, payment instructions, QR slot, success notice, and editable price configuration in `src/pages/grad/d/cv/meet/[reviewer].tsx` and `src/components/cv-review/nairah-services.ts` (FR-033, FR-034, FR-037)
+- [X] T061 [US7] Add persisted manual-review payment submissions and protected list/confirm APIs in `src/lib/mongo.ts`, `src/lib/models/cv-payment-submission.ts`, `src/pages/api/cv-payments/index.ts`, and `src/pages/api/admin/cv-payments.ts` (FR-035, FR-036)
+- [X] T062 [US7] Add the Nairah payment admin dashboard and primary-admin entry point in `src/pages/admin/cv-payments.tsx` and `src/pages/admin/index.tsx` (FR-036)
+- [ ] T063 Add Nairah&apos;s three approved EGP prices, recipient label, and real InstaPay QR asset to `src/components/cv-review/nairah-services.ts` and `public/` before opening live payment confirmation (FR-033, FR-037)
+- [X] T064 Update payment, manual-approval, routing, and transition requirements in the feature documents (FR-018, FR-029, FR-033–FR-037)
+- [X] T065 Run TypeScript, ESLint, whitespace, and production-build validation after the payment-flow implementation
+
+**Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

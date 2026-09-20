@@ -268,3 +268,28 @@ Storybook/manual coverage:
 **Rationale**: This matches the supplied reference directly, removes decorative
 layers, and keeps the effect native, responsive, and easy to replace with final
 photos later.
+
+## R11: Nairah Manual Payment Handoff
+
+**Decision**: Keep Abdo and Omar as direct Calendly destinations. Route only
+Nairah through an internal service choice and a manual payment-confirmation
+record, then let an existing authorised admin confirm payment and manually send
+the Calendly link.
+
+**Rationale**:
+
+- The requested manual review is explicit: the system must not claim it can
+  verify an InstaPay transfer or send the final booking email automatically.
+- Storing only the visitor&apos;s name, email, service, shown price, and required
+  acknowledgement supports manual matching without collecting payment secrets.
+- A real QR and prices are commercial inputs, not values the application can
+  safely invent. The page stays closed until the operator configures them.
+
+**Alternatives considered**:
+
+- Embed Calendly before payment review: rejected because it bypasses the manual
+  payment confirmation requirement.
+- Collect transaction credentials or receipt images: rejected because neither
+  is required for the requested admin workflow and they add sensitive data.
+- Generate a placeholder InstaPay QR: rejected because a fake payment target
+  would be unsafe.
