@@ -60,21 +60,19 @@
 - Abdo and Omar use normal direct navigation to their configured Calendly URLs.
 - Nairah&apos;s Meet action expands a black, white-bordered transaction surface
   from behind the button, then routes to `/grad/d/cv/meet/nairah`.
-- Nairah&apos;s page has three services, separately editable prices, a required
-  email-in-transfer-message acknowledgement, payment instructions, and a QR
-  slot. Missing live payment configuration disables submission.
+- Nairah&apos;s page has three services with visible, separately editable prices,
+  then a guide image with confirmation and a QR step. Missing live payment
+  configuration disables submission.
 - No iframe, SDK, `window.open`, preflight request, tracking parameter, or
   payment credential collection is allowed.
 
 ## Manual Payment Approval Contract
 
-- A public Nairah payment confirmation records name, email, selected service,
-  displayed price, acknowledgement time, and `pending` state only.
+- A public Nairah payment confirmation records selected service, displayed
+  price, payment-confirmation time, and `pending` state only.
 - An existing authorised admin sees the newest entries at `/admin/cv-payments`.
 - Confirming is manual and changes only `pending` to `confirmed` with a review
   timestamp. It never emails or opens Calendly automatically.
-- The admin copies the requester&apos;s email, then sends the configured Nairah
-  Calendly URL manually.
 
 ## Accessibility and Motion
 
