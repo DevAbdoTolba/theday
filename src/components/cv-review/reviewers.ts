@@ -48,6 +48,10 @@ const OMAR_DESTINATION = createBookingDestination(
   "https://calendly.com/omargenius2015/cv-review-meeting",
 );
 
+const NAIRAH_DESTINATION = createBookingDestination(
+  "https://calendly.com/qualified-resumes11/30min",
+);
+
 export const CV_REVIEWERS = [
   {
     id: "abdo-tolba",
@@ -68,6 +72,6 @@ export const CV_REVIEWERS = [
     displayName: "Nairah A.",
     portraitSrc: "/nairah.webp",
     visualTier: "premium-gold",
-    booking: PLACEHOLDER_DESTINATION,
+    booking: NAIRAH_DESTINATION,
   },
 ] as const satisfies readonly ReviewerProfile[];
