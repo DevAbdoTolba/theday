@@ -7,13 +7,13 @@ import {
   Button,
   Dialog,
   IconButton,
-  Portal,
   Popover,
   RadioGroup,
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/material/styles";
 import type { ReviewerId, ReviewerProfile } from "./reviewers";
+import { transitionToMeet } from "./meet-transition";
 
 function hasFinePointer(): boolean {
   return (
@@ -89,19 +89,6 @@ const readyPop = keyframes`
   100% { transform: translate(-50%, 0) scale(1); }
 `;
 
-const nairahPageTransition = keyframes`
-  from {
-    clip-path: inset(var(--meet-top) var(--meet-right) var(--meet-bottom) var(--meet-left) round 18px);
-  }
-  to {
-    clip-path: inset(0px 0px 0px 0px round 0px);
-  }
-`;
-
-const quietPageTransition = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
 
 const CONSENT_BRIGHT = "#FFB800";
 const CONSENT_GLOW = "rgba(255, 184, 0, 0.35)";
@@ -126,8 +113,6 @@ export default function CVReviewerDialog({
   const [consentState, setConsentState] = React.useState<"idle" | "reading" | "ready">("idle");
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [isNairahTransitioning, setIsNairahTransitioning] = React.useState(false);
-  const [transitionOrigin, setTransitionOrigin] = React.useState({ top: 0, right: 0, bottom: 0, left: 0 });
-  const navigationStarted = React.useRef(false);
 
   React.useEffect(() => {
     if (open && selectedReviewerId === "nairah") {
@@ -140,7 +125,6 @@ export default function CVReviewerDialog({
       setConsentState("idle");
       setAnchorEl(null);
       setIsNairahTransitioning(false);
-      navigationStarted.current = false;
     }
   }, [open]);
 
@@ -179,18 +163,14 @@ export default function CVReviewerDialog({
 
     event.preventDefault();
     if (isNairahTransitioning) return;
-    const buttonBounds = event.currentTarget.getBoundingClientRect();
-    setTransitionOrigin({
-      top: buttonBounds.top,
-      right: Math.max(0, window.innerWidth - buttonBounds.right),
-      bottom: Math.max(0, window.innerHeight - buttonBounds.bottom),
-      left: buttonBounds.left,
-    });
     const returnPath = window.location.pathname.replace(/\/cv-review$/, "") + window.location.search;
     try {
       window.sessionStorage.setItem("cv-review-return-path", returnPath || "/");
     } catch { /* Navigation remains available when storage is disabled. */ }
     setIsNairahTransitioning(true);
+    void transitionToMeet(event.currentTarget, () => router.push("/grad/d/cv/meet/nairah"))
+      .catch(() => undefined)
+      .finally(() => setIsNairahTransitioning(false));
   };
 
   return (
@@ -563,45 +543,6 @@ export default function CVReviewerDialog({
         Meet
       </Button>
 
-      {isNairahTransitioning && typeof document !== "undefined" && (
-        <Portal>
-          <Box sx={{ position: "fixed", inset: 0, zIndex: (theme) => theme.zIndex.modal + 10, pointerEvents: "none", filter: "drop-shadow(0 0 1px rgba(255,255,255,0.9))" }}>
-          <Box
-          aria-hidden
-          onAnimationEnd={(event) => {
-            if (event.target !== event.currentTarget || navigationStarted.current) return;
-            navigationStarted.current = true;
-            void router.push("/grad/d/cv/meet/nairah").then((completed) => {
-              if (!completed) {
-                navigationStarted.current = false;
-                setIsNairahTransitioning(false);
-              }
-            }).catch(() => {
-              navigationStarted.current = false;
-              setIsNairahTransitioning(false);
-            });
-          }}
-          sx={{
-            "--meet-top": `${transitionOrigin.top}px`,
-            "--meet-right": `${transitionOrigin.right}px`,
-            "--meet-bottom": `${transitionOrigin.bottom}px`,
-            "--meet-left": `${transitionOrigin.left}px`,
-            position: "fixed",
-            zIndex: (theme) => theme.zIndex.modal + 10,
-            inset: 0,
-            bgcolor: "#000",
-            pointerEvents: "auto",
-            willChange: "clip-path",
-            animation: `${nairahPageTransition} 780ms cubic-bezier(0.76, 0, 0.24, 1) both`,
-            "@media (prefers-reduced-motion: reduce)": {
-              animation: `${quietPageTransition} 120ms ease-out both`,
-              willChange: "opacity",
-            },
-          }}
-          />
-          </Box>
-        </Portal>
-      )}
 
       {/* ── Consent notice ──────────────────────────── */}
       {isNairahPaymentFlow &&
