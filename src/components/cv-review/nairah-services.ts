@@ -33,6 +33,8 @@ export const NAIRAH_SERVICES = [
 ] as const satisfies readonly NairahService[];
 
 export const NAIRAH_PAYMENT_CONFIG = {
+  /** Add the Step 1 payment-message guide image under public/ and set its path here. */
+  paymentGuideImageSrc: null as string | null,
   /** Add a real Instapay QR image under public/ and set its path here. */
   instapayQrImageSrc: null as string | null,
   /** Add the recipient name or payment handle shown next to the QR. */
@@ -40,5 +42,5 @@ export const NAIRAH_PAYMENT_CONFIG = {
 } as const;
 
 export function formatNairahServicePrice(priceEgp: number | null): string {
-  return priceEgp === null ? "Price coming soon" : `${priceEgp} EGP`;
+  return priceEgp === null ? "PRICE — SET IN CONFIG" : `PRICE — ${priceEgp} EGP`;
 }

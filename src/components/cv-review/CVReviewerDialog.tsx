@@ -7,6 +7,7 @@ import {
   Button,
   Dialog,
   IconButton,
+  Portal,
   Popover,
   RadioGroup,
   Typography,
@@ -90,12 +91,16 @@ const readyPop = keyframes`
 
 const nairahPageTransition = keyframes`
   from {
-    clip-path: circle(0% at 50% 90%);
-    opacity: 0.88;
+    width: 0;
+    height: 0;
+    opacity: 0.94;
+    border-radius: 50%;
   }
   to {
-    clip-path: circle(155% at 50% 90%);
+    width: 250vmax;
+    height: 250vmax;
     opacity: 1;
+    border-radius: 72px;
   }
 `;
 
@@ -122,6 +127,7 @@ export default function CVReviewerDialog({
   const [consentState, setConsentState] = React.useState<"idle" | "reading" | "ready">("idle");
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [isNairahTransitioning, setIsNairahTransitioning] = React.useState(false);
+  const [transitionOrigin, setTransitionOrigin] = React.useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
     if (!open) {
@@ -165,10 +171,19 @@ export default function CVReviewerDialog({
     }
 
     event.preventDefault();
+    const buttonBounds = event.currentTarget.getBoundingClientRect();
+    setTransitionOrigin({
+      x: buttonBounds.left + buttonBounds.width / 2,
+      y: buttonBounds.top + buttonBounds.height / 2,
+    });
+    const returnPath = window.location.pathname.replace(/\/cv-review$/, "") + window.location.search;
+    window.sessionStorage.setItem("cv-review-return-path", returnPath || "/");
     setIsNairahTransitioning(true);
-    window.setTimeout(() => {
-      void router.push("/grad/d/cv/meet/nairah");
-    }, 460);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        void router.push("/grad/d/cv/meet/nairah");
+      }, 720);
+    });
   };
 
   return (
@@ -541,22 +556,28 @@ export default function CVReviewerDialog({
         Meet
       </Button>
 
-      {isNairahTransitioning && (
-        <Box
+      {isNairahTransitioning && typeof document !== "undefined" && (
+        <Portal>
+          <Box
           aria-hidden
           sx={{
             position: "fixed",
-            zIndex: 50,
-            inset: 0,
+            zIndex: (theme) => theme.zIndex.modal + 10,
+            left: transitionOrigin.x,
+            top: transitionOrigin.y,
+            width: 0,
+            height: 0,
+            transform: "translate(-50%, -50%)",
             bgcolor: "#000",
             border: "1px solid #fff",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.28), 0 0 34px rgba(255,255,255,0.18)",
             pointerEvents: "none",
-            animation: `${nairahPageTransition} 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-            "@media (prefers-reduced-motion: reduce)": {
-              animationDuration: "120ms",
-            },
+            willChange: "width, height, border-radius",
+            animation: `${nairahPageTransition} 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+            "@media (prefers-reduced-motion: reduce)": { animationDuration: "160ms" },
           }}
-        />
+          />
+        </Portal>
       )}
 
       {/* ── Consent notice ──────────────────────────── */}
