@@ -31,9 +31,9 @@ export async function transitionToMeet(
   const scaleX = rect.width / window.innerWidth;
   const scaleY = rect.height / window.innerHeight;
   const start = `translate3d(${rect.left}px, ${rect.top}px, 0) scale(${scaleX}, ${scaleY})`;
-  // Compensate for the unequal X/Y scaling so the initial corners are round
-  // on screen, rather than being flattened into sharp-looking edges.
-  const initialRadius = `${18 / scaleX}px / ${18 / scaleY}px`;
+  // Unequal elliptical corners form an organic silhouette. Percentage radii
+  // grow with the surface instead of leaving tiny corners on a large box.
+  const initialRadius = "38% 52% 42% 48% / 48% 44% 56% 52%";
   cover.style.transform = reduced ? "none" : start;
   cover.style.borderRadius = reduced ? "0" : initialRadius;
   document.body.append(cover, foregroundButton);
@@ -48,7 +48,12 @@ export async function transitionToMeet(
         {
           offset: 0.5,
           transform: `translate3d(${rect.left / 2}px, ${rect.top / 2}px, 0) scale(${(scaleX + 1) / 2}, ${(scaleY + 1) / 2})`,
-          borderRadius: `${32 / ((scaleX + 1) / 2)}px / ${32 / ((scaleY + 1) / 2)}px`,
+          borderRadius: "32% 46% 38% 50% / 44% 34% 52% 40%",
+        },
+        {
+          offset: 0.82,
+          transform: `translate3d(${rect.left * 0.18}px, ${rect.top * 0.18}px, 0) scale(${scaleX + (1 - scaleX) * 0.82}, ${scaleY + (1 - scaleY) * 0.82})`,
+          borderRadius: "20% 30% 24% 34% / 28% 20% 32% 26%",
         },
         { transform: "translate3d(0, 0, 0) scale(1, 1)", borderRadius: "0px" },
       ],
