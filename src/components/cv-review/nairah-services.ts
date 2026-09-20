@@ -16,19 +16,19 @@ export const NAIRAH_SERVICES = [
     id: "cv-review",
     title: "CV reviewing — 30 min session feedback",
     summary: "A focused review with clear, practical feedback on your CV.",
-    priceEgp: null,
+    priceEgp: 700,
   },
   {
     id: "cv-writing",
     title: "CV writing",
     summary: "May start with a consultation, then Nairah writes your CV with you.",
-    priceEgp: null,
+    priceEgp: 1500,
   },
   {
     id: "linkedin-optimization",
     title: "LinkedIn optimization",
     summary: "Get notes for your profile or share access for Nairah to edit it herself.",
-    priceEgp: null,
+    priceEgp: 1000,
   },
 ] as const satisfies readonly NairahService[];
 

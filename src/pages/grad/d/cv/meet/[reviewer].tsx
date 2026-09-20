@@ -46,8 +46,7 @@ const pageSx = {
 function ServiceCard({ service, onChoose }: { readonly service: NairahService; readonly onChoose: () => void }) {
   return (
     <Button onClick={onChoose} variant="outlined" sx={{ display: "block", width: "100%", p: { xs: 2.25, sm: 3 }, textAlign: "left", color: "#fff", borderColor: "rgba(255,255,255,0.72)", borderRadius: "25px 32px 24px 30px / 28px 27px 33px 26px", textTransform: "none", transition: "transform 260ms cubic-bezier(0.2, 0.82, 0.2, 1), background-color 200ms ease, border-color 200ms ease", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.08)", transform: "translateY(-4px)" }, "&:focus-visible": { outline: "3px solid #ffe600", outlineOffset: 4 } }}>
-      <Typography component="span" display="block" sx={{ color: "#ffe600", fontSize: "0.86rem", fontWeight: 1000, letterSpacing: "0.1em" }}>{formatNairahServicePrice(service.priceEgp)}</Typography>
-      <Typography component="span" display="block" sx={{ mt: 0.8, fontSize: { xs: "1.2rem", sm: "1.5rem" }, fontWeight: 950, lineHeight: 1.06, letterSpacing: "-0.045em" }}>{service.title}</Typography>
+      <Typography component="span" display="block" sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" }, fontWeight: 950, lineHeight: 1.06, letterSpacing: "-0.045em" }}>{service.title}</Typography>
       <Typography component="span" display="block" sx={{ mt: 1, maxWidth: "48rem", color: "rgba(255,255,255,0.72)", fontSize: "0.94rem", lineHeight: 1.45 }}>{service.summary}</Typography>
     </Button>
   );
