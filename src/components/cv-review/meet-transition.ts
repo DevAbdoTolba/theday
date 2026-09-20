@@ -22,20 +22,23 @@ export async function transitionToMeet(
     zIndex: "2147483647", pointerEvents: "none", boxSizing: "border-box",
   });
   cover.setAttribute("aria-hidden", "true");
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const radius = Math.hypot(
+    Math.max(centerX, window.innerWidth - centerX),
+    Math.max(centerY, window.innerHeight - centerY),
+  ) + 4;
+  const diameter = radius * 2;
+  const initialScale = Math.max(rect.width, rect.height) / diameter;
   Object.assign(cover.style, {
-    position: "fixed", inset: "0", zIndex: "2147483646",
-    background: "#000", transformOrigin: "0 0", pointerEvents: "auto",
-    willChange: "transform, opacity", border: "1px solid rgba(255,255,255,.8)",
-    boxSizing: "border-box",
+    position: "fixed", zIndex: "2147483646",
+    left: `${centerX - radius}px`, top: `${centerY - radius}px`,
+    width: `${diameter}px`, height: `${diameter}px`,
+    background: "#000", borderRadius: "50%", transformOrigin: "center",
+    pointerEvents: "auto", willChange: "transform, opacity",
+    border: "1px solid rgba(255,255,255,.82)", boxSizing: "border-box",
   });
-  const scaleX = rect.width / window.innerWidth;
-  const scaleY = rect.height / window.innerHeight;
-  const start = `translate3d(${rect.left}px, ${rect.top}px, 0) scale(${scaleX}, ${scaleY})`;
-  // Unequal elliptical corners form an organic silhouette. Percentage radii
-  // grow with the surface instead of leaving tiny corners on a large box.
-  const initialRadius = "38% 52% 42% 48% / 48% 44% 56% 52%";
-  cover.style.transform = reduced ? "none" : start;
-  cover.style.borderRadius = reduced ? "0" : initialRadius;
+  cover.style.transform = reduced ? "none" : `scale(${initialScale})`;
   document.body.append(cover, foregroundButton);
   try {
     const buttonFade = foregroundButton.animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -44,18 +47,9 @@ export async function transitionToMeet(
     });
     await cover.animate(
       reduced ? [{ opacity: 0 }, { opacity: 1 }] : [
-        { transform: start, borderRadius: initialRadius },
-        {
-          offset: 0.5,
-          transform: `translate3d(${rect.left / 2}px, ${rect.top / 2}px, 0) scale(${(scaleX + 1) / 2}, ${(scaleY + 1) / 2})`,
-          borderRadius: "32% 46% 38% 50% / 44% 34% 52% 40%",
-        },
-        {
-          offset: 0.82,
-          transform: `translate3d(${rect.left * 0.18}px, ${rect.top * 0.18}px, 0) scale(${scaleX + (1 - scaleX) * 0.82}, ${scaleY + (1 - scaleY) * 0.82})`,
-          borderRadius: "20% 30% 24% 34% / 28% 20% 32% 26%",
-        },
-        { transform: "translate3d(0, 0, 0) scale(1, 1)", borderRadius: "0px" },
+        { transform: `scale(${initialScale})` },
+        { offset: 0.62, transform: "scale(0.88)" },
+        { transform: "scale(1)" },
       ],
       { duration: reduced ? 100 : 620, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "forwards" },
     ).finished;
