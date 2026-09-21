@@ -78,7 +78,10 @@ Dialog invariants:
   means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
   price, InstaPay handle, matching email, payment-confirmation timestamp, status
-  (`pending` or `confirmed`), and optional manual reviewer identity/timestamp.
+  (`pending`, `confirmed`, or `declined`), and optional manual reviewer
+  identity/timestamp. Declined records also keep the required reason,
+  declining reviewer, and decline timestamp. Changing a finished decision clears
+  metadata from the previous status.
 - **Booking Gate Token**: A deterministic SHA-256 digest over a versioned
   namespace, normalized email, and normalized InstaPay handle, encoded as
   Base64URL in `?u=`. It is a lightweight client-side deterrent, not an

@@ -142,11 +142,13 @@ As Nairah&apos;s authorised admin, I view the newest payment requests with their
 
 **Acceptance Scenarios**:
 
-1. **Given** an authorised admin opens the CV-payment dashboard, **When** requests exist, **Then** the newest submissions show service, shown price, InstaPay handle, email, timestamp, and pending or confirmed state.
-2. **Given** a payment is pending, **When** the admin manually selects Confirm, **Then** only that pending submission becomes confirmed and no Calendly email is sent automatically.
+1. **Given** an authorised admin opens the CV-payment dashboard, **When** requests exist, **Then** the newest submissions show service, shown price, InstaPay handle, email, timestamp, and pending, completed, or declined state.
+2. **Given** a payment is pending, **When** the admin manually completes it, **Then** only that submission becomes confirmed and no Calendly email is sent automatically.
 3. **Given** a payment is confirmed, **When** the admin copies its booking link, **Then** the link contains a SHA-256 Base64URL token derived from the normalized email and InstaPay handle without a database record ID.
 4. **Given** the visitor opens that link, **When** they re-enter the matching email and InstaPay handle, **Then** client-side verification unlocks a full-name prompt and the resulting name/email prefill the embedded Calendly picker.
 5. **Given** the visitor opens the scheduling route without a `u` token, **When** the page loads, **Then** no verification form or scheduling control is usable; a blocking error tells them to request the correct complete URL from Nairah and exposes only Need help.
+6. **Given** a request is spam, invalid, or cannot be verified, **When** the admin declines it, **Then** a reason is required, saved with the reviewer identity and time, and remains visible in the dashboard.
+7. **Given** an admin made the wrong decision or reason, **When** they activate the finished status, **Then** the same compact inline control allows the status or decline reason to be corrected.
 
 ---
 
@@ -216,7 +218,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-033**: Nairah&apos;s service journey MUST offer exactly three configurable services with separately editable hardcoded prices: CV review, CV writing, and LinkedIn optimization.
 - **FR-034**: The Nairah payment screen MUST use two short steps: the configured guide video with side-by-side English and Egyptian-Arabic email-only transfer-note warnings, followed by the InstaPay QR. Confirmation MUST remain blurred and disabled until the video plays fully.
 - **FR-035**: A payment confirmation MUST record the InstaPay handle, matching email, chosen service, displayed price, payment-confirmation time, and manual-review status. It MUST NOT collect a customer phone number, payment credentials, or banking details.
-- **FR-036**: An existing authorised admin MUST be able to view the latest Nairah payment confirmations, manually mark a pending entry confirmed, and copy the internal Nairah scheduling link. Confirmation MUST NOT send a Calendly link automatically.
+- **FR-036**: An existing authorised admin MUST be able to view the latest Nairah payment confirmations, manually mark an entry completed or declined, require and retain a decline reason, edit either decision through one compact inline control, and copy the internal Nairah scheduling link only for completed entries. Confirmation MUST NOT send a Calendly link automatically.
 - **FR-037**: Until real prices, a guide video, recipient details, a valid InstaPay QR, and the direct phone-payment URL are configured, Nairah payment submissions MUST remain disabled with an explanatory message. The direct URL MUST be visible and clickable on phone screens.
 - **FR-038**: The Nairah support phone MUST be stored in MongoDB and returned only after the visitor activates Need help. The revealed contact MUST include a direct WhatsApp link using the Egyptian country code.
 - **FR-039**: The exact InstaPay account-name/email warning MUST appear on Nairah&apos;s internal scheduling page beside the embedded Calendly time picker and MUST NOT appear on the post-payment confirmation. After the visitor passes the client-side email/handle gate, the entered full name and email MUST prefill Calendly.
@@ -224,7 +226,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-041**: The scheduling page MUST print the approved styled ASCII recruiting easter egg in the developer console without attempting to detect or block developer tools.
 - **FR-042**: A scheduling route without a non-empty `u` token MUST render a fully blocking invalid-link state. It MUST hide the identity form and all scheduling controls, instruct the visitor to ask Nairah for the correct complete URL, and leave only the on-demand Need help contact operable.
 - **FR-043**: CV-payment administration MUST allow only `mtolba2004@gmail.com` and `qualified.resumes11@gmail.com`. The second account MUST receive CV-payment page/API access without receiving general admin access.
-- **FR-044**: The CV-payment dashboard MUST provide server-side pagination in pages of ten, All/Pending/Confirmed filters, total status counts, a visible result range, and first/previous/next/last navigation.
+- **FR-044**: The CV-payment dashboard MUST provide server-side pagination in pages of ten, All/Pending/Completed/Declined filters, total status counts, a visible result range, and first/previous/next/last navigation.
 
 ### Key Entities
 
