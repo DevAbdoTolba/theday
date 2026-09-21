@@ -154,7 +154,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
               </Box>
               <Box lang="ar" dir="rtl" sx={{ p: { xs: 2, sm: 2.5 }, textAlign: "right" }}>
                 <Typography sx={{ color: "#ffe600", fontSize: "0.72rem", fontWeight: 1000, letterSpacing: "0.08em" }}>ملاحظة بالعربي</Typography>
-                <Typography sx={{ mt: 0.8, color: "#fff", fontSize: { xs: "0.98rem", sm: "1.04rem" }, fontWeight: 750, lineHeight: 1.65 }}>في ملاحظة التحويل، اكتب إيميلك إنت بس، من غير أي كلام زيادة. من غير الإيميل، ممكن ما نعرفش نطابق التحويل وممكن فلوسك تضيع.</Typography>
+                <Typography sx={{ mt: 0.8, color: "#fff", fontSize: { xs: "0.98rem", sm: "1.04rem" }, fontWeight: 750, lineHeight: 1.65 }}>في التحويل، اكتب إيميلك الشخصي بس كملحوظة، من غير أي كلام زيادة. من غير الإيميل ده، مش هنقدر نطابق التحويل وممكن فلوسك تضيع.</Typography>
               </Box>
             </Box>
             <Box sx={{ mt: 2, display: "grid", placeItems: "center", overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "#050505" }}>
