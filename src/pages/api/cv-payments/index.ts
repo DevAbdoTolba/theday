@@ -3,7 +3,11 @@ import { connectMongo } from "../../../lib/mongo";
 import CvPaymentSubmissionModel from "../../../lib/models/cv-payment-submission";
 import { NAIRAH_SERVICES, type NairahServiceId } from "../../../components/cv-review/nairah-services";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface CreatePaymentSubmissionBody {
+  readonly fullName?: unknown;
+  readonly email?: unknown;
   readonly serviceId?: unknown;
   readonly paymentConfirmed?: unknown;
 }
@@ -19,9 +23,19 @@ export default async function handler(
     return;
   }
 
-  const { serviceId, paymentConfirmed } = req.body as CreatePaymentSubmissionBody;
+  const { fullName, email, serviceId, paymentConfirmed } = req.body as CreatePaymentSubmissionBody;
+  const customerName = typeof fullName === "string" ? fullName.trim().replace(/\s+/g, " ") : "";
+  const customerEmail = typeof email === "string" ? email.trim() : "";
   const selectedService = NAIRAH_SERVICES.find((service) => service.id === serviceId);
 
+  if (customerName.length < 2 || customerName.length > 120) {
+    res.status(400).json({ error: "Enter the full name used in InstaPay." });
+    return;
+  }
+  if (!EMAIL_PATTERN.test(customerEmail) || customerEmail.length > 254) {
+    res.status(400).json({ error: "Enter a valid email address." });
+    return;
+  }
   if (!selectedService || typeof serviceId !== "string") {
     res.status(400).json({ error: "Choose a valid service." });
     return;
@@ -35,6 +49,8 @@ export default async function handler(
     await connectMongo();
 
     const submission = await CvPaymentSubmissionModel.create({
+      fullName: customerName,
+      email: customerEmail,
       serviceId: serviceId as NairahServiceId,
       serviceTitle: selectedService.title,
       priceEgp: selectedService.priceEgp,
