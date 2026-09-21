@@ -34,6 +34,7 @@ export const NAIRAH_SERVICES = [
 
 export const NAIRAH_PAYMENT_CONFIG = {
   /** Step 1 video showing how to add the email-only payment note. */
+  paymentGuideVideoWebmSrc: "/cv-review/nairah-payment-guide.webm" as string | null,
   paymentGuideVideoSrc: "/cv-review/nairah-payment-guide.mp4" as string | null,
   /** InstaPay QR and phone-friendly direct payment destination. */
   instapayQrImageSrc: "/cv-review/nairah-instapay-qr.jpg" as string | null,
