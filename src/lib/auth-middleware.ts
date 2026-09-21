@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { adminAuth } from "./firebase-admin";
 import UserModel, { IUser } from "./models/user";
-import { SUPER_ADMIN_EMAIL } from "./constants";
+import { isCvPaymentAdminEmail, SUPER_ADMIN_EMAIL } from "./constants";
 
 export function sendError(
   res: NextApiResponse,
@@ -82,6 +82,18 @@ export async function requireSuperAdmin(
   const { user } = await verifyAuth(req);
 
   if (user.email !== SUPER_ADMIN_EMAIL) {
+    throw new Error("Forbidden");
+  }
+
+  return { user };
+}
+
+export async function requireCvPaymentAdmin(
+  req: NextApiRequest
+): Promise<{ user: mongoose.HydratedDocument<IUser> }> {
+  const { user } = await verifyAuth(req);
+
+  if (!isCvPaymentAdminEmail(user.email)) {
     throw new Error("Forbidden");
   }
 

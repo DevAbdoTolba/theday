@@ -1,5 +1,16 @@
 export const SUPER_ADMIN_EMAIL = "mtolba2004@gmail.com";
 
+export const CV_PAYMENT_ADMIN_EMAILS = [
+  SUPER_ADMIN_EMAIL,
+  "qualified.resumes11@gmail.com",
+] as const;
+
+export function isCvPaymentAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const normalizedEmail = email.trim().toLowerCase();
+  return CV_PAYMENT_ADMIN_EMAILS.some((allowedEmail) => allowedEmail === normalizedEmail);
+}
+
 // Upload size limits
 export const UPLOAD_SOFT_LIMIT = 2 * 1024 * 1024 * 1024; // 2 GB
 export const UPLOAD_HARD_LIMIT = 5 * 1024 * 1024 * 1024; // 5 GB

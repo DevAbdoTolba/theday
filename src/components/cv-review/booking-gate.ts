@@ -9,7 +9,7 @@ export function normalizeInstapayHandle(value: string): string {
 }
 
 export function isValidInstapayHandle(value: string): boolean {
-  return /^[a-z]+@instapay$/i.test(value.trim());
+  return /^[a-z0-9]+@instapay$/i.test(value.trim());
 }
 
 export async function createBookingGateToken(
