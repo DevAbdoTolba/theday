@@ -76,11 +76,13 @@ Dialog invariants:
   public InstaPay QR image path, and direct phone-payment URL. Missing any value
   means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
-  price, payment-confirmation timestamp, status (`pending` or `confirmed`),
-  and optional manual reviewer identity/timestamp.
+  price, exact transfer-note email, phone number, payment-confirmation timestamp,
+  status (`pending` or `confirmed`), and optional manual reviewer
+  identity/timestamp.
 
-Payment submissions never include a name, email, card, bank-account, PIN, or
-transaction credential data.
+Payment submissions never include a card, bank-account, PIN, or transaction
+credential. Email and phone are collected only for transfer matching and manual
+booking follow-up.
 
 ## Privacy and Lifetime
 
