@@ -21,6 +21,13 @@ export function sanitizeInstapayUsernameInput(value: string): string {
     .slice(0, 64);
 }
 
+export function hasUnsupportedInstapayUsernameInput(value: string): boolean {
+  const withoutKnownSuffix = value
+    .replace(/@instapay/gi, "")
+    .replace(/instapay/gi, "");
+  return /[^a-z0-9]/i.test(withoutKnownSuffix);
+}
+
 export function isValidInstapayHandle(value: string): boolean {
   return /^[a-z0-9]+@instapay$/i.test(value.trim());
 }
