@@ -77,19 +77,21 @@ Dialog invariants:
   public InstaPay QR image path, and direct phone-payment URL. Missing any value
   means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
-  price, InstaPay full name, matching email, payment-confirmation timestamp,
-  status (`pending` or `confirmed`), and optional manual reviewer
-  identity/timestamp. The confirmed record ID forms the private scheduling link;
-  the name and email are not placed in that link.
+  price, InstaPay handle, matching email, payment-confirmation timestamp, status
+  (`pending` or `confirmed`), and optional manual reviewer identity/timestamp.
+- **Booking Gate Token**: A deterministic SHA-256 digest over a versioned
+  namespace, normalized email, and normalized InstaPay handle, encoded as
+  Base64URL in `?u=`. It is a lightweight client-side deterrent, not an
+  authentication credential. The full name is requested only after it matches.
 - **CV Support Contact**: A singleton MongoDB record keyed by `nairah`, with a
   local display phone and E.164 phone used to build the WhatsApp link. It is
   returned only by an explicit on-demand support request.
 
 Payment submissions never include a customer phone, card, bank-account, PIN, or
-transaction credential.
+transaction credential. The scheduling page does not query MongoDB.
 
 ## Privacy and Lifetime
 
-The feature sends no student identity, CV content, analytics payload, tracking
-parameters, or prefilled data. The external destination is contacted only after
-the visitor activates Meet. UI state is not persisted.
+The feature sends no CV content, analytics payload, or tracking parameters.
+Only after the client gate unlocks does the scheduling page send the visitor&apos;s
+entered full name and email to Calendly as prefill data. Gate state is not persisted.

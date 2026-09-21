@@ -24,11 +24,12 @@ import CheckRounded from "@mui/icons-material/CheckRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import AdminGuard from "../../components/admin/AdminGuard";
+import { createBookingGateToken } from "../../components/cv-review/booking-gate";
 import { useAuth } from "../../hooks/useAuth";
 
 interface PaymentSubmission {
   readonly id: string;
-  readonly fullName: string | null;
+  readonly instapayHandle: string | null;
   readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
@@ -117,10 +118,12 @@ function CvPaymentsContent() {
     }
   };
 
-  const copyBookingLink = async (submissionId: string) => {
+  const copyBookingLink = async (submission: PaymentSubmission) => {
+    if (!submission.email || !submission.instapayHandle) return;
     try {
+      const token = await createBookingGateToken(submission.email, submission.instapayHandle);
       const bookingUrl = new URL("/grad/d/cv/meet/nairah/schedule", window.location.origin);
-      bookingUrl.searchParams.set("request", submissionId);
+      bookingUrl.searchParams.set("u", token);
       await navigator.clipboard.writeText(bookingUrl.toString());
       setNotice("Nairah booking link copied.");
     } catch {
@@ -174,7 +177,7 @@ function CvPaymentsContent() {
                   <TableRow>
                     <TableCell>Service</TableCell>
                     <TableCell>Price</TableCell>
-                    <TableCell>InstaPay name</TableCell>
+                    <TableCell>InstaPay handle</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Submitted</TableCell>
                     <TableCell>Status</TableCell>
@@ -188,7 +191,7 @@ function CvPaymentsContent() {
                       <TableRow key={submission.id} hover>
                         <TableCell>{submission.serviceTitle}</TableCell>
                         <TableCell>{formatPrice(submission.priceEgp)}</TableCell>
-                        <TableCell>{submission.fullName ?? "Not collected"}</TableCell>
+                        <TableCell>{submission.instapayHandle ?? "Not collected"}</TableCell>
                         <TableCell>{submission.email ?? "Not collected"}</TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>
                         <TableCell>
@@ -196,7 +199,7 @@ function CvPaymentsContent() {
                         </TableCell>
                         <TableCell align="right">
                           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                            <Button size="small" variant="outlined" disabled={isPending || !submission.fullName || !submission.email} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink(submission.id)} sx={{ textTransform: "none" }}>Copy booking link</Button>
+                            <Button size="small" variant="outlined" disabled={isPending || !submission.instapayHandle || !submission.email} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink(submission)} sx={{ textTransform: "none" }}>Copy booking link</Button>
                             <Button
                               size="small"
                               variant="contained"
