@@ -15,7 +15,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  check: (auth: { isAdmin: boolean; isSuperAdmin: boolean }) => boolean;
+  check: (auth: { email: string | null; isAdmin: boolean; isSuperAdmin: boolean }) => boolean;
 }
 
 export default function AuthGuard({ children, check }: AuthGuardProps) {
@@ -29,7 +29,7 @@ export default function AuthGuard({ children, check }: AuthGuardProps) {
     signOut,
   } = useAuth();
   const router = useRouter();
-  const hasAccess = check({ isAdmin, isSuperAdmin });
+  const hasAccess = check({ email: user?.email ?? null, isAdmin, isSuperAdmin });
 
   if (loading) {
     return (

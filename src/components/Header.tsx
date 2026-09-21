@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ExpandMore, School, Check, Logout, AdminPanelSettings } from "@mui/icons-material"; // New icons
 import { useAuth } from "../hooks/useAuth";
+import { isCvPaymentAdminEmail } from "../lib/constants";
 
 // ... (Keep Data interfaces and Search styled components as they were) ...
 interface Data {
@@ -123,6 +124,7 @@ export default function Header({
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const canManageCvPayments = isCvPaymentAdminEmail(user?.email);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   // -- Point 1: Modern Class Navigation State --
@@ -241,11 +243,11 @@ export default function Header({
               </IconButton>
             </Tooltip>
 
-            {(user?.isAdmin || user?.isSuperAdmin) && (
-              <Tooltip title="Admin Dashboard">
+            {(user?.isAdmin || user?.isSuperAdmin || canManageCvPayments) && (
+              <Tooltip title={user?.isAdmin || user?.isSuperAdmin ? "Admin Dashboard" : "CV Payments"}>
                 <IconButton
                   color="inherit"
-                  onClick={() => router.push("/admin")}
+                  onClick={() => router.push(user?.isAdmin || user?.isSuperAdmin ? "/admin" : "/admin/cv-payments")}
                   sx={{ 
                     mr: 2,
                     bgcolor: alpha(theme.palette.success.main, 0.1),
