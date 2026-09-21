@@ -237,6 +237,7 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T069 Update feature documentation and run TypeScript, ESLint, whitespace, and production-build validation (FR-033 through FR-037)
 - [X] T070 [US6] Replace the guide placeholder with the supplied video, add matching English and Egyptian-Arabic email-only transfer-note warnings, and keep confirmation blurred and disabled until full playback in `src/pages/grad/d/cv/meet/[reviewer].tsx`, `src/components/cv-review/nairah-services.ts`, and `public/cv-review/nairah-payment-guide.mp4` (FR-034, FR-037)
 - [X] T071 [US6] Configure the supplied InstaPay QR, recipient handle, and exact phone-only direct payment URL in `src/components/cv-review/nairah-services.ts`, `src/pages/grad/d/cv/meet/[reviewer].tsx`, and `public/cv-review/nairah-instapay-qr.jpg` (FR-037)
+- [X] T072 [US6] Collect and validate the exact transfer-note email and a compliance phone number, persist both with the payment confirmation, expose them in the admin dashboard with email copying, and show the manual Calendly-delivery and exact-entry instructions in `src/pages/grad/d/cv/meet/[reviewer].tsx`, `src/pages/api/cv-payments/index.ts`, `src/lib/models/cv-payment-submission.ts`, `src/pages/api/admin/cv-payments.ts`, and `src/pages/admin/cv-payments.tsx` (FR-035, FR-036)
 
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 

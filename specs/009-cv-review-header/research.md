@@ -280,8 +280,9 @@ the Calendly link.
 
 - The requested manual review is explicit: the system must not claim it can
   verify an InstaPay transfer or send the final booking email automatically.
-- Storing only the visitor&apos;s name, email, service, shown price, and required
-  acknowledgement supports manual matching without collecting payment secrets.
+- Storing only the exact transfer-note email, a follow-up phone number, service,
+  shown price, and required acknowledgement supports manual matching without
+  collecting payment secrets.
 - A real QR and prices are commercial inputs, not values the application can
   safely invent. The page stays closed until the operator configures them.
 

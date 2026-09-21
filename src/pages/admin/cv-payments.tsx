@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import CheckRounded from "@mui/icons-material/CheckRounded";
+import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
 import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import AdminGuard from "../../components/admin/AdminGuard";
 import { useAuth } from "../../hooks/useAuth";
@@ -29,6 +30,8 @@ interface PaymentSubmission {
   readonly id: string;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
+  readonly email: string | null;
+  readonly phone: string | null;
   readonly status: "pending" | "confirmed";
   readonly createdAt: string;
   readonly confirmedAt: string | null;
@@ -106,11 +109,20 @@ function CvPaymentsContent() {
           submission.id === body.submission.id ? body.submission : submission,
         ),
       );
-      setNotice("Payment marked confirmed.");
+      setNotice("Payment confirmed. Copy the email and send the Calendly link manually.");
     } catch (confirmError) {
       setError(confirmError instanceof Error ? confirmError.message : "Could not confirm payment.");
     } finally {
       setIsConfirming(null);
+    }
+  };
+
+  const copyEmail = async (email: string) => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setNotice("Email copied.");
+    } catch {
+      setError("Could not copy the email. Please copy it manually.");
     }
   };
 
@@ -131,7 +143,7 @@ function CvPaymentsContent() {
               Nairah CV payments
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: "47rem" }}>
-              Confirm only after checking the InstaPay transfer.
+              Confirm only after checking the InstaPay transfer. Then copy the email and send the Calendly link manually.
             </Typography>
           </Box>
           <Tooltip title="Refresh submissions">
@@ -160,6 +172,8 @@ function CvPaymentsContent() {
                   <TableRow>
                     <TableCell>Service</TableCell>
                     <TableCell>Price</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Phone</TableCell>
                     <TableCell>Submitted</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell align="right">Manual action</TableCell>
@@ -172,6 +186,30 @@ function CvPaymentsContent() {
                       <TableRow key={submission.id} hover>
                         <TableCell>{submission.serviceTitle}</TableCell>
                         <TableCell>{formatPrice(submission.priceEgp)}</TableCell>
+                        <TableCell>
+                          {submission.email ? (
+                            <Button
+                              size="small"
+                              variant="text"
+                              endIcon={<ContentCopyRounded fontSize="small" />}
+                              onClick={() => void copyEmail(submission.email as string)}
+                              sx={{ textTransform: "none", fontWeight: 750 }}
+                            >
+                              {submission.email}
+                            </Button>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">Not collected</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {submission.phone ? (
+                            <Typography component="a" href={`tel:${submission.phone}`} sx={{ color: "inherit", textUnderlineOffset: 3 }}>
+                              {submission.phone}
+                            </Typography>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">Not collected</Typography>
+                          )}
+                        </TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>
                         <TableCell>
                           <Chip size="small" label={isPending ? "Pending" : "Confirmed"} color={isPending ? "warning" : "success"} />
