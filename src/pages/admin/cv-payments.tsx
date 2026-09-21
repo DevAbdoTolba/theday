@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Chip,
+  ClickAwayListener,
   CircularProgress,
   IconButton,
   Pagination,
@@ -20,11 +21,14 @@ import {
   Tooltip,
   ToggleButton,
   ToggleButtonGroup,
+  TextField,
   Typography,
 } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import CheckRounded from "@mui/icons-material/CheckRounded";
+import CloseRounded from "@mui/icons-material/CloseRounded";
 import ContentCopyRounded from "@mui/icons-material/ContentCopyRounded";
+import EditRounded from "@mui/icons-material/EditRounded";
 import RefreshRounded from "@mui/icons-material/RefreshRounded";
 import CvPaymentsGuard from "../../components/admin/CvPaymentsGuard";
 import { createBookingGateToken } from "../../components/cv-review/booking-gate";
@@ -36,12 +40,15 @@ interface PaymentSubmission {
   readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
-  readonly status: "pending" | "confirmed";
+  readonly status: "pending" | "confirmed" | "declined";
   readonly createdAt: string;
   readonly confirmedAt: string | null;
+  readonly declineReason: string | null;
+  readonly declinedAt: string | null;
 }
 
-type PaymentStatusFilter = "all" | "pending" | "confirmed";
+type PaymentStatusFilter = "all" | "pending" | "confirmed" | "declined";
+type PaymentReviewAction = "confirm" | "decline";
 
 interface PaginationMeta {
   readonly page: number;
@@ -54,6 +61,7 @@ interface PaymentCounts {
   readonly all: number;
   readonly pending: number;
   readonly confirmed: number;
+  readonly declined: number;
 }
 
 function formatDate(value: string): string {
@@ -65,6 +73,149 @@ function formatDate(value: string): string {
 
 function formatPrice(priceEgp: number | null): string {
   return priceEgp === null ? "Price not set" : `${priceEgp} EGP`;
+}
+
+interface PaymentStatusControlProps {
+  readonly submission: PaymentSubmission;
+  readonly isUpdating: boolean;
+  readonly onUpdate: (
+    submissionId: string,
+    action: PaymentReviewAction,
+    reason?: string,
+  ) => Promise<boolean>;
+}
+
+function PaymentStatusControl({ submission, isUpdating, onUpdate }: PaymentStatusControlProps) {
+  const [mode, setMode] = useState<"idle" | "choose" | "decline">("idle");
+  const [reason, setReason] = useState(submission.declineReason ?? "");
+  const normalizedReason = reason.trim();
+  const reasonIsValid = normalizedReason.length >= 3 && normalizedReason.length <= 280;
+
+  useEffect(() => {
+    setMode("idle");
+    setReason(submission.declineReason ?? "");
+  }, [submission.declineReason, submission.id, submission.status]);
+
+  const complete = async () => {
+    if (await onUpdate(submission.id, "confirm")) setMode("idle");
+  };
+
+  const decline = async () => {
+    if (!reasonIsValid) return;
+    if (await onUpdate(submission.id, "decline", normalizedReason)) setMode("idle");
+  };
+
+  const openDeclineEditor = () => {
+    setReason(submission.declineReason ?? "");
+    setMode("decline");
+  };
+
+  const choiceControl = (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "3fr minmax(42px, 1fr)",
+        gap: 0.5,
+        width: "100%",
+      }}
+    >
+      <Button
+        size="small"
+        variant="contained"
+        color="success"
+        startIcon={<CheckRounded />}
+        disabled={isUpdating}
+        onClick={() => void complete()}
+        sx={{ minWidth: 0, textTransform: "none", borderRadius: 2 }}
+      >
+        Complete
+      </Button>
+      <Tooltip title="Decline with a reason">
+        <span>
+          <IconButton
+            color="error"
+            disabled={isUpdating}
+            onClick={openDeclineEditor}
+            aria-label="Decline payment request"
+            sx={{ width: "100%", height: 38, borderRadius: 2, border: "1px solid", borderColor: "error.main" }}
+          >
+            <CloseRounded fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Box>
+  );
+
+  return (
+    <ClickAwayListener onClickAway={() => { if (!isUpdating) setMode("idle"); }}>
+      <Box sx={{ width: 268, maxWidth: "100%" }}>
+        {mode === "decline" ? (
+          <Box
+            component="form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void decline();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && !isUpdating) setMode("idle");
+            }}
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) 42px",
+              gap: 0.5,
+              transformOrigin: "right center",
+              animation: "declineEditorIn 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+              "@keyframes declineEditorIn": {
+                from: { opacity: 0.35, transform: "scaleX(0.35)" },
+                to: { opacity: 1, transform: "scaleX(1)" },
+              },
+              "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+            }}
+          >
+            <TextField
+              autoFocus
+              size="small"
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              placeholder="Decline reason"
+              inputProps={{ maxLength: 280, "aria-label": "Reason for declining payment request" }}
+              error={reason.length > 0 && !reasonIsValid}
+              disabled={isUpdating}
+              sx={{ "& .MuiOutlinedInput-root": { height: 38, borderRadius: 2 } }}
+            />
+            <Tooltip title={reasonIsValid ? "Save decline" : "Enter at least 3 characters"}>
+              <span>
+                <IconButton
+                  type="submit"
+                  color="success"
+                  disabled={isUpdating || !reasonIsValid}
+                  aria-label="Save decline reason"
+                  sx={{ width: 42, height: 38, borderRadius: 2, bgcolor: "success.main", color: "success.contrastText", "&:hover": { bgcolor: "success.dark" } }}
+                >
+                  {isUpdating ? <CircularProgress size={18} color="inherit" /> : <CheckRounded fontSize="small" />}
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        ) : mode === "choose" || submission.status === "pending" ? (
+          choiceControl
+        ) : (
+          <Button
+            fullWidth
+            size="small"
+            variant="outlined"
+            color={submission.status === "confirmed" ? "success" : "error"}
+            endIcon={<EditRounded fontSize="small" />}
+            disabled={isUpdating}
+            onClick={() => setMode("choose")}
+            sx={{ height: 38, justifyContent: "space-between", textTransform: "none", borderRadius: 2 }}
+          >
+            {submission.status === "confirmed" ? "Completed" : "Declined"}
+          </Button>
+        )}
+      </Box>
+    </ClickAwayListener>
+  );
 }
 
 export default function CvPaymentsAdminPage() {
@@ -81,9 +232,9 @@ function CvPaymentsContent() {
   const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>("all");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationMeta>({ page: 1, pageSize: 10, total: 0, totalPages: 1 });
-  const [counts, setCounts] = useState<PaymentCounts>({ all: 0, pending: 0, confirmed: 0 });
+  const [counts, setCounts] = useState<PaymentCounts>({ all: 0, pending: 0, confirmed: 0, declined: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [isConfirming, setIsConfirming] = useState<string | null>(null);
+  const [updatingSubmissionId, setUpdatingSubmissionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -113,8 +264,12 @@ function CvPaymentsContent() {
     void loadSubmissions();
   }, [loadSubmissions]);
 
-  const confirmPayment = async (submissionId: string) => {
-    setIsConfirming(submissionId);
+  const updatePaymentStatus = async (
+    submissionId: string,
+    action: PaymentReviewAction,
+    reason?: string,
+  ): Promise<boolean> => {
+    setUpdatingSubmissionId(submissionId);
     setError(null);
     try {
       const token = await getIdToken();
@@ -124,19 +279,21 @@ function CvPaymentsContent() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token ?? ""}`,
         },
-        body: JSON.stringify({ submissionId, action: "confirm" }),
+        body: JSON.stringify({ submissionId, action, reason }),
       });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(body?.error ?? "Could not confirm payment.");
+        throw new Error(body?.error ?? "Could not update payment status.");
       }
       await response.json();
-      setNotice("Payment confirmed. Copy the booking link and email it manually.");
+      setNotice(action === "confirm" ? "Payment completed. The booking link is ready." : "Request declined with its reason saved.");
       await loadSubmissions();
+      return true;
     } catch (confirmError) {
-      setError(confirmError instanceof Error ? confirmError.message : "Could not confirm payment.");
+      setError(confirmError instanceof Error ? confirmError.message : "Could not update payment status.");
+      return false;
     } finally {
-      setIsConfirming(null);
+      setUpdatingSubmissionId(null);
     }
   };
 
@@ -170,7 +327,7 @@ function CvPaymentsContent() {
               Nairah CV payments
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: "47rem" }}>
-              Confirm only after checking the InstaPay transfer. Then copy the private booking link and send it to the email written in the transfer note.
+              Complete verified transfers, or decline suspicious requests with a clear reason. Booking links are available only after completion.
             </Typography>
           </Box>
           <Tooltip title="Refresh submissions">
@@ -182,11 +339,12 @@ function CvPaymentsContent() {
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 1.25, mb: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 1.25, mb: 2 }}>
           {([
             ["All requests", counts.all, "primary.main"],
             ["Needs review", counts.pending, "warning.main"],
-            ["Confirmed", counts.confirmed, "success.main"],
+            ["Completed", counts.confirmed, "success.main"],
+            ["Declined", counts.declined, "error.main"],
           ] as const).map(([label, value, color]) => (
             <Paper key={label} variant="outlined" sx={{ p: 2, borderRadius: 2.5 }}>
               <Typography color="text.secondary" variant="body2" fontWeight={750}>{label}</Typography>
@@ -210,7 +368,8 @@ function CvPaymentsContent() {
             >
               <ToggleButton value="all">All</ToggleButton>
               <ToggleButton value="pending">Pending</ToggleButton>
-              <ToggleButton value="confirmed">Confirmed</ToggleButton>
+              <ToggleButton value="confirmed">Completed</ToggleButton>
+              <ToggleButton value="declined">Declined</ToggleButton>
             </ToggleButtonGroup>
             <Typography color="text.secondary" variant="body2">
               {pagination.total === 0 ? "No results" : `${(pagination.page - 1) * pagination.pageSize + 1}–${Math.min(pagination.page * pagination.pageSize, pagination.total)} of ${pagination.total}`}
@@ -227,7 +386,7 @@ function CvPaymentsContent() {
             </Box>
           ) : (
             <TableContainer sx={{ maxHeight: 620 }}>
-              <Table stickyHeader size="small" aria-label="Nairah CV payment submissions" sx={{ minWidth: 980 }}>
+              <Table stickyHeader size="small" aria-label="Nairah CV payment submissions" sx={{ minWidth: 1180 }}>
                 <TableHead>
                   <TableRow>
                     <TableCell>Service</TableCell>
@@ -236,12 +395,13 @@ function CvPaymentsContent() {
                     <TableCell>Email</TableCell>
                     <TableCell>Submitted</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell align="right">Manual action</TableCell>
+                    <TableCell align="right">Review</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {submissions.map((submission) => {
                     const isPending = submission.status === "pending";
+                    const isCompleted = submission.status === "confirmed";
                     return (
                       <TableRow key={submission.id} hover>
                         <TableCell>{submission.serviceTitle}</TableCell>
@@ -250,22 +410,29 @@ function CvPaymentsContent() {
                         <TableCell>{submission.email ?? "Not collected"}</TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>
                         <TableCell>
-                          <Chip size="small" label={isPending ? "Pending" : "Confirmed"} color={isPending ? "warning" : "success"} />
+                          <Chip
+                            size="small"
+                            label={isPending ? "Pending" : isCompleted ? "Completed" : "Declined"}
+                            color={isPending ? "warning" : isCompleted ? "success" : "error"}
+                          />
+                          {submission.status === "declined" && submission.declineReason && (
+                            <Typography sx={{ mt: 0.75, maxWidth: 230, color: "error.main", fontSize: "0.76rem", fontWeight: 700, lineHeight: 1.35 }}>
+                              {submission.declineReason}
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell align="right">
-                          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                            <Button size="small" variant="outlined" disabled={isPending || !submission.instapayHandle || !submission.email} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink(submission)} sx={{ textTransform: "none" }}>Copy booking link</Button>
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="success"
-                              disabled={!isPending || isConfirming === submission.id}
-                              startIcon={<CheckRounded />}
-                              onClick={() => void confirmPayment(submission.id)}
-                              sx={{ textTransform: "none" }}
-                            >
-                              {isConfirming === submission.id ? "Confirming…" : "Confirm"}
-                            </Button>
+                          <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 1 }}>
+                            {isCompleted && submission.instapayHandle && submission.email && (
+                              <Button size="small" variant="outlined" startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink(submission)} sx={{ whiteSpace: "nowrap", textTransform: "none" }}>
+                                Copy link
+                              </Button>
+                            )}
+                            <PaymentStatusControl
+                              submission={submission}
+                              isUpdating={updatingSubmissionId === submission.id}
+                              onUpdate={updatePaymentStatus}
+                            />
                           </Box>
                         </TableCell>
                       </TableRow>

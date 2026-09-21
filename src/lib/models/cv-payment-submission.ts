@@ -9,9 +9,12 @@ export interface ICvPaymentSubmission {
   serviceTitle: string;
   priceEgp: number | null;
   paymentConfirmedAt: Date;
-  status: "pending" | "confirmed";
+  status: "pending" | "confirmed" | "declined";
   confirmedBy?: string;
   confirmedAt?: Date;
+  declineReason?: string;
+  declinedBy?: string;
+  declinedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,9 +31,12 @@ const cvPaymentSubmissionSchema = new mongoose.Schema<ICvPaymentSubmission>(
     serviceTitle: { type: String, required: true, maxlength: 180 },
     priceEgp: { type: Number, default: null },
     paymentConfirmedAt: { type: Date, required: true },
-    status: { type: String, required: true, enum: ["pending", "confirmed"], default: "pending" },
+    status: { type: String, required: true, enum: ["pending", "confirmed", "declined"], default: "pending" },
     confirmedBy: { type: String, default: undefined },
     confirmedAt: { type: Date, default: undefined },
+    declineReason: { type: String, trim: true, maxlength: 280, default: undefined },
+    declinedBy: { type: String, default: undefined },
+    declinedAt: { type: Date, default: undefined },
   },
   { timestamps: true },
 );

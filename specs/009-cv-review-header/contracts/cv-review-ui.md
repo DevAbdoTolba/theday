@@ -76,10 +76,13 @@
   price, InstaPay handle, matching email, payment-confirmation time, and
   `pending` state.
 - An existing authorised admin sees the newest entries at `/admin/cv-payments`.
-- Confirming is manual and changes only `pending` to `confirmed` with a review
-  timestamp. The admin copies the internal booking link and sends it to the
-  email found in the InstaPay transfer note; confirmation never emails or opens
-  Calendly automatically.
+- Review is manual and changes a request to `confirmed` (displayed as Completed)
+  or `declined`. Declining requires a visible reason plus reviewer and time
+  metadata. A finished status remains editable through the same compact control;
+  changing it clears the previous status metadata.
+- The admin can copy the internal booking link only for completed requests and
+  sends it to the email found in the InstaPay transfer note; completion never
+  emails or opens Calendly automatically.
 - The copied link contains only `?u=` with a SHA-256 Base64URL token derived in
   the admin browser from normalized email and InstaPay handle. It contains no
   payment record ID and needs no server lookup after being sent.
@@ -94,8 +97,9 @@
 - CV-payment page and API access use one exact two-email allowlist:
   `mtolba2004@gmail.com` and `qualified.resumes11@gmail.com`. The latter is
   scoped to CV payments and is not promoted to general admin.
-- The dashboard fetches ten newest-first records per page and exposes status
-  filters, global counts, result ranges, and bounded pagination controls.
+- The dashboard fetches ten newest-first records per page and exposes All,
+  Pending, Completed, and Declined filters, global counts, result ranges, and
+  bounded pagination controls.
 - Need help performs an on-demand POST, reads the Nairah support phone from
   MongoDB, and only then reveals the phone and direct WhatsApp action.
 

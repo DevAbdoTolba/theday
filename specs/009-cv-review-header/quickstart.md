@@ -51,7 +51,10 @@ For Abdo Tolba and Omar Shawky:
 13. Open the developer console and confirm the approved yellow-on-black ASCII art and recruiting message appear without debugger detection or UI disruption.
 14. Remove `?u=` from the scheduling URL and confirm the page shows only a blocking invalid-link explanation and Need help; the identity form, Continue action, full-name prompt, Calendly iframe, and external Calendly link must not render.
 15. Sign in as each approved CV-payment email and confirm `/admin/cv-payments` plus its list/confirm API work. Confirm `qualified.resumes11@gmail.com` is routed directly to CV Payments and remains denied from general admin pages.
-16. Create more than ten records and verify All/Pending/Confirmed filters, counts, result ranges, and first/previous/next/last pagination remain consistent after confirming a request.
+16. Create more than ten records and verify All/Pending/Completed/Declined filters, counts, result ranges, and first/previous/next/last pagination remain consistent after reviewing a request.
+17. On a pending row, confirm the complete action occupies most of the status control and the decline X occupies only its final quarter. Activate X and confirm it smoothly becomes one reason field plus one save check.
+18. Verify an empty decline reason cannot save, a valid reason appears on the declined row, and its reviewer/time metadata are stored.
+19. Activate a completed or declined status and verify the same compact control can switch the decision or edit the decline reason without a row of extra buttons. Confirm booking-link copying remains available only for completed records.
 
 ## Accessibility Checks
 
