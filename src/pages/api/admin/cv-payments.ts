@@ -11,12 +11,14 @@ interface PaymentSubmissionResponse {
   readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
-  readonly status: "pending" | "confirmed";
+  readonly status: "pending" | "confirmed" | "declined";
   readonly createdAt: string;
   readonly confirmedAt: string | null;
+  readonly declineReason: string | null;
+  readonly declinedAt: string | null;
 }
 
-type PaymentStatusFilter = "all" | "pending" | "confirmed";
+type PaymentStatusFilter = "all" | "pending" | "confirmed" | "declined";
 
 function readQueryValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -34,6 +36,8 @@ function serializeSubmission(
     status: submission.status,
     createdAt: submission.createdAt.toISOString(),
     confirmedAt: submission.confirmedAt?.toISOString() ?? null,
+    declineReason: submission.declineReason ?? null,
+    declinedAt: submission.declinedAt?.toISOString() ?? null,
   };
 }
 
@@ -51,16 +55,18 @@ export default async function handler(
       const page = Number.isFinite(requestedPage) ? Math.max(1, requestedPage) : 1;
       const pageSize = 10;
       const requestedStatus = readQueryValue(req.query.status);
-      const status: PaymentStatusFilter = requestedStatus === "pending" || requestedStatus === "confirmed" ? requestedStatus : "all";
+      const status: PaymentStatusFilter = requestedStatus === "pending" || requestedStatus === "confirmed" || requestedStatus === "declined" ? requestedStatus : "all";
       const filter = status === "all" ? {} : { status };
-      const [submissions, total, pending, confirmed] = await Promise.all([
+      const [submissions, total, all, pending, confirmed, declined] = await Promise.all([
         CvPaymentSubmissionModel.find(filter)
-        .sort({ createdAt: -1 })
+          .sort({ createdAt: -1 })
           .skip((page - 1) * pageSize)
           .limit(pageSize),
         CvPaymentSubmissionModel.countDocuments(filter),
+        CvPaymentSubmissionModel.countDocuments({}),
         CvPaymentSubmissionModel.countDocuments({ status: "pending" }),
         CvPaymentSubmissionModel.countDocuments({ status: "confirmed" }),
+        CvPaymentSubmissionModel.countDocuments({ status: "declined" }),
       ]);
       res.status(200).json({
         submissions: submissions.map(serializeSubmission),
@@ -70,34 +76,53 @@ export default async function handler(
           total,
           totalPages: Math.max(1, Math.ceil(total / pageSize)),
         },
-        counts: { all: pending + confirmed, pending, confirmed },
+        counts: { all, pending, confirmed, declined },
       });
       return;
     }
 
     if (req.method === "PATCH") {
-      const { submissionId, action } = req.body as {
+      const { submissionId, action, reason } = req.body as {
         submissionId?: unknown;
         action?: unknown;
+        reason?: unknown;
       };
       if (typeof submissionId !== "string" || !mongoose.isValidObjectId(submissionId)) {
         return sendError(res, 400, "Invalid payment submission.");
       }
-      if (action !== "confirm") {
+      if (action !== "confirm" && action !== "decline") {
         return sendError(res, 400, "Invalid payment action.");
       }
 
+      const declineReason = typeof reason === "string" ? reason.trim() : "";
+      if (action === "decline" && (declineReason.length < 3 || declineReason.length > 280)) {
+        return sendError(res, 400, "Add a decline reason between 3 and 280 characters.");
+      }
+
       const submission = await CvPaymentSubmissionModel.findOneAndUpdate(
-        { _id: submissionId, status: "pending" },
-        {
-          status: "confirmed",
-          confirmedBy: user.email,
-          confirmedAt: new Date(),
-        },
+        { _id: submissionId },
+        action === "confirm"
+          ? {
+              $set: {
+                status: "confirmed",
+                confirmedBy: user.email,
+                confirmedAt: new Date(),
+              },
+              $unset: { declineReason: 1, declinedBy: 1, declinedAt: 1 },
+            }
+          : {
+              $set: {
+                status: "declined",
+                declineReason,
+                declinedBy: user.email,
+                declinedAt: new Date(),
+              },
+              $unset: { confirmedBy: 1, confirmedAt: 1 },
+            },
         { new: true },
       );
       if (!submission) {
-        return sendError(res, 404, "Payment submission is no longer pending.");
+        return sendError(res, 404, "Payment submission was not found.");
       }
 
       res.status(200).json({ submission: serializeSubmission(submission) });
