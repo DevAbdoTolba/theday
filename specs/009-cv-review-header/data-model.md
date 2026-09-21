@@ -70,9 +70,9 @@ Dialog invariants:
 
 ## Nairah Service and Payment Entities
 
-- **Nairah Service**: One of `cv-review`, `cv-writing`, or
-  `linkedin-optimization`, with a title, explanation, and manually editable
-  EGP price. A missing price means payments are closed.
+- **Nairah Service**: One of `cv-review`, `cv-review-linkedin-review`,
+  `cv-writing`, or `cv-writing-linkedin-optimization`, with an individual or
+  bundle category, title, explanation, and hardcoded EGP price.
 - **Nairah Payment Configuration**: The payment-guide video, recipient label,
   public InstaPay QR image path, and direct phone-payment URL. Missing any value
   means payments are closed.
@@ -82,10 +82,12 @@ Dialog invariants:
   identity/timestamp. Declined records also keep the required reason,
   declining reviewer, and decline timestamp. Changing a finished decision clears
   metadata from the previous status.
-- **Booking Gate Token**: A deterministic SHA-256 digest over a versioned
-  namespace, normalized email, and normalized InstaPay handle, encoded as
-  Base64URL in `?u=`. It is a lightweight client-side deterrent, not an
-  authentication credential. The full name is requested only after it matches.
+- **Booking Gate Token**: One `?u=` value containing the Base64URL-encoded
+  purchased-service title and a deterministic SHA-256 digest over a versioned
+  namespace, normalized email, normalized InstaPay handle, and that service
+  title. It is a lightweight client-side deterrent, not an authentication
+  credential. The full name is requested only after it matches. Legacy v1
+  digest-only values remain accepted but cannot prefill a service.
 - **CV Support Contact**: A singleton MongoDB record keyed by `nairah`, with a
   local display phone and E.164 phone used to build the WhatsApp link. It is
   returned only by an explicit on-demand support request.

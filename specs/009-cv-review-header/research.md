@@ -282,9 +282,14 @@ the Calendly link.
   verify an InstaPay transfer or send the final booking email automatically.
 - Store the InstaPay handle and matching email with the service, shown price,
   and acknowledgement for manual review. After confirmation, derive a
-  deterministic SHA-256 Base64URL token from normalized email and handle in the
-  admin browser. The scheduling page recomputes it locally, so the sent link
+  deterministic SHA-256 Base64URL token from normalized email, handle, and the
+  Base64URL-encoded purchased-service title in the admin browser. The scheduling
+  page decodes the service and recomputes the digest locally, so the sent link
   remains usable without MongoDB. This is an intentional deterrent, not strong authentication.
+- Prefill the purchased service into Calendly&apos;s first custom question with the
+  official `a1` URL parameter, alongside the existing `name` and `email`
+  parameters. Nairah&apos;s event must keep “Purchased service” as custom question
+  one. Source: https://help.calendly.com/hc/en-us/articles/226766767-Pre-populate-invitee-information-in-the-booking-process
 - Store the business support phone as a MongoDB singleton and reveal it only
   after an explicit support request, with an E.164 WhatsApp destination.
 - A real QR and prices are commercial inputs, not values the application can

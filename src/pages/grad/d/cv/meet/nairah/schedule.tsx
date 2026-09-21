@@ -5,8 +5,8 @@ import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import LinkOffRounded from "@mui/icons-material/LinkOffRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import {
-  createBookingGateToken,
   isValidInstapayHandle,
+  verifyBookingGateToken,
 } from "../../../../../../components/cv-review/booking-gate";
 import CVSupportContact from "../../../../../../components/cv-review/CVSupportContact";
 import { NAIRAH_DESTINATION } from "../../../../../../components/cv-review/reviewers";
@@ -34,6 +34,7 @@ export default function NairahSchedulePage() {
   const [fullName, setFullName] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [purchasedService, setPurchasedService] = useState<string | null>(null);
   const [calendarName, setCalendarName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -51,11 +52,12 @@ export default function NairahSchedulePage() {
     setIsChecking(true);
     setError(null);
     try {
-      const expectedToken = await createBookingGateToken(email, instapayHandle);
-      if (expectedToken !== suppliedToken) {
-        setError("The email or InstaPay handle does not match this booking link.");
+      const verification = await verifyBookingGateToken(suppliedToken, email, instapayHandle);
+      if (!verification.valid) {
+        setError("The email, InstaPay handle, or purchased service does not match this booking link.");
         return;
       }
+      setPurchasedService(verification.serviceTitle);
       setIsUnlocked(true);
     } catch {
       setError("Could not verify this booking link. Please try again.");
@@ -91,6 +93,7 @@ export default function NairahSchedulePage() {
   if (calendarName) {
     calendlyUrl.searchParams.set("name", calendarName);
     calendlyUrl.searchParams.set("email", email.trim());
+    if (purchasedService) calendlyUrl.searchParams.set("a1", purchasedService);
   }
 
   return (
@@ -127,7 +130,7 @@ export default function NairahSchedulePage() {
             <>
               <Typography component="h1" sx={{ fontSize: { xs: "1.65rem", sm: "2.5rem" }, fontWeight: 1000, letterSpacing: "-0.055em" }}>Choose your time with Nairah.</Typography>
               <Alert severity="warning" sx={{ mt: 1.5, mb: 2, bgcolor: "rgba(255,230,0,0.11)", color: "#fff", border: "1px solid rgba(255,230,0,0.65)", "& .MuiAlert-icon": { color: "#ffe600" } }}>
-                Confirm that Calendly shows the InstaPay account holder&apos;s exact name and the same email used in InstaPay.
+                Confirm that Calendly shows the InstaPay account holder&apos;s exact name, the same email used in InstaPay{purchasedService ? <>, and the purchased service: <strong>{purchasedService}</strong></> : null}.
               </Alert>
               <Box component="iframe" src={calendlyUrl.toString()} title="Choose a Calendly time with Nairah" sx={{ display: "block", width: "100%", minHeight: { xs: "760px", sm: "820px" }, border: 0, borderRadius: "18px", bgcolor: "#fff" }} />
               <Button component="a" href={calendlyUrl.toString()} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewRounded />} sx={{ mt: 1.5, color: "#fff", textTransform: "none", fontWeight: 850 }}>Open Calendly in a new tab</Button>

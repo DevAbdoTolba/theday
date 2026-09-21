@@ -26,7 +26,7 @@ const cvPaymentSubmissionSchema = new mongoose.Schema<ICvPaymentSubmission>(
     serviceId: {
       type: String,
       required: true,
-      enum: ["cv-review", "cv-writing", "linkedin-optimization"],
+      enum: ["cv-review", "cv-review-linkedin-review", "cv-writing", "cv-writing-linkedin-optimization"],
     },
     serviceTitle: { type: String, required: true, maxlength: 180 },
     priceEgp: { type: Number, default: null },

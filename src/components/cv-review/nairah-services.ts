@@ -1,10 +1,14 @@
 export type NairahServiceId =
   | "cv-review"
+  | "cv-review-linkedin-review"
   | "cv-writing"
-  | "linkedin-optimization";
+  | "cv-writing-linkedin-optimization";
+
+export type NairahServiceCategory = "service" | "bundle";
 
 export interface NairahService {
   readonly id: NairahServiceId;
+  readonly category: NairahServiceCategory;
   readonly title: string;
   readonly summary: string;
   /** Set the final EGP amount before enabling payments. */
@@ -14,21 +18,31 @@ export interface NairahService {
 export const NAIRAH_SERVICES = [
   {
     id: "cv-review",
-    title: "CV reviewing — 30 min session feedback",
+    category: "service",
+    title: "CV review",
     summary: "A focused review with clear, practical feedback on your CV.",
     priceEgp: 700,
   },
   {
-    id: "cv-writing",
-    title: "CV writing",
-    summary: "May start with a consultation, then Nairah writes your CV with you.",
-    priceEgp: 1500,
+    id: "cv-review-linkedin-review",
+    category: "bundle",
+    title: "CV review + LinkedIn review",
+    summary: "Practical feedback on both your CV and LinkedIn profile in one review.",
+    priceEgp: 1000,
   },
   {
-    id: "linkedin-optimization",
-    title: "LinkedIn optimization",
-    summary: "Get notes for your profile or share access for Nairah to edit it herself.",
-    priceEgp: 1000,
+    id: "cv-writing",
+    category: "service",
+    title: "CV writing",
+    summary: "A complete CV written around your experience, strengths, and target roles.",
+    priceEgp: 1200,
+  },
+  {
+    id: "cv-writing-linkedin-optimization",
+    category: "bundle",
+    title: "CV writing + LinkedIn optimization",
+    summary: "A complete CV plus a LinkedIn profile optimized to tell the same strong story.",
+    priceEgp: 1500,
   },
 ] as const satisfies readonly NairahService[];
 
