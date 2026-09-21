@@ -49,6 +49,7 @@ For Abdo Tolba and Omar Shawky:
 11. Disable MongoDB or inspect network activity, open the sent link, re-enter the exact email and handle, and confirm it unlocks with no API call. Confirm a mismatch stays locked.
 12. Enter the full InstaPay account name and confirm the exact warning stays visible beside the Calendly picker with name and email prefilled.
 13. Open the developer console and confirm the approved yellow-on-black ASCII art and recruiting message appear without debugger detection or UI disruption.
+14. Remove `?u=` from the scheduling URL and confirm the page shows only a blocking invalid-link explanation and Need help; the identity form, Continue action, full-name prompt, Calendly iframe, and external Calendly link must not render.
 
 ## Accessibility Checks
 
