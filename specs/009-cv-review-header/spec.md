@@ -146,6 +146,7 @@ As Nairah&apos;s authorised admin, I view the newest payment requests with their
 2. **Given** a payment is pending, **When** the admin manually selects Confirm, **Then** only that pending submission becomes confirmed and no Calendly email is sent automatically.
 3. **Given** a payment is confirmed, **When** the admin copies its booking link, **Then** the link contains a SHA-256 Base64URL token derived from the normalized email and InstaPay handle without a database record ID.
 4. **Given** the visitor opens that link, **When** they re-enter the matching email and InstaPay handle, **Then** client-side verification unlocks a full-name prompt and the resulting name/email prefill the embedded Calendly picker.
+5. **Given** the visitor opens the scheduling route without a `u` token, **When** the page loads, **Then** no verification form or scheduling control is usable; a blocking error tells them to request the correct complete URL from Nairah and exposes only Need help.
 
 ---
 
@@ -221,6 +222,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-039**: The exact InstaPay account-name/email warning MUST appear on Nairah&apos;s internal scheduling page beside the embedded Calendly time picker and MUST NOT appear on the post-payment confirmation. After the visitor passes the client-side email/handle gate, the entered full name and email MUST prefill Calendly.
 - **FR-040**: The admin-generated scheduling link MUST be independent of MongoDB after creation and use `?u=` with a deterministic SHA-256 Base64URL token derived from normalized email and InstaPay handle. The page MUST recompute and compare the token locally.
 - **FR-041**: The scheduling page MUST print the approved styled ASCII recruiting easter egg in the developer console without attempting to detect or block developer tools.
+- **FR-042**: A scheduling route without a non-empty `u` token MUST render a fully blocking invalid-link state. It MUST hide the identity form and all scheduling controls, instruct the visitor to ask Nairah for the correct complete URL, and leave only the on-demand Need help contact operable.
 
 ### Key Entities
 
