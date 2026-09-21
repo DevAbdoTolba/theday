@@ -21,7 +21,7 @@ with dark separation, normal photo outlines remain absent, and Nairah's
 data-driven premium tier adds a six-second interaction shimmer plus a
 selected-only dropping gold badge with restrained motion.
 
-The Nairah payment route adds a small authenticated approval API and anonymous MongoDB payment-confirmation records. A separate MongoDB support-contact record is revealed only when requested. The manually delivered Nairah scheduling route embeds the live Calendly picker with the exact matching warning visible. It still adds no payment processor, Calendly SDK, automated email, analytics integration, or npm dependency.
+The Nairah payment route adds a small authenticated approval API and MongoDB payment-confirmation records containing the InstaPay full name and matching email. A separate MongoDB support-contact record is revealed only when requested. The manually delivered Nairah scheduling route resolves a confirmed request ID server-side, then embeds the live Calendly picker with the saved name/email prefilled and the exact matching warning visible. It still adds no payment processor, Calendly SDK, automated email, analytics integration, or npm dependency.
 
 ## Technical Context
 
@@ -130,6 +130,6 @@ No violations or additional complexity exceptions are required.
 
 - Do not modify dashboard or subject page files; they already consume `ModernHeader`.
 - Do not add or modify API routes, database models, authentication, global state, PWA/service-worker files, or analytics.
-- Do not add a Calendly SDK, API health check, UTM parameters, or prefilled personal data. The only approved embed is Nairah&apos;s post-payment scheduling page.
+- Do not add a Calendly SDK, API health check, or UTM parameters. The only approved embed and personal-data prefill is Nairah&apos;s confirmed post-payment scheduling page.
 - Do not use Framer Motion or add another motion dependency for this feature.
 - Treat final reviewer portraits, descriptions, and validated Calendly URLs as content updates inside the typed configuration, not architecture changes.

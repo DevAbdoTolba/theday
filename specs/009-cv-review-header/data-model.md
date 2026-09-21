@@ -77,14 +77,16 @@ Dialog invariants:
   public InstaPay QR image path, and direct phone-payment URL. Missing any value
   means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
-  price, payment-confirmation timestamp, status (`pending` or `confirmed`), and
-  optional manual reviewer identity/timestamp.
+  price, InstaPay full name, matching email, payment-confirmation timestamp,
+  status (`pending` or `confirmed`), and optional manual reviewer
+  identity/timestamp. The confirmed record ID forms the private scheduling link;
+  the name and email are not placed in that link.
 - **CV Support Contact**: A singleton MongoDB record keyed by `nairah`, with a
   local display phone and E.164 phone used to build the WhatsApp link. It is
   returned only by an explicit on-demand support request.
 
-Payment submissions never include a customer name, email, phone, card,
-bank-account, PIN, or transaction credential.
+Payment submissions never include a customer phone, card, bank-account, PIN, or
+transaction credential.
 
 ## Privacy and Lifetime
 

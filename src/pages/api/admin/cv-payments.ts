@@ -7,6 +7,8 @@ import CvPaymentSubmissionModel, {
 
 interface PaymentSubmissionResponse {
   readonly id: string;
+  readonly fullName: string | null;
+  readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
   readonly status: "pending" | "confirmed";
@@ -19,6 +21,8 @@ function serializeSubmission(
 ): PaymentSubmissionResponse {
   return {
     id: submission._id.toString(),
+    fullName: submission.fullName ?? null,
+    email: submission.email ?? null,
     serviceTitle: submission.serviceTitle,
     priceEgp: submission.priceEgp,
     status: submission.status,

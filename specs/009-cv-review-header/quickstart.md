@@ -42,11 +42,11 @@ For Abdo Tolba and Omar Shawky:
 4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
 5. Confirm the supplied QR renders at step two and a 320px phone shows the exact clickable direct InstaPay URL without overflow.
 6. Until prices, recipient, QR, and direct URL are configured, confirm submission is disabled and explains why.
-7. Confirm there are no customer email or phone fields, submit a request, and verify `/admin/cv-payments` shows only the service, price, time, and status.
+7. Enter the full name used in InstaPay and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
 8. Confirm Need help reveals `01114117164` only after activation and its WhatsApp action opens `https://wa.me/201114117164`.
-9. Confirm the success screen only tells the visitor to watch the email written in the InstaPay note.
-10. Confirm the admin can manually confirm a pending request and copy the internal Nairah booking link without any automatic Calendly message.
-11. Open that link and confirm the exact InstaPay account-name/email warning stays visible beside the Calendly time picker.
+9. Confirm the success screen tells the visitor to watch the submitted email without showing the exact-match warning.
+10. Confirm the admin can manually confirm a pending request and copy an internal Nairah booking link containing only the request ID, without any automatic Calendly message.
+11. Open that link and confirm the exact InstaPay account-name/email warning stays visible beside the Calendly time picker and both Calendly fields are prefilled.
 
 ## Accessibility Checks
 
