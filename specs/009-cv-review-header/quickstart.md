@@ -40,9 +40,10 @@ For Abdo Tolba and Omar Shawky:
 2. Confirm the page offers the three approved services and each selected service has a back action and distinct editable price slot.
 3. Confirm the payment page shows the configured video and matching English/Egyptian-Arabic email-only note warnings.
 4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
-5. Until prices, recipient, and QR are configured, confirm submission is disabled and explains why.
-6. After configuration, submit a request and confirm `/admin/cv-payments` shows the service, price, and pending status for an admin.
-7. Confirm the admin can manually confirm a pending request, without any automatic Calendly message.
+5. Confirm the supplied QR renders at step two and a 320px phone shows the exact clickable direct InstaPay URL without overflow.
+6. Until prices, recipient, QR, and direct URL are configured, confirm submission is disabled and explains why.
+7. After configuration, submit a request and confirm `/admin/cv-payments` shows the service, price, and pending status for an admin.
+8. Confirm the admin can manually confirm a pending request, without any automatic Calendly message.
 
 ## Accessibility Checks
 

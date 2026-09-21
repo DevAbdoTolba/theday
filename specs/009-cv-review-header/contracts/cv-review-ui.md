@@ -62,8 +62,8 @@
   from behind the button, then routes to `/grad/d/cv/meet/nairah`.
 - Nairah&apos;s page has three services with separately editable detail prices,
   then a guide video, bilingual email-only transfer-note warning, gated
-  confirmation, and QR step. Missing live payment configuration disables
-  submission.
+  confirmation, and QR step. Phone screens additionally expose the exact direct
+  InstaPay URL. Missing live payment configuration disables submission.
 - No iframe, SDK, `window.open`, preflight request, tracking parameter, or
   payment credential collection is allowed.
 
