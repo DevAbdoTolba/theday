@@ -44,7 +44,7 @@ export default function NairahSchedulePage() {
   const suppliedToken = typeof router.query.u === "string" ? router.query.u : "";
 
   useEffect(() => {
-    console.info(`%c${CONSOLE_ART}`, "color:#ffe600;background:#050505;font:900 13px/1.15 monospace;padding:18px;border:2px solid #fff;border-radius:10px;");
+    console.info(`%c${CONSOLE_ART}`, "color:#ffe600;background:#050505;font:900 12px/1 monospace;letter-spacing:0;padding:0;border:0;");
     console.info("%cIf you are interested in a nice position, please contact me at DevAbdoTolba@gmail.com with subject 'Hacked theday'", "color:#fff;background:#050505;font:800 16px/1.5 sans-serif;padding:12px 18px;border-left:5px solid #ffe600;");
   }, []);
 
@@ -111,7 +111,7 @@ export default function NairahSchedulePage() {
               <Typography sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)" }}>Enter the same details used for your payment request.</Typography>
               <Box sx={{ mt: 3, display: "grid", gap: 1.5 }}>
                 <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
-                <TextField label="InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value.replace(/@instapay$/i, ""))} required autoComplete="off" placeholder="name123" helperText="Type only your username." error={instapayHandle.length > 0 && !handleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ color: "#ffe600", fontWeight: 950 }}>@instapay</InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={fieldSx} />
+                <TextField label="InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value.replace(/@instapay$/i, ""))} required autoComplete="off" placeholder="name123" helperText="Type only your username. @instapay is added automatically." error={instapayHandle.length > 0 && !handleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ ml: 1, pointerEvents: "none" }}><Box aria-hidden="true" sx={{ px: { xs: 1, sm: 1.35 }, py: 0.8, color: "#000", bgcolor: "#ffe600", border: "1px solid #fff", borderRadius: "9px 12px 8px 11px", boxShadow: "0 0 0 1px rgba(0,0,0,0.85), 0 4px 14px rgba(255,230,0,0.2)", fontSize: { xs: "0.8rem", sm: "0.9rem" }, fontWeight: 1000, lineHeight: 1, letterSpacing: "-0.02em", userSelect: "none", whiteSpace: "nowrap" }}>@instapay</Box></InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={fieldSx} />
               </Box>
               {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
               <Button onClick={() => void verifyIdentity()} disabled={!emailIsValid || !handleIsValid || !suppliedToken || isChecking} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>{isChecking ? "Checking…" : "Continue"}</Button>
