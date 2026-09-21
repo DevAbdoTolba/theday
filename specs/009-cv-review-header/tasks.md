@@ -236,6 +236,7 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T068 [US4] Render the Nairah transition in a top-level portal and delay routing until the button-origin expansion is visible in `src/components/cv-review/CVReviewerDialog.tsx` (FR-029)
 - [X] T069 Update feature documentation and run TypeScript, ESLint, whitespace, and production-build validation (FR-033 through FR-037)
 - [X] T070 [US6] Replace the guide placeholder with the supplied video, add matching English and Egyptian-Arabic email-only transfer-note warnings, and keep confirmation blurred and disabled until full playback in `src/pages/grad/d/cv/meet/[reviewer].tsx`, `src/components/cv-review/nairah-services.ts`, and `public/cv-review/nairah-payment-guide.mp4` (FR-034, FR-037)
+- [X] T071 [US6] Configure the supplied InstaPay QR, recipient handle, and exact phone-only direct payment URL in `src/components/cv-review/nairah-services.ts`, `src/pages/grad/d/cv/meet/[reviewer].tsx`, and `public/cv-review/nairah-instapay-qr.jpg` (FR-037)
 
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 

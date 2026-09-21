@@ -131,7 +131,7 @@ As a visitor who selected Nairah, I choose the precise service, see its price, w
 2. **Given** the visitor selects a service, **When** its detail view appears, **Then** the selected service rises into the primary position and a back action returns to the service choices.
 3. **Given** the payment flow is visible, **When** the visitor opens it, **Then** step one shows the configured guide video and matching English and Egyptian-Arabic warnings that the transfer note must contain only the visitor&apos;s own email.
 4. **Given** the guide video has not played to its end, **When** the visitor views the confirmation control, **Then** it remains blurred, disabled, and unable to reveal the QR action.
-5. **Given** the visitor finishes the video and confirms understanding, **When** step two opens, **Then** the InstaPay QR and recipient label are visible without a name or email form field.
+5. **Given** the visitor finishes the video and confirms understanding, **When** step two opens, **Then** the InstaPay QR and recipient label are visible without a name or email form field, and phone screens also show the exact direct InstaPay URL.
 6. **Given** a real price, guide video, recipient label, or InstaPay QR has not been configured, **When** the visitor reaches payment, **Then** the page clearly states that payment is not open and cannot record a payment confirmation.
 6. **Given** a configured payment request is submitted, **When** it is accepted, **Then** the visitor sees a short manual-review confirmation.
 
@@ -213,7 +213,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-034**: The Nairah payment screen MUST use two short steps: the configured guide video with side-by-side English and Egyptian-Arabic email-only transfer-note warnings, followed by the InstaPay QR. Confirmation MUST remain blurred and disabled until the video plays fully.
 - **FR-035**: A payment confirmation MUST record only the chosen service, displayed price, payment-confirmation time, and manual-review status; it MUST NOT collect personal identity, payment credentials, or banking details.
 - **FR-036**: An existing authorised admin MUST be able to view the latest Nairah payment confirmations and manually mark a pending entry confirmed. Confirmation MUST NOT send a Calendly link automatically.
-- **FR-037**: Until real prices, a guide video, recipient details, and a valid InstaPay QR are configured, Nairah payment submissions MUST remain disabled with an explanatory message.
+- **FR-037**: Until real prices, a guide video, recipient details, a valid InstaPay QR, and the direct phone-payment URL are configured, Nairah payment submissions MUST remain disabled with an explanatory message. The direct URL MUST be visible and clickable on phone screens.
 
 ### Key Entities
 
