@@ -121,17 +121,18 @@ As a visitor, I choose a reviewer, confirm that choice with the shared yellow Me
 
 ### User Story 6 - Request Nairah&apos;s Paid Service (Priority: P1)
 
-As a visitor who selected Nairah, I choose the precise service, see its price, follow one simple payment guide image, then reveal the InstaPay QR.
+As a visitor who selected Nairah, I choose the precise service, see its price, watch the payment guide video, confirm the email-only transfer-note warning, then reveal the InstaPay QR.
 
-**Independent Test**: Open Nairah&apos;s service journey, select every offered service, verify its price is visible, proceed through the guide-image and QR steps, and submit a configured anonymous payment request.
+**Independent Test**: Open Nairah&apos;s service journey, select every offered service, verify its price is visible, watch the guide video fully, confirm the bilingual email-only transfer-note warning, proceed to the QR, and submit a configured anonymous payment request.
 
 **Acceptance Scenarios**:
 
 1. **Given** the Nairah journey opens, **When** the visitor views the choices, **Then** it shows exactly: CV reviewing — 30 min session feedback; CV writing; and LinkedIn optimization.
 2. **Given** the visitor selects a service, **When** its detail view appears, **Then** the selected service rises into the primary position and a back action returns to the service choices.
-3. **Given** the payment flow is visible, **When** the visitor opens it, **Then** step one shows only the operator-configured guide image and one confirmation action.
-4. **Given** the visitor confirms step one, **When** step two opens, **Then** the InstaPay QR and recipient label are visible without a name or email field.
-5. **Given** a real price, guide image, recipient label, or InstaPay QR has not been configured, **When** the visitor reaches payment, **Then** the page clearly states that payment is not open and cannot record a payment confirmation.
+3. **Given** the payment flow is visible, **When** the visitor opens it, **Then** step one shows the configured guide video and matching English and Egyptian-Arabic warnings that the transfer note must contain only the visitor&apos;s own email.
+4. **Given** the guide video has not played to its end, **When** the visitor views the confirmation control, **Then** it remains blurred, disabled, and unable to reveal the QR action.
+5. **Given** the visitor finishes the video and confirms understanding, **When** step two opens, **Then** the InstaPay QR and recipient label are visible without a name or email form field.
+6. **Given** a real price, guide video, recipient label, or InstaPay QR has not been configured, **When** the visitor reaches payment, **Then** the page clearly states that payment is not open and cannot record a payment confirmation.
 6. **Given** a configured payment request is submitted, **When** it is accepted, **Then** the visitor sees a short manual-review confirmation.
 
 ### User Story 7 - Confirm Nairah Payments Manually (Priority: P1)
@@ -209,10 +210,10 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-031**: Nairah's photo MUST receive a restrained premium treatment: an immediate warm shine repeated at roughly six-second intervals while hovered or focused, plus a small gold badge that drops from above only after selection and then performs a subtle recurring dance. The treatment MUST NOT form a border, change panel size, or obscure the photo or selected name.
 - **FR-032**: The yellow Meet action MUST keep strong text/background contrast in every selected state.
 - **FR-033**: Nairah&apos;s service journey MUST offer exactly three configurable services with separately editable hardcoded prices: CV review, CV writing, and LinkedIn optimization.
-- **FR-034**: The Nairah payment screen MUST use two short steps: an operator-configured guide image and confirmation action, followed by the InstaPay QR.
+- **FR-034**: The Nairah payment screen MUST use two short steps: the configured guide video with side-by-side English and Egyptian-Arabic email-only transfer-note warnings, followed by the InstaPay QR. Confirmation MUST remain blurred and disabled until the video plays fully.
 - **FR-035**: A payment confirmation MUST record only the chosen service, displayed price, payment-confirmation time, and manual-review status; it MUST NOT collect personal identity, payment credentials, or banking details.
 - **FR-036**: An existing authorised admin MUST be able to view the latest Nairah payment confirmations and manually mark a pending entry confirmed. Confirmation MUST NOT send a Calendly link automatically.
-- **FR-037**: Until real prices, a guide image, recipient details, and a valid InstaPay QR are configured, Nairah payment submissions MUST remain disabled with an explanatory message.
+- **FR-037**: Until real prices, a guide video, recipient details, and a valid InstaPay QR are configured, Nairah payment submissions MUST remain disabled with an explanatory message.
 
 ### Key Entities
 
@@ -241,7 +242,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 ## Assumptions
 
 - "Header" means the student dashboard and subject browsing header variants on phone and desktop.
-- Nairah&apos;s payment journey remains closed until the operator sets the three prices, guide image, recipient label, and real InstaPay QR in the designated configuration.
+- Nairah&apos;s payment journey remains closed until the operator sets the three prices, guide video, recipient label, and real InstaPay QR in the designated configuration.
 - Every available booking represents a live one-to-one CV review call; its duration and meeting platform may be defined on the selected reviewer's scheduling page.
 - The three final scheduling URLs and portraits will replace functional placeholders later.
 - Reviewer-focus descriptions may remain in configuration for future use but are not displayed in this compact fighter-selection release.

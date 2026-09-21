@@ -38,10 +38,11 @@ For Abdo Tolba and Omar Shawky:
 
 1. Select Nairah and activate Meet. Confirm a black white-bordered surface grows from behind Meet before the service page appears.
 2. Confirm the page offers the three approved services and each selected service has a back action and distinct editable price slot.
-3. Confirm the payment page first shows only the configured guide image and reveals the QR only after confirmation.
-4. Until prices, recipient, and QR are configured, confirm submission is disabled and explains why.
-5. After configuration, submit a request and confirm `/admin/cv-payments` shows the service, price, and pending status for an admin.
-6. Confirm the admin can manually confirm a pending request, without any automatic Calendly message.
+3. Confirm the payment page shows the configured video and matching English/Egyptian-Arabic email-only note warnings.
+4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
+5. Until prices, recipient, and QR are configured, confirm submission is disabled and explains why.
+6. After configuration, submit a request and confirm `/admin/cv-payments` shows the service, price, and pending status for an admin.
+7. Confirm the admin can manually confirm a pending request, without any automatic Calendly message.
 
 ## Accessibility Checks
 

@@ -72,7 +72,7 @@ Dialog invariants:
 - **Nairah Service**: One of `cv-review`, `cv-writing`, or
   `linkedin-optimization`, with a title, explanation, and manually editable
   EGP price. A missing price means payments are closed.
-- **Nairah Payment Configuration**: The payment-guide image, recipient label,
+- **Nairah Payment Configuration**: The payment-guide video, recipient label,
   and public InstaPay QR image path. Missing any value means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
   price, payment-confirmation timestamp, status (`pending` or `confirmed`),
