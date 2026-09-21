@@ -21,7 +21,7 @@ with dark separation, normal photo outlines remain absent, and Nairah's
 data-driven premium tier adds a six-second interaction shimmer plus a
 selected-only dropping gold badge with restrained motion.
 
-The Nairah payment route adds a small authenticated approval API and MongoDB model for manual payment-confirmation records. It still adds no payment processor, Calendly embed, Calendly SDK, automated email, preflight request, analytics integration, or npm dependency.
+The Nairah payment route adds a small authenticated approval API and MongoDB model for manual payment-confirmation records with the exact transfer-note email and a follow-up phone number. It still adds no payment processor, Calendly embed, Calendly SDK, automated email, preflight request, analytics integration, or npm dependency.
 
 ## Technical Context
 

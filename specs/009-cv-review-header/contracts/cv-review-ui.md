@@ -70,10 +70,12 @@
 ## Manual Payment Approval Contract
 
 - A public Nairah payment confirmation records selected service, displayed
-  price, payment-confirmation time, and `pending` state only.
+  price, the exact transfer-note email, a phone number, payment-confirmation
+  time, and `pending` state.
 - An existing authorised admin sees the newest entries at `/admin/cv-payments`.
 - Confirming is manual and changes only `pending` to `confirmed` with a review
-  timestamp. It never emails or opens Calendly automatically.
+  timestamp. The admin copies the email and sends the Calendly link manually;
+  confirmation never emails or opens Calendly automatically.
 
 ## Accessibility and Motion
 
