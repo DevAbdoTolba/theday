@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Checkbox, FormControlLabel, InputAdornment, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
@@ -16,7 +16,7 @@ import {
   type NairahService,
   type NairahServiceId,
 } from "../../../../../components/cv-review/nairah-services";
-import { isValidInstapayHandle, sanitizeInstapayUsernameInput } from "../../../../../components/cv-review/booking-gate";
+import { hasUnsupportedInstapayUsernameInput, isValidInstapayHandle, sanitizeInstapayUsernameInput } from "../../../../../components/cv-review/booking-gate";
 import CVSupportContact from "../../../../../components/cv-review/CVSupportContact";
 import { CV_REVIEWERS } from "../../../../../components/cv-review/reviewers";
 
@@ -99,6 +99,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [instapayHandle, setInstapayHandle] = useState("");
+  const [handleInputWarning, setHandleInputWarning] = useState(false);
   const [email, setEmail] = useState("");
   const [guideWatched, setGuideWatched] = useState(false);
   const [guideStarted, setGuideStarted] = useState(false);
@@ -188,7 +189,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
               {NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl && <Box sx={{ display: { xs: "block", sm: "none" }, mt: 2, textAlign: "center" }}><Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.78rem", fontWeight: 750 }}>Pay directly on your phone</Typography><Typography component="a" href={NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl} target="_blank" rel="noopener noreferrer" sx={{ display: "block", mt: 0.65, color: "#ffe600", fontSize: "0.88rem", fontWeight: 900, lineHeight: 1.35, overflowWrap: "anywhere", textUnderlineOffset: 3 }}>{NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl}</Typography></Box>}
             </Box>
             <Box sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
-              <TextField label="Your InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(sanitizeInstapayUsernameInput(event.target.value))} required fullWidth autoComplete="off" placeholder="name123" helperText="Paste the full handle if you want—we keep only the username." error={instapayHandle.length > 0 && !instapayHandleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ ml: 1, pointerEvents: "none" }}><Box aria-hidden="true" sx={{ px: { xs: 1, sm: 1.35 }, py: 0.8, color: "#fff", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.88)", borderRadius: "9px 12px 8px 11px", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", fontSize: { xs: "0.8rem", sm: "0.9rem" }, fontWeight: 1000, lineHeight: 1, letterSpacing: "-0.02em", userSelect: "none", whiteSpace: "nowrap" }}>@instapay</Box></InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
+              <Tooltip open={handleInputWarning} title="English letters and numbers only." placement="top" arrow disableFocusListener disableHoverListener disableTouchListener><TextField label="Your InstaPay username" value={instapayHandle} onChange={(event) => { const rawValue = event.target.value; setHandleInputWarning(hasUnsupportedInstapayUsernameInput(rawValue)); setInstapayHandle(sanitizeInstapayUsernameInput(rawValue)); }} onBlur={() => setHandleInputWarning(false)} required fullWidth autoComplete="off" placeholder="name123" helperText="Paste the full handle if you want—we keep only the username." error={instapayHandle.length > 0 && !instapayHandleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ alignSelf: "stretch", height: "auto", maxHeight: "none", ml: 1.25, pl: 1.25, borderInlineStart: "1px solid rgba(255,255,255,0.58)", pointerEvents: "none" }}><Box aria-hidden="true" sx={{ color: "rgba(255,255,255,0.9)", fontSize: { xs: "0.82rem", sm: "0.92rem" }, fontWeight: 900, lineHeight: 1, userSelect: "none", whiteSpace: "nowrap" }}>@instapay</Box></InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} /></Tooltip>
               <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required fullWidth autoComplete="email" helperText="Use the same email written in the transfer note." error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
             </Box>
             {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, QR, and direct payment URL in the payment config to open payments.</Alert>}

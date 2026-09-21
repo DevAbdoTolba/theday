@@ -252,6 +252,7 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T084 [US6] Strengthen the fixed `@instapay` suffix into a high-contrast yellow badge in both payment and scheduling forms in `src/pages/grad/d/cv/meet/[reviewer].tsx` and `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-035, FR-040)
 - [X] T085 [US6] Fix the console easter egg styling so the supplied “PLEASE DON’T” ASCII lines join into one readable block while preserving the separate recruiting note in `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-041)
 - [X] T086 [US6] Restyle the fixed suffix as a neutral white-on-dark badge and centrally sanitize pasted or typed complete handles, `@`, `instapay`, whitespace, and symbols across both forms in `src/components/cv-review/booking-gate.ts`, `src/pages/grad/d/cv/meet/[reviewer].tsx`, and `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-035, FR-040)
+- [X] T087 [US6] Replace the suffix badge with a `username | @instapay` vertical-separator layout and show an English-letters-and-numbers tooltip when Arabic or unsupported symbols are attempted in both forms (FR-035, FR-040)
 
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 
