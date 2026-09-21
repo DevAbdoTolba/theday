@@ -61,22 +61,26 @@ function cleanReturnPath(): string {
 const outlinedPanelSx = { p: { xs: 2.25, sm: 3.5 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.045)" };
 const yellowButtonSx = { mt: 3, px: 3, minHeight: 52, color: "#000", bgcolor: "#ffe600", borderRadius: "12px 17px 11px 15px", fontSize: "1.05rem", fontWeight: 1000, textTransform: "none", "&:hover": { color: "#000", bgcolor: "#ffef4d" } };
 
-function PaymentGuideConfirmation({ onConfirmed }: { readonly onConfirmed: () => void }) {
+function PaymentGuideConfirmation({ videoWatched, onConfirmed }: { readonly videoWatched: boolean; readonly onConfirmed: () => void }) {
   const [confirmed, setConfirmed] = useState(false);
 
   return (
     <Box sx={{ mt: 3, width: "min(100%, 22rem)" }}>
+      <Typography sx={{ mb: 1, color: videoWatched ? "#ffe600" : "rgba(255,255,255,0.7)", fontSize: "0.82rem", fontWeight: 800 }}>
+        {videoWatched ? "Video completed. Confirm below." : "Watch the full video to unlock confirmation."}
+      </Typography>
       <FormControlLabel
         control={
           <Checkbox
             checked={confirmed}
+            disabled={!videoWatched}
             onChange={(event) => setConfirmed(event.target.checked)}
             inputProps={{ "aria-label": "I read and understand the payment guide" }}
-            sx={{ color: "rgba(255,255,255,0.72)", "&.Mui-checked": { color: "#ffe600" } }}
+            sx={{ color: "rgba(255,255,255,0.72)", "&.Mui-checked": { color: "#ffe600" }, "&.Mui-disabled": { color: "rgba(255,255,255,0.28)" } }}
           />
         }
         label={<Typography sx={{ color: confirmed ? "#ffe600" : "#fff", fontSize: { xs: "0.92rem", sm: "1rem" }, fontWeight: 850, lineHeight: 1.25 }}>I read and understand these steps.</Typography>}
-        sx={{ width: "100%", minHeight: 58, m: 0, px: 1.1, py: 0.45, border: "1px solid rgba(255,255,255,0.78)", borderRadius: "13px 17px 12px 15px", bgcolor: confirmed ? "rgba(255,230,0,0.09)" : "rgba(255,255,255,0.045)", transition: "background-color 180ms ease, border-color 180ms ease", "&:hover": { borderColor: "#fff", bgcolor: confirmed ? "rgba(255,230,0,0.12)" : "rgba(255,255,255,0.08)" } }}
+        sx={{ width: "100%", minHeight: 58, m: 0, px: 1.1, py: 0.45, border: "1px solid rgba(255,255,255,0.78)", borderRadius: "13px 17px 12px 15px", bgcolor: confirmed ? "rgba(255,230,0,0.09)" : "rgba(255,255,255,0.045)", filter: videoWatched ? "none" : "blur(2.5px)", opacity: videoWatched ? 1 : 0.42, pointerEvents: videoWatched ? "auto" : "none", transition: "filter 280ms ease, opacity 280ms ease, background-color 180ms ease, border-color 180ms ease", "&:hover": { borderColor: "#fff", bgcolor: confirmed ? "rgba(255,230,0,0.12)" : "rgba(255,255,255,0.08)" } }}
       />
       <Button onClick={onConfirmed} disabled={!confirmed} variant="outlined" sx={{ mt: 1.2, width: "100%", minHeight: 48, color: "#fff", borderColor: "rgba(255,255,255,0.8)", borderRadius: "10px 14px 9px 12px", fontSize: "1rem", fontWeight: 950, textTransform: "none", opacity: confirmed ? 1 : 0, transform: confirmed ? "translateY(0)" : "translateY(10px)", pointerEvents: confirmed ? "auto" : "none", transition: "opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease", "&:hover": { color: "#000", bgcolor: "#fff", borderColor: "#fff" } }}>Show QR code</Button>
     </Box>
@@ -89,8 +93,11 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   const [selectedServiceId, setSelectedServiceId] = useState<NairahServiceId | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [guideWatched, setGuideWatched] = useState(false);
+  const guideVideoRef = React.useRef<HTMLVideoElement | null>(null);
+  const furthestGuideTimeRef = React.useRef(0);
   const selectedService = useMemo(() => NAIRAH_SERVICES.find((service) => service.id === selectedServiceId) ?? null, [selectedServiceId]);
-  const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideImageSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
+  const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
 
   const goBack = () => {
     if (stage === "details") setStage("services");
@@ -127,7 +134,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
             <Typography sx={{ color: "#ffe600", fontSize: "0.76rem", fontWeight: 950, letterSpacing: "0.16em", textTransform: "uppercase" }}>Nairah A. · CV services</Typography>
             <Typography component="h1" sx={{ mt: 1, mb: 1.25, fontSize: { xs: "clamp(2.5rem, 12vw, 5.6rem)", sm: "clamp(4rem, 9vw, 7rem)" }, fontWeight: 1000, lineHeight: 0.86, letterSpacing: "-0.085em" }}>Pick your next move.</Typography>
             <Typography sx={{ maxWidth: "38rem", mb: { xs: 4, sm: 5 }, color: "rgba(255,255,255,0.72)", fontSize: { xs: "1rem", sm: "1.15rem" } }}>Three ways to make your professional story do its job.</Typography>
-            <Box sx={{ display: "grid", gap: 1.5 }}>{NAIRAH_SERVICES.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setStage("details"); setSubmitError(null); }} />)}</Box>
+            <Box sx={{ display: "grid", gap: 1.5 }}>{NAIRAH_SERVICES.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
           </Box>}
 
           {stage === "details" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={outlinedPanelSx}>
@@ -140,10 +147,20 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
           {stage === "guide" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}>
             <Typography sx={{ color: "#ffe600", fontSize: "0.78rem", fontWeight: 950, letterSpacing: "0.13em" }}>STEP 1 OF 2</Typography>
             <Typography component="h1" sx={{ mt: 1, fontSize: { xs: "2.2rem", sm: "4rem" }, fontWeight: 1000, lineHeight: 0.9, letterSpacing: "-0.07em" }}>Follow this first.</Typography>
-            <Box sx={{ mt: 3, overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "rgba(255,255,255,0.045)" }}>
-              {NAIRAH_PAYMENT_CONFIG.paymentGuideImageSrc ? <Box component="img" src={NAIRAH_PAYMENT_CONFIG.paymentGuideImageSrc} alt="How to send the InstaPay payment" sx={{ display: "block", width: "100%", height: "auto" }} /> : <Box sx={{ minHeight: { xs: 230, sm: 360 }, display: "grid", placeItems: "center", p: 3, textAlign: "center", color: "rgba(255,255,255,0.66)", border: "1px dashed rgba(255,255,255,0.38)" }}><Box><Typography sx={{ color: "#ffe600", fontSize: "0.76rem", fontWeight: 950, letterSpacing: "0.14em" }}>PAYMENT GUIDE IMAGE</Typography><Typography sx={{ mt: 1, fontWeight: 800 }}>Add your screenshot here.</Typography></Box></Box>}
+            <Box role="note" sx={{ mt: 3, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, overflow: "hidden", border: "1px solid rgba(255,230,0,0.72)", borderRadius: "18px 23px 19px 21px", bgcolor: "rgba(255,230,0,0.075)" }}>
+              <Box sx={{ p: { xs: 2, sm: 2.5 }, borderInlineEnd: { sm: "1px solid rgba(255,230,0,0.34)" }, borderBlockEnd: { xs: "1px solid rgba(255,230,0,0.34)", sm: 0 } }}>
+                <Typography sx={{ color: "#ffe600", fontSize: "0.72rem", fontWeight: 1000, letterSpacing: "0.13em" }}>ENGLISH NOTE</Typography>
+                <Typography sx={{ mt: 0.8, color: "#fff", fontSize: { xs: "0.94rem", sm: "1rem" }, fontWeight: 750, lineHeight: 1.5 }}>In the payment note, write only your own email address. Do not add any other words. Without the email, we may not match your payment and your money could be lost.</Typography>
+              </Box>
+              <Box lang="ar" dir="rtl" sx={{ p: { xs: 2, sm: 2.5 }, textAlign: "right" }}>
+                <Typography sx={{ color: "#ffe600", fontSize: "0.72rem", fontWeight: 1000, letterSpacing: "0.08em" }}>ملاحظة بالعربي</Typography>
+                <Typography sx={{ mt: 0.8, color: "#fff", fontSize: { xs: "0.98rem", sm: "1.04rem" }, fontWeight: 750, lineHeight: 1.65 }}>في ملاحظة التحويل، اكتب إيميلك إنت بس، من غير أي كلام زيادة. من غير الإيميل، ممكن ما نعرفش نطابق التحويل وممكن فلوسك تضيع.</Typography>
+              </Box>
             </Box>
-            <PaymentGuideConfirmation onConfirmed={() => setStage("qr")} />
+            <Box sx={{ mt: 2, display: "grid", placeItems: "center", overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "#050505" }}>
+              {NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc ? <Box component="video" ref={guideVideoRef} src={NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc} controls playsInline preload="metadata" aria-label="Video showing how to add the email payment note" onTimeUpdate={(event) => { const video = event.currentTarget; if (!video.seeking && video.currentTime <= furthestGuideTimeRef.current + 1.25) furthestGuideTimeRef.current = Math.max(furthestGuideTimeRef.current, video.currentTime); }} onSeeking={(event) => { const video = event.currentTarget; if (!guideWatched && video.currentTime > furthestGuideTimeRef.current + 1) video.currentTime = furthestGuideTimeRef.current; }} onEnded={(event) => { const video = event.currentTarget; if (video.duration > 0 && furthestGuideTimeRef.current >= video.duration - 1) setGuideWatched(true); }} sx={{ display: "block", width: "min(100%, 26rem)", maxHeight: "72dvh", bgcolor: "#000" }} /> : <Box sx={{ minHeight: { xs: 230, sm: 360 }, display: "grid", placeItems: "center", p: 3, textAlign: "center", color: "rgba(255,255,255,0.66)" }}><Typography sx={{ fontWeight: 800 }}>Payment guide video is not configured.</Typography></Box>}
+            </Box>
+            <PaymentGuideConfirmation videoWatched={guideWatched} onConfirmed={() => setStage("qr")} />
           </Box>}
 
           {stage === "qr" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}>
@@ -153,7 +170,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
               {NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc ? <Box component="img" src={NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc} alt="Instapay payment QR" sx={{ display: "block", width: { xs: 210, sm: 250 }, maxWidth: "100%", mx: "auto", p: 1, bgcolor: "#fff", borderRadius: 2 }} /> : <Box sx={{ minHeight: 200, display: "grid", placeItems: "center", textAlign: "center", color: "rgba(255,255,255,0.66)", border: "1px dashed rgba(255,255,255,0.46)", borderRadius: 2 }}><Box><QrCode2Rounded sx={{ fontSize: 72 }} /><Typography sx={{ mt: 1, fontWeight: 800 }}>Add the InstaPay QR here.</Typography></Box></Box>}
               {NAIRAH_PAYMENT_CONFIG.recipientLabel && <Typography sx={{ mt: 2, textAlign: "center", color: "rgba(255,255,255,0.78)", fontWeight: 750 }}>{NAIRAH_PAYMENT_CONFIG.recipientLabel}</Typography>}
             </Box>
-            {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide image, recipient, and QR in the payment config to open payments.</Alert>}
+            {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, and QR in the payment config to open payments.</Alert>}
             {submitError && <Alert severity="error" sx={{ mt: 2 }}>{submitError}</Alert>}
             <Button onClick={() => void submitPayment()} disabled={!paymentReady || isSubmitting} variant="contained" sx={{ ...yellowButtonSx, px: 3.5, minHeight: 54, "&.Mui-disabled": { bgcolor: "rgba(255,230,0,0.34)", color: "rgba(0,0,0,0.5)" } }}>{isSubmitting ? "Sending…" : "I made the payment"}</Button>
           </Box>}

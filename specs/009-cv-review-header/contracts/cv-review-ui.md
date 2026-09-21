@@ -60,9 +60,10 @@
 - Abdo and Omar use normal direct navigation to their configured Calendly URLs.
 - Nairah&apos;s Meet action expands a black, white-bordered transaction surface
   from behind the button, then routes to `/grad/d/cv/meet/nairah`.
-- Nairah&apos;s page has three services with visible, separately editable prices,
-  then a guide image with confirmation and a QR step. Missing live payment
-  configuration disables submission.
+- Nairah&apos;s page has three services with separately editable detail prices,
+  then a guide video, bilingual email-only transfer-note warning, gated
+  confirmation, and QR step. Missing live payment configuration disables
+  submission.
 - No iframe, SDK, `window.open`, preflight request, tracking parameter, or
   payment credential collection is allowed.
 
