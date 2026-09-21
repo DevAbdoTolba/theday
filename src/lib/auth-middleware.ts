@@ -67,9 +67,9 @@ export async function verifyAuth(
 export async function requireAdmin(
   req: NextApiRequest
 ): Promise<{ user: mongoose.HydratedDocument<IUser> }> {
-  const { user } = await verifyAuth(req);
+  const { user, isSuperAdmin } = await verifyAuth(req);
 
-  if (!user.isAdmin) {
+  if (!isSuperAdmin && !user.isAdmin) {
     throw new Error("Forbidden");
   }
 
