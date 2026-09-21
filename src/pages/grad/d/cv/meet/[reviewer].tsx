@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Slider, Typography } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel, Typography } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
@@ -61,46 +61,23 @@ function cleanReturnPath(): string {
 const outlinedPanelSx = { p: { xs: 2.25, sm: 3.5 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.045)" };
 const yellowButtonSx = { mt: 3, px: 3, minHeight: 52, color: "#000", bgcolor: "#ffe600", borderRadius: "12px 17px 11px 15px", fontSize: "1.05rem", fontWeight: 1000, textTransform: "none", "&:hover": { color: "#000", bgcolor: "#ffef4d" } };
 
-function UnderstandSlider({ onConfirmed }: { readonly onConfirmed: () => void }) {
-  const [progress, setProgress] = useState(0);
+function PaymentGuideConfirmation({ onConfirmed }: { readonly onConfirmed: () => void }) {
   const [confirmed, setConfirmed] = useState(false);
 
-  const finishDrag = (value: number | readonly number[]) => {
-    const committedValue = typeof value === "number" ? value : value[0];
-    if (committedValue < 90) {
-      setProgress(0);
-      return;
-    }
-    setProgress(100);
-    setConfirmed(true);
-  };
-
   return (
-    <Box sx={{ mt: 3, width: "min(100%, 18rem)" }}>
-      <Box sx={{ position: "relative", height: 60, overflow: "hidden", border: "1px solid rgba(255,255,255,0.78)", borderRadius: "30px", bgcolor: "rgba(255,255,255,0.055)" }}>
-        <Typography aria-hidden sx={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: confirmed ? "#ffe600" : "rgba(255,255,255,0.78)", fontSize: "0.96rem", fontWeight: 900, pointerEvents: "none", transition: "color 180ms ease" }}>
-          {confirmed ? "Understood ✓" : "Slide to confirm"}
-        </Typography>
-        <Slider
-          value={progress}
-          min={0}
-          max={100}
-          step={1}
-          disabled={confirmed}
-          aria-label="Slide to confirm that you understand the payment guide"
-          getAriaValueText={(value) => value >= 90 ? "Ready to confirm" : `${value} percent`}
-          onChange={(_, value) => setProgress(typeof value === "number" ? value : value[0])}
-          onChangeCommitted={(_, value) => finishDrag(value)}
-          sx={{
-            position: "absolute", insetInlineStart: 27, insetBlockStart: 5, width: "calc(100% - 54px)", height: 50, p: 0, color: "#ffe600",
-            "& .MuiSlider-rail": { height: 50, opacity: 0, borderRadius: 25 },
-            "& .MuiSlider-track": { height: 50, border: 0, borderRadius: "25px 18px 18px 25px", bgcolor: "rgba(255,230,0,0.14)" },
-            "& .MuiSlider-thumb": { width: 50, height: 50, color: "#ffe600", border: "1px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 16px rgba(255,230,0,0.28)", "&::after": { width: "100%", height: "100%" }, "&::before": { content: "'›'", display: "grid", placeItems: "center", color: "#000", fontSize: "1.45rem", fontWeight: 1000, boxShadow: "none" }, "&:hover, &.Mui-focusVisible": { boxShadow: "0 0 0 6px rgba(255,230,0,0.15)" } },
-            "&.Mui-disabled": { color: "#ffe600", opacity: 1 },
-            "@media (prefers-reduced-motion: reduce)": { "& *": { transitionDuration: "80ms !important" } },
-          }}
-        />
-      </Box>
+    <Box sx={{ mt: 3, width: "min(100%, 22rem)" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={confirmed}
+            onChange={(event) => setConfirmed(event.target.checked)}
+            inputProps={{ "aria-label": "I read and understand the payment guide" }}
+            sx={{ color: "rgba(255,255,255,0.72)", "&.Mui-checked": { color: "#ffe600" } }}
+          />
+        }
+        label={<Typography sx={{ color: confirmed ? "#ffe600" : "#fff", fontSize: { xs: "0.92rem", sm: "1rem" }, fontWeight: 850, lineHeight: 1.25 }}>I read and understand these steps.</Typography>}
+        sx={{ width: "100%", minHeight: 58, m: 0, px: 1.1, py: 0.45, border: "1px solid rgba(255,255,255,0.78)", borderRadius: "13px 17px 12px 15px", bgcolor: confirmed ? "rgba(255,230,0,0.09)" : "rgba(255,255,255,0.045)", transition: "background-color 180ms ease, border-color 180ms ease", "&:hover": { borderColor: "#fff", bgcolor: confirmed ? "rgba(255,230,0,0.12)" : "rgba(255,255,255,0.08)" } }}
+      />
       <Button onClick={onConfirmed} disabled={!confirmed} variant="outlined" sx={{ mt: 1.2, width: "100%", minHeight: 48, color: "#fff", borderColor: "rgba(255,255,255,0.8)", borderRadius: "10px 14px 9px 12px", fontSize: "1rem", fontWeight: 950, textTransform: "none", opacity: confirmed ? 1 : 0, transform: confirmed ? "translateY(0)" : "translateY(10px)", pointerEvents: confirmed ? "auto" : "none", transition: "opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease", "&:hover": { color: "#000", bgcolor: "#fff", borderColor: "#fff" } }}>Show QR code</Button>
     </Box>
   );
@@ -166,7 +143,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
             <Box sx={{ mt: 3, overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "rgba(255,255,255,0.045)" }}>
               {NAIRAH_PAYMENT_CONFIG.paymentGuideImageSrc ? <Box component="img" src={NAIRAH_PAYMENT_CONFIG.paymentGuideImageSrc} alt="How to send the InstaPay payment" sx={{ display: "block", width: "100%", height: "auto" }} /> : <Box sx={{ minHeight: { xs: 230, sm: 360 }, display: "grid", placeItems: "center", p: 3, textAlign: "center", color: "rgba(255,255,255,0.66)", border: "1px dashed rgba(255,255,255,0.38)" }}><Box><Typography sx={{ color: "#ffe600", fontSize: "0.76rem", fontWeight: 950, letterSpacing: "0.14em" }}>PAYMENT GUIDE IMAGE</Typography><Typography sx={{ mt: 1, fontWeight: 800 }}>Add your screenshot here.</Typography></Box></Box>}
             </Box>
-            <UnderstandSlider onConfirmed={() => setStage("qr")} />
+            <PaymentGuideConfirmation onConfirmed={() => setStage("qr")} />
           </Box>}
 
           {stage === "qr" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}>
