@@ -28,6 +28,8 @@ import { useAuth } from "../../hooks/useAuth";
 
 interface PaymentSubmission {
   readonly id: string;
+  readonly fullName: string | null;
+  readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
   readonly status: "pending" | "confirmed";
@@ -115,9 +117,11 @@ function CvPaymentsContent() {
     }
   };
 
-  const copyBookingLink = async () => {
+  const copyBookingLink = async (submissionId: string) => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/grad/d/cv/meet/nairah/schedule`);
+      const bookingUrl = new URL("/grad/d/cv/meet/nairah/schedule", window.location.origin);
+      bookingUrl.searchParams.set("request", submissionId);
+      await navigator.clipboard.writeText(bookingUrl.toString());
       setNotice("Nairah booking link copied.");
     } catch {
       setError("Could not copy the booking link. Please copy it manually.");
@@ -170,6 +174,8 @@ function CvPaymentsContent() {
                   <TableRow>
                     <TableCell>Service</TableCell>
                     <TableCell>Price</TableCell>
+                    <TableCell>InstaPay name</TableCell>
+                    <TableCell>Email</TableCell>
                     <TableCell>Submitted</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell align="right">Manual action</TableCell>
@@ -182,13 +188,15 @@ function CvPaymentsContent() {
                       <TableRow key={submission.id} hover>
                         <TableCell>{submission.serviceTitle}</TableCell>
                         <TableCell>{formatPrice(submission.priceEgp)}</TableCell>
+                        <TableCell>{submission.fullName ?? "Not collected"}</TableCell>
+                        <TableCell>{submission.email ?? "Not collected"}</TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>
                         <TableCell>
                           <Chip size="small" label={isPending ? "Pending" : "Confirmed"} color={isPending ? "warning" : "success"} />
                         </TableCell>
                         <TableCell align="right">
                           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                            <Button size="small" variant="outlined" disabled={isPending} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink()} sx={{ textTransform: "none" }}>Copy booking link</Button>
+                            <Button size="small" variant="outlined" disabled={isPending || !submission.fullName || !submission.email} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink(submission.id)} sx={{ textTransform: "none" }}>Copy booking link</Button>
                             <Button
                               size="small"
                               variant="contained"

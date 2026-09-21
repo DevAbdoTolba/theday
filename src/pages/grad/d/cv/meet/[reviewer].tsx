@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Checkbox, FormControlLabel, Typography } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
@@ -136,11 +136,15 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   const [selectedServiceId, setSelectedServiceId] = useState<NairahServiceId | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [guideWatched, setGuideWatched] = useState(false);
   const guideVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const furthestGuideTimeRef = React.useRef(0);
   const selectedService = useMemo(() => NAIRAH_SERVICES.find((service) => service.id === selectedServiceId) ?? null, [selectedServiceId]);
   const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
+  const fullNameIsValid = fullName.trim().length >= 2 && fullName.trim().length <= 120;
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const goBack = () => {
     if (stage === "details") setStage("services");
@@ -149,11 +153,11 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   };
 
   const submitPayment = async () => {
-    if (!selectedService || !paymentReady) return;
+    if (!selectedService || !paymentReady || !fullNameIsValid || !emailIsValid) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = await fetch("/api/cv-payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ serviceId: selectedService.id, paymentConfirmed: true }) });
+      const response = await fetch("/api/cv-payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fullName: fullName.trim(), email: email.trim(), serviceId: selectedService.id, paymentConfirmed: true }) });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
         throw new Error(body?.error ?? "Could not submit your payment confirmation.");
@@ -215,13 +219,17 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
               {NAIRAH_PAYMENT_CONFIG.recipientLabel && <Typography sx={{ mt: 2, textAlign: "center", color: "rgba(255,255,255,0.78)", fontWeight: 750 }}>{NAIRAH_PAYMENT_CONFIG.recipientLabel}</Typography>}
               {NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl && <Box sx={{ display: { xs: "block", sm: "none" }, mt: 2, textAlign: "center" }}><Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.78rem", fontWeight: 750 }}>Pay directly on your phone</Typography><Typography component="a" href={NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl} target="_blank" rel="noopener noreferrer" sx={{ display: "block", mt: 0.65, color: "#ffe600", fontSize: "0.88rem", fontWeight: 900, lineHeight: 1.35, overflowWrap: "anywhere", textUnderlineOffset: 3 }}>{NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl}</Typography></Box>}
             </Box>
+            <Box sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
+              <TextField label="Full name used in InstaPay" value={fullName} onChange={(event) => setFullName(event.target.value)} required fullWidth autoComplete="name" helperText="This will be filled in Calendly for you." error={fullName.length > 0 && !fullNameIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
+              <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required fullWidth autoComplete="email" helperText="Use the same email written in the transfer note." error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
+            </Box>
             {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, QR, and direct payment URL in the payment config to open payments.</Alert>}
             {submitError && <Alert severity="error" sx={{ mt: 2 }}>{submitError}</Alert>}
-            <Button onClick={() => void submitPayment()} disabled={!paymentReady || isSubmitting} variant="contained" sx={{ ...yellowButtonSx, px: 3.5, minHeight: 54, "&.Mui-disabled": { bgcolor: "rgba(255,230,0,0.34)", color: "rgba(0,0,0,0.5)" } }}>{isSubmitting ? "Recording confirmation…" : "I made the payment"}</Button>
+            <Button onClick={() => void submitPayment()} disabled={!paymentReady || !fullNameIsValid || !emailIsValid || isSubmitting} variant="contained" sx={{ ...yellowButtonSx, px: 3.5, minHeight: 54, "&.Mui-disabled": { bgcolor: "rgba(255,230,0,0.34)", color: "rgba(0,0,0,0.5)" } }}>{isSubmitting ? "Recording confirmation…" : "I made the payment"}</Button>
             <NeedHelpContact />
           </Box>}
 
-          {stage === "complete" && <Box component="main" sx={{ minHeight: "75dvh", display: "grid", placeItems: "center", textAlign: "center", animation: `${selectedServiceRise} 420ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={{ maxWidth: "34rem", p: { xs: 3, sm: 4 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.05)" }}><CheckCircleRounded sx={{ color: "#ffe600", fontSize: 56 }} /><Typography component="h1" sx={{ mt: 1.5, fontSize: { xs: "2.1rem", sm: "3.3rem" }, fontWeight: 1000, lineHeight: 0.9, letterSpacing: "-0.07em" }}>Watch your email.</Typography><Typography sx={{ mt: 2, color: "rgba(255,255,255,0.76)", lineHeight: 1.55 }}>After Nairah confirms the payment, the private scheduling link will be sent to the email you wrote in the InstaPay note.</Typography><NeedHelpContact /></Box></Box>}
+          {stage === "complete" && <Box component="main" sx={{ minHeight: "75dvh", display: "grid", placeItems: "center", textAlign: "center", animation: `${selectedServiceRise} 420ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={{ maxWidth: "34rem", p: { xs: 3, sm: 4 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.05)" }}><CheckCircleRounded sx={{ color: "#ffe600", fontSize: 56 }} /><Typography component="h1" sx={{ mt: 1.5, fontSize: { xs: "2.1rem", sm: "3.3rem" }, fontWeight: 1000, lineHeight: 0.9, letterSpacing: "-0.07em" }}>Watch your email.</Typography><Typography sx={{ mt: 2, color: "rgba(255,255,255,0.76)", lineHeight: 1.55 }}>After Nairah confirms the payment, the private scheduling link will be sent to <Box component="strong" sx={{ color: "#fff" }}>{email.trim()}</Box>.</Typography><NeedHelpContact /></Box></Box>}
         </Box>
       </Box>
     </>

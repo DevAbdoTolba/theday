@@ -73,12 +73,16 @@
 ## Manual Payment Approval Contract
 
 - A public Nairah payment confirmation records selected service, displayed
-  price, payment-confirmation time, and `pending` state only.
+  price, InstaPay full name, matching email, payment-confirmation time, and
+  `pending` state.
 - An existing authorised admin sees the newest entries at `/admin/cv-payments`.
 - Confirming is manual and changes only `pending` to `confirmed` with a review
   timestamp. The admin copies the internal booking link and sends it to the
   email found in the InstaPay transfer note; confirmation never emails or opens
   Calendly automatically.
+- The copied link contains only the confirmed payment request ID. The scheduling
+  page loads the saved name and email server-side and prefills Calendly with its
+  official `name` and `email` parameters.
 - Need help performs an on-demand POST, reads the Nairah support phone from
   MongoDB, and only then reveals the phone and direct WhatsApp action.
 

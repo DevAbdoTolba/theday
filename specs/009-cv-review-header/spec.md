@@ -22,7 +22,7 @@
 - Q: What temporary content makes the flow fully usable? → A: Each section uses a Picsum placeholder image and every Meet action opens `example.com` in a new tab.
 - Q: What final polish is required after the image-section review? → A: Give the CV mark more internal breathing room, keep the phone invitation fully inside the viewport, use readable light reviewer names, remove normal selection/focus outlines from photos, and give Nairah a subtle warm premium glow.
 - Q: How should the compact label and Nairah premium treatment behave in the final interaction? → A: The CV label must keep its resting inset and circular corner space throughout expansion. Nairah receives an immediate photo shimmer that repeats about every six seconds while hovered or focused, and selection drops a small gold premium badge from above with a restrained recurring dance.
-- Q: How should booking differ by reviewer? → A: Abdo Tolba and Omar Shawky navigate directly to their Calendly pages. Nairah opens an internal service-selection journey and records an anonymous payment confirmation for manual review; support contact details are revealed only when requested.
+- Q: How should booking differ by reviewer? → A: Abdo Tolba and Omar Shawky navigate directly to their Calendly pages. Nairah opens an internal service-selection journey and records the InstaPay full name and email needed for manual review and Calendly prefill; support contact details are revealed only when requested.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -123,7 +123,7 @@ As a visitor, I choose a reviewer, confirm that choice with the shared yellow Me
 
 As a visitor who selected Nairah, I choose the precise service, see its price, watch the payment guide video, confirm the email-only transfer-note warning, then reveal the InstaPay QR.
 
-**Independent Test**: Open Nairah&apos;s service journey, select every offered service, verify its price is visible, watch the guide video fully, confirm the bilingual email-only transfer-note warning, proceed to the QR, and submit a configured anonymous payment request.
+**Independent Test**: Open Nairah&apos;s service journey, select every offered service, verify its price is visible, watch the guide video fully, confirm the bilingual email-only transfer-note warning, proceed to the QR, enter the InstaPay full name and matching email, and submit a configured payment request.
 
 **Acceptance Scenarios**:
 
@@ -131,20 +131,20 @@ As a visitor who selected Nairah, I choose the precise service, see its price, w
 2. **Given** the visitor selects a service, **When** its detail view appears, **Then** the selected service rises into the primary position and a back action returns to the service choices.
 3. **Given** the payment flow is visible, **When** the visitor opens it, **Then** step one shows the configured guide video and matching English and Egyptian-Arabic warnings that the transfer note must contain only the visitor&apos;s own email.
 4. **Given** the guide video has not played to its end, **When** the visitor views the confirmation control, **Then** it remains blurred, disabled, and unable to reveal the QR action.
-5. **Given** the visitor finishes the video and confirms understanding, **When** step two opens, **Then** the InstaPay QR and recipient label are visible without customer email or phone fields, and phone screens also show the exact direct InstaPay URL.
+5. **Given** the visitor finishes the video and confirms understanding, **When** step two opens, **Then** the InstaPay QR, recipient label, InstaPay full-name field, and matching email field are visible without a customer phone field, and phone screens also show the exact direct InstaPay URL.
 6. **Given** a real price, guide video, recipient label, or InstaPay QR has not been configured, **When** the visitor reaches payment, **Then** the page clearly states that payment is not open and cannot record a payment confirmation.
-7. **Given** a configured payment request is submitted, **When** it is accepted, **Then** the visitor is told to watch the email written in the InstaPay note for the manually sent scheduling link.
+7. **Given** a configured payment request is submitted, **When** it is accepted, **Then** the visitor is told to watch the submitted email for the manually sent scheduling link.
 8. **Given** the visitor requests help, **When** they activate Need help, **Then** the support phone is fetched on demand and shown with a direct WhatsApp action.
 
 ### User Story 7 - Confirm Nairah Payments Manually (Priority: P1)
 
-As Nairah&apos;s authorised admin, I view the newest anonymous payment requests and manually confirm a verified transfer.
+As Nairah&apos;s authorised admin, I view the newest payment requests with their InstaPay full name and email and manually confirm a verified transfer.
 
 **Acceptance Scenarios**:
 
-1. **Given** an authorised admin opens the CV-payment dashboard, **When** requests exist, **Then** the newest submissions show service, shown price, timestamp, and pending or confirmed state.
+1. **Given** an authorised admin opens the CV-payment dashboard, **When** requests exist, **Then** the newest submissions show service, shown price, InstaPay full name, email, timestamp, and pending or confirmed state.
 2. **Given** a payment is pending, **When** the admin manually selects Confirm, **Then** only that pending submission becomes confirmed and no Calendly email is sent automatically.
-3. **Given** a payment is confirmed, **When** the admin copies its booking link, **Then** the link opens Nairah&apos;s embedded Calendly picker with the exact InstaPay name/email warning visible while choosing a time.
+3. **Given** a payment is confirmed, **When** the admin copies its booking link, **Then** the private request link opens Nairah&apos;s embedded Calendly picker with the saved name and email prefilled and the exact matching warning visible while choosing a time.
 
 ---
 
@@ -213,11 +213,11 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-032**: The yellow Meet action MUST keep strong text/background contrast in every selected state.
 - **FR-033**: Nairah&apos;s service journey MUST offer exactly three configurable services with separately editable hardcoded prices: CV review, CV writing, and LinkedIn optimization.
 - **FR-034**: The Nairah payment screen MUST use two short steps: the configured guide video with side-by-side English and Egyptian-Arabic email-only transfer-note warnings, followed by the InstaPay QR. Confirmation MUST remain blurred and disabled until the video plays fully.
-- **FR-035**: A payment confirmation MUST record only the chosen service, displayed price, payment-confirmation time, and manual-review status. It MUST NOT collect a customer name, email, phone number, payment credentials, or banking details.
+- **FR-035**: A payment confirmation MUST record the InstaPay full name, matching email, chosen service, displayed price, payment-confirmation time, and manual-review status. It MUST NOT collect a customer phone number, payment credentials, or banking details.
 - **FR-036**: An existing authorised admin MUST be able to view the latest Nairah payment confirmations, manually mark a pending entry confirmed, and copy the internal Nairah scheduling link. Confirmation MUST NOT send a Calendly link automatically.
 - **FR-037**: Until real prices, a guide video, recipient details, a valid InstaPay QR, and the direct phone-payment URL are configured, Nairah payment submissions MUST remain disabled with an explanatory message. The direct URL MUST be visible and clickable on phone screens.
 - **FR-038**: The Nairah support phone MUST be stored in MongoDB and returned only after the visitor activates Need help. The revealed contact MUST include a direct WhatsApp link using the Egyptian country code.
-- **FR-039**: The exact InstaPay account-name/email warning MUST appear on Nairah&apos;s internal scheduling page beside the embedded Calendly time picker and MUST NOT appear on the post-payment confirmation.
+- **FR-039**: The exact InstaPay account-name/email warning MUST appear on Nairah&apos;s internal scheduling page beside the embedded Calendly time picker and MUST NOT appear on the post-payment confirmation. The confirmed request&apos;s full name and email MUST prefill Calendly.
 
 ### Key Entities
 
@@ -241,7 +241,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **SC-010**: In visual review at desktop and phone sizes, the compact-to-expanded invitation shows exactly one continuous external outline with no intersecting circle border.
 - **SC-011**: At 320px, the expanded invitation produces no horizontal page overflow and keeps at least 0.75rem of total viewport gutter.
 - **SC-012**: Across resting, preview, and pinned states, the CV label retains at least the same visible edge clearance it has in the compact mark; Nairah's premium motion remains confined to her photo and repeats no more than once per six-second cycle.
-- **SC-013**: In 100% of valid configured Nairah payment submissions, the admin dashboard displays the service, price, and pending status within one refresh without storing customer contact details.
+- **SC-013**: In 100% of valid configured Nairah payment submissions, the admin dashboard displays the full name, email, service, price, and pending status within one refresh, and the confirmed private booking link prefills the same name and email.
 
 ## Assumptions
 
