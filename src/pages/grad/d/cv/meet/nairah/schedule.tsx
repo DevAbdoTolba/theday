@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
 import LinkOffRounded from "@mui/icons-material/LinkOffRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import {
@@ -38,7 +38,8 @@ export default function NairahSchedulePage() {
   const [calendarName, setCalendarName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const handleIsValid = isValidInstapayHandle(instapayHandle);
+  const fullInstapayHandle = instapayHandle.trim() ? `${instapayHandle.trim()}@instapay` : "";
+  const handleIsValid = isValidInstapayHandle(fullInstapayHandle);
   const fullNameIsValid = fullName.trim().length >= 2 && fullName.trim().length <= 120;
   const suppliedToken = typeof router.query.u === "string" ? router.query.u : "";
 
@@ -52,7 +53,7 @@ export default function NairahSchedulePage() {
     setIsChecking(true);
     setError(null);
     try {
-      const verification = await verifyBookingGateToken(suppliedToken, email, instapayHandle);
+      const verification = await verifyBookingGateToken(suppliedToken, email, fullInstapayHandle);
       if (!verification.valid) {
         setError("The email, InstaPay handle, or purchased service does not match this booking link.");
         return;
@@ -110,7 +111,7 @@ export default function NairahSchedulePage() {
               <Typography sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)" }}>Enter the same details used for your payment request.</Typography>
               <Box sx={{ mt: 3, display: "grid", gap: 1.5 }}>
                 <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
-                <TextField label="InstaPay handle" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value)} required autoComplete="off" placeholder="name@instapay" error={instapayHandle.length > 0 && !handleIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
+                <TextField label="InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value.replace(/@instapay$/i, ""))} required autoComplete="off" placeholder="name123" helperText="Type only your username." error={instapayHandle.length > 0 && !handleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ color: "#ffe600", fontWeight: 950 }}>@instapay</InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={fieldSx} />
               </Box>
               {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
               <Button onClick={() => void verifyIdentity()} disabled={!emailIsValid || !handleIsValid || !suppliedToken || isChecking} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>{isChecking ? "Checking…" : "Continue"}</Button>

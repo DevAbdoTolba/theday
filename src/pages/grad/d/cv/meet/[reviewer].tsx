@@ -2,10 +2,11 @@ import React, { useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Checkbox, FormControlLabel, InputAdornment, TextField, Typography } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
+import PlayArrowRounded from "@mui/icons-material/PlayArrowRounded";
 import QrCode2Rounded from "@mui/icons-material/QrCode2Rounded";
 import { keyframes } from "@mui/material/styles";
 import {
@@ -100,11 +101,13 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   const [instapayHandle, setInstapayHandle] = useState("");
   const [email, setEmail] = useState("");
   const [guideWatched, setGuideWatched] = useState(false);
+  const [guideStarted, setGuideStarted] = useState(false);
   const guideVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const furthestGuideTimeRef = React.useRef(0);
   const selectedService = useMemo(() => NAIRAH_SERVICES.find((service) => service.id === selectedServiceId) ?? null, [selectedServiceId]);
   const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
-  const instapayHandleIsValid = isValidInstapayHandle(instapayHandle);
+  const fullInstapayHandle = instapayHandle.trim() ? `${instapayHandle.trim()}@instapay` : "";
+  const instapayHandleIsValid = isValidInstapayHandle(fullInstapayHandle);
   const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const goBack = () => {
@@ -118,7 +121,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = await fetch("/api/cv-payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instapayHandle: instapayHandle.trim(), email: email.trim(), serviceId: selectedService.id, paymentConfirmed: true }) });
+      const response = await fetch("/api/cv-payments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instapayHandle: fullInstapayHandle, email: email.trim(), serviceId: selectedService.id, paymentConfirmed: true }) });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
         throw new Error(body?.error ?? "Could not submit your payment confirmation.");
@@ -143,9 +146,9 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
             <Typography component="h1" sx={{ mt: 1, mb: 1.25, fontSize: { xs: "clamp(2.5rem, 12vw, 5.6rem)", sm: "clamp(4rem, 9vw, 7rem)" }, fontWeight: 1000, lineHeight: 0.86, letterSpacing: "-0.085em" }}>Pick your next move.</Typography>
             <Typography sx={{ maxWidth: "38rem", mb: { xs: 4, sm: 5 }, color: "rgba(255,255,255,0.72)", fontSize: { xs: "1rem", sm: "1.15rem" } }}>Choose one focused service, or handle your full professional profile with a bundle.</Typography>
             <Typography component="h2" sx={{ mb: 1.5, color: "rgba(255,255,255,0.7)", fontSize: "0.78rem", fontWeight: 1000, letterSpacing: "0.16em", textTransform: "uppercase" }}>Services</Typography>
-            <Box sx={{ display: "grid", gap: 1.5 }}>{individualServices.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
+            <Box sx={{ display: "grid", gap: 1.5 }}>{individualServices.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); setGuideStarted(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
             <Typography component="h2" sx={{ mt: { xs: 4, sm: 5 }, mb: 1.5, color: "#ffe600", fontSize: "0.78rem", fontWeight: 1000, letterSpacing: "0.16em", textTransform: "uppercase" }}>Bundles</Typography>
-            <Box sx={{ display: "grid", gap: 1.5 }}>{serviceBundles.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
+            <Box sx={{ display: "grid", gap: 1.5 }}>{serviceBundles.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); setGuideStarted(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
           </Box>}
 
           {stage === "details" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={outlinedPanelSx}>
@@ -168,8 +171,9 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
                 <Typography sx={{ mt: 0.8, color: "#fff", fontSize: { xs: "0.98rem", sm: "1.04rem" }, fontWeight: 750, lineHeight: 1.65 }}>في التحويل، اكتب إيميلك الشخصي بس كملحوظة، من غير أي كلام زيادة. من غير الإيميل ده، مش هنقدر نطابق التحويل وممكن فلوسك تضيع.</Typography>
               </Box>
             </Box>
-            <Box sx={{ mt: 2, display: "grid", placeItems: "center", overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "#050505" }}>
-              {NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc ? <Box component="video" ref={guideVideoRef} controls playsInline preload="metadata" aria-label="Video showing how to add the email payment note" onTimeUpdate={(event) => { const video = event.currentTarget; if (!video.seeking && video.currentTime <= furthestGuideTimeRef.current + 1.25) furthestGuideTimeRef.current = Math.max(furthestGuideTimeRef.current, video.currentTime); }} onSeeking={(event) => { const video = event.currentTarget; if (!guideWatched && video.currentTime > furthestGuideTimeRef.current + 1) video.currentTime = furthestGuideTimeRef.current; }} onEnded={(event) => { const video = event.currentTarget; if (video.duration > 0 && furthestGuideTimeRef.current >= video.duration - 1) setGuideWatched(true); }} sx={{ display: "block", width: "min(100%, 26rem)", maxHeight: "72dvh", bgcolor: "#000" }}>{NAIRAH_PAYMENT_CONFIG.paymentGuideVideoWebmSrc && <source src={NAIRAH_PAYMENT_CONFIG.paymentGuideVideoWebmSrc} type="video/webm" />}<source src={NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc} type="video/mp4" /></Box> : <Box sx={{ minHeight: { xs: 230, sm: 360 }, display: "grid", placeItems: "center", p: 3, textAlign: "center", color: "rgba(255,255,255,0.66)" }}><Typography sx={{ fontWeight: 800 }}>Payment guide video is not configured.</Typography></Box>}
+            <Box sx={{ position: "relative", mt: 2, display: "grid", placeItems: "center", overflow: "hidden", border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "#050505" }}>
+              {NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc ? <Box component="video" ref={guideVideoRef} controls playsInline preload="metadata" aria-label="Video showing how to add the email payment note" onPlay={() => setGuideStarted(true)} onTimeUpdate={(event) => { const video = event.currentTarget; if (!video.seeking && video.currentTime <= furthestGuideTimeRef.current + 1.25) furthestGuideTimeRef.current = Math.max(furthestGuideTimeRef.current, video.currentTime); }} onSeeking={(event) => { const video = event.currentTarget; if (!guideWatched && video.currentTime > furthestGuideTimeRef.current + 1) video.currentTime = furthestGuideTimeRef.current; }} onEnded={(event) => { const video = event.currentTarget; if (video.duration > 0 && furthestGuideTimeRef.current >= video.duration - 1) setGuideWatched(true); }} sx={{ display: "block", width: "min(100%, 26rem)", maxHeight: "72dvh", bgcolor: "#000" }}>{NAIRAH_PAYMENT_CONFIG.paymentGuideVideoWebmSrc && <source src={NAIRAH_PAYMENT_CONFIG.paymentGuideVideoWebmSrc} type="video/webm" />}<source src={NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc} type="video/mp4" /></Box> : <Box sx={{ minHeight: { xs: 230, sm: 360 }, display: "grid", placeItems: "center", p: 3, textAlign: "center", color: "rgba(255,255,255,0.66)" }}><Typography sx={{ fontWeight: 800 }}>Payment guide video is not configured.</Typography></Box>}
+              {NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc && !guideStarted && <Button onClick={() => void guideVideoRef.current?.play()} variant="contained" startIcon={<PlayArrowRounded sx={{ fontSize: "2rem !important" }} />} aria-label="Play the payment guide video" sx={{ position: "absolute", inset: "50% auto auto 50%", zIndex: 2, minWidth: { xs: 170, sm: 210 }, minHeight: { xs: 58, sm: 66 }, px: 3, color: "#000", bgcolor: "#ffe600", border: "2px solid #000", borderRadius: "999px", boxShadow: "0 10px 40px rgba(0,0,0,0.72), 0 0 0 2px rgba(255,255,255,0.88)", fontSize: { xs: "1rem", sm: "1.1rem" }, fontWeight: 1000, textTransform: "none", transform: "translate(-50%, -50%)", transition: "transform 180ms ease, background-color 180ms ease", "&:hover": { bgcolor: "#fff36a", transform: "translate(-50%, -50%) scale(1.04)" }, "&:focus-visible": { outline: "3px solid #fff", outlineOffset: 4 }, "@media (prefers-reduced-motion: reduce)": { transition: "none" } }}>Play video</Button>}
             </Box>
             <PaymentGuideConfirmation videoWatched={guideWatched} onConfirmed={() => setStage("qr")} />
           </Box>}
@@ -184,7 +188,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
               {NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl && <Box sx={{ display: { xs: "block", sm: "none" }, mt: 2, textAlign: "center" }}><Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.78rem", fontWeight: 750 }}>Pay directly on your phone</Typography><Typography component="a" href={NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl} target="_blank" rel="noopener noreferrer" sx={{ display: "block", mt: 0.65, color: "#ffe600", fontSize: "0.88rem", fontWeight: 900, lineHeight: 1.35, overflowWrap: "anywhere", textUnderlineOffset: 3 }}>{NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl}</Typography></Box>}
             </Box>
             <Box sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
-              <TextField label="Your InstaPay handle" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value)} required fullWidth autoComplete="off" placeholder="name123@instapay" helperText="Letters and numbers only before @instapay." error={instapayHandle.length > 0 && !instapayHandleIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
+              <TextField label="Your InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value.replace(/@instapay$/i, ""))} required fullWidth autoComplete="off" placeholder="name123" helperText="Type only your username. @instapay is added automatically." error={instapayHandle.length > 0 && !instapayHandleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ color: "#ffe600", fontWeight: 950 }}>@instapay</InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
               <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required fullWidth autoComplete="email" helperText="Use the same email written in the transfer note." error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={{ "& .MuiOutlinedInput-root": { color: "#fff", bgcolor: "rgba(255,255,255,0.035)", "& fieldset": { borderColor: "rgba(255,255,255,0.58)" }, "&:hover fieldset": { borderColor: "#fff" } } }} />
             </Box>
             {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, QR, and direct payment URL in the payment config to open payments.</Alert>}
