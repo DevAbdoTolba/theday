@@ -33,8 +33,8 @@ export const NAIRAH_SERVICES = [
 ] as const satisfies readonly NairahService[];
 
 export const NAIRAH_PAYMENT_CONFIG = {
-  /** Add the Step 1 payment-message guide image under public/ and set its path here. */
-  paymentGuideImageSrc: null as string | null,
+  /** Step 1 video showing how to add the email-only payment note. */
+  paymentGuideVideoSrc: "/cv-review/nairah-payment-guide.mp4" as string | null,
   /** Add a real Instapay QR image under public/ and set its path here. */
   instapayQrImageSrc: null as string | null,
   /** Add the recipient name or payment handle shown next to the QR. */
