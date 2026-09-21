@@ -223,7 +223,7 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T060 [US6] Build the Nairah service choice, selected-service detail, required transfer-message acknowledgement, payment instructions, QR slot, success notice, and editable price configuration in `src/pages/grad/d/cv/meet/[reviewer].tsx` and `src/components/cv-review/nairah-services.ts` (FR-033, FR-034, FR-037)
 - [X] T061 [US7] Add persisted manual-review payment submissions and protected list/confirm APIs in `src/lib/mongo.ts`, `src/lib/models/cv-payment-submission.ts`, `src/pages/api/cv-payments/index.ts`, and `src/pages/api/admin/cv-payments.ts` (FR-035, FR-036)
 - [X] T062 [US7] Add the Nairah payment admin dashboard and primary-admin entry point in `src/pages/admin/cv-payments.tsx` and `src/pages/admin/index.tsx` (FR-036)
-- [ ] T063 Add Nairah&apos;s three approved EGP prices, recipient label, and real InstaPay QR asset to `src/components/cv-review/nairah-services.ts` and `public/` before opening live payment confirmation (FR-033, FR-037)
+- [X] T063 Add Nairah&apos;s three approved EGP prices, recipient label, and real InstaPay QR asset to `src/components/cv-review/nairah-services.ts` and `public/` before opening live payment confirmation (FR-033, FR-037)
 - [X] T064 Update payment, manual-approval, routing, and transition requirements in the feature documents (FR-018, FR-029, FR-033–FR-037)
 - [X] T065 Run TypeScript, ESLint, whitespace, and production-build validation after the payment-flow implementation
 
@@ -239,6 +239,7 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T071 [US6] Configure the supplied InstaPay QR, recipient handle, and exact phone-only direct payment URL in `src/components/cv-review/nairah-services.ts`, `src/pages/grad/d/cv/meet/[reviewer].tsx`, and `public/cv-review/nairah-instapay-qr.jpg` (FR-037)
 - [X] T072 [US6] Collect and validate the exact transfer-note email and a compliance phone number, persist both with the payment confirmation, expose them in the admin dashboard with email copying, and show the manual Calendly-delivery and exact-entry instructions in `src/pages/grad/d/cv/meet/[reviewer].tsx`, `src/pages/api/cv-payments/index.ts`, `src/lib/models/cv-payment-submission.ts`, `src/pages/api/admin/cv-payments.ts`, and `src/pages/admin/cv-payments.tsx` (FR-035, FR-036)
 - [X] T073 [US6] Compress the payment guide while preserving every source frame and serve VP9 WebM first with an optimized H.264 MP4 fallback in `public/cv-review/` and `src/pages/grad/d/cv/meet/[reviewer].tsx` (FR-034)
+- [X] T074 [US6] Remove customer email/phone collection, restore anonymous payment records, store the business support phone in MongoDB for demand-only reveal with WhatsApp, and move the exact matching warning to an embedded Nairah scheduling route copied by the admin in `src/lib/models/`, `src/pages/api/`, `src/pages/grad/d/cv/meet/`, and `src/pages/admin/cv-payments.tsx` (FR-035, FR-036, FR-038, FR-039)
 
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 
@@ -336,7 +337,7 @@ The full useful booking flow requires US1–US4. US5 is the P2 refinement but re
 
 - Do not add unit/E2E infrastructure solely for this feature.
 - Do not use Framer Motion; React controls state and MUI/Emotion emits native CSS transitions.
-- Do not add live Calendly availability comparison, an iframe, API request, analytics event, storage, or a new dependency.
+- Do not add live multi-calendar comparison, analytics, or a new dependency. The Nairah post-payment iframe, support API, and MongoDB records are explicit later-phase requirements.
 - Keep the pitch-black surfaces and white borders consistent in both site themes while retaining accessible focus and high-contrast fallbacks.
 - Final portraits and real Calendly URLs are later content replacements in `src/components/cv-review/reviewers.ts`.
 - Keep unrelated existing worktree changes untouched.

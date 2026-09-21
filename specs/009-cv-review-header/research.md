@@ -186,7 +186,7 @@ Calendly supports sharing a normal event-type scheduling link, so no embed or SD
 **Alternatives considered**:
 
 - `window.open`: rejected because popup blocking and accessibility behavior are less predictable.
-- Inline/popup Calendly embed: rejected because it loads third-party code inside TheDay and does not provide a unified three-calendar comparison.
+- Inline/popup Calendly embed for initial reviewer comparison: rejected because it loads three calendars before selection. A single Nairah embed is allowed only in the manually delivered post-payment scheduling route so the matching warning remains visible while choosing a time.
 - URL preflight: rejected because it adds latency/privacy exposure and cannot prove the visitor's booking page will work.
 - First-release booking analytics: rejected as out of scope; TheDay cannot claim a completed booking from a handoff click.
 
@@ -280,9 +280,10 @@ the Calendly link.
 
 - The requested manual review is explicit: the system must not claim it can
   verify an InstaPay transfer or send the final booking email automatically.
-- Storing only the exact transfer-note email, a follow-up phone number, service,
-  shown price, and required acknowledgement supports manual matching without
-  collecting payment secrets.
+- Storing only the service, shown price, and required acknowledgement keeps the
+  payment request anonymous. The transfer note remains the manual matching source.
+- Store the business support phone as a MongoDB singleton and reveal it only
+  after an explicit support request, with an E.164 WhatsApp destination.
 - A real QR and prices are commercial inputs, not values the application can
   safely invent. The page stays closed until the operator configures them.
 

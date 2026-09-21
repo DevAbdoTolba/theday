@@ -30,8 +30,6 @@ interface PaymentSubmission {
   readonly id: string;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
-  readonly email: string | null;
-  readonly phone: string | null;
   readonly status: "pending" | "confirmed";
   readonly createdAt: string;
   readonly confirmedAt: string | null;
@@ -109,7 +107,7 @@ function CvPaymentsContent() {
           submission.id === body.submission.id ? body.submission : submission,
         ),
       );
-      setNotice("Payment confirmed. Copy the email and send the Calendly link manually.");
+      setNotice("Payment confirmed. Copy the booking link and email it manually.");
     } catch (confirmError) {
       setError(confirmError instanceof Error ? confirmError.message : "Could not confirm payment.");
     } finally {
@@ -117,12 +115,12 @@ function CvPaymentsContent() {
     }
   };
 
-  const copyEmail = async (email: string) => {
+  const copyBookingLink = async () => {
     try {
-      await navigator.clipboard.writeText(email);
-      setNotice("Email copied.");
+      await navigator.clipboard.writeText(`${window.location.origin}/grad/d/cv/meet/nairah/schedule`);
+      setNotice("Nairah booking link copied.");
     } catch {
-      setError("Could not copy the email. Please copy it manually.");
+      setError("Could not copy the booking link. Please copy it manually.");
     }
   };
 
@@ -143,7 +141,7 @@ function CvPaymentsContent() {
               Nairah CV payments
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 0.75, maxWidth: "47rem" }}>
-              Confirm only after checking the InstaPay transfer. Then copy the email and send the Calendly link manually.
+              Confirm only after checking the InstaPay transfer. Then copy the private booking link and send it to the email written in the transfer note.
             </Typography>
           </Box>
           <Tooltip title="Refresh submissions">
@@ -172,8 +170,6 @@ function CvPaymentsContent() {
                   <TableRow>
                     <TableCell>Service</TableCell>
                     <TableCell>Price</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Phone</TableCell>
                     <TableCell>Submitted</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell align="right">Manual action</TableCell>
@@ -186,46 +182,25 @@ function CvPaymentsContent() {
                       <TableRow key={submission.id} hover>
                         <TableCell>{submission.serviceTitle}</TableCell>
                         <TableCell>{formatPrice(submission.priceEgp)}</TableCell>
-                        <TableCell>
-                          {submission.email ? (
-                            <Button
-                              size="small"
-                              variant="text"
-                              endIcon={<ContentCopyRounded fontSize="small" />}
-                              onClick={() => void copyEmail(submission.email as string)}
-                              sx={{ textTransform: "none", fontWeight: 750 }}
-                            >
-                              {submission.email}
-                            </Button>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">Not collected</Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {submission.phone ? (
-                            <Typography component="a" href={`tel:${submission.phone}`} sx={{ color: "inherit", textUnderlineOffset: 3 }}>
-                              {submission.phone}
-                            </Typography>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">Not collected</Typography>
-                          )}
-                        </TableCell>
                         <TableCell>{formatDate(submission.createdAt)}</TableCell>
                         <TableCell>
                           <Chip size="small" label={isPending ? "Pending" : "Confirmed"} color={isPending ? "warning" : "success"} />
                         </TableCell>
                         <TableCell align="right">
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="success"
-                            disabled={!isPending || isConfirming === submission.id}
-                            startIcon={<CheckRounded />}
-                            onClick={() => void confirmPayment(submission.id)}
-                            sx={{ textTransform: "none" }}
-                          >
-                            {isConfirming === submission.id ? "Confirming…" : "Confirm"}
-                          </Button>
+                          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                            <Button size="small" variant="outlined" disabled={isPending} startIcon={<ContentCopyRounded />} onClick={() => void copyBookingLink()} sx={{ textTransform: "none" }}>Copy booking link</Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="success"
+                              disabled={!isPending || isConfirming === submission.id}
+                              startIcon={<CheckRounded />}
+                              onClick={() => void confirmPayment(submission.id)}
+                              sx={{ textTransform: "none" }}
+                            >
+                              {isConfirming === submission.id ? "Confirming…" : "Confirm"}
+                            </Button>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );

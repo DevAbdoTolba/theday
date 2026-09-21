@@ -48,7 +48,7 @@ const OMAR_DESTINATION = createBookingDestination(
   "https://calendly.com/omargenius2015/cv-review-meeting",
 );
 
-const NAIRAH_DESTINATION = createBookingDestination(
+export const NAIRAH_DESTINATION = createBookingDestination(
   "https://calendly.com/qualified-resumes11/30min",
   "nairah-payment",
 );
