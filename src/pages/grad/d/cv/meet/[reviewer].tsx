@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Slider, Typography } from "@mui/material";
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
@@ -62,67 +62,44 @@ const outlinedPanelSx = { p: { xs: 2.25, sm: 3.5 }, border: "1px solid #fff", bo
 const yellowButtonSx = { mt: 3, px: 3, minHeight: 52, color: "#000", bgcolor: "#ffe600", borderRadius: "12px 17px 11px 15px", fontSize: "1.05rem", fontWeight: 1000, textTransform: "none", "&:hover": { color: "#000", bgcolor: "#ffef4d" } };
 
 function UnderstandSlider({ onConfirmed }: { readonly onConfirmed: () => void }) {
-  const trackRef = React.useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [confirmed, setConfirmed] = useState(false);
 
-  const updateProgress = (clientX: number) => {
-    const track = trackRef.current;
-    if (!track || confirmed) return;
-    const bounds = track.getBoundingClientRect();
-    setProgress(Math.max(0, Math.min(1, (clientX - bounds.left) / bounds.width)));
-  };
-  const finishDrag = () => {
-    if (progress < 0.82) {
+  const finishDrag = (value: number | readonly number[]) => {
+    const committedValue = typeof value === "number" ? value : value[0];
+    if (committedValue < 90) {
       setProgress(0);
       return;
     }
-    setProgress(1);
+    setProgress(100);
     setConfirmed(true);
   };
 
   return (
     <Box sx={{ mt: 3, width: "min(100%, 18rem)" }}>
-      <Box
-        ref={trackRef}
-        role="slider"
-        tabIndex={0}
-        aria-label="Slide to confirm that you understand the payment guide"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
-        onPointerDown={(event) => {
-          if (confirmed) return;
-          event.currentTarget.setPointerCapture(event.pointerId);
-          updateProgress(event.clientX);
-        }}
-        onPointerMove={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) updateProgress(event.clientX);
-        }}
-        onPointerUp={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-          finishDrag();
-        }}
-        onPointerCancel={() => setProgress(0)}
-        onKeyDown={(event) => {
-          if (confirmed) return;
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            setProgress((current) => Math.min(1, current + 0.2));
-          } else if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            setProgress((current) => Math.max(0, current - 0.2));
-          } else if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setProgress(1);
-            setConfirmed(true);
-          }
-        }}
-        sx={{ position: "relative", height: 58, overflow: "hidden", touchAction: "none", userSelect: "none", border: "1px solid rgba(255,255,255,0.82)", borderRadius: "11px 15px 10px 13px", bgcolor: "rgba(255,255,255,0.06)", cursor: confirmed ? "default" : "grab", "&:active": { cursor: "grabbing" }, "&:focus-visible": { outline: "3px solid #ffe600", outlineOffset: 3 } }}
-      >
-        <Box sx={{ position: "absolute", inset: 0, width: `${progress * 100}%`, bgcolor: "rgba(255,230,0,0.16)", borderInlineEnd: progress ? "1px solid rgba(255,230,0,0.72)" : 0, transition: "width 100ms linear" }} />
-        <Typography sx={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: "#fff", fontSize: "1rem", fontWeight: 900, pointerEvents: "none" }}>{confirmed ? "Understood" : "I understand"}</Typography>
-        <Box aria-hidden sx={{ position: "absolute", insetBlock: 5, insetInlineStart: `calc(${progress * 100}% + ${5 - progress * 56}px)`, width: 46, display: "grid", placeItems: "center", color: "#000", bgcolor: "rgba(255,230,0,0.92)", borderRadius: "8px 11px 7px 10px", fontSize: "1.35rem", fontWeight: 1000, transition: "inset-inline-start 100ms linear" }}>›</Box>
+      <Box sx={{ position: "relative", height: 60, overflow: "hidden", border: "1px solid rgba(255,255,255,0.78)", borderRadius: "30px", bgcolor: "rgba(255,255,255,0.055)" }}>
+        <Typography aria-hidden sx={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: confirmed ? "#ffe600" : "rgba(255,255,255,0.78)", fontSize: "0.96rem", fontWeight: 900, pointerEvents: "none", transition: "color 180ms ease" }}>
+          {confirmed ? "Understood ✓" : "Slide to confirm"}
+        </Typography>
+        <Slider
+          value={progress}
+          min={0}
+          max={100}
+          step={1}
+          disabled={confirmed}
+          aria-label="Slide to confirm that you understand the payment guide"
+          getAriaValueText={(value) => value >= 90 ? "Ready to confirm" : `${value} percent`}
+          onChange={(_, value) => setProgress(typeof value === "number" ? value : value[0])}
+          onChangeCommitted={(_, value) => finishDrag(value)}
+          sx={{
+            position: "absolute", insetInlineStart: 27, insetBlockStart: 5, width: "calc(100% - 54px)", height: 50, p: 0, color: "#ffe600",
+            "& .MuiSlider-rail": { height: 50, opacity: 0, borderRadius: 25 },
+            "& .MuiSlider-track": { height: 50, border: 0, borderRadius: "25px 18px 18px 25px", bgcolor: "rgba(255,230,0,0.14)" },
+            "& .MuiSlider-thumb": { width: 50, height: 50, color: "#ffe600", border: "1px solid rgba(255,255,255,0.82)", boxShadow: "0 3px 16px rgba(255,230,0,0.28)", "&::after": { width: "100%", height: "100%" }, "&::before": { content: "'›'", display: "grid", placeItems: "center", color: "#000", fontSize: "1.45rem", fontWeight: 1000, boxShadow: "none" }, "&:hover, &.Mui-focusVisible": { boxShadow: "0 0 0 6px rgba(255,230,0,0.15)" } },
+            "&.Mui-disabled": { color: "#ffe600", opacity: 1 },
+            "@media (prefers-reduced-motion: reduce)": { "& *": { transitionDuration: "80ms !important" } },
+          }}
+        />
       </Box>
       <Button onClick={onConfirmed} disabled={!confirmed} variant="outlined" sx={{ mt: 1.2, width: "100%", minHeight: 48, color: "#fff", borderColor: "rgba(255,255,255,0.8)", borderRadius: "10px 14px 9px 12px", fontSize: "1rem", fontWeight: 950, textTransform: "none", opacity: confirmed ? 1 : 0, transform: confirmed ? "translateY(0)" : "translateY(10px)", pointerEvents: confirmed ? "auto" : "none", transition: "opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease", "&:hover": { color: "#000", bgcolor: "#fff", borderColor: "#fff" } }}>Show QR code</Button>
     </Box>
