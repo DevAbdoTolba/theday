@@ -173,7 +173,7 @@ Calendly supports sharing a normal event-type scheduling link, so no embed or SD
 
 - A direct user-activated anchor is simpler and more reliable than `window.open`.
 - `noopener` isolates `window.opener`; `noreferrer` suppresses referrer data.
-- The initial reviewer handoff sends no personal data, CV data, user identity, or UTM value. Nairah&apos;s confirmed post-payment page is the explicit exception: it prefills only the submitted full name and email.
+- The initial reviewer handoff sends no personal data, CV data, user identity, or UTM value. Nairah&apos;s confirmed post-payment page is the explicit exception: it prefills only the full name entered after unlock and the verified email.
 - No Calendly resource or cookie is loaded inside TheDay before the user deliberately follows the link.
 - TheDay cannot reliably observe a cross-origin Calendly outage; keeping the original tab intact is the honest recovery behavior.
 
@@ -280,10 +280,11 @@ the Calendly link.
 
 - The requested manual review is explicit: the system must not claim it can
   verify an InstaPay transfer or send the final booking email automatically.
-- Store the InstaPay full name and matching email with the service, shown price,
-  and acknowledgement. Resolve those values server-side from the confirmed
-  request ID so the emailed booking URL contains no personal-data parameters,
-  then use Calendly&apos;s official `name` and `email` prefill parameters only in the iframe URL.
+- Store the InstaPay handle and matching email with the service, shown price,
+  and acknowledgement for manual review. After confirmation, derive a
+  deterministic SHA-256 Base64URL token from normalized email and handle in the
+  admin browser. The scheduling page recomputes it locally, so the sent link
+  remains usable without MongoDB. This is an intentional deterrent, not strong authentication.
 - Store the business support phone as a MongoDB singleton and reveal it only
   after an explicit support request, with an E.164 WhatsApp destination.
 - A real QR and prices are commercial inputs, not values the application can

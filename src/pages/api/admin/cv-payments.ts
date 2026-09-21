@@ -7,7 +7,7 @@ import CvPaymentSubmissionModel, {
 
 interface PaymentSubmissionResponse {
   readonly id: string;
-  readonly fullName: string | null;
+  readonly instapayHandle: string | null;
   readonly email: string | null;
   readonly serviceTitle: string;
   readonly priceEgp: number | null;
@@ -21,7 +21,7 @@ function serializeSubmission(
 ): PaymentSubmissionResponse {
   return {
     id: submission._id.toString(),
-    fullName: submission.fullName ?? null,
+    instapayHandle: submission.instapayHandle ?? null,
     email: submission.email ?? null,
     serviceTitle: submission.serviceTitle,
     priceEgp: submission.priceEgp,

@@ -1,18 +1,72 @@
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
-import type { GetServerSideProps } from "next";
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { useRouter } from "next/router";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
+import {
+  createBookingGateToken,
+  isValidInstapayHandle,
+} from "../../../../../../components/cv-review/booking-gate";
 import { NAIRAH_DESTINATION } from "../../../../../../components/cv-review/reviewers";
 
-interface Props {
-  readonly fullName: string;
-  readonly email: string;
-}
+const CONSOLE_ART = `██████╗ ██╗     ███████╗ █████╗ ███████╗███████╗    ██████╗  ██████╗ ███╗   ██╗████████╗       ██╗
+██╔══██╗██║     ██╔════╝██╔══██╗██╔════╝██╔════╝    ██╔══██╗██╔═══██╗████╗  ██║╚══██╔══╝    ██╗╚██╗
+██████╔╝██║     █████╗  ███████║███████╗█████╗      ██║  ██║██║   ██║██╔██╗ ██║   ██║       ╚═╝ ██║
+██╔═══╝ ██║     ██╔══╝  ██╔══██║╚════██║██╔══╝      ██║  ██║██║   ██║██║╚██╗██║   ██║       ██╗ ██║
+██║     ███████╗███████╗██║  ██║███████║███████╗    ██████╔╝╚██████╔╝██║ ╚████║   ██║       ╚═╝██╔╝
+╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝   ╚═╝          ╚═╝`;
 
-export default function NairahSchedulePage({ fullName, email }: Props) {
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    color: "#fff",
+    bgcolor: "rgba(255,255,255,0.04)",
+    "& fieldset": { borderColor: "rgba(255,255,255,0.58)" },
+    "&:hover fieldset": { borderColor: "#fff" },
+  },
+};
+
+export default function NairahSchedulePage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [instapayHandle, setInstapayHandle] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [calendarName, setCalendarName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const handleIsValid = isValidInstapayHandle(instapayHandle);
+  const fullNameIsValid = fullName.trim().length >= 2 && fullName.trim().length <= 120;
+  const suppliedToken = typeof router.query.u === "string" ? router.query.u : "";
+
+  useEffect(() => {
+    console.info(`%c${CONSOLE_ART}`, "color:#ffe600;background:#050505;font:900 13px/1.15 monospace;padding:18px;border:2px solid #fff;border-radius:10px;");
+    console.info("%cIf you are interested in a nice position, please contact me at DevAbdoTolba@gmail.com with subject 'Hacked theday'", "color:#fff;background:#050505;font:800 16px/1.5 sans-serif;padding:12px 18px;border-left:5px solid #ffe600;");
+  }, []);
+
+  const verifyIdentity = async () => {
+    if (!emailIsValid || !handleIsValid || !suppliedToken) return;
+    setIsChecking(true);
+    setError(null);
+    try {
+      const expectedToken = await createBookingGateToken(email, instapayHandle);
+      if (expectedToken !== suppliedToken) {
+        setError("The email or InstaPay handle does not match this booking link.");
+        return;
+      }
+      setIsUnlocked(true);
+    } catch {
+      setError("Could not verify this booking link. Please try again.");
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   const calendlyUrl = new URL(NAIRAH_DESTINATION.url);
-  calendlyUrl.searchParams.set("name", fullName);
-  calendlyUrl.searchParams.set("email", email);
+  if (calendarName) {
+    calendlyUrl.searchParams.set("name", calendarName);
+    calendlyUrl.searchParams.set("email", email.trim());
+  }
 
   return (
     <>
@@ -21,33 +75,42 @@ export default function NairahSchedulePage({ fullName, email }: Props) {
         <meta name="robots" content="noindex, nofollow" />
       </Head>
       <Box component="main" sx={{ minHeight: "100dvh", bgcolor: "#000", color: "#fff", px: { xs: 1.25, sm: 3 }, py: { xs: 1.25, sm: 2.5 } }}>
-        <Box sx={{ width: "100%", maxWidth: "72rem", mx: "auto" }}>
-          <Typography component="h1" sx={{ fontSize: { xs: "1.65rem", sm: "2.5rem" }, fontWeight: 1000, letterSpacing: "-0.055em" }}>Choose your time with Nairah.</Typography>
-          <Alert severity="warning" sx={{ mt: 1.5, mb: 2, bgcolor: "rgba(255,230,0,0.11)", color: "#fff", border: "1px solid rgba(255,230,0,0.65)", "& .MuiAlert-icon": { color: "#ffe600" } }}>
-            On Calendly, enter the InstaPay account holder&apos;s name and the email used in InstaPay exactly, letter by letter.
-          </Alert>
-          <Box component="iframe" src={calendlyUrl.toString()} title="Choose a Calendly time with Nairah" sx={{ display: "block", width: "100%", minHeight: { xs: "760px", sm: "820px" }, border: 0, borderRadius: "18px", bgcolor: "#fff" }} />
-          <Button component="a" href={calendlyUrl.toString()} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewRounded />} sx={{ mt: 1.5, color: "#fff", textTransform: "none", fontWeight: 850 }}>Open Calendly in a new tab</Button>
+        <Box sx={{ width: "100%", maxWidth: calendarName ? "72rem" : "34rem", mx: "auto" }}>
+          {!isUnlocked && (
+            <Box sx={{ mt: { xs: 3, sm: 8 }, p: { xs: 2.5, sm: 4 }, border: "1px solid #fff", borderRadius: "24px 31px 25px 29px / 28px 25px 33px 26px" }}>
+              <Typography component="h1" sx={{ fontSize: { xs: "2rem", sm: "3.2rem" }, fontWeight: 1000, lineHeight: 0.95, letterSpacing: "-0.065em" }}>One quick check.</Typography>
+              <Typography sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)" }}>Enter the same details used for your payment request.</Typography>
+              <Box sx={{ mt: 3, display: "grid", gap: 1.5 }}>
+                <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
+                <TextField label="InstaPay handle" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value)} required autoComplete="off" placeholder="name@instapay" error={instapayHandle.length > 0 && !handleIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
+              </Box>
+              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+              {!suppliedToken && router.isReady && <Alert severity="error" sx={{ mt: 2 }}>This booking link is incomplete. Ask Nairah for the full link.</Alert>}
+              <Button onClick={() => void verifyIdentity()} disabled={!emailIsValid || !handleIsValid || !suppliedToken || isChecking} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>{isChecking ? "Checking…" : "Continue"}</Button>
+            </Box>
+          )}
+
+          {isUnlocked && !calendarName && (
+            <Box sx={{ mt: { xs: 3, sm: 8 }, p: { xs: 2.5, sm: 4 }, border: "1px solid #fff", borderRadius: "24px 31px 25px 29px / 28px 25px 33px 26px" }}>
+              <Typography component="h1" sx={{ fontSize: { xs: "2rem", sm: "3.2rem" }, fontWeight: 1000, lineHeight: 0.95, letterSpacing: "-0.065em" }}>Last thing.</Typography>
+              <Typography sx={{ mt: 1.5, color: "rgba(255,255,255,0.72)" }}>Enter the InstaPay account holder&apos;s full name exactly, letter by letter.</Typography>
+              <TextField label="Full name in InstaPay" value={fullName} onChange={(event) => setFullName(event.target.value)} required fullWidth autoComplete="name" error={fullName.length > 0 && !fullNameIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={{ ...fieldSx, mt: 3 }} />
+              <Button onClick={() => setCalendarName(fullName.trim())} disabled={!fullNameIsValid} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>Choose a time</Button>
+            </Box>
+          )}
+
+          {calendarName && (
+            <>
+              <Typography component="h1" sx={{ fontSize: { xs: "1.65rem", sm: "2.5rem" }, fontWeight: 1000, letterSpacing: "-0.055em" }}>Choose your time with Nairah.</Typography>
+              <Alert severity="warning" sx={{ mt: 1.5, mb: 2, bgcolor: "rgba(255,230,0,0.11)", color: "#fff", border: "1px solid rgba(255,230,0,0.65)", "& .MuiAlert-icon": { color: "#ffe600" } }}>
+                Confirm that Calendly shows the InstaPay account holder&apos;s exact name and the same email used in InstaPay.
+              </Alert>
+              <Box component="iframe" src={calendlyUrl.toString()} title="Choose a Calendly time with Nairah" sx={{ display: "block", width: "100%", minHeight: { xs: "760px", sm: "820px" }, border: 0, borderRadius: "18px", bgcolor: "#fff" }} />
+              <Button component="a" href={calendlyUrl.toString()} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewRounded />} sx={{ mt: 1.5, color: "#fff", textTransform: "none", fontWeight: 850 }}>Open Calendly in a new tab</Button>
+            </>
+          )}
         </Box>
       </Box>
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const requestId = context.query.request;
-  if (typeof requestId !== "string" || !/^[a-f\d]{24}$/i.test(requestId)) return { notFound: true };
-
-  const [{ connectMongo }, { default: CvPaymentSubmissionModel }] = await Promise.all([
-    import("../../../../../../lib/mongo"),
-    import("../../../../../../lib/models/cv-payment-submission"),
-  ]);
-  await connectMongo();
-  const submission = await CvPaymentSubmissionModel.findOne({
-    _id: requestId,
-    status: "confirmed",
-  }).select("fullName email");
-
-  if (!submission?.fullName || !submission.email) return { notFound: true };
-  return { props: { fullName: submission.fullName, email: submission.email } };
-};

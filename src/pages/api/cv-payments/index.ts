@@ -2,11 +2,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { connectMongo } from "../../../lib/mongo";
 import CvPaymentSubmissionModel from "../../../lib/models/cv-payment-submission";
 import { NAIRAH_SERVICES, type NairahServiceId } from "../../../components/cv-review/nairah-services";
+import { isValidInstapayHandle, normalizeInstapayHandle } from "../../../components/cv-review/booking-gate";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface CreatePaymentSubmissionBody {
-  readonly fullName?: unknown;
+  readonly instapayHandle?: unknown;
   readonly email?: unknown;
   readonly serviceId?: unknown;
   readonly paymentConfirmed?: unknown;
@@ -23,13 +24,13 @@ export default async function handler(
     return;
   }
 
-  const { fullName, email, serviceId, paymentConfirmed } = req.body as CreatePaymentSubmissionBody;
-  const customerName = typeof fullName === "string" ? fullName.trim().replace(/\s+/g, " ") : "";
+  const { instapayHandle, email, serviceId, paymentConfirmed } = req.body as CreatePaymentSubmissionBody;
+  const customerHandle = typeof instapayHandle === "string" ? normalizeInstapayHandle(instapayHandle) : "";
   const customerEmail = typeof email === "string" ? email.trim() : "";
   const selectedService = NAIRAH_SERVICES.find((service) => service.id === serviceId);
 
-  if (customerName.length < 2 || customerName.length > 120) {
-    res.status(400).json({ error: "Enter the full name used in InstaPay." });
+  if (!isValidInstapayHandle(customerHandle) || customerHandle.length > 80) {
+    res.status(400).json({ error: "Enter a valid InstaPay handle, such as name@instapay." });
     return;
   }
   if (!EMAIL_PATTERN.test(customerEmail) || customerEmail.length > 254) {
@@ -49,7 +50,7 @@ export default async function handler(
     await connectMongo();
 
     const submission = await CvPaymentSubmissionModel.create({
-      fullName: customerName,
+      instapayHandle: customerHandle,
       email: customerEmail,
       serviceId: serviceId as NairahServiceId,
       serviceTitle: selectedService.title,
