@@ -61,7 +61,8 @@
 - Abdo and Omar use normal direct navigation to their configured Calendly URLs.
 - Nairah&apos;s Meet action expands a black, white-bordered transaction surface
   from behind the button, then routes to `/grad/d/cv/meet/nairah`.
-- Nairah&apos;s page has three services with separately editable detail prices,
+- Nairah&apos;s page has an individual-services section and a bundles section with
+  the four approved fixed prices,
   then a guide video, bilingual email-only transfer-note warning, gated
   confirmation, and QR step. Phone screens additionally expose the exact direct
   InstaPay URL. Missing live payment configuration disables submission.
@@ -83,12 +84,15 @@
 - The admin can copy the internal booking link only for completed requests and
   sends it to the email found in the InstaPay transfer note; completion never
   emails or opens Calendly automatically.
-- The copied link contains only `?u=` with a SHA-256 Base64URL token derived in
-  the admin browser from normalized email and InstaPay handle. It contains no
-  payment record ID and needs no server lookup after being sent.
+- The copied link contains only `?u=` with the Base64URL-encoded purchased
+  service title and a SHA-256 Base64URL digest derived in the admin browser from
+  normalized email, InstaPay handle, and that title. It contains no payment
+  record ID and needs no server lookup after being sent.
 - The scheduling page asks for the same email and handle, recomputes the token
   locally, and unlocks only on equality. It then asks for the InstaPay account
-  holder&apos;s full name and prefills Calendly with the name and email.
+  holder&apos;s full name and prefills Calendly with the name, email, and purchased
+  service. The service is passed to Calendly as `a1`, requiring “Purchased
+  service” to be the first custom question on Nairah&apos;s event.
 - Without `u`, the route is a terminal invalid-link screen: no identity or
   scheduling UI is rendered, the visitor is told to request the correct URL
   from Nairah, and only the shared on-demand Need help contact remains usable.

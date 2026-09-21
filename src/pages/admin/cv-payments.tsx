@@ -300,7 +300,11 @@ function CvPaymentsContent() {
   const copyBookingLink = async (submission: PaymentSubmission) => {
     if (!submission.email || !submission.instapayHandle) return;
     try {
-      const token = await createBookingGateToken(submission.email, submission.instapayHandle);
+      const token = await createBookingGateToken(
+        submission.email,
+        submission.instapayHandle,
+        submission.serviceTitle,
+      );
       const bookingUrl = new URL("/grad/d/cv/meet/nairah/schedule", window.location.origin);
       bookingUrl.searchParams.set("u", token);
       await navigator.clipboard.writeText(bookingUrl.toString());
