@@ -21,7 +21,7 @@ with dark separation, normal photo outlines remain absent, and Nairah's
 data-driven premium tier adds a six-second interaction shimmer plus a
 selected-only dropping gold badge with restrained motion.
 
-The Nairah payment route adds a small authenticated approval API and MongoDB payment-confirmation records containing the InstaPay full name and matching email. A separate MongoDB support-contact record is revealed only when requested. The manually delivered Nairah scheduling route resolves a confirmed request ID server-side, then embeds the live Calendly picker with the saved name/email prefilled and the exact matching warning visible. It still adds no payment processor, Calendly SDK, automated email, analytics integration, or npm dependency.
+The Nairah payment route adds a small authenticated approval API and MongoDB payment-confirmation records containing the InstaPay handle and matching email. A separate MongoDB support-contact record is revealed only when requested. After approval, the admin browser derives a SHA-256 Base64URL token for a stateless scheduling link. The scheduling page verifies the re-entered email/handle locally, asks for the full name, then embeds Calendly with name/email prefilled and the exact matching warning visible. It still adds no payment processor, Calendly SDK, automated email, analytics integration, or npm dependency.
 
 ## Technical Context
 

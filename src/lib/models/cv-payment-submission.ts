@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import type { NairahServiceId } from "../../components/cv-review/nairah-services";
 
 export interface ICvPaymentSubmission {
-  fullName?: string;
+  instapayHandle?: string;
   email?: string;
   serviceId: NairahServiceId;
   serviceTitle: string;
@@ -18,7 +18,7 @@ export interface ICvPaymentSubmission {
 
 const cvPaymentSubmissionSchema = new mongoose.Schema<ICvPaymentSubmission>(
   {
-    fullName: { type: String, required: true, trim: true, maxlength: 120 },
+    instapayHandle: { type: String, required: true, trim: true, maxlength: 80 },
     email: { type: String, required: true, trim: true, maxlength: 254 },
     serviceId: {
       type: String,

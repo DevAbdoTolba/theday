@@ -42,11 +42,13 @@ For Abdo Tolba and Omar Shawky:
 4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
 5. Confirm the supplied QR renders at step two and a 320px phone shows the exact clickable direct InstaPay URL without overflow.
 6. Until prices, recipient, QR, and direct URL are configured, confirm submission is disabled and explains why.
-7. Enter the full name used in InstaPay and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
+7. Enter the InstaPay handle (`letters@instapay`) and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
 8. Confirm Need help reveals `01114117164` only after activation and its WhatsApp action opens `https://wa.me/201114117164`.
 9. Confirm the success screen tells the visitor to watch the submitted email without showing the exact-match warning.
-10. Confirm the admin can manually confirm a pending request and copy an internal Nairah booking link containing only the request ID, without any automatic Calendly message.
-11. Open that link and confirm the exact InstaPay account-name/email warning stays visible beside the Calendly time picker and both Calendly fields are prefilled.
+10. Confirm the admin can manually confirm a pending request and copy an internal Nairah booking link containing only `?u=<Base64URL token>`, without a record ID or automatic Calendly message.
+11. Disable MongoDB or inspect network activity, open the sent link, re-enter the exact email and handle, and confirm it unlocks with no API call. Confirm a mismatch stays locked.
+12. Enter the full InstaPay account name and confirm the exact warning stays visible beside the Calendly picker with name and email prefilled.
+13. Open the developer console and confirm the approved yellow-on-black ASCII art and recruiting message appear without debugger detection or UI disruption.
 
 ## Accessibility Checks
 
