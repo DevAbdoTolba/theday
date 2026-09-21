@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import LinkOffRounded from "@mui/icons-material/LinkOffRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import {
   createBookingGateToken,
   isValidInstapayHandle,
 } from "../../../../../../components/cv-review/booking-gate";
+import CVSupportContact from "../../../../../../components/cv-review/CVSupportContact";
 import { NAIRAH_DESTINATION } from "../../../../../../components/cv-review/reviewers";
 
 const CONSOLE_ART = `██████╗ ██╗     ███████╗ █████╗ ███████╗███████╗    ██████╗  ██████╗ ███╗   ██╗████████╗       ██╗
@@ -62,6 +64,29 @@ export default function NairahSchedulePage() {
     }
   };
 
+  if (!router.isReady) {
+    return <Box sx={{ minHeight: "100dvh", bgcolor: "#000" }} />;
+  }
+
+  if (!suppliedToken) {
+    return (
+      <>
+        <Head>
+          <title>Invalid Nairah booking link | TheDay</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Head>
+        <Box component="main" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", bgcolor: "#000", color: "#fff", px: 2 }}>
+          <Box role="alert" sx={{ width: "100%", maxWidth: "35rem", p: { xs: 3, sm: 4.5 }, textAlign: "center", border: "1px solid #fff", borderRadius: "27px 34px 28px 32px / 31px 27px 35px 29px", bgcolor: "rgba(255,255,255,0.045)" }}>
+            <LinkOffRounded sx={{ color: "#ffe600", fontSize: 58 }} />
+            <Typography component="h1" sx={{ mt: 1.5, fontSize: { xs: "2.15rem", sm: "3.5rem" }, fontWeight: 1000, lineHeight: 0.92, letterSpacing: "-0.07em" }}>This link cannot work.</Typography>
+            <Typography sx={{ mt: 2, color: "rgba(255,255,255,0.75)", fontSize: { xs: "1rem", sm: "1.1rem" }, lineHeight: 1.55 }}>The booking URL is incomplete. Ask Nairah to send you the correct, complete scheduling link.</Typography>
+            <CVSupportContact />
+          </Box>
+        </Box>
+      </>
+    );
+  }
+
   const calendlyUrl = new URL(NAIRAH_DESTINATION.url);
   if (calendarName) {
     calendlyUrl.searchParams.set("name", calendarName);
@@ -85,7 +110,6 @@ export default function NairahSchedulePage() {
                 <TextField label="InstaPay handle" value={instapayHandle} onChange={(event) => setInstapayHandle(event.target.value)} required autoComplete="off" placeholder="name@instapay" error={instapayHandle.length > 0 && !handleIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
               </Box>
               {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-              {!suppliedToken && router.isReady && <Alert severity="error" sx={{ mt: 2 }}>This booking link is incomplete. Ask Nairah for the full link.</Alert>}
               <Button onClick={() => void verifyIdentity()} disabled={!emailIsValid || !handleIsValid || !suppliedToken || isChecking} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>{isChecking ? "Checking…" : "Continue"}</Button>
             </Box>
           )}

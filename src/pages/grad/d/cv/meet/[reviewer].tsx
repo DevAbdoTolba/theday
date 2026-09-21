@@ -6,9 +6,7 @@ import { Alert, Box, Button, Checkbox, FormControlLabel, TextField, Typography }
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
-import HelpOutlineRounded from "@mui/icons-material/HelpOutlineRounded";
 import QrCode2Rounded from "@mui/icons-material/QrCode2Rounded";
-import WhatsApp from "@mui/icons-material/WhatsApp";
 import { keyframes } from "@mui/material/styles";
 import {
   formatNairahServicePrice,
@@ -18,6 +16,7 @@ import {
   type NairahServiceId,
 } from "../../../../../components/cv-review/nairah-services";
 import { isValidInstapayHandle } from "../../../../../components/cv-review/booking-gate";
+import CVSupportContact from "../../../../../components/cv-review/CVSupportContact";
 import { CV_REVIEWERS } from "../../../../../components/cv-review/reviewers";
 
 type PageStage = "services" | "details" | "guide" | "qr" | "complete";
@@ -86,47 +85,6 @@ function PaymentGuideConfirmation({ videoWatched, onConfirmed }: { readonly vide
         sx={{ width: "100%", minHeight: 58, m: 0, px: 1.1, py: 0.45, border: "1px solid rgba(255,255,255,0.78)", borderRadius: "13px 17px 12px 15px", bgcolor: confirmed ? "rgba(255,230,0,0.09)" : "rgba(255,255,255,0.045)", filter: videoWatched ? "none" : "blur(2.5px)", opacity: videoWatched ? 1 : 0.42, pointerEvents: videoWatched ? "auto" : "none", transition: "filter 280ms ease, opacity 280ms ease, background-color 180ms ease, border-color 180ms ease", "&:hover": { borderColor: "#fff", bgcolor: confirmed ? "rgba(255,230,0,0.12)" : "rgba(255,255,255,0.08)" } }}
       />
       <Button onClick={onConfirmed} disabled={!confirmed} variant="outlined" sx={{ mt: 1.2, width: "100%", minHeight: 48, color: "#fff", borderColor: "rgba(255,255,255,0.8)", borderRadius: "10px 14px 9px 12px", fontSize: "1rem", fontWeight: 950, textTransform: "none", opacity: confirmed ? 1 : 0, transform: confirmed ? "translateY(0)" : "translateY(10px)", pointerEvents: confirmed ? "auto" : "none", transition: "opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease", "&:hover": { color: "#000", bgcolor: "#fff", borderColor: "#fff" } }}>Show QR code</Button>
-    </Box>
-  );
-}
-
-interface SupportContact {
-  readonly phone: string;
-  readonly whatsappUrl: string;
-}
-
-function NeedHelpContact() {
-  const [contact, setContact] = useState<SupportContact | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const revealContact = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/cv-support", { method: "POST" });
-      if (!response.ok) throw new Error("Could not load the support number.");
-      setContact((await response.json()) as SupportContact);
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not load the support number.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (contact) {
-    return (
-      <Box sx={{ mt: 2.25, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 1.25 }}>
-        <Typography sx={{ color: "rgba(255,255,255,0.78)", fontWeight: 800 }}>{contact.phone}</Typography>
-        <Button component="a" href={contact.whatsappUrl} target="_blank" rel="noopener noreferrer" startIcon={<WhatsApp />} variant="outlined" sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.75)", textTransform: "none", fontWeight: 900, "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.08)" } }}>Chat on WhatsApp</Button>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ mt: 2.25, textAlign: "center" }}>
-      <Button onClick={() => void revealContact()} disabled={isLoading} startIcon={<HelpOutlineRounded />} variant="text" sx={{ color: "rgba(255,255,255,0.8)", textTransform: "none", fontWeight: 850 }}>{isLoading ? "Loading support…" : "Need help?"}</Button>
-      {error && <Typography role="alert" sx={{ mt: 0.5, color: "#ff8a80", fontSize: "0.85rem" }}>{error}</Typography>}
     </Box>
   );
 }
@@ -227,10 +185,10 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
             {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, QR, and direct payment URL in the payment config to open payments.</Alert>}
             {submitError && <Alert severity="error" sx={{ mt: 2 }}>{submitError}</Alert>}
             <Button onClick={() => void submitPayment()} disabled={!paymentReady || !instapayHandleIsValid || !emailIsValid || isSubmitting} variant="contained" sx={{ ...yellowButtonSx, px: 3.5, minHeight: 54, "&.Mui-disabled": { bgcolor: "rgba(255,230,0,0.34)", color: "rgba(0,0,0,0.5)" } }}>{isSubmitting ? "Recording confirmation…" : "I made the payment"}</Button>
-            <NeedHelpContact />
+            <CVSupportContact />
           </Box>}
 
-          {stage === "complete" && <Box component="main" sx={{ minHeight: "75dvh", display: "grid", placeItems: "center", textAlign: "center", animation: `${selectedServiceRise} 420ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={{ maxWidth: "34rem", p: { xs: 3, sm: 4 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.05)" }}><CheckCircleRounded sx={{ color: "#ffe600", fontSize: 56 }} /><Typography component="h1" sx={{ mt: 1.5, fontSize: { xs: "2.1rem", sm: "3.3rem" }, fontWeight: 1000, lineHeight: 0.9, letterSpacing: "-0.07em" }}>Watch your email.</Typography><Typography sx={{ mt: 2, color: "rgba(255,255,255,0.76)", lineHeight: 1.55 }}>After Nairah confirms the payment, the private scheduling link will be sent to <Box component="strong" sx={{ color: "#fff" }}>{email.trim()}</Box>.</Typography><NeedHelpContact /></Box></Box>}
+          {stage === "complete" && <Box component="main" sx={{ minHeight: "75dvh", display: "grid", placeItems: "center", textAlign: "center", animation: `${selectedServiceRise} 420ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={{ maxWidth: "34rem", p: { xs: 3, sm: 4 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.05)" }}><CheckCircleRounded sx={{ color: "#ffe600", fontSize: 56 }} /><Typography component="h1" sx={{ mt: 1.5, fontSize: { xs: "2.1rem", sm: "3.3rem" }, fontWeight: 1000, lineHeight: 0.9, letterSpacing: "-0.07em" }}>Watch your email.</Typography><Typography sx={{ mt: 2, color: "rgba(255,255,255,0.76)", lineHeight: 1.55 }}>After Nairah confirms the payment, the private scheduling link will be sent to <Box component="strong" sx={{ color: "#fff" }}>{email.trim()}</Box>.</Typography><CVSupportContact /></Box></Box>}
         </Box>
       </Box>
     </>

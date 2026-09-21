@@ -86,6 +86,9 @@
 - The scheduling page asks for the same email and handle, recomputes the token
   locally, and unlocks only on equality. It then asks for the InstaPay account
   holder&apos;s full name and prefills Calendly with the name and email.
+- Without `u`, the route is a terminal invalid-link screen: no identity or
+  scheduling UI is rendered, the visitor is told to request the correct URL
+  from Nairah, and only the shared on-demand Need help contact remains usable.
 - A styled ASCII recruiting message is logged to the developer console; the UI
   does not detect, obstruct, or react to developer tools.
 - Need help performs an on-demand POST, reads the Nairah support phone from
