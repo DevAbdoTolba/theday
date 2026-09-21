@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
-import { requireAdmin, sendError } from "../../../lib/auth-middleware";
+import { requireCvPaymentAdmin, sendError } from "../../../lib/auth-middleware";
 import CvPaymentSubmissionModel, {
   type ICvPaymentSubmission,
 } from "../../../lib/models/cv-payment-submission";
@@ -14,6 +14,12 @@ interface PaymentSubmissionResponse {
   readonly status: "pending" | "confirmed";
   readonly createdAt: string;
   readonly confirmedAt: string | null;
+}
+
+type PaymentStatusFilter = "all" | "pending" | "confirmed";
+
+function readQueryValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function serializeSubmission(
@@ -38,14 +44,33 @@ export default async function handler(
   res.setHeader("Cache-Control", "no-store, max-age=0");
 
   try {
-    const { user } = await requireAdmin(req);
+    const { user } = await requireCvPaymentAdmin(req);
 
     if (req.method === "GET") {
-      const submissions = await CvPaymentSubmissionModel.find({})
+      const requestedPage = Number.parseInt(readQueryValue(req.query.page) ?? "1", 10);
+      const page = Number.isFinite(requestedPage) ? Math.max(1, requestedPage) : 1;
+      const pageSize = 10;
+      const requestedStatus = readQueryValue(req.query.status);
+      const status: PaymentStatusFilter = requestedStatus === "pending" || requestedStatus === "confirmed" ? requestedStatus : "all";
+      const filter = status === "all" ? {} : { status };
+      const [submissions, total, pending, confirmed] = await Promise.all([
+        CvPaymentSubmissionModel.find(filter)
         .sort({ createdAt: -1 })
-        .limit(100);
+          .skip((page - 1) * pageSize)
+          .limit(pageSize),
+        CvPaymentSubmissionModel.countDocuments(filter),
+        CvPaymentSubmissionModel.countDocuments({ status: "pending" }),
+        CvPaymentSubmissionModel.countDocuments({ status: "confirmed" }),
+      ]);
       res.status(200).json({
         submissions: submissions.map(serializeSubmission),
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        },
+        counts: { all: pending + confirmed, pending, confirmed },
       });
       return;
     }

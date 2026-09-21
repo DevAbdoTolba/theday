@@ -91,6 +91,11 @@
   from Nairah, and only the shared on-demand Need help contact remains usable.
 - A styled ASCII recruiting message is logged to the developer console; the UI
   does not detect, obstruct, or react to developer tools.
+- CV-payment page and API access use one exact two-email allowlist:
+  `mtolba2004@gmail.com` and `qualified.resumes11@gmail.com`. The latter is
+  scoped to CV payments and is not promoted to general admin.
+- The dashboard fetches ten newest-first records per page and exposes status
+  filters, global counts, result ranges, and bounded pagination controls.
 - Need help performs an on-demand POST, reads the Nairah support phone from
   MongoDB, and only then reveals the phone and direct WhatsApp action.
 

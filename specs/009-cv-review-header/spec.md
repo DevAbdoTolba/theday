@@ -223,6 +223,8 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **FR-040**: The admin-generated scheduling link MUST be independent of MongoDB after creation and use `?u=` with a deterministic SHA-256 Base64URL token derived from normalized email and InstaPay handle. The page MUST recompute and compare the token locally.
 - **FR-041**: The scheduling page MUST print the approved styled ASCII recruiting easter egg in the developer console without attempting to detect or block developer tools.
 - **FR-042**: A scheduling route without a non-empty `u` token MUST render a fully blocking invalid-link state. It MUST hide the identity form and all scheduling controls, instruct the visitor to ask Nairah for the correct complete URL, and leave only the on-demand Need help contact operable.
+- **FR-043**: CV-payment administration MUST allow only `mtolba2004@gmail.com` and `qualified.resumes11@gmail.com`. The second account MUST receive CV-payment page/API access without receiving general admin access.
+- **FR-044**: The CV-payment dashboard MUST provide server-side pagination in pages of ten, All/Pending/Confirmed filters, total status counts, a visible result range, and first/previous/next/last navigation.
 
 ### Key Entities
 
@@ -247,6 +249,7 @@ As a visitor, I experience the circle-to-notch-to-panel transformation as one co
 - **SC-011**: At 320px, the expanded invitation produces no horizontal page overflow and keeps at least 0.75rem of total viewport gutter.
 - **SC-012**: Across resting, preview, and pinned states, the CV label retains at least the same visible edge clearance it has in the compact mark; Nairah's premium motion remains confined to her photo and repeats no more than once per six-second cycle.
 - **SC-013**: In 100% of valid configured Nairah payment submissions, the admin dashboard displays the InstaPay handle, email, service, price, and pending status within one refresh; the generated token link continues to unlock without MongoDB access.
+- **SC-014**: Both approved CV-payment emails can list and confirm requests, any other non-admin email is rejected, and `qualified.resumes11@gmail.com` cannot access general admin routes or APIs.
 
 ## Assumptions
 

@@ -42,7 +42,7 @@ For Abdo Tolba and Omar Shawky:
 4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
 5. Confirm the supplied QR renders at step two and a 320px phone shows the exact clickable direct InstaPay URL without overflow.
 6. Until prices, recipient, QR, and direct URL are configured, confirm submission is disabled and explains why.
-7. Enter the InstaPay handle (`letters@instapay`) and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
+7. Enter the InstaPay handle (`name123@instapay`) and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
 8. Confirm Need help reveals `01114117164` only after activation and its WhatsApp action opens `https://wa.me/201114117164`.
 9. Confirm the success screen tells the visitor to watch the submitted email without showing the exact-match warning.
 10. Confirm the admin can manually confirm a pending request and copy an internal Nairah booking link containing only `?u=<Base64URL token>`, without a record ID or automatic Calendly message.
@@ -50,6 +50,8 @@ For Abdo Tolba and Omar Shawky:
 12. Enter the full InstaPay account name and confirm the exact warning stays visible beside the Calendly picker with name and email prefilled.
 13. Open the developer console and confirm the approved yellow-on-black ASCII art and recruiting message appear without debugger detection or UI disruption.
 14. Remove `?u=` from the scheduling URL and confirm the page shows only a blocking invalid-link explanation and Need help; the identity form, Continue action, full-name prompt, Calendly iframe, and external Calendly link must not render.
+15. Sign in as each approved CV-payment email and confirm `/admin/cv-payments` plus its list/confirm API work. Confirm `qualified.resumes11@gmail.com` is routed directly to CV Payments and remains denied from general admin pages.
+16. Create more than ten records and verify All/Pending/Confirmed filters, counts, result ranges, and first/previous/next/last pagination remain consistent after confirming a request.
 
 ## Accessibility Checks
 

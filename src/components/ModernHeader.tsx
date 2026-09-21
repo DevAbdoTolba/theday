@@ -14,6 +14,7 @@ import ModernKeyDialog from "./ModernKeyDialog";
 import { DataContext } from "../context/TranscriptContext";
 import CVReviewHeaderItem from "./cv-review/CVReviewHeaderItem";
 import { CV_REVIEWERS } from "./cv-review/reviewers";
+import { isCvPaymentAdminEmail } from "../lib/constants";
 
 // Dynamic imports for MUI icons
 const Search = dynamic(() => import("@mui/icons-material/Search"), { ssr: false });
@@ -60,6 +61,7 @@ export default function ModernHeader({
   const [classMenuAnchor, setClassMenuAnchor] = useState<null | HTMLElement>(null);
   
   const { user, signOut } = useAuth();
+  const canManageCvPayments = isCvPaymentAdminEmail(user?.email);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
@@ -211,10 +213,10 @@ export default function ModernHeader({
               </IconButton>
             </Tooltip>
 
-            {(user?.isAdmin || user?.isSuperAdmin) && (
-              <Tooltip title="Admin Dashboard">
+            {(user?.isAdmin || user?.isSuperAdmin || canManageCvPayments) && (
+              <Tooltip title={user?.isAdmin || user?.isSuperAdmin ? "Admin Dashboard" : "CV Payments"}>
                 <IconButton 
-                  onClick={() => router.push("/admin")} 
+                  onClick={() => router.push(user?.isAdmin || user?.isSuperAdmin ? "/admin" : "/admin/cv-payments")}
                   color="inherit"
                   sx={{ 
                     bgcolor: alpha(theme.palette.success.main, 0.05),
