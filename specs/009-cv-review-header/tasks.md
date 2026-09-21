@@ -249,6 +249,8 @@ description: "Dependency-ordered implementation tasks for the CV Review Header I
 - [X] T081 [US6] Add an accessible prominent click-to-play overlay to the idle payment guide video and hide it when playback starts in `src/pages/grad/d/cv/meet/[reviewer].tsx` (FR-034)
 - [X] T082 [US6] Simplify the QR form to collect only the InstaPay username with a fixed `@instapay` suffix while persisting the reconstructed full handle in `src/pages/grad/d/cv/meet/[reviewer].tsx` (FR-035)
 - [X] T083 [US6] Apply the same non-removable `@instapay` suffix pattern to the scheduling identity check and verify with the reconstructed full handle in `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-040)
+- [X] T084 [US6] Strengthen the fixed `@instapay` suffix into a high-contrast yellow badge in both payment and scheduling forms in `src/pages/grad/d/cv/meet/[reviewer].tsx` and `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-035, FR-040)
+- [X] T085 [US6] Fix the console easter egg styling so the supplied “PLEASE DON’T” ASCII lines join into one readable block while preserving the separate recruiting note in `src/pages/grad/d/cv/meet/nairah/schedule.tsx` (FR-041)
 
 **Checkpoint**: Direct reviewers reach Calendly, Nairah reaches only the secure manual journey, and live payment cannot begin before real commercial settings are supplied.
 
