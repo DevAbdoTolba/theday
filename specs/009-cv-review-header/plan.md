@@ -21,7 +21,7 @@ with dark separation, normal photo outlines remain absent, and Nairah's
 data-driven premium tier adds a six-second interaction shimmer plus a
 selected-only dropping gold badge with restrained motion.
 
-The Nairah payment route adds a small authenticated approval API and MongoDB model for manual payment-confirmation records with the exact transfer-note email and a follow-up phone number. It still adds no payment processor, Calendly embed, Calendly SDK, automated email, preflight request, analytics integration, or npm dependency.
+The Nairah payment route adds a small authenticated approval API and anonymous MongoDB payment-confirmation records. A separate MongoDB support-contact record is revealed only when requested. The manually delivered Nairah scheduling route embeds the live Calendly picker with the exact matching warning visible. It still adds no payment processor, Calendly SDK, automated email, analytics integration, or npm dependency.
 
 ## Technical Context
 
@@ -52,7 +52,7 @@ The Nairah payment route adds a small authenticated approval API and MongoDB mod
 | I. User-Centered Performance | PASS | PASS | Client-only rendering, no new requests before handoff, an absolutely positioned panel that cannot move page layout, explicit motion budgets, reduced-motion behavior, keyboard support, and 320px/200% zoom validation. |
 | II. TypeScript Strict | PASS | PASS | Reviewer IDs, booking availability, visual tier, invitation state, dialog props, and URL validation use explicit unions and interfaces. New code contains no `any`. |
 | III. Component Reusability | PASS | PASS | The header item and dialog are prop-driven MUI compositions. Complex motion styling uses MUI `styled`/`sx` and theme tokens, producing native CSS without a global stylesheet. |
-| IV. Performance & Caching | PASS | PASS | No API, database, storage, Google Drive request, Calendly script, iframe, or preflight fetch. No cache invalidation strategy is required. Existing PWA behavior is outside the modified files. |
+| IV. Performance & Caching | PASS | PASS | Initial header interaction performs no API call. Payment/admin records and the demand-only support lookup use MongoDB with `no-store`; only the manually delivered Nairah page loads one Calendly iframe. Existing PWA behavior is outside the modified files. |
 | V. Simplicity (YAGNI) | PASS | PASS | One existing header edit, two focused UI components, one typed configuration module, and one Storybook file. No provider, global store, SDK, animation library, API, or speculative scheduling abstraction. |
 
 No constitution violations were found. Complexity Tracking is not required.
@@ -130,6 +130,6 @@ No violations or additional complexity exceptions are required.
 
 - Do not modify dashboard or subject page files; they already consume `ModernHeader`.
 - Do not add or modify API routes, database models, authentication, global state, PWA/service-worker files, or analytics.
-- Do not add a Calendly embed, third-party scheduling script, API health check, UTM parameters, or prefilled personal data.
+- Do not add a Calendly SDK, API health check, UTM parameters, or prefilled personal data. The only approved embed is Nairah&apos;s post-payment scheduling page.
 - Do not use Framer Motion or add another motion dependency for this feature.
 - Treat final reviewer portraits, descriptions, and validated Calendly URLs as content updates inside the typed configuration, not architecture changes.

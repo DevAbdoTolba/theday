@@ -5,7 +5,8 @@
 ## Scope
 
 - `ModernHeader` mounts one CV invitation on dashboard and subject pages.
-- The feature remains client-only and exposes no HTTP API or persistent state.
+- The header and selection interaction remain client-side. Nairah&apos;s manual flow
+  exposes focused payment, admin, and on-demand support APIs backed by MongoDB.
 - The dialog directs Abdo and Omar to their configured Calendly pages. Nairah
   alone opens the internal service and manual-payment journey.
 
@@ -64,18 +65,22 @@
   then a guide video, bilingual email-only transfer-note warning, gated
   confirmation, and QR step. Phone screens additionally expose the exact direct
   InstaPay URL. Missing live payment configuration disables submission.
-- No iframe, SDK, `window.open`, preflight request, tracking parameter, or
+- The manually delivered Nairah scheduling route keeps the exact InstaPay
+  account-name/email warning visible beside an embedded Calendly picker.
+- No SDK, `window.open`, preflight request, tracking parameter, or
   payment credential collection is allowed.
 
 ## Manual Payment Approval Contract
 
 - A public Nairah payment confirmation records selected service, displayed
-  price, the exact transfer-note email, a phone number, payment-confirmation
-  time, and `pending` state.
+  price, payment-confirmation time, and `pending` state only.
 - An existing authorised admin sees the newest entries at `/admin/cv-payments`.
 - Confirming is manual and changes only `pending` to `confirmed` with a review
-  timestamp. The admin copies the email and sends the Calendly link manually;
-  confirmation never emails or opens Calendly automatically.
+  timestamp. The admin copies the internal booking link and sends it to the
+  email found in the InstaPay transfer note; confirmation never emails or opens
+  Calendly automatically.
+- Need help performs an on-demand POST, reads the Nairah support phone from
+  MongoDB, and only then reveals the phone and direct WhatsApp action.
 
 ## Accessibility and Motion
 
