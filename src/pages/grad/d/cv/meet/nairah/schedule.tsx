@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Alert, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
 import LinkOffRounded from "@mui/icons-material/LinkOffRounded";
 import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import {
+  hasUnsupportedInstapayUsernameInput,
   isValidInstapayHandle,
   sanitizeInstapayUsernameInput,
   verifyBookingGateToken,
@@ -32,6 +33,7 @@ export default function NairahSchedulePage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [instapayHandle, setInstapayHandle] = useState("");
+  const [handleInputWarning, setHandleInputWarning] = useState(false);
   const [fullName, setFullName] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -112,7 +114,7 @@ export default function NairahSchedulePage() {
               <Typography sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)" }}>Enter the same details used for your payment request.</Typography>
               <Box sx={{ mt: 3, display: "grid", gap: 1.5 }}>
                 <TextField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" error={email.length > 0 && !emailIsValid} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} sx={fieldSx} />
-                <TextField label="InstaPay username" value={instapayHandle} onChange={(event) => setInstapayHandle(sanitizeInstapayUsernameInput(event.target.value))} required autoComplete="off" placeholder="name123" helperText="Paste the full handle if you want—we keep only the username." error={instapayHandle.length > 0 && !handleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ ml: 1, pointerEvents: "none" }}><Box aria-hidden="true" sx={{ px: { xs: 1, sm: 1.35 }, py: 0.8, color: "#fff", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.88)", borderRadius: "9px 12px 8px 11px", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", fontSize: { xs: "0.8rem", sm: "0.9rem" }, fontWeight: 1000, lineHeight: 1, letterSpacing: "-0.02em", userSelect: "none", whiteSpace: "nowrap" }}>@instapay</Box></InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={fieldSx} />
+                <Tooltip open={handleInputWarning} title="English letters and numbers only." placement="top" arrow disableFocusListener disableHoverListener disableTouchListener><TextField label="InstaPay username" value={instapayHandle} onChange={(event) => { const rawValue = event.target.value; setHandleInputWarning(hasUnsupportedInstapayUsernameInput(rawValue)); setInstapayHandle(sanitizeInstapayUsernameInput(rawValue)); }} onBlur={() => setHandleInputWarning(false)} required autoComplete="off" placeholder="name123" helperText="Paste the full handle if you want—we keep only the username." error={instapayHandle.length > 0 && !handleIsValid} inputProps={{ maxLength: 64, pattern: "[A-Za-z0-9]+" }} InputProps={{ endAdornment: <InputAdornment position="end" sx={{ alignSelf: "stretch", height: "auto", maxHeight: "none", ml: 1.25, pl: 1.25, borderInlineStart: "1px solid rgba(255,255,255,0.58)", pointerEvents: "none" }}><Box aria-hidden="true" sx={{ color: "rgba(255,255,255,0.9)", fontSize: { xs: "0.82rem", sm: "0.92rem" }, fontWeight: 900, lineHeight: 1, userSelect: "none", whiteSpace: "nowrap" }}>@instapay</Box></InputAdornment> }} InputLabelProps={{ sx: { color: "rgba(255,255,255,0.72)" } }} FormHelperTextProps={{ sx: { color: "rgba(255,255,255,0.62)" } }} sx={fieldSx} /></Tooltip>
               </Box>
               {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
               <Button onClick={() => void verifyIdentity()} disabled={!emailIsValid || !handleIsValid || !suppliedToken || isChecking} variant="contained" sx={{ mt: 2.5, minHeight: 50, px: 3, color: "#000", bgcolor: "#ffe600", fontWeight: 1000, textTransform: "none", "&:hover": { bgcolor: "#ffef4d" } }}>{isChecking ? "Checking…" : "Continue"}</Button>
