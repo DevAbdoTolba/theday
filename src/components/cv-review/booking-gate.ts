@@ -14,6 +14,13 @@ export function normalizeInstapayHandle(value: string): string {
   return value.trim().toLowerCase();
 }
 
+export function sanitizeInstapayUsernameInput(value: string): string {
+  return value
+    .replace(/[^a-z0-9]/gi, "")
+    .replace(/instapay/gi, "")
+    .slice(0, 64);
+}
+
 export function isValidInstapayHandle(value: string): boolean {
   return /^[a-z0-9]+@instapay$/i.test(value.trim());
 }
