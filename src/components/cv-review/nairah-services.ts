@@ -35,10 +35,10 @@ export const NAIRAH_SERVICES = [
 export const NAIRAH_PAYMENT_CONFIG = {
   /** Step 1 video showing how to add the email-only payment note. */
   paymentGuideVideoSrc: "/cv-review/nairah-payment-guide.mp4" as string | null,
-  /** Add a real Instapay QR image under public/ and set its path here. */
-  instapayQrImageSrc: null as string | null,
-  /** Add the recipient name or payment handle shown next to the QR. */
-  recipientLabel: null as string | null,
+  /** InstaPay QR and phone-friendly direct payment destination. */
+  instapayQrImageSrc: "/cv-review/nairah-instapay-qr.jpg" as string | null,
+  instapayPaymentUrl: "https://ipn.eg/S/nairahatem/instapay/4i0HhZ" as string | null,
+  recipientLabel: "nairahatem@instapay" as string | null,
 } as const;
 
 export function formatNairahServicePrice(priceEgp: number | null): string {

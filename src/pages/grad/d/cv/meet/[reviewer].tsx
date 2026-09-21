@@ -97,7 +97,7 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
   const guideVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const furthestGuideTimeRef = React.useRef(0);
   const selectedService = useMemo(() => NAIRAH_SERVICES.find((service) => service.id === selectedServiceId) ?? null, [selectedServiceId]);
-  const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
+  const paymentReady = selectedService?.priceEgp !== null && NAIRAH_PAYMENT_CONFIG.paymentGuideVideoSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc !== null && NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl !== null && NAIRAH_PAYMENT_CONFIG.recipientLabel !== null;
 
   const goBack = () => {
     if (stage === "details") setStage("services");
@@ -169,8 +169,9 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
             <Box sx={{ mt: 3, p: { xs: 2, sm: 3 }, border: "1px solid rgba(255,255,255,0.75)", borderRadius: "24px 30px 25px 29px / 28px 25px 31px 24px", bgcolor: "rgba(255,255,255,0.045)" }}>
               {NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc ? <Box component="img" src={NAIRAH_PAYMENT_CONFIG.instapayQrImageSrc} alt="Instapay payment QR" sx={{ display: "block", width: { xs: 210, sm: 250 }, maxWidth: "100%", mx: "auto", p: 1, bgcolor: "#fff", borderRadius: 2 }} /> : <Box sx={{ minHeight: 200, display: "grid", placeItems: "center", textAlign: "center", color: "rgba(255,255,255,0.66)", border: "1px dashed rgba(255,255,255,0.46)", borderRadius: 2 }}><Box><QrCode2Rounded sx={{ fontSize: 72 }} /><Typography sx={{ mt: 1, fontWeight: 800 }}>Add the InstaPay QR here.</Typography></Box></Box>}
               {NAIRAH_PAYMENT_CONFIG.recipientLabel && <Typography sx={{ mt: 2, textAlign: "center", color: "rgba(255,255,255,0.78)", fontWeight: 750 }}>{NAIRAH_PAYMENT_CONFIG.recipientLabel}</Typography>}
+              {NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl && <Box sx={{ display: { xs: "block", sm: "none" }, mt: 2, textAlign: "center" }}><Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: "0.78rem", fontWeight: 750 }}>Pay directly on your phone</Typography><Typography component="a" href={NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl} target="_blank" rel="noopener noreferrer" sx={{ display: "block", mt: 0.65, color: "#ffe600", fontSize: "0.88rem", fontWeight: 900, lineHeight: 1.35, overflowWrap: "anywhere", textUnderlineOffset: 3 }}>{NAIRAH_PAYMENT_CONFIG.instapayPaymentUrl}</Typography></Box>}
             </Box>
-            {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, and QR in the payment config to open payments.</Alert>}
+            {!paymentReady && <Alert severity="info" sx={{ mt: 2, bgcolor: "rgba(255,255,255,0.08)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)", "& .MuiAlert-icon": { color: "#fff" } }}>Add the price, guide video, recipient, QR, and direct payment URL in the payment config to open payments.</Alert>}
             {submitError && <Alert severity="error" sx={{ mt: 2 }}>{submitError}</Alert>}
             <Button onClick={() => void submitPayment()} disabled={!paymentReady || isSubmitting} variant="contained" sx={{ ...yellowButtonSx, px: 3.5, minHeight: 54, "&.Mui-disabled": { bgcolor: "rgba(255,230,0,0.34)", color: "rgba(0,0,0,0.5)" } }}>{isSubmitting ? "Sending…" : "I made the payment"}</Button>
           </Box>}
