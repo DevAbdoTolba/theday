@@ -38,15 +38,15 @@ For Abdo Tolba and Omar Shawky:
 
 1. Select Nairah and activate Meet. Confirm a black white-bordered surface grows from behind Meet before the service page appears.
 2. Confirm the page separates Services from Bundles and shows exactly: CV review — 700 EGP; CV review + LinkedIn review — 1,000 EGP; CV writing — 1,200 EGP; and CV writing + LinkedIn optimization — 1,500 EGP. Prices remain hidden until a choice is opened.
-3. Confirm the payment page shows the configured video and matching English/Egyptian-Arabic email-only note warnings.
+3. Confirm the payment page shows the configured video with an unmistakable centered Play video control, not an image-like idle frame, plus matching English/Egyptian-Arabic email-only note warnings. Activate it and confirm the overlay disappears when playback starts.
 4. Confirm seeking ahead is rejected, the understanding control stays blurred/disabled before video completion, and the QR action appears only after completion and explicit confirmation.
 5. Confirm the supplied QR renders at step two and a 320px phone shows the exact clickable direct InstaPay URL without overflow.
 6. Until prices, recipient, QR, and direct URL are configured, confirm submission is disabled and explains why.
-7. Enter the InstaPay handle (`name123@instapay`) and the same email written in the transfer note, submit a request, and verify `/admin/cv-payments` shows both values with the service, price, time, and status. Confirm there is no customer phone field.
+7. Confirm the QR form keeps `@instapay` fixed and asks the visitor to type only `name123`. Submit with the same email written in the transfer note, then verify `/admin/cv-payments` stores and shows `name123@instapay` with the service, price, time, and status. Confirm there is no customer phone field.
 8. Confirm Need help reveals `01114117164` only after activation and its WhatsApp action opens `https://wa.me/201114117164`.
 9. Confirm the success screen tells the visitor to watch the submitted email without showing the exact-match warning.
 10. Confirm the admin can manually complete a pending request and copy an internal Nairah booking link containing only `?u=<service-payload>.<Base64URL digest>`, without a record ID or automatic Calendly message.
-11. Disable MongoDB or inspect network activity, open the sent link, re-enter the exact email and handle, and confirm it unlocks with no API call. Confirm changing the encoded service or either identity value fails verification. Confirm a legacy v1 link still verifies without a service prefill.
+11. Disable MongoDB or inspect network activity, open the sent link, re-enter the exact email and only the InstaPay username beside its fixed non-removable `@instapay` suffix, and confirm it unlocks with no API call. Confirm changing the encoded service or either identity value fails verification. Confirm a legacy v1 link still verifies without a service prefill.
 12. Enter the full InstaPay account name and confirm the exact warning stays visible beside the Calendly picker with name, email, and the exact purchased service prefilled into Calendly&apos;s first custom question (`a1`).
 13. Open the developer console and confirm the approved yellow-on-black ASCII art and recruiting message appear without debugger detection or UI disruption.
 14. Remove `?u=` from the scheduling URL and confirm the page shows only a blocking invalid-link explanation and Need help; the identity form, Continue action, full-name prompt, Calendly iframe, and external Calendly link must not render.
