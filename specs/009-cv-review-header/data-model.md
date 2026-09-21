@@ -4,8 +4,9 @@
 
 ## Overview
 
-This feature is client-only. Reviewer configuration is static, and invitation,
-dialog, and selection state exist only while the components are mounted.
+Reviewer configuration is static, while invitation, dialog, and selection state
+exist only while the components are mounted. Anonymous confirmations and the
+on-demand support contact use the existing MongoDB connection.
 
 ## Reviewer Configuration
 
@@ -76,13 +77,14 @@ Dialog invariants:
   public InstaPay QR image path, and direct phone-payment URL. Missing any value
   means payments are closed.
 - **CV Payment Submission**: `serviceId`, displayed service title, displayed
-  price, exact transfer-note email, phone number, payment-confirmation timestamp,
-  status (`pending` or `confirmed`), and optional manual reviewer
-  identity/timestamp.
+  price, payment-confirmation timestamp, status (`pending` or `confirmed`), and
+  optional manual reviewer identity/timestamp.
+- **CV Support Contact**: A singleton MongoDB record keyed by `nairah`, with a
+  local display phone and E.164 phone used to build the WhatsApp link. It is
+  returned only by an explicit on-demand support request.
 
-Payment submissions never include a card, bank-account, PIN, or transaction
-credential. Email and phone are collected only for transfer matching and manual
-booking follow-up.
+Payment submissions never include a customer name, email, phone, card,
+bank-account, PIN, or transaction credential.
 
 ## Privacy and Lifetime
 
