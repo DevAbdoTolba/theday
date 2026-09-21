@@ -62,6 +62,8 @@ function cleanReturnPath(): string {
 
 const outlinedPanelSx = { p: { xs: 2.25, sm: 3.5 }, border: "1px solid #fff", borderRadius: "28px 36px 29px 34px / 33px 29px 37px 28px", bgcolor: "rgba(255,255,255,0.045)" };
 const yellowButtonSx = { mt: 3, px: 3, minHeight: 52, color: "#000", bgcolor: "#ffe600", borderRadius: "12px 17px 11px 15px", fontSize: "1.05rem", fontWeight: 1000, textTransform: "none", "&:hover": { color: "#000", bgcolor: "#ffef4d" } };
+const individualServices = NAIRAH_SERVICES.filter((service) => service.category === "service");
+const serviceBundles = NAIRAH_SERVICES.filter((service) => service.category === "bundle");
 
 function PaymentGuideConfirmation({ videoWatched, onConfirmed }: { readonly videoWatched: boolean; readonly onConfirmed: () => void }) {
   const [confirmed, setConfirmed] = useState(false);
@@ -139,8 +141,11 @@ export default function MeetReviewerPage({ reviewerName }: Props) {
           {stage === "services" && <Box component="main">
             <Typography sx={{ color: "#ffe600", fontSize: "0.76rem", fontWeight: 950, letterSpacing: "0.16em", textTransform: "uppercase" }}>Nairah A. · CV services</Typography>
             <Typography component="h1" sx={{ mt: 1, mb: 1.25, fontSize: { xs: "clamp(2.5rem, 12vw, 5.6rem)", sm: "clamp(4rem, 9vw, 7rem)" }, fontWeight: 1000, lineHeight: 0.86, letterSpacing: "-0.085em" }}>Pick your next move.</Typography>
-            <Typography sx={{ maxWidth: "38rem", mb: { xs: 4, sm: 5 }, color: "rgba(255,255,255,0.72)", fontSize: { xs: "1rem", sm: "1.15rem" } }}>Three ways to make your professional story do its job.</Typography>
-            <Box sx={{ display: "grid", gap: 1.5 }}>{NAIRAH_SERVICES.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
+            <Typography sx={{ maxWidth: "38rem", mb: { xs: 4, sm: 5 }, color: "rgba(255,255,255,0.72)", fontSize: { xs: "1rem", sm: "1.15rem" } }}>Choose one focused service, or handle your full professional profile with a bundle.</Typography>
+            <Typography component="h2" sx={{ mb: 1.5, color: "rgba(255,255,255,0.7)", fontSize: "0.78rem", fontWeight: 1000, letterSpacing: "0.16em", textTransform: "uppercase" }}>Services</Typography>
+            <Box sx={{ display: "grid", gap: 1.5 }}>{individualServices.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
+            <Typography component="h2" sx={{ mt: { xs: 4, sm: 5 }, mb: 1.5, color: "#ffe600", fontSize: "0.78rem", fontWeight: 1000, letterSpacing: "0.16em", textTransform: "uppercase" }}>Bundles</Typography>
+            <Box sx={{ display: "grid", gap: 1.5 }}>{serviceBundles.map((service) => <ServiceCard key={service.id} service={service} onChoose={() => { setSelectedServiceId(service.id); setGuideWatched(false); furthestGuideTimeRef.current = 0; setStage("details"); setSubmitError(null); }} />)}</Box>
           </Box>}
 
           {stage === "details" && selectedService && <Box component="main" sx={{ animation: `${selectedServiceRise} 360ms cubic-bezier(0.16, 1, 0.3, 1)` }}><Box sx={outlinedPanelSx}>
